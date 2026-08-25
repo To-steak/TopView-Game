@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1741f20cf1fc4d4ebf94e1b13c45121, type: 3}
+  m_Name: Grenade
+  m_EditorClassIdentifier: Assembly-CSharp::ThrowWeaponSO
+  WeaponName: Grenade
+  Damage: 150
+  GrenadePrefab: {fileID: 3006573835764851770, guid: c8836d5c1f9260a41aafb72573635c50, type: 3}
+  ParticlePrefab: {fileID: 8638940641552346735, guid: 46ffadbb188f9ab498b623c4290ef656, type: 3}
+  ReserveAmmo: 5
+  WeaponPrefab: {fileID: 3006573835764851770, guid: 88eec3c3ac7a9b54c966aeba2bec804e, type: 3}
+  PoolSize: 5
+  GrenadeSpeed: 10
+  UpwardRatio: 0.75
+  ExplosionRadius: 3
+  ExplosionDelay: 1.5
+  TargetLayer:
+    serializedVersion: 2
+    m_Bits: 128

@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 117ad02e9096c5f4dba17aa6b7c5aeda, type: 3}
+  m_Name: EnemyBodyAttack
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAttackA
+  Layer:
+    serializedVersion: 2
+    m_Bits: 512
+  AnimationParameter: Attack
+  Radius: 1
+  Offset: 1.5
+  MaxTarget: 1
+  DamageMultiplier: 1

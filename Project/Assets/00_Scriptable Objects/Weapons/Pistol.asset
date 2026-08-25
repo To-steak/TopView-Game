@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 88c666d431ccff541ab32825961000dc, type: 3}
+  m_Name: Pistol
+  m_EditorClassIdentifier: Assembly-CSharp::RangedWeaponSO
+  WeaponPrefab: {fileID: 3196504383240874190, guid: c82cad46dd5eeac4cbfebf8c18d4a631, type: 3}
+  WeaponName: Pistol
+  Damage: 45
+  MaxAmmo: 8
+  ReserveAmmo: 32
+  BulletPrefab: {fileID: 8751706380067456088, guid: efd619ac9fb459d43ae8b33c3b88d388, type: 3}
+  BulletParticle: {fileID: 3955763423431681050, guid: 8bc8c0bfc14e7e74d9aa237605256a88, type: 3}
+  PoolSize: 12
+  BulletSpeed: 35
+  TargetLayer:
+    serializedVersion: 2
+    m_Bits: 128
