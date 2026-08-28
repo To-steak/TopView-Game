@@ -12,12 +12,6 @@ TopView 싱글플레이 액션 게임입니다.
 - MVP: `PlayerPresenter`, `PlayerUI` 등으로 UI 표현과 게임 로직을 분리했습니다.
 - Object Pooling: Unity `IObjectPool<T>`를 사용해 Enemy와 UI를 재사용해 반복적인 `Instantiate`/`Destroy`로 인한 GC 부하와 스파이크를 줄이기 위해 도입했습니다.
 
-# Devlog
-개발 과정 중 일어난 문제는 [To_steak's Devlog](https://to-steak.github.io/)에 기록하고 있습니다.
-- [확장 가능한 무기 아키텍처](https://to-steak.github.io/client/client_01.html)
-- [어셈블리 정의](https://to-steak.github.io/client/client_02.html)
-- [풀과 애니메이터 변수 초기화](https://to-steak.github.io/client/client_03.html)
-
 # Demo - 아래 이미지 클릭 시 YouTube로 이동합니다
 [![TopView Game Demo](https://img.youtube.com/vi/KcKis8tuSq8/maxresdefault.jpg)](https://www.youtube.com/watch?v=KcKis8tuSq8)
 
