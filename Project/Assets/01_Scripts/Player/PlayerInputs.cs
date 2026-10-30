@@ -7,12 +7,12 @@ public class PlayerInputs : MonoBehaviour
     public bool IsRunning { get; private set; }
     public Vector2 MousePosition => Mouse.current != null ? Mouse.current.position.ReadValue() : Vector2.zero;
 
-    private Player_Actions _actions;
+    private PlayerActions _actions;
     private PlayerEvents _events;
 
     void Awake()
     {
-        _actions = new Player_Actions();
+        _actions = new PlayerActions();
     }
 
     void OnEnable()

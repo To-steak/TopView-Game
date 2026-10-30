@@ -1,6 +1,6 @@
 {
     "version": 1,
-    "name": "Player_Actions",
+    "name": "PlayerActions",
     "maps": [
         {
             "name": "Global",
