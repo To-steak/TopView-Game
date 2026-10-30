@@ -1,4 +1,13 @@
 ﻿<Solution>
-  <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="TopView.Entity.csproj" />
+  <Project Path="TopView.Systems.csproj" />
+  <Project Path="DOTween.Modules.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />
+  <Project Path="TopView.UserInterface.csproj" />
+  <Project Path="TopView.Definitions.csproj" />
+  <Project Path="TopView.Authoring.csproj" />
+  <Project Path="TopView.Presentation.csproj" />
+  <Project Path="TopView.Core.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="TopView.Editor.csproj" />
 </Solution>

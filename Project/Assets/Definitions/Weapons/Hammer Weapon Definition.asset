@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5ae9619f9bef9542a8b18fe1f1cd54e, type: 3}
+  m_Name: Hammer Weapon Definition
+  m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.WeaponDefinition
+  weapon:
+    kind: 0
+    damage: 15
+    maxAmmo: 0
+    currentAmmo: 0
+    reserveAmmo: 0
+    attackCommitTicks: 0
+    attackDurationTicks: 0
+    projectile:
+      kind: 0
+      speed: 0
+      radius: 0
+      lifetimeTicks: 0
+      upwardRatio: 0
+      gravity: 0
+      fuseTicks: 0
+      explosionRadius: 0
+      collisionLayer:
+        serializedVersion: 2
+        m_Bits: 0
+    meleeRadius: 3
+    meleeOffset: 3
+    meleeMaxTargets: 10
+  modelPrefab: {fileID: 4377655535536273225, guid: 48b3e48d1e96a0c4490dc61536c17515, type: 3}
+  projectilePrefab: {fileID: 0}
+  hitEffectPrefab: {fileID: 0}

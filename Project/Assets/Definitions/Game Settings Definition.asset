@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 241db8334db166f4fa7332510972a81f, type: 3}
+  m_Name: Game Settings Definition
+  m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.GameSettingsDefinition
+  rule:
+    timeLimitTicks: 7500
+    spawnIntervalTicks: 250
+    enemyLevel: 1
+    bossLevel: 1
+    playerStartPosition: {x: 0, y: 0, z: 0}
+    bossSpawnPosition: {x: -7, y: 0, z: 7}
+    randomSeed: 0
+  waves:
+  - startTicks: 250
+    isBoss: 0
+    enemyKindIndex: 0
+  - startTicks: 1500
+    isBoss: 0
+    enemyKindIndex: 1
+  - startTicks: 3000
+    isBoss: 0
+    enemyKindIndex: 2
+  - startTicks: 4500
+    isBoss: 1
+    enemyKindIndex: 0
+  targetFrameRate: 144

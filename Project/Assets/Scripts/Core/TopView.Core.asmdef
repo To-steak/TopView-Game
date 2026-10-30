@@ -1,0 +1,22 @@
+{
+    "name": "TopView.Core",
+    "rootNamespace": "TopView.Core",
+    "references": [
+        "TopView.Entity",
+        "TopView.Systems",
+        "TopView.Definitions",
+        "TopView.Authoring",
+        "TopView.Presentation",
+        "TopView.UserInterface",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
