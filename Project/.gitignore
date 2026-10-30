@@ -75,5 +75,6 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
 # Assets
+/.vscode/
 /[Aa]ssets/[Qq]uarterView 3D Action BE5/
 /[Aa]ssets/[Qq]uarterView 3D Action BE5.meta
