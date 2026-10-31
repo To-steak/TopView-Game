@@ -5,7 +5,7 @@ using UnityEngine.UI;
 namespace TopView.UserInterface.Views
 {
     // 보스 체력 게이지를 보여 준다.
-    public class BossHealthView : MonoBehaviour
+    public class BossHealthView : UserInterfaceView
     {
         [FormerlySerializedAs("hPGauge")]
         [SerializeField] private Image healthGauge;

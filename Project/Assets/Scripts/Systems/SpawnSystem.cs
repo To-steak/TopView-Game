@@ -39,6 +39,8 @@ namespace TopView.Systems
             }
 
             int droppedEnemyCount = 0;
+            int missingNavMeshCount = 0;
+            Vector3 missingNavMeshPosition = Vector3.zero;
             while (enemySpawnRequests.Count > 0)
             {
                 EnemySpawnRequest request = enemySpawnRequests.Dequeue();
@@ -49,7 +51,11 @@ namespace TopView.Systems
                     continue;
                 }
 
-                SpawnEnemy(ref enemies.entities[index], in request);
+                if (!SpawnEnemy(ref enemies.entities[index], in request))
+                {
+                    missingNavMeshCount++;
+                    missingNavMeshPosition = request.position;
+                }
             }
 
             bool hasPlayer = EnemyBehaviorSystem.TryGetPlayerTarget(players, out EntityIdentifier _, out Vector3 playerPosition, out float _);
@@ -98,6 +104,10 @@ namespace TopView.Systems
             if (droppedEnemyCount > 0)
             {
                 Debug.LogWarning($"SpawnSystem >> 적 종류 번호가 범위 밖이거나 빈 칸이 없어 적 생성 요청 {droppedEnemyCount}개를 버렸다.");
+            }
+            if (missingNavMeshCount > 0)
+            {
+                Debug.LogWarning($"SpawnSystem >> 생성 위치 근처에 NavMesh가 없어 그 위치에 그대로 만든 적 {missingNavMeshCount}마리가 있다. 마지막 생성 위치: {missingNavMeshPosition}");
             }
             if (droppedBossCount > 0)
             {
@@ -155,7 +165,8 @@ namespace TopView.Systems
             };
         }
 
-        private static void SpawnEnemy(ref EnemyEntity slot, in EnemySpawnRequest request)
+        // 생성 위치 근처에 NavMesh가 없으면 그 위치에 그대로 만들고 false를 돌려준다.
+        private static bool SpawnEnemy(ref EnemyEntity slot, in EnemySpawnRequest request)
         {
             EnemyAttackComponent[] attacks = ReuseArray(slot.attacks, request.attacks);
             Vector3[] pathCorners = slot.pathCorners;
@@ -166,13 +177,10 @@ namespace TopView.Systems
             Array.Clear(pathCorners, 0, pathCorners.Length);
 
             Vector3 position = request.position;
-            if (NavMesh.SamplePosition(position, out NavMeshHit hit, request.navigation.navMeshSampleDistance, NavMesh.AllAreas))
+            bool hasNavMesh = NavMesh.SamplePosition(position, out NavMeshHit hit, request.navigation.navMeshSampleDistance, NavMesh.AllAreas);
+            if (hasNavMesh)
             {
                 position = hit.position;
-            }
-            else
-            {
-                Debug.LogWarning($"SpawnSystem >> 적 생성 위치 {request.position} 근처에 NavMesh가 없어 그 위치에 그대로 만들었다.");
             }
 
             float maxHealth = request.stats.basicMaxHealth + request.level * request.stats.levelIncrement;
@@ -196,6 +204,7 @@ namespace TopView.Systems
                 state = EnemyState.Idle,
                 pathCorners = pathCorners
             };
+            return hasNavMesh;
         }
 
         // 보스는 도발 상태로 생기며, 도발을 시작할 때처럼 플레이어 쪽(XZ)을 바로 바라본다.

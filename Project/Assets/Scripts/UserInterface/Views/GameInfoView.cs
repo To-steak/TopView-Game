@@ -6,7 +6,7 @@ using UnityEngine.UI;
 namespace TopView.UserInterface.Views
 {
     // 남은 시간, 점수, 시작 화면, 게임오버 화면을 보여 주고 버튼 입력을 이벤트로 알린다.
-    public class GameInfoView : MonoBehaviour
+    public class GameInfoView : UserInterfaceView
     {
         // 시작 버튼을 눌렀다
         public event Action StartClicked;

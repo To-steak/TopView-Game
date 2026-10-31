@@ -231,6 +231,7 @@ namespace TopView.Systems
                 case WeaponKind.Ranged:
                     if (weapon.currentAmmo <= 0)
                     {
+                        Debug.LogWarning($"PlayerStateSystem >> 탄창 탄약이 {weapon.currentAmmo}이라 원거리 공격을 내보내지 않았다.");
                         return;
                     }
                     weapon.currentAmmo--;
@@ -240,6 +241,7 @@ namespace TopView.Systems
                 case WeaponKind.Throw:
                     if (weapon.reserveAmmo <= 0)
                     {
+                        Debug.LogWarning($"PlayerStateSystem >> 남은 탄약이 {weapon.reserveAmmo}이라 투척 공격을 내보내지 않았다.");
                         return;
                     }
                     weapon.reserveAmmo--;

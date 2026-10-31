@@ -28,6 +28,8 @@ namespace TopView.Systems
             bool hasPlayer = TryGetPlayerTarget(players, out EntityIdentifier playerIdentifier, out Vector3 playerPosition, out float playerRadius);
             float deltaTime = Time.fixedDeltaTime;
             int failedWanderCount = 0;
+            int missingAttackCount = 0;
+            int missingAttackKind = 0;
 
             for (int enemyIndex = 0; enemyIndex < enemies.entities.Length; enemyIndex++)
             {
@@ -60,7 +62,11 @@ namespace TopView.Systems
                         {
                             if (isPlayerDetected)
                             {
-                                BeginAttack(ref enemy, in identifier, random, stateRecords);
+                                if (!BeginAttack(ref enemy, in identifier, random, stateRecords))
+                                {
+                                    missingAttackCount++;
+                                    missingAttackKind = enemy.kind;
+                                }
                             }
                             else
                             {
@@ -86,6 +92,10 @@ namespace TopView.Systems
             if (failedWanderCount > 0)
             {
                 Debug.LogWarning($"EnemyBehaviorSystem >> 근처에 NavMesh가 없어 배회 지점을 고르지 못한 적 {failedWanderCount}마리가 있다.");
+            }
+            if (missingAttackCount > 0)
+            {
+                Debug.LogWarning($"EnemyBehaviorSystem >> 공격이 없어 공격하지 않은 적 {missingAttackCount}마리가 있다. 마지막 적 종류: {missingAttackKind}");
             }
         }
 
@@ -267,20 +277,20 @@ namespace TopView.Systems
             }
         }
 
-        // 공격을 무작위로 하나 골라 공격 상태에 들어간다. 공격이 없으면 Idle로 돌아간다.
-        private static void BeginAttack(ref EnemyEntity enemy, in EntityIdentifier identifier, System.Random random, List<EnemyStateChangedRecord> stateRecords)
+        // 공격을 무작위로 하나 골라 공격 상태에 들어간다. 공격이 없으면 Idle로 돌아가고 false를 돌려준다.
+        private static bool BeginAttack(ref EnemyEntity enemy, in EntityIdentifier identifier, System.Random random, List<EnemyStateChangedRecord> stateRecords)
         {
             if (enemy.attacks.Length == 0)
             {
-                Debug.LogWarning($"EnemyBehaviorSystem >> 적 종류 {enemy.kind}에 공격이 없어 공격하지 않았다.");
                 ChangeState(ref enemy, in identifier, EnemyState.Idle, stateRecords);
-                return;
+                return false;
             }
 
             enemy.attackIndex = random.Next(0, enemy.attacks.Length);
             enemy.isAttackCommitted = false;
             enemy.hasAttackTarget = true;
             ChangeState(ref enemy, in identifier, EnemyState.Attack, stateRecords);
+            return true;
         }
 
         // 지금 위치를 중심으로 감지 반지름 안의 무작위 점을 골라, 가장 가까운 NavMesh 위의 점을 돌려준다.
@@ -333,7 +343,9 @@ namespace TopView.Systems
 
         private static bool IsWithin(Vector3 from, Vector3 to, float distance)
         {
-            return (to - from).sqrMagnitude <= distance * distance;
+            float x = to.x - from.x;
+            float z = to.z - from.z;
+            return x * x + z * z <= distance * distance;
         }
     }
 }

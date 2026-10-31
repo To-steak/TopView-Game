@@ -6,7 +6,7 @@ using UnityEngine.UI;
 namespace TopView.UserInterface.Views
 {
     // 플레이어의 체력과 탄약을 보여 준다.
-    public class HeadUpDisplayView : MonoBehaviour
+    public class HeadUpDisplayView : UserInterfaceView
     {
         [SerializeField] private TMP_Text healthText;
         [SerializeField] private TMP_Text ammoText;
