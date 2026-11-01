@@ -17,7 +17,14 @@ using TopView.Presentation.Projectile.ViewSystems;
 using TopView.Presentation.Projectile.Views;
 using TopView.Requests;
 using TopView.Systems;
-using TopView.UserInterface.Presenters;
+using TopView.UserInterface.Ammo;
+using TopView.UserInterface.BossHealth;
+using TopView.UserInterface.GameOver;
+using TopView.UserInterface.GameStart;
+using TopView.UserInterface.PlayerHealth;
+using TopView.UserInterface.RemainingTime;
+using TopView.UserInterface.Score;
+using TopView.UserInterface.WorldGauge;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -40,8 +47,12 @@ namespace TopView.Core
         private GameObject[] _projectilePrefabs;
         private float[] _projectilePitchSpeeds;
         private GameObject[] _hitEffectPrefabs;
-        private GameInfoPresenter _gameInfoPresenter;
-        private HeadUpDisplayPresenter _headUpDisplayPresenter;
+        private GameStartPresenter _gameStartPresenter;
+        private GameOverPresenter _gameOverPresenter;
+        private RemainingTimePresenter _remainingTimePresenter;
+        private ScorePresenter _scorePresenter;
+        private PlayerHealthPresenter _playerHealthPresenter;
+        private AmmoPresenter _ammoPresenter;
         private PlayerManaGaugePresenter _playerManaGaugePresenter;
         private BossHealthPresenter _bossHealthPresenter;
         private EnemyHealthGaugePresenter _enemyHealthGaugePresenter;
@@ -156,8 +167,12 @@ namespace TopView.Core
         {
             _world = null;
             _viewContext = null;
-            _gameInfoPresenter = null;
-            _headUpDisplayPresenter = null;
+            _gameStartPresenter = null;
+            _gameOverPresenter = null;
+            _remainingTimePresenter = null;
+            _scorePresenter = null;
+            _playerHealthPresenter = null;
+            _ammoPresenter = null;
             _playerManaGaugePresenter = null;
             _bossHealthPresenter = null;
             _enemyHealthGaugePresenter = null;
@@ -327,24 +342,64 @@ namespace TopView.Core
 
         private void BindPresenters(PlayerDefinition playerDefinition, Vector3[] gaugeOffsets, Color[] gaugeColors)
         {
-            _gameInfoPresenter = FindAnyObjectByType<GameInfoPresenter>();
-            if (_gameInfoPresenter == null)
+            _gameStartPresenter = FindAnyObjectByType<GameStartPresenter>();
+            if (_gameStartPresenter == null)
             {
-                Debug.LogError("Runner >> 씬에 GameInfoPresenter가 없다.");
+                Debug.LogError("Runner >> 씬에 GameStartPresenter가 없다.");
             }
             else
             {
-                _gameInfoPresenter.Initialize(_world.commandBuffer);
+                _gameStartPresenter.Initialize(_world.commandBuffer);
             }
 
-            _headUpDisplayPresenter = FindAnyObjectByType<HeadUpDisplayPresenter>();
-            if (_headUpDisplayPresenter == null)
+            _gameOverPresenter = FindAnyObjectByType<GameOverPresenter>();
+            if (_gameOverPresenter == null)
             {
-                Debug.LogError("Runner >> 씬에 HeadUpDisplayPresenter가 없다.");
+                Debug.LogError("Runner >> 씬에 GameOverPresenter가 없다.");
             }
             else
             {
-                _headUpDisplayPresenter.Initialize();
+                _gameOverPresenter.Initialize(_world.commandBuffer);
+            }
+
+            _remainingTimePresenter = FindAnyObjectByType<RemainingTimePresenter>();
+            if (_remainingTimePresenter == null)
+            {
+                Debug.LogError("Runner >> 씬에 RemainingTimePresenter가 없다.");
+            }
+            else
+            {
+                _remainingTimePresenter.Initialize();
+            }
+
+            _scorePresenter = FindAnyObjectByType<ScorePresenter>();
+            if (_scorePresenter == null)
+            {
+                Debug.LogError("Runner >> 씬에 ScorePresenter가 없다.");
+            }
+            else
+            {
+                _scorePresenter.Initialize();
+            }
+
+            _playerHealthPresenter = FindAnyObjectByType<PlayerHealthPresenter>();
+            if (_playerHealthPresenter == null)
+            {
+                Debug.LogError("Runner >> 씬에 PlayerHealthPresenter가 없다.");
+            }
+            else
+            {
+                _playerHealthPresenter.Initialize();
+            }
+
+            _ammoPresenter = FindAnyObjectByType<AmmoPresenter>();
+            if (_ammoPresenter == null)
+            {
+                Debug.LogError("Runner >> 씬에 AmmoPresenter가 없다.");
+            }
+            else
+            {
+                _ammoPresenter.Initialize();
             }
 
             _playerManaGaugePresenter = FindAnyObjectByType<PlayerManaGaugePresenter>();
@@ -627,16 +682,33 @@ namespace TopView.Core
 
         private void PresentUserInterface()
         {
-            if (_gameInfoPresenter != null)
+            GamePhase phase = _world.progress.phase;
+            if (_gameStartPresenter != null)
             {
-                _gameInfoPresenter.Present(_world.progress.phase, _world.progress.remainingTicks, _world.progress.score);
+                _gameStartPresenter.Present(phase);
+            }
+            if (_gameOverPresenter != null)
+            {
+                _gameOverPresenter.Present(phase);
+            }
+            if (_remainingTimePresenter != null)
+            {
+                _remainingTimePresenter.Present(phase, _world.progress.remainingTicks);
+            }
+            if (_scorePresenter != null)
+            {
+                _scorePresenter.Present(phase, _world.progress.score);
             }
 
             if (!TryFindAlivePlayer(out int playerIndex))
             {
-                if (_headUpDisplayPresenter != null)
+                if (_playerHealthPresenter != null)
                 {
-                    _headUpDisplayPresenter.Present(false, 0f, 0f, false, WeaponKind.Melee, 0, 0);
+                    _playerHealthPresenter.Present(false, 0f, 0f);
+                }
+                if (_ammoPresenter != null)
+                {
+                    _ammoPresenter.Present(false, false, WeaponKind.Melee, 0, 0);
                 }
                 if (_playerManaGaugePresenter != null)
                 {
@@ -655,17 +727,22 @@ namespace TopView.Core
         {
             ref readonly PlayerEntity player = ref _world.players.entities[playerIndex];
 
-            if (_headUpDisplayPresenter != null)
+            if (_playerHealthPresenter != null)
+            {
+                _playerHealthPresenter.Present(true, player.health, player.vitals.maxHealth);
+            }
+
+            if (_ammoPresenter != null)
             {
                 int weaponIndex = player.currentWeaponIndex;
                 if (weaponIndex >= 0 && weaponIndex < player.weapons.Length)
                 {
                     ref readonly WeaponComponent weapon = ref player.weapons[weaponIndex];
-                    _headUpDisplayPresenter.Present(true, player.health, player.vitals.maxHealth, true, weapon.kind, weapon.currentAmmo, weapon.reserveAmmo);
+                    _ammoPresenter.Present(true, true, weapon.kind, weapon.currentAmmo, weapon.reserveAmmo);
                 }
                 else
                 {
-                    _headUpDisplayPresenter.Present(true, player.health, player.vitals.maxHealth, false, WeaponKind.Melee, 0, 0);
+                    _ammoPresenter.Present(true, false, WeaponKind.Melee, 0, 0);
                 }
             }
 
@@ -736,8 +813,12 @@ namespace TopView.Core
                     gameFlowCommands.RemoveAt(commandIndex);
                     _world = null;
                     _viewContext = null;
-                    _gameInfoPresenter = null;
-                    _headUpDisplayPresenter = null;
+                    _gameStartPresenter = null;
+                    _gameOverPresenter = null;
+                    _remainingTimePresenter = null;
+                    _scorePresenter = null;
+                    _playerHealthPresenter = null;
+                    _ammoPresenter = null;
                     _playerManaGaugePresenter = null;
                     _bossHealthPresenter = null;
                     _enemyHealthGaugePresenter = null;

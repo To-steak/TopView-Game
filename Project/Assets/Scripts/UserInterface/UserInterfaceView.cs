@@ -13,5 +13,14 @@ namespace TopView.UserInterface
         public RectTransform body;
         // Content의 아래쪽 영역. Layout Element로 높이를 정한다.
         public RectTransform footer;
+
+        /// <summary>
+        /// Content를 켜거나 끈다.
+        /// </summary>
+        /// <param name="isVisible">켜려면 true</param>
+        public void SetVisible(bool isVisible)
+        {
+            content.gameObject.SetActive(isVisible);
+        }
     }
 }

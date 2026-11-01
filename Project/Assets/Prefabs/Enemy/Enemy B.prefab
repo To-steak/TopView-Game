@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7921462316570986138}
+  - component: {fileID: 4938824712565742979}
   m_Layer: 7
   m_Name: Enemy B
   m_TagString: Untagged
@@ -32,6 +33,19 @@ Transform:
   - {fileID: 9132887557499319759}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4938824712565742979
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7807188980422851779}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c53aa8a3d25e75b44b1180ba7b21a515, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TopView.Presentation::TopView.Presentation.Enemy.Views.EnemyView
+  animator: {fileID: 7943247963800267098}
 --- !u!1001 &8733660162401341988
 PrefabInstance:
   m_ObjectHideFlags: 0

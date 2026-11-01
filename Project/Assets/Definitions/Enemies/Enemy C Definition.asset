@@ -30,6 +30,8 @@ MonoBehaviour:
     angularSpeed: 120
     radius: 0.5
     baseOffset: 0.1
+    navMeshSampleDistance: 3
+    maxPathCorners: 3
   attacks:
   - kind: 1
     commitTicks: 0

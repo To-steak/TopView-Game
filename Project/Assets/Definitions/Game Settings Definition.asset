@@ -17,8 +17,6 @@ MonoBehaviour:
     spawnIntervalTicks: 250
     enemyLevel: 1
     bossLevel: 1
-    playerStartPosition: {x: 0, y: 0, z: 0}
-    bossSpawnPosition: {x: -7, y: 0, z: 7}
     randomSeed: 0
   waves:
   - startTicks: 250
@@ -33,4 +31,10 @@ MonoBehaviour:
   - startTicks: 4500
     isBoss: 1
     enemyKindIndex: 0
+  waveEnemies:
+  - {fileID: 11400000, guid: 7e27ad8917b2b2344a07a7ef6f3f8468, type: 2}
+  - {fileID: 11400000, guid: 5bc1f2883afbca94a96dc37769c8c69a, type: 2}
+  - {fileID: 11400000, guid: 5c5cbd46eaead144ca431125be8ed13c, type: 2}
   targetFrameRate: 144
+  enemyCapacityPerKind: 10
+  projectileCapacity: 10

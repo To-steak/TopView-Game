@@ -31,14 +31,14 @@ MonoBehaviour:
     skinWidth: 0.08
     collisionLayer:
       serializedVersion: 2
-      m_Bits: 4294966527
+      m_Bits: 247
     muzzleOffset: {x: 0, y: 0, z: 0.5}
   vitals:
     maxHealth: 100
     maxMana: 50000
-    manaRecoveryPerSecond: 25
+    manaRecoveryPerTick: 0.5
     manaRecoveryDelayTicks: 150
-    runManaCostPerSecond: 5
+    runManaCostPerTick: 0.1
     dodgeManaCost: 15
     jumpManaCost: 10
   action:
@@ -54,3 +54,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 926e7ffa61c566e47a9215ee6c0acf1e, type: 2}
   viewPrefab: {fileID: 8657122809230754077, guid: 01c18da25d44ad64b983d140cc66a067, type: 3}
   manaGaugeOffset: {x: 0, y: -1.5, z: 0}
+  meleeHitCapacity: 10
+  cameraPriority: 2
