@@ -202,6 +202,12 @@ namespace TopView.Systems
                 return;
             }
 
+            if (IsWaitingNextShot(in player))
+            {
+                player.moveDirection = Vector3.zero;
+                return;
+            }
+
             bool isRunning = command.isRunning;
             if (isRunning)
             {
@@ -407,6 +413,12 @@ namespace TopView.Systems
             }
 
             return false;
+        }
+
+        // Ranged의 연사 간격을 기다리는 중인지. 이 동안은 서 있는다. 공격 상태에 들어가야 대기가 생기므로 무기 번호는 유효하다
+        private static bool IsWaitingNextShot(in PlayerEntity player)
+        {
+            return player.attackCooldownTicks > 0 && player.weapons[player.currentWeaponIndex].kind == WeaponKind.Ranged;
         }
 
         private static bool CanSwap(in PlayerEntity player, int weaponIndex)

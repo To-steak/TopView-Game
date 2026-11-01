@@ -119,7 +119,7 @@ namespace TopView.Core
                 return;
             }
 
-            PlayerViewSystem.Present(_world.players, _world.playerStateChangedRecords, _playerViewPrefab, _playerWeaponModelPrefabs, _viewContext);
+            PlayerViewSystem.Present(_world.players, _world.playerStateChangedRecords, _playerViewPrefab, _playerWeaponModelPrefabs, _playerUpperLayerBlendInTicks, _viewContext);
             EnemyViewSystem.Present(_world.enemies, _world.enemyStateChangedRecords, _enemyViewPrefabs, _viewContext);
             EnemyHealthGaugeViewSystem.Present(_world.enemies, _enemyHealthGaugePrefabs, _enemyHealthGaugeOffsets, _enemyHealthGaugeColors, _viewContext);
             BossViewSystem.Present(_world.bosses, _world.bossStateChangedRecords, _bossViewPrefab, _viewContext);
@@ -221,6 +221,7 @@ namespace TopView.Core
             _world = world;
             _playerViewPrefab = playerDefinition.viewPrefab;
             _playerCameraPriority = playerDefinition.cameraPriority;
+            _playerUpperLayerBlendInTicks = playerDefinition.upperLayerBlendInTicks;
             _playerWeaponModelPrefabs = weaponModelPrefabs;
             _enemyViewPrefabs = enemyViewPrefabs;
             _enemyHealthGaugePrefabs = enemyHealthGaugePrefabs;

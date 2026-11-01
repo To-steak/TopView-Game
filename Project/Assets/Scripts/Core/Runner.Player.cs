@@ -18,6 +18,7 @@ namespace TopView.Core
         private PlayerActions _playerActions;
         private GameObject _playerViewPrefab;
         private int _playerCameraPriority;
+        private int _playerUpperLayerBlendInTicks;
         private GameObject[] _playerWeaponModelPrefabs;
 
         private const int PLAYER_CAPACITY = 1;

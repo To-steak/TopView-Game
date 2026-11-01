@@ -25,6 +25,10 @@ namespace TopView.Presentation.Player.ViewSystems
         private const float WALK_SPEED = 1f;
         private const float RUN_SPEED = 2f;
 
+        private const string UPPER_LAYER_NAME = "Upper Layer";
+        private const float UPPER_LAYER_ON_WEIGHT = 1f;
+        private const float UPPER_LAYER_OFF_WEIGHT = 0f;
+
         /// <summary>
         /// 살아 있는 플레이어가 있으면 View를 만들거나 맞추고, 없으면 View를 끈다.
         /// </summary>
@@ -32,8 +36,9 @@ namespace TopView.Presentation.Player.ViewSystems
         /// <param name="stateRecords">이번 프레임의 상태 변경 기록</param>
         /// <param name="viewPrefab">PlayerView가 붙은 프리팹</param>
         /// <param name="weaponModelPrefabs">무기 번호 순서의 무기 모델 프리팹. 없는 칸은 null</param>
+        /// <param name="upperLayerBlendInTicks">상체 레이어 가중치가 0에서 1로 올라오는 시간(틱)</param>
         /// <param name="context">View 실행 상태</param>
-        public static void Present(PlayerStorage players, List<PlayerStateChangedRecord> stateRecords, GameObject viewPrefab, GameObject[] weaponModelPrefabs, ViewContext context)
+        public static void Present(PlayerStorage players, List<PlayerStateChangedRecord> stateRecords, GameObject viewPrefab, GameObject[] weaponModelPrefabs, int upperLayerBlendInTicks, ViewContext context)
         {
             if (!TryFindAlivePlayer(players, out int playerIndex))
             {
@@ -60,6 +65,7 @@ namespace TopView.Presentation.Player.ViewSystems
             Animator animator = context.playerView.animator;
             ApplyStateRecords(in identifier, stateRecords, animator);
             ApplyMovementAnimation(in player, animator);
+            ApplyUpperLayerWeight(in player, animator, context.playerUpperLayerIndex, upperLayerBlendInTicks);
             ApplyWeaponModels(in player, context.playerWeaponModels);
             ApplyTransform(in player, context.playerView.transform);
         }
@@ -82,6 +88,11 @@ namespace TopView.Presentation.Player.ViewSystems
         {
             GameObject viewObject = Object.Instantiate(viewPrefab, player.currentPosition, player.currentRotation);
             context.playerView = viewObject.GetComponent<PlayerView>();
+            context.playerUpperLayerIndex = context.playerView.animator.GetLayerIndex(UPPER_LAYER_NAME);
+            if (context.playerUpperLayerIndex < 0)
+            {
+                Debug.LogError($"PlayerViewSystem >> 플레이어 Animator에 {UPPER_LAYER_NAME} 레이어가 없어 상체 레이어 가중치를 바꾸지 않는다.");
+            }
 
             context.playerWeaponModels = new GameObject[weaponModelPrefabs.Length];
             for (int weaponIndex = 0; weaponIndex < weaponModelPrefabs.Length; weaponIndex++)
@@ -158,10 +169,11 @@ namespace TopView.Presentation.Player.ViewSystems
             }
         }
 
-        // Move와 Land 상태에서만 이동 입력과 달리기 여부로 MovementSpeed를 정한다. 다른 상태에서는 그대로 둔다.
+        // Move, Land, Reload 상태에서만 이동 입력과 달리기 여부로 MovementSpeed를 정한다. 다른 상태에서는 그대로 둔다.
+        // Reload는 상체 레이어에서 재생되므로, 멈춰 있는 동안 하체가 Idle을 재생하도록 맞춘다.
         private static void ApplyMovementAnimation(in PlayerEntity player, Animator animator)
         {
-            if (player.state != PlayerState.Move && player.state != PlayerState.Land)
+            if (player.state != PlayerState.Move && player.state != PlayerState.Land && player.state != PlayerState.Reload)
             {
                 return;
             }
@@ -172,6 +184,31 @@ namespace TopView.Presentation.Player.ViewSystems
                 speed = player.isRunning ? RUN_SPEED : WALK_SPEED;
             }
             animator.SetFloat(MOVEMENT_SPEED_HASH, speed);
+        }
+
+        // Dodge, Jump, Land, Swap, Die는 전신 모션이라 상체 레이어를 바로 끄고, 다른 상태에서는 upperLayerBlendInTicks에 걸쳐 켠다.
+        private static void ApplyUpperLayerWeight(in PlayerEntity player, Animator animator, int upperLayerIndex, int upperLayerBlendInTicks)
+        {
+            if (upperLayerIndex < 0)
+            {
+                return;
+            }
+
+            bool isFullBodyState = player.state == PlayerState.Dodge || player.state == PlayerState.Jump || player.state == PlayerState.Land || player.state == PlayerState.Swap || player.state == PlayerState.Die;
+            if (isFullBodyState)
+            {
+                animator.SetLayerWeight(upperLayerIndex, UPPER_LAYER_OFF_WEIGHT);
+                return;
+            }
+
+            if (upperLayerBlendInTicks <= 0)
+            {
+                animator.SetLayerWeight(upperLayerIndex, UPPER_LAYER_ON_WEIGHT);
+                return;
+            }
+
+            float maxWeightDelta = Time.deltaTime / (upperLayerBlendInTicks * Time.fixedDeltaTime);
+            animator.SetLayerWeight(upperLayerIndex, Mathf.MoveTowards(animator.GetLayerWeight(upperLayerIndex), UPPER_LAYER_ON_WEIGHT, maxWeightDelta));
         }
 
         private static void ApplyWeaponModels(in PlayerEntity player, GameObject[] weaponModels)

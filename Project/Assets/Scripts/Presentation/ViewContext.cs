@@ -25,6 +25,8 @@ namespace TopView.Presentation
         public EntityIdentifier playerViewEntity;
         // playerView의 무기 소켓에 붙인 무기 모델. 번호는 무기 번호와 같다
         public GameObject[] playerWeaponModels;
+        // playerView Animator의 상체 레이어 번호. 레이어가 없으면 -1
+        public int playerUpperLayerIndex;
 
         // 적 저장소 칸별 View. 빈 칸은 null
         public EnemyView[] enemyViews;

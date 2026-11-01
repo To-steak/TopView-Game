@@ -19,5 +19,7 @@ namespace TopView.Definitions
         public GameObject viewPrefab;
         // 플레이어 카메라가 환경 카메라보다 앞서도록 주는 Cinemachine 우선순위
         public int cameraPriority;
+        // 상체 레이어 가중치가 0에서 1로 올라오는 시간(틱). 0이면 바로 1이 된다
+        public int upperLayerBlendInTicks;
     }
 }
