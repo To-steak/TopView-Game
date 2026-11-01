@@ -55,10 +55,11 @@ namespace TopView.Systems
                         break;
 
                     case EnemyState.Walk:
+                        // SetDestination이 도착 여부를 지우므로 먼저 읽어 둔다
                         bool hasReachedDestination = enemy.hasReachedDestination;
                         if (isPlayerDetected)
                         {
-                            SetDestination(ref enemy, playerPosition, enemy.behavior.attackDistance);
+                            EnemyNavigationSystem.SetDestination(ref enemy, playerPosition, enemy.behavior.attackDistance);
                         }
                         if (hasReachedDestination)
                         {
@@ -127,7 +128,7 @@ namespace TopView.Systems
                     break;
                 case EnemyState.Attack:
                 case EnemyState.Die:
-                    StopMove(ref enemy);
+                    EnemyNavigationSystem.StopMove(ref enemy);
                     break;
             }
         }
@@ -137,7 +138,7 @@ namespace TopView.Systems
         {
             if (isPlayerDetected)
             {
-                SetDestination(ref enemy, playerPosition, enemy.behavior.attackDistance);
+                EnemyNavigationSystem.SetDestination(ref enemy, playerPosition, enemy.behavior.attackDistance);
                 ChangeState(ref enemy, in identifier, EnemyState.Walk, stateRecords);
                 return true;
             }
@@ -154,7 +155,7 @@ namespace TopView.Systems
                 return false;
             }
 
-            SetDestination(ref enemy, wanderPoint, 0f);
+            EnemyNavigationSystem.SetDestination(ref enemy, wanderPoint, 0f);
             ChangeState(ref enemy, in identifier, EnemyState.Walk, stateRecords);
             return true;
         }
@@ -224,25 +225,6 @@ namespace TopView.Systems
             while (point.sqrMagnitude > 1f);
 
             return point;
-        }
-
-        private static void SetDestination(ref EnemyEntity enemy, Vector3 destination, float stoppingDistance)
-        {
-            enemy.hasDestination = true;
-            enemy.destination = destination;
-            enemy.stoppingDistance = stoppingDistance;
-            enemy.isPathDirty = true;
-            enemy.hasReachedDestination = false;
-        }
-
-        private static void StopMove(ref EnemyEntity enemy)
-        {
-            enemy.hasDestination = false;
-            enemy.isPathDirty = false;
-            enemy.hasReachedDestination = false;
-            enemy.pathCornerCount = 0;
-            enemy.pathCornerIndex = 0;
-            enemy.velocity = Vector3.zero;
         }
     }
 }

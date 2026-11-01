@@ -60,6 +60,35 @@ namespace TopView.Systems
             }
         }
 
+        /// <summary>
+        /// 새 목적지를 정한다. 경로는 다음 Tick에 다시 구하고, 도착 여부를 지운다.
+        /// </summary>
+        /// <param name="enemy">적</param>
+        /// <param name="destination">목적지(월드)</param>
+        /// <param name="stoppingDistance">남은 경로가 이 거리 안이면 도착한 것으로 본다(유닛)</param>
+        public static void SetDestination(ref EnemyEntity enemy, Vector3 destination, float stoppingDistance)
+        {
+            enemy.hasDestination = true;
+            enemy.destination = destination;
+            enemy.stoppingDistance = stoppingDistance;
+            enemy.isPathDirty = true;
+            enemy.hasReachedDestination = false;
+        }
+
+        /// <summary>
+        /// 목적지와 경로, 속도를 지워 멈춘다.
+        /// </summary>
+        /// <param name="enemy">적</param>
+        public static void StopMove(ref EnemyEntity enemy)
+        {
+            enemy.hasDestination = false;
+            enemy.isPathDirty = false;
+            enemy.hasReachedDestination = false;
+            enemy.pathCornerCount = 0;
+            enemy.pathCornerIndex = 0;
+            enemy.velocity = Vector3.zero;
+        }
+
         // 목적지까지의 경로를 다시 구한다. 구하지 못하면 꺾이는 점이 없는 채로 false를 돌려주고, Move가 도착한 것으로 본다.
         private static bool TryRecalculatePath(ref EnemyEntity enemy, NavMeshPath path)
         {
