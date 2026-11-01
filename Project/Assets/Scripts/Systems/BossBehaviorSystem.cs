@@ -64,13 +64,13 @@ namespace TopView.Systems
 
                     case BossState.Attack:
                         ref readonly EnemyAttackComponent attack = ref boss.attacks[boss.attackIndex];
-                        if (!boss.isAttackCommitted && boss.stateElapsedTicks >= attack.commitTicks)
+                        if (!boss.isAttackCommitted && boss.stateElapsedTicks >= attack.startTicks)
                         {
                             boss.isAttackCommitted = true;
                             EntityReference owner = new EntityReference { kind = EntityKind.Boss, identifier = identifier };
                             EnemyAttackSystem.CommitAttack(in attack, boss.currentPosition, boss.currentRotation, boss.attackDamage, ref boss.missileShotCount, in owner, projectileSpawnRequests, meleeSpawnRequests);
                         }
-                        if (boss.stateElapsedTicks >= attack.durationTicks)
+                        if (EnemyAttackSystem.IsAttackFinished(in attack, boss.stateElapsedTicks, boss.isAttackCommitted))
                         {
                             ChangeState(ref boss, in identifier, BossState.Idle, stateRecords);
                         }

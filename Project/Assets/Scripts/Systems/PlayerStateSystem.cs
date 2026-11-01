@@ -218,18 +218,22 @@ namespace TopView.Systems
         {
             ref WeaponComponent weapon = ref player.weapons[player.currentWeaponIndex];
 
-            if (!player.isAttackCommitted && player.stateElapsedTicks >= weapon.attackCommitTicks)
+            if (!player.isAttackCommitted && player.stateElapsedTicks >= weapon.attackStartTicks)
             {
                 CommitAttack(ref player, in identifier, ref weapon, projectileSpawnRequests, meleeSpawnRequests);
             }
 
-            if (player.stateElapsedTicks >= weapon.attackDurationTicks)
+            // Melee는 후딜레이까지 기다리고, Ranged와 Throw는 투사체를 내보내면 바로 끝난다
+            bool isFinished = weapon.kind == WeaponKind.Melee
+                ? player.stateElapsedTicks >= weapon.attackDurationTicks
+                : player.isAttackCommitted;
+            if (isFinished)
             {
                 FinishAction(ref player, in identifier, moveInput, stateRecords);
             }
         }
 
-        // 공격을 내보낸다. 탄약이 없으면 아무것도 하지 않는다. Ranged와 Throw는 투사체 생성 요청을, Melee는 공격 상태가 끝날 때까지 이어지는 근접 판정 생성 요청을 넣는다.
+        // 공격을 내보낸다. 탄약이 없으면 아무것도 하지 않는다. Ranged와 Throw는 투사체 생성 요청을, Melee는 attackEndTicks까지 이어지는 근접 판정 생성 요청을 넣는다.
         private static void CommitAttack(ref PlayerEntity player, in EntityIdentifier identifier, ref WeaponComponent weapon, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
         {
             player.isAttackCommitted = true;
@@ -265,7 +269,7 @@ namespace TopView.Systems
                         center = player.currentPosition + player.currentRotation * Vector3.forward * weapon.meleeOffset,
                         radius = weapon.meleeRadius,
                         damage = weapon.damage,
-                        durationTicks = weapon.attackDurationTicks - weapon.attackCommitTicks
+                        durationTicks = weapon.attackEndTicks - weapon.attackStartTicks
                     });
                     break;
             }

@@ -18,8 +18,9 @@ MonoBehaviour:
     maxAmmo: 0
     currentAmmo: 0
     reserveAmmo: 0
-    attackCommitTicks: 0
-    attackDurationTicks: 0
+    attackStartTicks: 18
+    attackEndTicks: 24
+    attackDurationTicks: 40
     projectile:
       kind: 0
       speed: 0
@@ -34,7 +35,6 @@ MonoBehaviour:
         m_Bits: 0
     meleeRadius: 3
     meleeOffset: 3
-    meleeMaxTargets: 10
   modelPrefab: {fileID: 4377655535536273225, guid: 48b3e48d1e96a0c4490dc61536c17515, type: 3}
   projectilePrefab: {fileID: 0}
   hitEffectPrefab: {fileID: 0}

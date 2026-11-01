@@ -18,7 +18,8 @@ MonoBehaviour:
     maxAmmo: 8
     currentAmmo: 8
     reserveAmmo: 32
-    attackCommitTicks: 0
+    attackStartTicks: 1
+    attackEndTicks: 0
     attackDurationTicks: 0
     projectile:
       kind: 0
@@ -34,7 +35,6 @@ MonoBehaviour:
         m_Bits: 0
     meleeRadius: 0
     meleeOffset: 0
-    meleeMaxTargets: 0
   modelPrefab: {fileID: 3196504383240874190, guid: c82cad46dd5eeac4cbfebf8c18d4a631, type: 3}
   projectilePrefab: {fileID: 8751706380067456088, guid: efd619ac9fb459d43ae8b33c3b88d388, type: 3}
   hitEffectPrefab: {fileID: 8231580814263889171, guid: 8bc8c0bfc14e7e74d9aa237605256a88, type: 3}

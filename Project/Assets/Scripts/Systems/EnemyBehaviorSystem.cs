@@ -173,7 +173,7 @@ namespace TopView.Systems
             }
 
             ref readonly EnemyAttackComponent attack = ref enemy.attacks[enemy.attackIndex];
-            if (!enemy.isAttackCommitted && enemy.stateElapsedTicks >= attack.commitTicks)
+            if (!enemy.isAttackCommitted && enemy.stateElapsedTicks >= attack.startTicks)
             {
                 enemy.isAttackCommitted = true;
                 int missileShotCount = 0;
@@ -181,7 +181,7 @@ namespace TopView.Systems
                 EnemyAttackSystem.CommitAttack(in attack, enemy.currentPosition, enemy.currentRotation, enemy.attackDamage, ref missileShotCount, in owner, projectileSpawnRequests, meleeSpawnRequests);
             }
 
-            if (enemy.stateElapsedTicks >= attack.durationTicks)
+            if (EnemyAttackSystem.IsAttackFinished(in attack, enemy.stateElapsedTicks, enemy.isAttackCommitted))
             {
                 ChangeState(ref enemy, in identifier, EnemyState.Idle, stateRecords);
             }

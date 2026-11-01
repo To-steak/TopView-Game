@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace TopView.Components
 {
@@ -9,9 +10,12 @@ namespace TopView.Components
     {
         // 공격 종류
         public EnemyAttackKind kind;
-        // 공격 상태에 들어간 뒤 공격이 나가기까지의 시간(틱)
-        public int commitTicks;
-        // 공격 상태에 들어간 뒤 공격 상태가 끝나기까지의 시간(틱)
+        // 공격 상태에 들어간 뒤 공격이 나가기까지의 시간(틱). Body는 판정이 시작되고, 투사체 공격은 투사체를 내보낸 뒤 공격 상태가 끝난다
+        [FormerlySerializedAs("commitTicks")]
+        public int startTicks;
+        // 공격 상태에 들어간 뒤 Body 판정이 끝나기까지의 시간(틱). startTicks보다 커야 한다. Body만 쓴다
+        public int endTicks;
+        // 공격 상태에 들어간 뒤 공격 상태가 끝나기까지의 시간(틱). endTicks 이후는 판정 없는 후딜레이다. Body만 쓴다
         public int durationTicks;
         // 공격력에 곱하는 배율
         public float damageMultiplier;

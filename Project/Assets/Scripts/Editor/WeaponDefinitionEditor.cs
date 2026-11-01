@@ -32,8 +32,7 @@ namespace TopView.Editor
             EditorGUI.indentLevel++;
             EditorGUILayout.PropertyField(kindProperty);
             DrawRelative(weapon, nameof(WeaponComponent.damage));
-            DrawRelative(weapon, nameof(WeaponComponent.attackCommitTicks));
-            DrawRelative(weapon, nameof(WeaponComponent.attackDurationTicks));
+            DrawAttackTicks(weapon, usesProjectile);
 
             if (kind == WeaponKind.Ranged)
             {
@@ -61,6 +60,24 @@ namespace TopView.Editor
             }
 
             serializedObject.ApplyModifiedProperties();
+        }
+
+        // 공격 시간 칸과 클립 구간 변환 칸을 그린다. Melee는 Start/End/Duration, 투사체 무기는 발사하면 끝나므로 Start만 쓴다.
+        private static void DrawAttackTicks(SerializedProperty weapon, bool usesProjectile)
+        {
+            SerializedProperty startTicks = weapon.FindPropertyRelative(nameof(WeaponComponent.attackStartTicks));
+            EditorGUILayout.PropertyField(startTicks);
+            if (usesProjectile)
+            {
+                AnimationTickConverter.DrawRange(EditorGUILayout.GetControlRect(false, AnimationTickConverter.RangeHeight), startTicks, null, null);
+                return;
+            }
+
+            SerializedProperty endTicks = weapon.FindPropertyRelative(nameof(WeaponComponent.attackEndTicks));
+            SerializedProperty durationTicks = weapon.FindPropertyRelative(nameof(WeaponComponent.attackDurationTicks));
+            EditorGUILayout.PropertyField(endTicks);
+            EditorGUILayout.PropertyField(durationTicks);
+            AnimationTickConverter.DrawRange(EditorGUILayout.GetControlRect(false, AnimationTickConverter.RangeHeight), startTicks, endTicks, durationTicks);
         }
 
         // 부모 칸 안의 자식 칸 하나를 자식까지 펼쳐 그린다.
