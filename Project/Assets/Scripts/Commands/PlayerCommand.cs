@@ -9,6 +9,8 @@ namespace TopView.Commands
         public Vector3 moveDirection;
         // 달리기 키를 누르고 있는지
         public bool isRunning;
+        // 공격 키를 누르고 있는지
+        public bool isAttackHeld;
         // aimPoint가 유효한지
         public bool hasAimPoint;
         // 마우스가 가리키는 총구 높이 평면 위의 점(월드)

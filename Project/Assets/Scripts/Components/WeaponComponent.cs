@@ -24,6 +24,8 @@ namespace TopView.Components
         public int attackEndTicks;
         // 공격 상태에 들어간 뒤 공격 상태가 끝나기까지의 시간(틱). attackEndTicks 이후는 판정 없는 후딜레이다. Melee만 쓴다
         public int attackDurationTicks;
+        // 공격 상태에 들어간 뒤 다음 공격 상태에 들어갈 수 있기까지의 시간(틱). 공격 상태가 끝나는 시간보다 짧으면 효과가 없다
+        public int attackIntervalTicks;
         // 내보내는 투사체. Ranged와 Throw가 쓴다
         public ProjectileComponent projectile;
         // 근접 판정 구의 반지름(유닛, XZ). Melee만 쓴다

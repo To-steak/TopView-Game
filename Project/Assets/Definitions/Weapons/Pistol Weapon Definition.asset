@@ -18,9 +18,10 @@ MonoBehaviour:
     maxAmmo: 8
     currentAmmo: 8
     reserveAmmo: 32
-    attackStartTicks: 1
+    attackStartTicks: 3
     attackEndTicks: 0
     attackDurationTicks: 0
+    attackIntervalTicks: 40
     projectile:
       kind: 0
       speed: 35

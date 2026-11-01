@@ -33,6 +33,8 @@ namespace TopView.Entities
         public int stateElapsedTicks;
         // 지금 공격 상태에서 공격이 이미 나갔는지
         public bool isAttackCommitted;
+        // 다음 공격 상태에 들어갈 수 있기까지 남은 시간(틱). 0이면 들어갈 수 있다
+        public int attackCooldownTicks;
 
         // 이동 방향(월드, XZ). 크기는 입력 크기다
         public Vector3 moveDirection;

@@ -116,6 +116,7 @@ namespace TopView.Core
             Vector2 moveInput = actions.Move.ReadValue<Vector2>();
             command.moveDirection = ToQuarterDirection(new Vector3(moveInput.x, 0f, moveInput.y));
             command.isRunning = actions.Run.IsPressed();
+            command.isAttackHeld = actions.Attack.IsPressed();
             command.hasAimPoint = TryGetAimPoint(out command.aimPoint);
 
             if (actions.Jump.WasPerformedThisFrame())

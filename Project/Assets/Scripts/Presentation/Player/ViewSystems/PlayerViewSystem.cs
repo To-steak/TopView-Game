@@ -99,7 +99,8 @@ namespace TopView.Presentation.Player.ViewSystems
             }
         }
 
-        // 상태가 바뀔 때마다 트리거를 모두 지우고, 새 상태에 맞는 파라미터를 건다.
+        // 상태가 바뀔 때마다 새 상태에 맞는 파라미터를 건다. 새 행동에 들어갈 때만 트리거를 모두 지운다.
+        // Idle과 Move에서 지우면 공격 상태가 바로 끝날 때 아직 소비되지 않은 공격 트리거가 사라진다.
         private static void ApplyStateRecords(in EntityIdentifier identifier, List<PlayerStateChangedRecord> stateRecords, Animator animator)
         {
             for (int recordIndex = 0; recordIndex < stateRecords.Count; recordIndex++)
@@ -110,9 +111,12 @@ namespace TopView.Presentation.Player.ViewSystems
                     continue;
                 }
 
-                for (int triggerIndex = 0; triggerIndex < TRIGGER_HASHES.Length; triggerIndex++)
+                if (record.state != PlayerState.Idle && record.state != PlayerState.Move)
                 {
-                    animator.ResetTrigger(TRIGGER_HASHES[triggerIndex]);
+                    for (int triggerIndex = 0; triggerIndex < TRIGGER_HASHES.Length; triggerIndex++)
+                    {
+                        animator.ResetTrigger(TRIGGER_HASHES[triggerIndex]);
+                    }
                 }
 
                 switch (record.state)

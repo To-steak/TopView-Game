@@ -33,6 +33,7 @@ namespace TopView.Editor
             EditorGUILayout.PropertyField(kindProperty);
             DrawRelative(weapon, nameof(WeaponComponent.damage));
             DrawAttackTicks(weapon, usesProjectile);
+            DrawRelative(weapon, nameof(WeaponComponent.attackIntervalTicks));
 
             if (kind == WeaponKind.Ranged)
             {
