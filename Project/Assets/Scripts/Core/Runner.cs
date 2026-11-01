@@ -121,6 +121,7 @@ namespace TopView.Core
 
             PlayerViewSystem.Present(_world.players, _world.playerStateChangedRecords, _playerViewPrefab, _playerWeaponModelPrefabs, _viewContext);
             EnemyViewSystem.Present(_world.enemies, _world.enemyStateChangedRecords, _enemyViewPrefabs, _viewContext);
+            EnemyHealthGaugeViewSystem.Present(_world.enemies, _enemyHealthGaugePrefabs, _enemyHealthGaugeOffsets, _enemyHealthGaugeColors, _viewContext);
             BossViewSystem.Present(_world.bosses, _world.bossStateChangedRecords, _bossViewPrefab, _viewContext);
             ProjectileViewSystem.Present(_world.projectiles, _projectilePrefabs, _projectilePitchSpeeds, _world.projectileHitRecords, _hitEffectPrefabs, _viewContext);
             CameraViewSystem.Present(_viewContext, _playerCameraPriority);
@@ -179,7 +180,7 @@ namespace TopView.Core
             }
 
             int enemyKindCount = enemyDefinitions.Length;
-            if (!TryReadEnemies(enemyDefinitions, projectilePrefabs, projectilePitchSpeeds, hitEffectPrefabs, out EnemySpawnRequest[] enemySpawnTemplates, out GameObject[] enemyViewPrefabs, out Vector3[] gaugeOffsets, out Color[] gaugeColors))
+            if (!TryReadEnemies(enemyDefinitions, projectilePrefabs, projectilePitchSpeeds, hitEffectPrefabs, out EnemySpawnRequest[] enemySpawnTemplates, out GameObject[] enemyViewPrefabs, out GameObject[] enemyHealthGaugePrefabs, out Vector3[] enemyHealthGaugeOffsets, out Color[] enemyHealthGaugeColors))
             {
                 return;
             }
@@ -222,13 +223,16 @@ namespace TopView.Core
             _playerCameraPriority = playerDefinition.cameraPriority;
             _playerWeaponModelPrefabs = weaponModelPrefabs;
             _enemyViewPrefabs = enemyViewPrefabs;
+            _enemyHealthGaugePrefabs = enemyHealthGaugePrefabs;
+            _enemyHealthGaugeOffsets = enemyHealthGaugeOffsets;
+            _enemyHealthGaugeColors = enemyHealthGaugeColors;
             _bossViewPrefab = bossDefinition.viewPrefab;
             _projectilePrefabs = projectilePrefabs.ToArray();
             _projectilePitchSpeeds = projectilePitchSpeeds.ToArray();
             _hitEffectPrefabs = hitEffectPrefabs.ToArray();
             _viewContext = CreateViewContext(enemyKindCount);
 
-            BindPresenters(playerDefinition, gaugeOffsets, gaugeColors);
+            BindPresenters();
         }
 
         // 이전 판의 World, View 실행 상태, Presenter 연결을 비운다.
@@ -241,9 +245,8 @@ namespace TopView.Core
             _scorePresenter = null;
             _playerHealthPresenter = null;
             _ammoPresenter = null;
-            _playerManaGaugePresenter = null;
+            _playerManaPresenter = null;
             _bossHealthPresenter = null;
-            _enemyHealthGaugePresenter = null;
         }
 
         // 이번 판의 저장소 크기와 View 표에 맞춰 View 실행 상태를 만들고 씬의 카메라를 찾는다.
@@ -257,6 +260,8 @@ namespace TopView.Core
                 enemyViewGenerations = new int[_world.enemies.entities.Length],
                 enemyViewPools = new Stack<EnemyView>[enemyKindCount],
                 enemyTriggerHashesByKind = new int[enemyKindCount][],
+                enemyHealthGaugeViews = new EnemyHealthGaugeView[_world.enemies.entities.Length],
+                enemyHealthGaugePools = new Stack<EnemyHealthGaugeView>[enemyKindCount],
                 projectileViews = new ProjectileView[_world.projectiles.entities.Length],
                 projectileViewGenerations = new int[_world.projectiles.entities.Length],
                 projectileViewIndices = new int[_world.projectiles.entities.Length],
@@ -266,6 +271,7 @@ namespace TopView.Core
             for (int kind = 0; kind < enemyKindCount; kind++)
             {
                 viewContext.enemyViewPools[kind] = new Stack<EnemyView>();
+                viewContext.enemyHealthGaugePools[kind] = new Stack<EnemyHealthGaugeView>();
             }
             for (int viewIndex = 0; viewIndex < _projectilePrefabs.Length; viewIndex++)
             {

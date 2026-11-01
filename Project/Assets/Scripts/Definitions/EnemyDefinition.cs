@@ -23,6 +23,8 @@ namespace TopView.Definitions
         public float[] attackProjectilePitchSpeeds;
         // EnemyView가 붙은 프리팹
         public GameObject viewPrefab;
+        // EnemyHealthGaugeView가 붙은 월드 공간 체력 게이지 프리팹
+        public GameObject healthGaugePrefab;
         // 체력 게이지를 적 위치에서 띄울 거리(월드)
         public Vector3 healthGaugeOffset;
         // 체력 게이지 색

@@ -34,6 +34,10 @@ namespace TopView.Presentation
         public Stack<EnemyView>[] enemyViewPools;
         // 적 종류별 Animator 트리거 파라미터. 그 종류의 View를 처음 만들 때 채운다
         public int[][] enemyTriggerHashesByKind;
+        // 적 저장소 칸별 체력 게이지. 빈 칸은 null
+        public EnemyHealthGaugeView[] enemyHealthGaugeViews;
+        // 적 종류별로 쉬고 있는 체력 게이지
+        public Stack<EnemyHealthGaugeView>[] enemyHealthGaugePools;
 
         // 보스 View. 아직 만들지 않았으면 null
         public BossView bossView;

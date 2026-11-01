@@ -11,7 +11,7 @@
 - Fixed Timestep: 0.02초 (50Hz)
 - 외부 패키지 참조
   - `TopView.Core` → `Unity.InputSystem`
-  - `TopView.Presentation` → `Unity.Cinemachine`
+  - `TopView.Presentation` → `Unity.Cinemachine`, `UnityEngine.UI`
   - `TopView.UserInterface` → `UnityEngine.UI`, `Unity.TextMeshPro`, `DOTween.Modules`
   - `TopView.Editor` → `UnityEngine.UI`
 

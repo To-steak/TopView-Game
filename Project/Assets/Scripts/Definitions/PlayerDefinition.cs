@@ -17,8 +17,6 @@ namespace TopView.Definitions
         public WeaponDefinition[] weapons;
         // PlayerView가 붙은 프리팹
         public GameObject viewPrefab;
-        // 마나 게이지를 플레이어 위치에서 띄울 거리(월드)
-        public Vector3 manaGaugeOffset;
         // 플레이어 카메라가 환경 카메라보다 앞서도록 주는 Cinemachine 우선순위
         public int cameraPriority;
     }

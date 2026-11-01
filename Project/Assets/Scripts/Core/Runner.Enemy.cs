@@ -13,6 +13,12 @@ namespace TopView.Core
     {
         // 적 종류별 View 프리팹. 번호가 적 종류 번호다
         private GameObject[] _enemyViewPrefabs;
+        // 적 종류별 체력 게이지 프리팹. 번호가 적 종류 번호다
+        private GameObject[] _enemyHealthGaugePrefabs;
+        // 적 종류별로 체력 게이지를 적 위치에서 띄울 거리(월드)
+        private Vector3[] _enemyHealthGaugeOffsets;
+        // 적 종류별 체력 게이지 색
+        private Color[] _enemyHealthGaugeColors;
 
         // 보스가 아닌 웨이브마다 Game Settings Definition의 웨이브 적 목록에서 Enemy Definition을 읽어 적 종류 번호를 매긴다. 번호는 웨이브 순서에서 처음 나온 순서다. 칸이 모자라거나 비어 있으면 false
         private static bool TryAssignWaveEnemyKinds(WaveComponent[] waves, EnemyDefinition[] waveEnemies, out EnemyDefinition[] enemyDefinitions)
@@ -48,11 +54,12 @@ namespace TopView.Core
         }
 
         // 적 종류별 Enemy Definition에서 생성 요청 템플릿과 View·게이지 값을 꺼낸다. 값이 빠져 있으면 false
-        private static bool TryReadEnemies(EnemyDefinition[] enemyDefinitions, List<GameObject> projectilePrefabs, List<float> projectilePitchSpeeds, List<GameObject> hitEffectPrefabs, out EnemySpawnRequest[] spawnTemplates, out GameObject[] viewPrefabs, out Vector3[] gaugeOffsets, out Color[] gaugeColors)
+        private static bool TryReadEnemies(EnemyDefinition[] enemyDefinitions, List<GameObject> projectilePrefabs, List<float> projectilePitchSpeeds, List<GameObject> hitEffectPrefabs, out EnemySpawnRequest[] spawnTemplates, out GameObject[] viewPrefabs, out GameObject[] gaugePrefabs, out Vector3[] gaugeOffsets, out Color[] gaugeColors)
         {
             int enemyKindCount = enemyDefinitions.Length;
             spawnTemplates = new EnemySpawnRequest[enemyKindCount];
             viewPrefabs = new GameObject[enemyKindCount];
+            gaugePrefabs = new GameObject[enemyKindCount];
             gaugeOffsets = new Vector3[enemyKindCount];
             gaugeColors = new Color[enemyKindCount];
 
@@ -62,6 +69,12 @@ namespace TopView.Core
                 if (definition.viewPrefab == null || definition.viewPrefab.GetComponent<EnemyView>() == null)
                 {
                     Debug.LogError($"Runner >> {definition.name}의 View Prefab이 없거나 EnemyView가 붙어 있지 않아 판을 시작할 수 없다.");
+                    return false;
+                }
+
+                if (definition.healthGaugePrefab == null || definition.healthGaugePrefab.GetComponent<EnemyHealthGaugeView>() == null)
+                {
+                    Debug.LogError($"Runner >> {definition.name}의 Health Gauge Prefab이 없거나 EnemyHealthGaugeView가 붙어 있지 않아 판을 시작할 수 없다.");
                     return false;
                 }
 
@@ -86,6 +99,7 @@ namespace TopView.Core
                     attacks = attacks
                 };
                 viewPrefabs[kind] = definition.viewPrefab;
+                gaugePrefabs[kind] = definition.healthGaugePrefab;
                 gaugeOffsets[kind] = definition.healthGaugeOffset;
                 gaugeColors[kind] = definition.healthGaugeColor;
             }
