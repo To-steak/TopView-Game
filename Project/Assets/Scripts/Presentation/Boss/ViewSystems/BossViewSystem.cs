@@ -24,14 +24,14 @@ namespace TopView.Presentation.Boss.ViewSystems
         /// <param name="bosses">보스 저장소</param>
         /// <param name="stateRecords">이번 프레임의 보스 상태 변경 기록</param>
         /// <param name="viewPrefab">BossView가 붙은 프리팹</param>
-        /// <param name="context">View 실행 상태</param>
-        public static void Present(BossStorage bosses, List<BossStateChangedRecord> stateRecords, GameObject viewPrefab, ViewContext context)
+        /// <param name="context">보스 View 실행 상태</param>
+        public static void Present(BossStorage bosses, List<BossStateChangedRecord> stateRecords, GameObject viewPrefab, BossViewContext context)
         {
             if (!TryFindAliveBoss(bosses, out int bossIndex))
             {
-                if (context.bossView != null && context.bossView.gameObject.activeSelf)
+                if (context.view != null && context.view.gameObject.activeSelf)
                 {
-                    context.bossView.gameObject.SetActive(false);
+                    context.view.gameObject.SetActive(false);
                 }
                 return;
             }
@@ -39,23 +39,23 @@ namespace TopView.Presentation.Boss.ViewSystems
             ref readonly BossEntity boss = ref bosses.entities[bossIndex];
             EntityIdentifier identifier = new EntityIdentifier { index = bossIndex, generation = boss.generation };
 
-            if (context.bossView == null || !context.bossView.gameObject.activeSelf || context.bossViewEntity.generation != identifier.generation)
+            if (context.view == null || !context.view.gameObject.activeSelf || context.viewEntity.generation != identifier.generation)
             {
                 ShowView(in boss, in identifier, viewPrefab, context);
             }
 
-            Animator animator = context.bossView.animator;
+            Animator animator = context.view.animator;
             for (int recordIndex = 0; recordIndex < stateRecords.Count; recordIndex++)
             {
                 BossStateChangedRecord record = stateRecords[recordIndex];
                 if (record.boss.index == identifier.index && record.boss.generation == identifier.generation)
                 {
-                    ApplyState(record.state, record.attackKind, animator, context.bossTriggerHashes);
+                    ApplyState(record.state, record.attackKind, animator, context.triggerHashes);
                 }
             }
 
             float alpha = Mathf.Clamp01((Time.time - Time.fixedTime) / Time.fixedDeltaTime);
-            context.bossView.transform.SetPositionAndRotation(
+            context.view.transform.SetPositionAndRotation(
                 Vector3.Lerp(boss.previousPosition, boss.currentPosition, alpha),
                 Quaternion.Slerp(boss.previousRotation, boss.currentRotation, alpha));
         }
@@ -75,22 +75,22 @@ namespace TopView.Presentation.Boss.ViewSystems
         }
 
         // View를 만들거나 다시 켜고, 지금 상태에 들어갈 때의 Animator 파라미터를 건다.
-        private static void ShowView(in BossEntity boss, in EntityIdentifier identifier, GameObject viewPrefab, ViewContext context)
+        private static void ShowView(in BossEntity boss, in EntityIdentifier identifier, GameObject viewPrefab, BossViewContext context)
         {
-            if (context.bossView == null)
+            if (context.view == null)
             {
-                context.bossView = Object.Instantiate(viewPrefab, boss.currentPosition, boss.currentRotation).GetComponent<BossView>();
-                context.bossTriggerHashes = CollectTriggerHashes(context.bossView.animator);
+                context.view = Object.Instantiate(viewPrefab, boss.currentPosition, boss.currentRotation).GetComponent<BossView>();
+                context.triggerHashes = CollectTriggerHashes(context.view.animator);
             }
             else
             {
-                context.bossView.gameObject.SetActive(true);
+                context.view.gameObject.SetActive(true);
             }
 
-            context.bossViewEntity = identifier;
+            context.viewEntity = identifier;
 
             EnemyAttackKind attackKind = boss.state == BossState.Attack ? boss.attacks[boss.attackIndex].kind : default;
-            ApplyState(boss.state, attackKind, context.bossView.animator, context.bossTriggerHashes);
+            ApplyState(boss.state, attackKind, context.view.animator, context.triggerHashes);
         }
 
         private static void ApplyState(BossState state, EnemyAttackKind attackKind, Animator animator, int[] triggerHashes)

@@ -45,12 +45,12 @@ namespace TopView.Core
         // 입력 방향을 카메라의 앞·오른쪽(XZ) 기준 월드 방향으로 바꾼다.
         private Vector3 ToQuarterDirection(Vector3 input)
         {
-            if (_viewContext.mainCamera == null)
+            if (_viewContext.camera.mainCamera == null)
             {
                 return input;
             }
 
-            Transform cameraTransform = _viewContext.mainCamera.transform;
+            Transform cameraTransform = _viewContext.camera.mainCamera.transform;
             Vector3 cameraForward = cameraTransform.forward;
             Vector3 cameraRight = cameraTransform.right;
             cameraForward.y = 0f;
@@ -65,13 +65,13 @@ namespace TopView.Core
         private bool TryGetAimPoint(out Vector3 aimPoint)
         {
             aimPoint = Vector3.zero;
-            if (_viewContext.mainCamera == null || _viewContext.playerView == null || Mouse.current == null)
+            if (_viewContext.camera.mainCamera == null || _viewContext.player.view == null || Mouse.current == null)
             {
                 return false;
             }
 
-            Ray ray = _viewContext.mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
-            Plane plane = new Plane(Vector3.up, new Vector3(0f, _viewContext.playerView.muzzle.position.y, 0f));
+            Ray ray = _viewContext.camera.mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
+            Plane plane = new Plane(Vector3.up, new Vector3(0f, _viewContext.player.view.muzzle.position.y, 0f));
             if (!plane.Raycast(ray, out float distance))
             {
                 return false;

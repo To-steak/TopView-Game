@@ -136,38 +136,52 @@ namespace TopView.Core
         {
             ViewContext viewContext = new ViewContext
             {
-                mainCamera = UnityEngine.Camera.main,
-                playerCameraView = FindAnyObjectByType<PlayerCameraView>(),
-                enemyViews = new EnemyView[_world.enemies.entities.Length],
-                enemyViewGenerations = new int[_world.enemies.entities.Length],
-                enemyViewPools = new Stack<EnemyView>[enemyKindCount],
-                enemyTriggerHashesByKind = new int[enemyKindCount][],
-                enemyHealthGaugeViews = new EnemyHealthGaugeView[_world.enemies.entities.Length],
-                enemyHealthGaugePools = new Stack<EnemyHealthGaugeView>[enemyKindCount],
-                projectileViews = new ProjectileView[_world.projectiles.entities.Length],
-                projectileViewGenerations = new int[_world.projectiles.entities.Length],
-                projectileViewIndices = new int[_world.projectiles.entities.Length],
-                projectileViewPools = new Stack<ProjectileView>[_projectilePrefabs.Length],
-                hitEffectPools = new Stack<ParticleSystem>[_hitEffectPrefabs.Length]
+                camera = new CameraViewContext
+                {
+                    mainCamera = UnityEngine.Camera.main,
+                    playerCameraView = FindAnyObjectByType<PlayerCameraView>()
+                },
+                player = new PlayerViewContext(),
+                enemy = new EnemyViewContext
+                {
+                    views = new EnemyView[_world.enemies.entities.Length],
+                    viewGenerations = new int[_world.enemies.entities.Length],
+                    viewPools = new Stack<EnemyView>[enemyKindCount],
+                    triggerHashesByKind = new int[enemyKindCount][],
+                    healthGaugeViews = new EnemyHealthGaugeView[_world.enemies.entities.Length],
+                    healthGaugePools = new Stack<EnemyHealthGaugeView>[enemyKindCount]
+                },
+                boss = new BossViewContext(),
+                projectile = new ProjectileViewContext
+                {
+                    views = new ProjectileView[_world.projectiles.entities.Length],
+                    viewGenerations = new int[_world.projectiles.entities.Length],
+                    viewIndices = new int[_world.projectiles.entities.Length],
+                    viewPools = new Stack<ProjectileView>[_projectilePrefabs.Length]
+                },
+                hitEffect = new HitEffectViewContext
+                {
+                    pools = new Stack<ParticleSystem>[_hitEffectPrefabs.Length]
+                }
             };
             for (int kind = 0; kind < enemyKindCount; kind++)
             {
-                viewContext.enemyViewPools[kind] = new Stack<EnemyView>();
-                viewContext.enemyHealthGaugePools[kind] = new Stack<EnemyHealthGaugeView>();
+                viewContext.enemy.viewPools[kind] = new Stack<EnemyView>();
+                viewContext.enemy.healthGaugePools[kind] = new Stack<EnemyHealthGaugeView>();
             }
             for (int viewIndex = 0; viewIndex < _projectilePrefabs.Length; viewIndex++)
             {
-                viewContext.projectileViewPools[viewIndex] = new Stack<ProjectileView>();
+                viewContext.projectile.viewPools[viewIndex] = new Stack<ProjectileView>();
             }
             for (int effectIndex = 0; effectIndex < _hitEffectPrefabs.Length; effectIndex++)
             {
-                viewContext.hitEffectPools[effectIndex] = new Stack<ParticleSystem>();
+                viewContext.hitEffect.pools[effectIndex] = new Stack<ParticleSystem>();
             }
-            if (viewContext.mainCamera == null)
+            if (viewContext.camera.mainCamera == null)
             {
                 Debug.LogError("Runner >> 씬에 MainCamera 태그를 가진 카메라가 없다.");
             }
-            if (viewContext.playerCameraView == null)
+            if (viewContext.camera.playerCameraView == null)
             {
                 Debug.LogError("Runner >> 씬에 PlayerCameraView가 없다.");
             }

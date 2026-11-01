@@ -102,6 +102,7 @@ MoveSystem.Tick(_world.enemies, _world.enemyMovedRecords);
 ```
 Presentation/
 ├── ViewContext.cs
+├── PlayerViewContext.cs    영역별 ~ViewContext
 ├── Player/
 │   ├── ViewSystems/    PlayerViewSystem
 │   └── Views/          PlayerView
@@ -117,9 +118,9 @@ Presentation/
   - 이유: 연출 판단이 ViewSystem 한 곳에 모이고, View는 프리팹의 참조 묶음으로만 남는다.
 - 연출의 판단과 동작은 모두 `~ViewSystem`(static)이 한다. Animator 파라미터 이름 등은 `~ViewSystem`의 상수로 둔다.
   - 이유: 문자열 이름이 흩어지면 오타가 실행해 봐야 드러난다.
-- View는 Runner가 LateUpdate에서 정해진 순서로 호출하는 `~ViewSystem.Present`가 처리한다. 인자는 System처럼 필요한 데이터와 ViewContext만 받는다.
-  - 이유: 연출의 순서와 읽는 데이터도 Logic처럼 한 곳에서 보인다.
-- View 쪽 실행 상태(EntityIdentifier → View 매핑, 풀, 카메라 참조)는 **ViewContext 인스턴스**에 둔다. ViewSystem도 static 필드에 상태를 두지 않는다.
+- View는 Runner가 LateUpdate에서 정해진 순서로 호출하는 `~ViewSystem.Present`가 처리한다. 인자는 System처럼 필요한 데이터와 자기 영역의 `~ViewContext`만 받는다. 다른 영역의 값이 필요하면 그 값만 인자로 받는다.
+  - 이유: 연출의 순서와 읽는 데이터도 Logic처럼 한 곳에서 보인다. `ViewContext`를 통째로 받으면 시그니처가 영향 범위를 보여 주지 못한다.
+- View 쪽 실행 상태(EntityIdentifier → View 매핑, 풀, 카메라 참조)는 영역별 **`~ViewContext` 인스턴스**에 두고, `ViewContext`가 이들을 모은다. ViewSystem도 static 필드에 상태를 두지 않는다.
   - 이유: 판을 다시 시작해도 이전 판의 View 매핑이 남지 않는다.
 - 지속 상태는 매 프레임 엔티티 저장소를 읽고, 그 순간의 일은 프레임 기록을 읽는다. 프레임 기록은 struct이며 객체 참조를 담지 않는다. 기록 목록은 Runner가 LateUpdate 마지막에 비운다.
   - 이유: 지속 상태는 놓친 프레임이 있어도 따라잡고, 사건은 한 번만 재생된다. 객체 참조가 없으니 이미 사라진 객체를 가리키지 않는다.
@@ -173,7 +174,7 @@ Presentation/
 | `Definitions/` | `~Definition` (ScriptableObject 데이터) | `<접두사>.Definitions` | Entity |
 | `Authoring/` | `~Authoring` (씬 배치 MonoBehaviour) | `<접두사>.Authoring` | Entity, Definitions |
 | `Persistence/` (필요할 때만) | 설정·기록 저장과 불러오기 | `<접두사>.Persistence` | Entity |
-| `Presentation/` | `~ViewSystem`, `~View`, ViewContext, 오디오, 오브젝트 풀 | `<접두사>.Presentation` | Entity, Definitions, Persistence |
+| `Presentation/` | `~ViewSystem`, `~View`, `ViewContext`, `~ViewContext`, 오디오, 오브젝트 풀 | `<접두사>.Presentation` | Entity, Definitions, Persistence |
 | `UserInterface/` | UI View, Presenter | `<접두사>.UserInterface` | Entity, Persistence |
 | `Core/` | World, Runner, 부트스트랩, 로딩, 씬 전환 | `<접두사>.Core` | 전부 |
 | `Editor/` | 에디터 도구 (Gizmo, PropertyDrawer, Custom Editor) | `<접두사>.Editor` (플랫폼: Editor 전용) | 전부 |

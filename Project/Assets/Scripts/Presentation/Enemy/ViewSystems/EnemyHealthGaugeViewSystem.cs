@@ -15,13 +15,14 @@ namespace TopView.Presentation.Enemy.ViewSystems
         /// <param name="gaugePrefabsByKind">적 종류별 EnemyHealthGaugeView 프리팹</param>
         /// <param name="offsetsByKind">적 종류별로 게이지를 적 위치에서 띄울 거리(월드)</param>
         /// <param name="colorsByKind">적 종류별 게이지 색</param>
-        /// <param name="context">View 실행 상태</param>
-        public static void Present(EnemyStorage enemies, GameObject[] gaugePrefabsByKind, Vector3[] offsetsByKind, Color[] colorsByKind, ViewContext context)
+        /// <param name="mainCamera">게이지가 바라볼 카메라. 없으면 null</param>
+        /// <param name="context">적 View 실행 상태</param>
+        public static void Present(EnemyStorage enemies, GameObject[] gaugePrefabsByKind, Vector3[] offsetsByKind, Color[] colorsByKind, UnityEngine.Camera mainCamera, EnemyViewContext context)
         {
             for (int enemyIndex = 0; enemyIndex < enemies.entities.Length; enemyIndex++)
             {
-                EnemyView enemyView = context.enemyViews[enemyIndex];
-                EnemyHealthGaugeView gauge = context.enemyHealthGaugeViews[enemyIndex];
+                EnemyView enemyView = context.views[enemyIndex];
+                EnemyHealthGaugeView gauge = context.healthGaugeViews[enemyIndex];
                 // 적 저장소는 종류별 구간으로 나뉘어 있어 칸 번호로 종류를 안다
                 int kind = enemyIndex / enemies.capacityPerKind;
 
@@ -41,8 +42,8 @@ namespace TopView.Presentation.Enemy.ViewSystems
                 }
 
                 Vector3 position = enemyView.transform.position + offsetsByKind[kind];
-                Quaternion rotation = context.mainCamera != null
-                    ? Quaternion.LookRotation(position - context.mainCamera.transform.position)
+                Quaternion rotation = mainCamera != null
+                    ? Quaternion.LookRotation(position - mainCamera.transform.position)
                     : gauge.transform.rotation;
                 gauge.transform.SetPositionAndRotation(position, rotation);
 
@@ -58,22 +59,22 @@ namespace TopView.Presentation.Enemy.ViewSystems
             }
         }
 
-        private static EnemyHealthGaugeView Acquire(ViewContext context, int enemyIndex, int kind, GameObject[] gaugePrefabsByKind, Color[] colorsByKind)
+        private static EnemyHealthGaugeView Acquire(EnemyViewContext context, int enemyIndex, int kind, GameObject[] gaugePrefabsByKind, Color[] colorsByKind)
         {
-            Stack<EnemyHealthGaugeView> pool = context.enemyHealthGaugePools[kind];
+            Stack<EnemyHealthGaugeView> pool = context.healthGaugePools[kind];
             EnemyHealthGaugeView gauge = pool.Count > 0 ? pool.Pop() : Object.Instantiate(gaugePrefabsByKind[kind]).GetComponent<EnemyHealthGaugeView>();
             gauge.gaugeFront.color = colorsByKind[kind];
             gauge.gameObject.SetActive(true);
-            context.enemyHealthGaugeViews[enemyIndex] = gauge;
+            context.healthGaugeViews[enemyIndex] = gauge;
             return gauge;
         }
 
-        private static void Release(ViewContext context, int enemyIndex, int kind)
+        private static void Release(EnemyViewContext context, int enemyIndex, int kind)
         {
-            EnemyHealthGaugeView gauge = context.enemyHealthGaugeViews[enemyIndex];
-            context.enemyHealthGaugeViews[enemyIndex] = null;
+            EnemyHealthGaugeView gauge = context.healthGaugeViews[enemyIndex];
+            context.healthGaugeViews[enemyIndex] = null;
             gauge.gameObject.SetActive(false);
-            context.enemyHealthGaugePools[kind].Push(gauge);
+            context.healthGaugePools[kind].Push(gauge);
         }
     }
 }

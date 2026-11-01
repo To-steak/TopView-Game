@@ -38,14 +38,14 @@ namespace TopView.Presentation.Player.ViewSystems
         /// <param name="viewPrefab">PlayerView가 붙은 프리팹</param>
         /// <param name="weaponModelPrefabs">무기 번호 순서의 무기 모델 프리팹. 없는 칸은 null</param>
         /// <param name="upperLayerBlendInTicks">상체 레이어 가중치가 0에서 1로 올라오는 시간(틱)</param>
-        /// <param name="context">View 실행 상태</param>
-        public static void Present(PlayerStorage players, List<PlayerStateChangedRecord> stateRecords, GameObject viewPrefab, GameObject[] weaponModelPrefabs, int upperLayerBlendInTicks, ViewContext context)
+        /// <param name="context">플레이어 View 실행 상태</param>
+        public static void Present(PlayerStorage players, List<PlayerStateChangedRecord> stateRecords, GameObject viewPrefab, GameObject[] weaponModelPrefabs, int upperLayerBlendInTicks, PlayerViewContext context)
         {
             if (!TryFindAlivePlayer(players, out int playerIndex))
             {
-                if (context.playerView != null && context.playerView.gameObject.activeSelf)
+                if (context.view != null && context.view.gameObject.activeSelf)
                 {
-                    context.playerView.gameObject.SetActive(false);
+                    context.view.gameObject.SetActive(false);
                 }
                 return;
             }
@@ -53,21 +53,21 @@ namespace TopView.Presentation.Player.ViewSystems
             ref readonly PlayerEntity player = ref players.entities[playerIndex];
             EntityIdentifier identifier = new EntityIdentifier { index = playerIndex, generation = player.generation };
 
-            if (context.playerView == null)
+            if (context.view == null)
             {
                 CreateView(in player, viewPrefab, weaponModelPrefabs, context);
             }
-            if (!context.playerView.gameObject.activeSelf)
+            if (!context.view.gameObject.activeSelf)
             {
-                context.playerView.gameObject.SetActive(true);
+                context.view.gameObject.SetActive(true);
             }
 
-            Animator animator = context.playerView.animator;
+            Animator animator = context.view.animator;
             ApplyStateRecords(in identifier, stateRecords, animator);
             ApplyMovementAnimation(in player, animator);
-            ApplyUpperLayerWeight(in player, animator, context.playerUpperLayerIndex, upperLayerBlendInTicks);
-            ApplyWeaponModels(in player, context.playerWeaponModels);
-            ApplyTransform(in player, context.playerView.transform);
+            ApplyUpperLayerWeight(in player, animator, context.upperLayerIndex, upperLayerBlendInTicks);
+            ApplyWeaponModels(in player, context.weaponModels);
+            ApplyTransform(in player, context.view.transform);
         }
 
         private static bool TryFindAlivePlayer(PlayerStorage players, out int playerIndex)
@@ -84,17 +84,17 @@ namespace TopView.Presentation.Player.ViewSystems
             return false;
         }
 
-        private static void CreateView(in PlayerEntity player, GameObject viewPrefab, GameObject[] weaponModelPrefabs, ViewContext context)
+        private static void CreateView(in PlayerEntity player, GameObject viewPrefab, GameObject[] weaponModelPrefabs, PlayerViewContext context)
         {
             GameObject viewObject = Object.Instantiate(viewPrefab, player.currentPosition, player.currentRotation);
-            context.playerView = viewObject.GetComponent<PlayerView>();
-            context.playerUpperLayerIndex = context.playerView.animator.GetLayerIndex(UPPER_LAYER_NAME);
-            if (context.playerUpperLayerIndex < 0)
+            context.view = viewObject.GetComponent<PlayerView>();
+            context.upperLayerIndex = context.view.animator.GetLayerIndex(UPPER_LAYER_NAME);
+            if (context.upperLayerIndex < 0)
             {
                 Debug.LogError($"PlayerViewSystem >> 플레이어 Animator에 {UPPER_LAYER_NAME} 레이어가 없어 상체 레이어 가중치를 바꾸지 않는다.");
             }
 
-            context.playerWeaponModels = new GameObject[weaponModelPrefabs.Length];
+            context.weaponModels = new GameObject[weaponModelPrefabs.Length];
             for (int weaponIndex = 0; weaponIndex < weaponModelPrefabs.Length; weaponIndex++)
             {
                 if (weaponModelPrefabs[weaponIndex] == null)
@@ -102,11 +102,11 @@ namespace TopView.Presentation.Player.ViewSystems
                     continue;
                 }
 
-                GameObject model = Object.Instantiate(weaponModelPrefabs[weaponIndex], context.playerView.weaponSocket);
+                GameObject model = Object.Instantiate(weaponModelPrefabs[weaponIndex], context.view.weaponSocket);
                 model.transform.localPosition = Vector3.zero;
                 model.transform.localRotation = Quaternion.identity;
                 model.SetActive(false);
-                context.playerWeaponModels[weaponIndex] = model;
+                context.weaponModels[weaponIndex] = model;
             }
         }
 

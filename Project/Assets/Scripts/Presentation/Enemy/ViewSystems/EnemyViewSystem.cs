@@ -24,17 +24,17 @@ namespace TopView.Presentation.Enemy.ViewSystems
         /// <param name="enemies">적 저장소</param>
         /// <param name="stateRecords">이번 프레임의 적 상태 변경 기록</param>
         /// <param name="viewPrefabsByKind">적 종류별 EnemyView 프리팹</param>
-        /// <param name="context">View 실행 상태</param>
-        public static void Present(EnemyStorage enemies, List<EnemyStateChangedRecord> stateRecords, GameObject[] viewPrefabsByKind, ViewContext context)
+        /// <param name="context">적 View 실행 상태</param>
+        public static void Present(EnemyStorage enemies, List<EnemyStateChangedRecord> stateRecords, GameObject[] viewPrefabsByKind, EnemyViewContext context)
         {
             float alpha = Mathf.Clamp01((Time.time - Time.fixedTime) / Time.fixedDeltaTime);
 
             for (int enemyIndex = 0; enemyIndex < enemies.entities.Length; enemyIndex++)
             {
                 ref readonly EnemyEntity enemy = ref enemies.entities[enemyIndex];
-                EnemyView view = context.enemyViews[enemyIndex];
+                EnemyView view = context.views[enemyIndex];
 
-                if (view != null && (!enemy.isAlive || context.enemyViewGenerations[enemyIndex] != enemy.generation))
+                if (view != null && (!enemy.isAlive || context.viewGenerations[enemyIndex] != enemy.generation))
                 {
                     Release(context, enemyIndex, enemyIndex / enemies.capacityPerKind);
                     view = null;
@@ -59,42 +59,42 @@ namespace TopView.Presentation.Enemy.ViewSystems
             for (int recordIndex = 0; recordIndex < stateRecords.Count; recordIndex++)
             {
                 EnemyStateChangedRecord record = stateRecords[recordIndex];
-                EnemyView view = context.enemyViews[record.enemy.index];
-                if (view == null || context.enemyViewGenerations[record.enemy.index] != record.enemy.generation)
+                EnemyView view = context.views[record.enemy.index];
+                if (view == null || context.viewGenerations[record.enemy.index] != record.enemy.generation)
                 {
                     continue;
                 }
 
                 int kind = enemies.entities[record.enemy.index].kind;
-                ApplyStateRecord(in record, view.animator, context.enemyTriggerHashesByKind[kind]);
+                ApplyStateRecord(in record, view.animator, context.triggerHashesByKind[kind]);
             }
         }
 
-        private static EnemyView Acquire(ViewContext context, int enemyIndex, in EnemyEntity enemy, GameObject[] viewPrefabsByKind)
+        private static EnemyView Acquire(EnemyViewContext context, int enemyIndex, in EnemyEntity enemy, GameObject[] viewPrefabsByKind)
         {
-            Stack<EnemyView> pool = context.enemyViewPools[enemy.kind];
+            Stack<EnemyView> pool = context.viewPools[enemy.kind];
             EnemyView view = pool.Count > 0 ? pool.Pop() : Object.Instantiate(viewPrefabsByKind[enemy.kind]).GetComponent<EnemyView>();
             view.gameObject.SetActive(true);
 
-            if (context.enemyTriggerHashesByKind[enemy.kind] == null)
+            if (context.triggerHashesByKind[enemy.kind] == null)
             {
-                context.enemyTriggerHashesByKind[enemy.kind] = CollectTriggerHashes(view.animator);
+                context.triggerHashesByKind[enemy.kind] = CollectTriggerHashes(view.animator);
             }
 
-            context.enemyViews[enemyIndex] = view;
-            context.enemyViewGenerations[enemyIndex] = enemy.generation;
+            context.views[enemyIndex] = view;
+            context.viewGenerations[enemyIndex] = enemy.generation;
 
-            PlayIdle(view.animator, context.enemyTriggerHashesByKind[enemy.kind]);
+            PlayIdle(view.animator, context.triggerHashesByKind[enemy.kind]);
             return view;
         }
 
         // 칸의 View를 떼어 그 종류의 풀에 돌려놓는다. 적 저장소는 종류별 구간으로 나뉘어 있어 칸 번호로 종류를 안다.
-        private static void Release(ViewContext context, int enemyIndex, int kind)
+        private static void Release(EnemyViewContext context, int enemyIndex, int kind)
         {
-            EnemyView view = context.enemyViews[enemyIndex];
-            context.enemyViews[enemyIndex] = null;
+            EnemyView view = context.views[enemyIndex];
+            context.views[enemyIndex] = null;
             view.gameObject.SetActive(false);
-            context.enemyViewPools[kind].Push(view);
+            context.viewPools[kind].Push(view);
         }
 
         private static void ApplyStateRecord(in EnemyStateChangedRecord record, Animator animator, int[] triggerHashes)

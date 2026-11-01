@@ -115,13 +115,13 @@ namespace TopView.Core
                 return;
             }
 
-            PlayerViewSystem.Present(_world.players, _world.playerStateChangedRecords, _playerViewPrefab, _playerWeaponModelPrefabs, _playerUpperLayerBlendInTicks, _viewContext);
-            EnemyViewSystem.Present(_world.enemies, _world.enemyStateChangedRecords, _enemyViewPrefabs, _viewContext);
-            EnemyHealthGaugeViewSystem.Present(_world.enemies, _enemyHealthGaugePrefabs, _enemyHealthGaugeOffsets, _enemyHealthGaugeColors, _viewContext);
-            BossViewSystem.Present(_world.bosses, _world.bossStateChangedRecords, _bossViewPrefab, _viewContext);
-            ProjectileViewSystem.Present(_world.projectiles, _projectilePrefabs, _projectilePitchSpeeds, _viewContext);
-            HitEffectViewSystem.Present(_world.projectileHitRecords, _hitEffectPrefabs, _viewContext);
-            CameraViewSystem.Present(_viewContext, _playerCameraPriority);
+            PlayerViewSystem.Present(_world.players, _world.playerStateChangedRecords, _playerViewPrefab, _playerWeaponModelPrefabs, _playerUpperLayerBlendInTicks, _viewContext.player);
+            EnemyViewSystem.Present(_world.enemies, _world.enemyStateChangedRecords, _enemyViewPrefabs, _viewContext.enemy);
+            EnemyHealthGaugeViewSystem.Present(_world.enemies, _enemyHealthGaugePrefabs, _enemyHealthGaugeOffsets, _enemyHealthGaugeColors, _viewContext.camera.mainCamera, _viewContext.enemy);
+            BossViewSystem.Present(_world.bosses, _world.bossStateChangedRecords, _bossViewPrefab, _viewContext.boss);
+            ProjectileViewSystem.Present(_world.projectiles, _projectilePrefabs, _projectilePitchSpeeds, _viewContext.projectile);
+            HitEffectViewSystem.Present(_world.projectileHitRecords, _hitEffectPrefabs, _viewContext.hitEffect);
+            CameraViewSystem.Present(_viewContext.camera, _viewContext.player.view, _playerCameraPriority);
 
             PresentUserInterface();
 
