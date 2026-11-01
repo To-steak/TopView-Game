@@ -125,8 +125,8 @@ Presentation/
   - 이유: 지속 상태는 놓친 프레임이 있어도 따라잡고, 사건은 한 번만 재생된다. 객체 참조가 없으니 이미 사라진 객체를 가리키지 않는다.
 - View 오브젝트는 살아 있는 엔티티와 비교해 생성·반납한다. 게임 루프에서 `Instantiate` / `Destroy`를 반복하지 않고 풀을 쓴다.
   - 이유: 게임 중 할당과 GC 스파이크를 막는다.
-- UI는 MVP 구조다. `UserInterface/`은 화면 영역별 하위 폴더로 나누고, 영역 폴더 안은 `Views/`(`~View`)와 `Presenters/`(`~Presenter`)로 나눈다.
-  - 이유: 화면 영역 이름만 알면 그 UI 코드의 위치를 안다.
+- UI는 MVP 구조다. `UserInterface/`은 화면 요소별 하위 폴더로 나누고, 요소 폴더 하나에 그 요소의 `~View`와 `~Presenter`를 함께 둔다. `Views/`, `Presenters/` 하위 폴더로 나누지 않는다.
+  - 이유: 요소 이름만 알면 그 UI의 View와 Presenter를 한 폴더에서 찾는다.
 - UI View는 버튼 입력을 이벤트로 발행하고 표시 메서드(`SetHealth` 등)를 가진다. Presenter는 MonoBehaviour이며, View의 이벤트를 구독해 명령 버퍼에 넣고, Runner에게 필요한 데이터만 받아 View의 표시 메서드를 부른다. Model 변경 알림은 없고 Runner가 매 프레임 데이터를 넘긴다.
   - 이유: 게임 데이터를 아는 쪽은 Presenter뿐이라 화면을 바꿔도 로직이 안전하다. 매 프레임 넘기므로 변경 알림 이벤트가 필요 없다.
 
