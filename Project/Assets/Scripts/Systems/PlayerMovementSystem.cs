@@ -62,6 +62,21 @@ namespace TopView.Systems
             }
         }
 
+        /// <summary>
+        /// 플레이어 이동 충돌 캡슐의 위아래 구 중심을 구한다.
+        /// </summary>
+        /// <param name="player">플레이어</param>
+        /// <param name="position">캡슐을 놓을 플레이어 위치</param>
+        /// <param name="top">위쪽 구의 중심</param>
+        /// <param name="bottom">아래쪽 구의 중심</param>
+        public static void GetCapsulePoints(in PlayerEntity player, Vector3 position, out Vector3 top, out Vector3 bottom)
+        {
+            Vector3 center = position + player.currentRotation * player.movement.capsuleCenter;
+            float halfLine = Mathf.Max(player.movement.capsuleHeight * 0.5f - player.movement.capsuleRadius, 0f);
+            top = center + Vector3.up * halfLine;
+            bottom = center - Vector3.up * halfLine;
+        }
+
         // 캡슐을 displacement만큼 옮기다가 장애물에 닿으면 닿은 면을 따라 남은 이동을 미끄러뜨린다.
         private static Vector3 Slide(in PlayerEntity player, Vector3 position, Vector3 displacement)
         {
@@ -132,14 +147,6 @@ namespace TopView.Systems
 
             Vector3 blockedOffset = offset / distance * minimumDistance;
             player.currentPosition = new Vector3(center.x + blockedOffset.x, player.currentPosition.y, center.z + blockedOffset.z);
-        }
-
-        private static void GetCapsulePoints(in PlayerEntity player, Vector3 position, out Vector3 top, out Vector3 bottom)
-        {
-            Vector3 center = position + player.currentRotation * player.movement.capsuleCenter;
-            float halfLine = Mathf.Max(player.movement.capsuleHeight * 0.5f - player.movement.capsuleRadius, 0f);
-            top = center + Vector3.up * halfLine;
-            bottom = center - Vector3.up * halfLine;
         }
     }
 }
