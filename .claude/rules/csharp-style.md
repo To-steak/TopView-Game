@@ -7,6 +7,8 @@ paths:
 
 규칙마다 `이유:` 줄은 그 규칙이 없으면 무엇이 깨지는지를 적는다.
 
+도구가 생성한 코드(Input System의 액션 클래스 등)는 이 규칙을 적용하지 않는다. 생성 코드는 고치지 않는다.
+
 ## 네임스페이스
 - `<접두사>.*`, 폴더 경로와 일치시킨다. 접두사는 `CLAUDE.md`의 프로젝트 값이다. 예: `Presentation/Player/ViewSystems/` → `<접두사>.Presentation.Player.ViewSystems`.
   - 이유: 파일 위치만 보고 네임스페이스를 알고, 네임스페이스만 보고 파일을 찾는다.
