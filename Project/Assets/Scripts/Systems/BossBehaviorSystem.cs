@@ -22,7 +22,7 @@ namespace TopView.Systems
         /// <param name="gameOverRequests">게임오버 요청 큐</param>
         public static void Tick(BossStorage bosses, PlayerStorage players, System.Random random, List<BossStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, Queue<GameOverRequest> gameOverRequests)
         {
-            bool hasPlayer = TargetingSystem.TryGetPlayerTarget(players, out EntityIdentifier _, out Vector3 playerPosition, out float _);
+            bool hasPlayer = TargetingSystem.TryGetPlayerTarget(players, out Vector3 playerPosition, out float _);
             float deltaTime = Time.fixedDeltaTime;
 
             for (int bossIndex = 0; bossIndex < bosses.entities.Length; bossIndex++)
@@ -88,14 +88,8 @@ namespace TopView.Systems
             }
         }
 
-        /// <summary>
-        /// 새 상태에 들어간다. Die 상태에서는 바꾸지 않는다. Attack 상태는 공격 번호를 정한 뒤 들어간다.
-        /// </summary>
-        /// <param name="boss">보스</param>
-        /// <param name="identifier">보스를 가리키는 값</param>
-        /// <param name="newState">새 상태</param>
-        /// <param name="stateRecords">보스 상태 변경 기록</param>
-        public static void ChangeState(ref BossEntity boss, in EntityIdentifier identifier, BossState newState, List<BossStateChangedRecord> stateRecords)
+        // 새 상태에 들어간다. Die 상태에서는 바꾸지 않는다. Attack 상태는 공격 번호를 정한 뒤 들어간다.
+        private static void ChangeState(ref BossEntity boss, in EntityIdentifier identifier, BossState newState, List<BossStateChangedRecord> stateRecords)
         {
             if (boss.state == BossState.Die)
             {

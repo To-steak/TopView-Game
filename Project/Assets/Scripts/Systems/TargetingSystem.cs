@@ -13,11 +13,10 @@ namespace TopView.Systems
         /// 살아 있는 플레이어의 위치와 피격 반지름을 돌려준다.
         /// </summary>
         /// <param name="players">플레이어 저장소</param>
-        /// <param name="playerIdentifier">플레이어를 가리키는 값</param>
         /// <param name="playerPosition">플레이어 위치(월드)</param>
         /// <param name="playerRadius">플레이어 이동 충돌 캡슐의 반지름. 감지와 공격 범위에 더한다</param>
         /// <returns>살아 있는 플레이어가 있으면 true</returns>
-        public static bool TryGetPlayerTarget(PlayerStorage players, out EntityIdentifier playerIdentifier, out Vector3 playerPosition, out float playerRadius)
+        public static bool TryGetPlayerTarget(PlayerStorage players, out Vector3 playerPosition, out float playerRadius)
         {
             for (int playerIndex = 0; playerIndex < players.entities.Length; playerIndex++)
             {
@@ -27,13 +26,11 @@ namespace TopView.Systems
                     continue;
                 }
 
-                playerIdentifier = new EntityIdentifier { index = playerIndex, generation = player.generation };
                 playerPosition = player.currentPosition;
                 playerRadius = player.movement.capsuleRadius;
                 return true;
             }
 
-            playerIdentifier = default;
             playerPosition = Vector3.zero;
             playerRadius = 0f;
             return false;

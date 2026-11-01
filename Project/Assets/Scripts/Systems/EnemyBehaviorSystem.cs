@@ -22,7 +22,7 @@ namespace TopView.Systems
         /// <param name="meleeSpawnRequests">근접 판정 생성 요청 큐</param>
         public static void Tick(EnemyStorage enemies, PlayerStorage players, System.Random random, List<EnemyStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
         {
-            bool hasPlayer = TargetingSystem.TryGetPlayerTarget(players, out EntityIdentifier _, out Vector3 playerPosition, out float playerRadius);
+            bool hasPlayer = TargetingSystem.TryGetPlayerTarget(players, out Vector3 playerPosition, out float playerRadius);
             float deltaTime = Time.fixedDeltaTime;
             int failedWanderCount = 0;
             int missingAttackCount = 0;
@@ -101,14 +101,8 @@ namespace TopView.Systems
             }
         }
 
-        /// <summary>
-        /// 지금 상태에서 나가고 새 상태에 들어간다. Die 상태에서는 바꾸지 않는다. Attack 상태는 BeginAttack으로 들어간다.
-        /// </summary>
-        /// <param name="enemy">적</param>
-        /// <param name="identifier">적을 가리키는 값</param>
-        /// <param name="newState">새 상태</param>
-        /// <param name="stateRecords">적 상태 변경 기록</param>
-        public static void ChangeState(ref EnemyEntity enemy, in EntityIdentifier identifier, EnemyState newState, List<EnemyStateChangedRecord> stateRecords)
+        // 지금 상태에서 나가고 새 상태에 들어간다. Die 상태에서는 바꾸지 않는다. Attack 상태는 BeginAttack으로 들어간다.
+        private static void ChangeState(ref EnemyEntity enemy, in EntityIdentifier identifier, EnemyState newState, List<EnemyStateChangedRecord> stateRecords)
         {
             if (enemy.state == EnemyState.Die)
             {
@@ -167,7 +161,8 @@ namespace TopView.Systems
 
         private static void UpdateAttack(ref EnemyEntity enemy, in EntityIdentifier identifier, bool hasPlayer, Vector3 playerPosition, float deltaTime, List<EnemyStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
         {
-            if (enemy.hasAttackTarget && !enemy.isAttackCommitted && hasPlayer)
+            // 공격이 나가기 전까지 플레이어 쪽으로 돈다
+            if (!enemy.isAttackCommitted && hasPlayer)
             {
                 TargetingSystem.TurnToward(ref enemy.currentRotation, enemy.currentPosition, playerPosition, deltaTime * enemy.behavior.attackRotationSpeed);
             }
@@ -198,7 +193,6 @@ namespace TopView.Systems
 
             enemy.attackIndex = random.Next(0, enemy.attacks.Length);
             enemy.isAttackCommitted = false;
-            enemy.hasAttackTarget = true;
             ChangeState(ref enemy, in identifier, EnemyState.Attack, stateRecords);
             return true;
         }

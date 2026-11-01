@@ -49,15 +49,8 @@ namespace TopView.Systems
             }
         }
 
-        /// <summary>
-        /// 지금 상태에서 나가고 새 상태에 들어간다. Die 상태에서는 바꾸지 않는다.
-        /// </summary>
-        /// <param name="player">플레이어</param>
-        /// <param name="identifier">플레이어를 가리키는 값</param>
-        /// <param name="newState">새 상태</param>
-        /// <param name="moveInput">이번 틱의 이동 입력(월드). 회피 방향에 쓴다</param>
-        /// <param name="stateRecords">상태 변경 기록</param>
-        public static void ChangeState(ref PlayerEntity player, in EntityIdentifier identifier, PlayerState newState, Vector3 moveInput, List<PlayerStateChangedRecord> stateRecords)
+        // 지금 상태에서 나가고 새 상태에 들어간다. Die 상태에서는 바꾸지 않는다. moveInput은 회피 방향에 쓴다.
+        private static void ChangeState(ref PlayerEntity player, in EntityIdentifier identifier, PlayerState newState, Vector3 moveInput, List<PlayerStateChangedRecord> stateRecords)
         {
             if (player.state == PlayerState.Die)
             {

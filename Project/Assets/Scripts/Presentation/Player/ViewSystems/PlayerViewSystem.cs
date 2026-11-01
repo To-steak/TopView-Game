@@ -57,7 +57,6 @@ namespace TopView.Presentation.Player.ViewSystems
             {
                 CreateView(in player, viewPrefab, weaponModelPrefabs, context);
             }
-            context.playerViewEntity = identifier;
             if (!context.playerView.gameObject.activeSelf)
             {
                 context.playerView.gameObject.SetActive(true);

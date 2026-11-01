@@ -50,8 +50,6 @@ namespace TopView.Entities
         public int attackIndex;
         // 지금 공격 상태에서 공격이 이미 나갔는지
         public bool isAttackCommitted;
-        // 공격 상태에 들어갈 때 플레이어를 감지했는지. true면 공격이 나가기 전까지 플레이어 쪽으로 돈다
-        public bool hasAttackTarget;
 
         // 목적지가 있는지
         public bool hasDestination;

@@ -17,7 +17,7 @@ namespace TopView.Systems
         /// <param name="players">플레이어 저장소. 보스가 생길 때 바라볼 방향을 정한다</param>
         public static void Tick(BossStorage bosses, Queue<BossSpawnRequest> bossSpawnRequests, PlayerStorage players)
         {
-            bool hasPlayer = TargetingSystem.TryGetPlayerTarget(players, out EntityIdentifier _, out Vector3 playerPosition, out float _);
+            bool hasPlayer = TargetingSystem.TryGetPlayerTarget(players, out Vector3 playerPosition, out float _);
             int droppedCount = 0;
             while (bossSpawnRequests.Count > 0)
             {
