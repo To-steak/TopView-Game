@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace TopView.Systems
 {
-    // 플레이어의 행동 상태를 입력과 상태 타이머로 바꾸고, 상태에 들어가고 나갈 때의 값을 정한다.
+    // 플레이어의 행동 상태를 입력과 상태 타이머로 바꾸고, 상태에 들어가고 나갈 때의 값을 정한다. 무기 처리는 PlayerWeaponSystem이 한다.
     public static class PlayerStateSystem
     {
         /// <summary>
@@ -93,7 +93,7 @@ namespace TopView.Systems
 
             if (command.swapWeaponIndex >= 0 && IsIdleOrMove(player.state))
             {
-                if (CanSwap(in player, command.swapWeaponIndex))
+                if (PlayerWeaponSystem.CanSwap(in player, command.swapWeaponIndex))
                 {
                     player.pendingWeaponIndex = command.swapWeaponIndex;
                     ChangeState(ref player, in identifier, PlayerState.Swap, command.moveDirection, stateRecords);
@@ -102,7 +102,7 @@ namespace TopView.Systems
 
             if (command.isReloadPressed && IsIdleOrMove(player.state))
             {
-                if (CanReload(in player))
+                if (PlayerWeaponSystem.CanReload(in player))
                 {
                     ChangeState(ref player, in identifier, PlayerState.Reload, command.moveDirection, stateRecords);
                 }
@@ -112,7 +112,7 @@ namespace TopView.Systems
             if ((command.isAttackPressed || command.isAttackHeld) && IsIdleOrMove(player.state) && player.isGrounded && player.attackCooldownTicks == 0)
             {
                 // Throw는 누르고 있을 때 탄약을 다 쓰지 않도록 누른 입력으로만 나간다
-                if (TryGetAttackState(in player, out PlayerState attackState) && (command.isAttackPressed || attackState != PlayerState.Throw))
+                if (PlayerWeaponSystem.TryGetAttackState(in player, out PlayerState attackState) &&(command.isAttackPressed || attackState != PlayerState.Throw))
                 {
                     ChangeState(ref player, in identifier, attackState, command.moveDirection, stateRecords);
                 }
@@ -164,13 +164,7 @@ namespace TopView.Systems
                     break;
 
                 case PlayerState.Swap:
-                    // swapStartTicks가 상태 길이보다 길어도 상태가 끝나기 전에 무기를 바꾼다
-                    if (player.currentWeaponIndex != player.pendingWeaponIndex && player.stateElapsedTicks >= Mathf.Min(player.action.swapStartTicks, player.action.swapTicks))
-                    {
-                        player.currentWeaponIndex = player.pendingWeaponIndex;
-                        player.attackCooldownTicks = 0;
-                    }
-
+                    PlayerWeaponSystem.CommitSwap(ref player);
                     if (player.stateElapsedTicks >= player.action.swapTicks)
                     {
                         FinishAction(ref player, in identifier, command.moveDirection, stateRecords);
@@ -180,7 +174,7 @@ namespace TopView.Systems
                 case PlayerState.Reload:
                     if (player.stateElapsedTicks >= player.action.reloadTicks)
                     {
-                        Reload(ref player);
+                        PlayerWeaponSystem.Reload(ref player);
                         FinishAction(ref player, in identifier, command.moveDirection, stateRecords);
                     }
                     break;
@@ -202,7 +196,8 @@ namespace TopView.Systems
                 return;
             }
 
-            if (IsWaitingNextShot(in player))
+            // 연사 간격을 기다리는 동안은 서 있는다
+            if (PlayerWeaponSystem.IsWaitingNextShot(in player))
             {
                 player.moveDirection = Vector3.zero;
                 return;
@@ -233,73 +228,13 @@ namespace TopView.Systems
 
             if (!player.isAttackCommitted && player.stateElapsedTicks >= weapon.attackStartTicks)
             {
-                CommitAttack(ref player, in identifier, ref weapon, projectileSpawnRequests, meleeSpawnRequests);
+                PlayerWeaponSystem.CommitAttack(ref player, in identifier, ref weapon, projectileSpawnRequests, meleeSpawnRequests);
             }
 
-            // Melee는 후딜레이까지 기다리고, Ranged와 Throw는 투사체를 내보내면 바로 끝난다
-            bool isFinished = weapon.kind == WeaponKind.Melee
-                ? player.stateElapsedTicks >= weapon.attackDurationTicks
-                : player.isAttackCommitted;
-            if (isFinished)
+            if (PlayerWeaponSystem.IsAttackFinished(in player, in weapon))
             {
                 FinishAction(ref player, in identifier, moveInput, stateRecords);
             }
-        }
-
-        // 공격을 내보낸다. 탄약이 없으면 아무것도 하지 않는다. Ranged와 Throw는 투사체 생성 요청을, Melee는 attackEndTicks까지 이어지는 근접 판정 생성 요청을 넣는다.
-        private static void CommitAttack(ref PlayerEntity player, in EntityIdentifier identifier, ref WeaponComponent weapon, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
-        {
-            player.isAttackCommitted = true;
-
-            switch (weapon.kind)
-            {
-                case WeaponKind.Ranged:
-                    if (weapon.currentAmmo <= 0)
-                    {
-                        Debug.LogWarning($"PlayerStateSystem >> 탄창 탄약이 {weapon.currentAmmo}이라 원거리 공격을 내보내지 않았다.");
-                        return;
-                    }
-                    weapon.currentAmmo--;
-                    RequestProjectile(in player, in weapon, player.currentRotation * Vector3.forward, projectileSpawnRequests);
-                    break;
-
-                case WeaponKind.Throw:
-                    if (weapon.reserveAmmo <= 0)
-                    {
-                        Debug.LogWarning($"PlayerStateSystem >> 남은 탄약이 {weapon.reserveAmmo}이라 투척 공격을 내보내지 않았다.");
-                        return;
-                    }
-                    weapon.reserveAmmo--;
-                    Vector3 throwDirection = (player.currentRotation * Vector3.forward + Vector3.up * weapon.projectile.upwardRatio).normalized;
-                    RequestProjectile(in player, in weapon, throwDirection, projectileSpawnRequests);
-                    break;
-
-                case WeaponKind.Melee:
-                    meleeSpawnRequests.Enqueue(new MeleeSpawnRequest
-                    {
-                        owner = new EntityReference { kind = EntityKind.Player, identifier = identifier },
-                        faction = Faction.Player,
-                        center = player.currentPosition + player.currentRotation * Vector3.forward * weapon.meleeOffset,
-                        radius = weapon.meleeRadius,
-                        damage = weapon.damage,
-                        durationTicks = weapon.attackEndTicks - weapon.attackStartTicks
-                    });
-                    break;
-            }
-        }
-
-        // 총구 위치에서 플레이어 회전으로 투사체를 내보낸다.
-        private static void RequestProjectile(in PlayerEntity player, in WeaponComponent weapon, Vector3 direction, Queue<ProjectileSpawnRequest> projectileSpawnRequests)
-        {
-            projectileSpawnRequests.Enqueue(new ProjectileSpawnRequest
-            {
-                projectile = weapon.projectile,
-                faction = Faction.Player,
-                damage = weapon.damage,
-                position = player.currentPosition + player.currentRotation * player.movement.muzzleOffset,
-                rotation = player.currentRotation,
-                velocity = direction * weapon.projectile.speed
-            });
         }
 
         // 행동이 끝났을 때 이동 입력에 따라 Idle이나 Move로 돌아간다.
@@ -383,70 +318,6 @@ namespace TopView.Systems
                     player.isRotationLocked = false;
                     break;
             }
-        }
-
-        // 들고 있는 무기로 들어갈 공격 상태. 탄약이 없거나 무기가 없으면 false
-        private static bool TryGetAttackState(in PlayerEntity player, out PlayerState attackState)
-        {
-            attackState = PlayerState.Idle;
-            if (!IsValidWeaponIndex(in player, player.currentWeaponIndex))
-            {
-                return false;
-            }
-
-            ref readonly WeaponComponent weapon = ref player.weapons[player.currentWeaponIndex];
-            switch (weapon.kind)
-            {
-                case WeaponKind.Melee:
-                    attackState = PlayerState.Swing;
-                    return true;
-
-                case WeaponKind.Ranged:
-                    attackState = PlayerState.Shot;
-                    return weapon.currentAmmo > 0;
-
-                case WeaponKind.Throw:
-                    attackState = PlayerState.Throw;
-                    return weapon.reserveAmmo > 0;
-            }
-
-            return false;
-        }
-
-        // Ranged의 연사 간격을 기다리는 중인지. 이 동안은 서 있는다. 공격 상태에 들어가야 대기가 생기므로 무기 번호는 유효하다
-        private static bool IsWaitingNextShot(in PlayerEntity player)
-        {
-            return player.attackCooldownTicks > 0 && player.weapons[player.currentWeaponIndex].kind == WeaponKind.Ranged;
-        }
-
-        private static bool CanSwap(in PlayerEntity player, int weaponIndex)
-        {
-            return weaponIndex != player.currentWeaponIndex && IsValidWeaponIndex(in player, weaponIndex);
-        }
-
-        private static bool CanReload(in PlayerEntity player)
-        {
-            if (!IsValidWeaponIndex(in player, player.currentWeaponIndex))
-            {
-                return false;
-            }
-
-            ref readonly WeaponComponent weapon = ref player.weapons[player.currentWeaponIndex];
-            return weapon.kind == WeaponKind.Ranged && weapon.currentAmmo < weapon.maxAmmo && weapon.reserveAmmo > 0;
-        }
-
-        // 예비 탄약에서 모자란 만큼 장전한다.
-        private static void Reload(ref PlayerEntity player)
-        {
-            ref WeaponComponent weapon = ref player.weapons[player.currentWeaponIndex];
-            int loadAmmo = Mathf.Min(weapon.maxAmmo - weapon.currentAmmo, weapon.reserveAmmo);
-            weapon.currentAmmo += loadAmmo;
-            weapon.reserveAmmo -= loadAmmo;
-        }
-
-        private static bool IsValidWeaponIndex(in PlayerEntity player, int weaponIndex)
-        {
-            return weaponIndex >= 0 && weaponIndex < player.weapons.Length;
         }
 
         private static bool IsIdleOrMove(PlayerState state)
