@@ -134,6 +134,20 @@ namespace TopView.Core
             PresentEnemyInterface();
         }
 
+        private bool TryFindAlivePlayer(out int playerIndex)
+        {
+            for (playerIndex = 0; playerIndex < _world.players.entities.Length; playerIndex++)
+            {
+                if (_world.players.entities[playerIndex].isAlive)
+                {
+                    return true;
+                }
+            }
+
+            playerIndex = -1;
+            return false;
+        }
+
         private void PresentPlayerInterface(int playerIndex)
         {
             ref readonly PlayerEntity player = ref _world.players.entities[playerIndex];
