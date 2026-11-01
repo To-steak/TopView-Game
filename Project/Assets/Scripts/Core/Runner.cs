@@ -69,7 +69,10 @@ namespace TopView.Core
             if (isPlaying)
             {
                 PlayerStateSystem.Tick(_world.players, in _world.commandBuffer.playerCommand, _world.playerStateChangedRecords, _world.projectileSpawnRequests, _world.meleeSpawnRequests, _world.melees, _world.gameOverRequests);
-                PlayerMovementSystem.Tick(_world.players, in _world.commandBuffer.playerCommand, _world.enemies, _world.bosses);
+                // 막기는 이동이 남긴 이번 틱의 previousPosition을 읽고, 조준은 막힌 뒤의 위치를 읽으므로 이 순서를 지킨다
+                PlayerMovementSystem.Tick(_world.players);
+                PlayerBlockSystem.Tick(_world.players, _world.enemies, _world.bosses);
+                PlayerAimSystem.Tick(_world.players, in _world.commandBuffer.playerCommand);
                 PlayerStaminaSystem.Tick(_world.players);
                 EnemyBehaviorSystem.Tick(_world.enemies, _world.players, _world.random, _world.enemyStateChangedRecords, _world.projectileSpawnRequests, _world.meleeSpawnRequests);
                 BossBehaviorSystem.Tick(_world.bosses, _world.players, _world.random, _world.bossStateChangedRecords, _world.projectileSpawnRequests, _world.meleeSpawnRequests, _world.gameOverRequests);
@@ -123,7 +126,8 @@ namespace TopView.Core
             EnemyViewSystem.Present(_world.enemies, _world.enemyStateChangedRecords, _enemyViewPrefabs, _viewContext);
             EnemyHealthGaugeViewSystem.Present(_world.enemies, _enemyHealthGaugePrefabs, _enemyHealthGaugeOffsets, _enemyHealthGaugeColors, _viewContext);
             BossViewSystem.Present(_world.bosses, _world.bossStateChangedRecords, _bossViewPrefab, _viewContext);
-            ProjectileViewSystem.Present(_world.projectiles, _projectilePrefabs, _projectilePitchSpeeds, _world.projectileHitRecords, _hitEffectPrefabs, _viewContext);
+            ProjectileViewSystem.Present(_world.projectiles, _projectilePrefabs, _projectilePitchSpeeds, _viewContext);
+            HitEffectViewSystem.Present(_world.projectileHitRecords, _hitEffectPrefabs, _viewContext);
             CameraViewSystem.Present(_viewContext, _playerCameraPriority);
 
             PresentUserInterface();
