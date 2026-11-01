@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace TopView.Systems
 {
-    // 투사체를 움직인다. Straight는 수명이 다하면 사라지고, Grenade는 환경에 닿으면 멈춘다. 판정과 폭발은 HitSystem이 한다.
+    // 투사체를 움직인다. Straight는 수명이 다하면 사라지고, Grenade는 환경에 닿으면 멈춘다. 판정과 폭발은 ProjectileHitSystem이 한다.
     public static class ProjectileSystem
     {
         /// <summary>
