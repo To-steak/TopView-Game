@@ -160,6 +160,7 @@ namespace TopView.Systems
                 case PlayerState.Shot:
                 case PlayerState.Swing:
                 case PlayerState.Throw:
+                    ApplyMoveInput(ref player, in command);
                     UpdateAttack(ref player, in identifier, command.moveDirection, stateRecords, projectileSpawnRequests, meleeSpawnRequests);
                     break;
 
@@ -172,6 +173,7 @@ namespace TopView.Systems
                     break;
 
                 case PlayerState.Reload:
+                    ApplyMoveInput(ref player, in command);
                     if (player.stateElapsedTicks >= player.action.reloadTicks)
                     {
                         PlayerWeaponSystem.Reload(ref player);
@@ -196,8 +198,13 @@ namespace TopView.Systems
                 return;
             }
 
-            // 연사 간격을 기다리는 동안은 서 있는다
-            if (PlayerWeaponSystem.IsWaitingNextShot(in player))
+            ApplyMoveInput(ref player, in command);
+        }
+
+        // 이동 입력을 이동 방향과 속도에 반영한다. 입력이 없으면 서 있고, 달리기 마나도 쓰지 않는다.
+        private static void ApplyMoveInput(ref PlayerEntity player, in PlayerCommand command)
+        {
+            if (IsZero(command.moveDirection))
             {
                 player.moveDirection = Vector3.zero;
                 return;
@@ -282,18 +289,19 @@ namespace TopView.Systems
                     break;
 
                 case PlayerState.Shot:
-                case PlayerState.Swing:
-                case PlayerState.Throw:
-                    player.isRotationLocked = true;
-                    player.moveDirection = Vector3.zero;
                     player.attackCooldownTicks = player.weapons[player.currentWeaponIndex].attackIntervalTicks;
                     break;
 
-                case PlayerState.Swap:
-                    player.moveDirection = Vector3.zero;
+                case PlayerState.Swing:
+                    player.isRotationLocked = true;
+                    player.attackCooldownTicks = player.weapons[player.currentWeaponIndex].attackIntervalTicks;
                     break;
 
-                case PlayerState.Reload:
+                case PlayerState.Throw:
+                    player.isRotationLocked = true;
+                    break;
+
+                case PlayerState.Swap:
                     player.moveDirection = Vector3.zero;
                     break;
 
@@ -312,7 +320,6 @@ namespace TopView.Systems
                     player.isRotationLocked = false;
                     break;
 
-                case PlayerState.Shot:
                 case PlayerState.Swing:
                 case PlayerState.Throw:
                     player.isRotationLocked = false;

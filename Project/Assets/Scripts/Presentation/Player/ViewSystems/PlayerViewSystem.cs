@@ -26,9 +26,11 @@ namespace TopView.Presentation.Player.ViewSystems
         private const float WALK_SPEED = 1f;
         private const float RUN_SPEED = 2f;
 
-        private const string UPPER_LAYER_NAME = "Upper Layer";
-        private const float UPPER_LAYER_ON_WEIGHT = 1f;
-        private const float UPPER_LAYER_OFF_WEIGHT = 0f;
+        private const string RANGED_LAYER_NAME = "Ranged Layer";
+        private const string MELEE_LAYER_NAME = "Melee Layer";
+        private const string THROW_LAYER_NAME = "Throw Layer";
+        private const float LAYER_ON_WEIGHT = 1f;
+        private const float LAYER_OFF_WEIGHT = 0f;
 
         /// <summary>
         /// 살아 있는 플레이어가 있으면 View를 만들거나 맞추고, 없으면 View를 끈다.
@@ -37,9 +39,9 @@ namespace TopView.Presentation.Player.ViewSystems
         /// <param name="stateRecords">이번 프레임의 상태 변경 기록</param>
         /// <param name="viewPrefab">PlayerView가 붙은 프리팹</param>
         /// <param name="weaponModelPrefabs">무기 번호 순서의 무기 모델 프리팹. 없는 칸은 null</param>
-        /// <param name="upperLayerBlendInTicks">상체 레이어 가중치가 0에서 1로 올라오는 시간(틱)</param>
+        /// <param name="rangedLayerBlendInTicks">원거리 레이어 가중치가 0에서 1로 올라오는 시간(틱)</param>
         /// <param name="context">플레이어 View 실행 상태</param>
-        public static void Present(PlayerStorage players, List<PlayerStateChangedRecord> stateRecords, GameObject viewPrefab, GameObject[] weaponModelPrefabs, int upperLayerBlendInTicks, PlayerViewContext context)
+        public static void Present(PlayerStorage players, List<PlayerStateChangedRecord> stateRecords, GameObject viewPrefab, GameObject[] weaponModelPrefabs, int rangedLayerBlendInTicks, PlayerViewContext context)
         {
             if (!TryFindAlivePlayer(players, out int playerIndex))
             {
@@ -65,7 +67,9 @@ namespace TopView.Presentation.Player.ViewSystems
             Animator animator = context.view.animator;
             ApplyStateRecords(in identifier, stateRecords, animator);
             ApplyMovementAnimation(in player, animator);
-            ApplyUpperLayerWeight(in player, animator, context.upperLayerIndex, upperLayerBlendInTicks);
+            ApplyRangedLayerWeight(in player, animator, context.rangedLayerIndex, rangedLayerBlendInTicks);
+            ApplyActionLayerWeight(animator, context.meleeLayerIndex, player.state == PlayerState.Swing);
+            ApplyActionLayerWeight(animator, context.throwLayerIndex, player.state == PlayerState.Throw);
             ApplyWeaponModels(in player, context.weaponModels);
             ApplyTransform(in player, context.view.transform);
         }
@@ -88,11 +92,9 @@ namespace TopView.Presentation.Player.ViewSystems
         {
             GameObject viewObject = Object.Instantiate(viewPrefab, player.currentPosition, player.currentRotation);
             context.view = viewObject.GetComponent<PlayerView>();
-            context.upperLayerIndex = context.view.animator.GetLayerIndex(UPPER_LAYER_NAME);
-            if (context.upperLayerIndex < 0)
-            {
-                Debug.LogError($"PlayerViewSystem >> 플레이어 Animator에 {UPPER_LAYER_NAME} 레이어가 없어 상체 레이어 가중치를 바꾸지 않는다.");
-            }
+            context.rangedLayerIndex = FindLayerIndex(context.view.animator, RANGED_LAYER_NAME);
+            context.meleeLayerIndex = FindLayerIndex(context.view.animator, MELEE_LAYER_NAME);
+            context.throwLayerIndex = FindLayerIndex(context.view.animator, THROW_LAYER_NAME);
 
             context.weaponModels = new GameObject[weaponModelPrefabs.Length];
             for (int weaponIndex = 0; weaponIndex < weaponModelPrefabs.Length; weaponIndex++)
@@ -108,6 +110,17 @@ namespace TopView.Presentation.Player.ViewSystems
                 model.SetActive(false);
                 context.weaponModels[weaponIndex] = model;
             }
+        }
+
+        private static int FindLayerIndex(Animator animator, string layerName)
+        {
+            int layerIndex = animator.GetLayerIndex(layerName);
+            if (layerIndex < 0)
+            {
+                Debug.LogError($"PlayerViewSystem >> 플레이어 Animator에 {layerName} 레이어가 없어 그 레이어의 가중치를 바꾸지 않는다.");
+            }
+
+            return layerIndex;
         }
 
         // 상태가 바뀔 때마다 새 상태에 맞는 파라미터를 건다. 새 행동에 들어갈 때만 트리거를 모두 지운다.
@@ -169,11 +182,11 @@ namespace TopView.Presentation.Player.ViewSystems
             }
         }
 
-        // Move, Land, Reload 상태에서만 이동 입력과 달리기 여부로 MovementSpeed를 정한다. 다른 상태에서는 그대로 둔다.
-        // Reload는 상체 레이어에서 재생되므로, 멈춰 있는 동안 하체가 Idle을 재생하도록 맞춘다.
+        // 움직일 수 있는 상태(Move, Land, 공격, Reload)에서만 이동 입력과 달리기 여부로 MovementSpeed를 정한다. 다른 상태에서는 그대로 둔다.
         private static void ApplyMovementAnimation(in PlayerEntity player, Animator animator)
         {
-            if (player.state != PlayerState.Move && player.state != PlayerState.Land && player.state != PlayerState.Reload)
+            bool canMove = player.state == PlayerState.Move || player.state == PlayerState.Land || player.state == PlayerState.Shot || player.state == PlayerState.Swing || player.state == PlayerState.Throw || player.state == PlayerState.Reload;
+            if (!canMove)
             {
                 return;
             }
@@ -186,10 +199,10 @@ namespace TopView.Presentation.Player.ViewSystems
             animator.SetFloat(MOVEMENT_SPEED_HASH, speed);
         }
 
-        // 조준 자세는 Ranged만 쓴다. Ranged가 아니거나 전신 모션(Dodge, Jump, Land, Swap, Die)이면 상체 레이어를 바로 끄고, 그 밖에는 upperLayerBlendInTicks에 걸쳐 켠다.
-        private static void ApplyUpperLayerWeight(in PlayerEntity player, Animator animator, int upperLayerIndex, int upperLayerBlendInTicks)
+        // 조준 자세는 Ranged만 쓴다. Ranged가 아니거나 전신 모션(Dodge, Jump, Land, Swap, Die)이면 원거리 레이어를 바로 끄고, 그 밖에는 rangedLayerBlendInTicks에 걸쳐 켠다.
+        private static void ApplyRangedLayerWeight(in PlayerEntity player, Animator animator, int rangedLayerIndex, int rangedLayerBlendInTicks)
         {
-            if (upperLayerIndex < 0)
+            if (rangedLayerIndex < 0)
             {
                 return;
             }
@@ -198,18 +211,29 @@ namespace TopView.Presentation.Player.ViewSystems
             bool isHoldingRanged = player.currentWeaponIndex < player.weapons.Length && player.weapons[player.currentWeaponIndex].kind == WeaponKind.Ranged;
             if (isFullBodyState || !isHoldingRanged)
             {
-                animator.SetLayerWeight(upperLayerIndex, UPPER_LAYER_OFF_WEIGHT);
+                animator.SetLayerWeight(rangedLayerIndex, LAYER_OFF_WEIGHT);
                 return;
             }
 
-            if (upperLayerBlendInTicks <= 0)
+            if (rangedLayerBlendInTicks <= 0)
             {
-                animator.SetLayerWeight(upperLayerIndex, UPPER_LAYER_ON_WEIGHT);
+                animator.SetLayerWeight(rangedLayerIndex, LAYER_ON_WEIGHT);
                 return;
             }
 
-            float maxWeightDelta = Time.deltaTime / (upperLayerBlendInTicks * Time.fixedDeltaTime);
-            animator.SetLayerWeight(upperLayerIndex, Mathf.MoveTowards(animator.GetLayerWeight(upperLayerIndex), UPPER_LAYER_ON_WEIGHT, maxWeightDelta));
+            float maxWeightDelta = Time.deltaTime / (rangedLayerBlendInTicks * Time.fixedDeltaTime);
+            animator.SetLayerWeight(rangedLayerIndex, Mathf.MoveTowards(animator.GetLayerWeight(rangedLayerIndex), LAYER_ON_WEIGHT, maxWeightDelta));
+        }
+
+        // Swing과 Throw는 자기 레이어에서 재생되므로 그 상태 동안만 켠다. 처음부터 보이도록 서서히 올리지 않는다.
+        private static void ApplyActionLayerWeight(Animator animator, int layerIndex, bool isOn)
+        {
+            if (layerIndex < 0)
+            {
+                return;
+            }
+
+            animator.SetLayerWeight(layerIndex, isOn ? LAYER_ON_WEIGHT : LAYER_OFF_WEIGHT);
         }
 
         private static void ApplyWeaponModels(in PlayerEntity player, GameObject[] weaponModels)

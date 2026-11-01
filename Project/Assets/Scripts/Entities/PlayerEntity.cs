@@ -46,7 +46,7 @@ namespace TopView.Entities
         public bool isGrounded;
         // 조준 방향으로 도는 것을 막는지
         public bool isRotationLocked;
-        // 마지막으로 Move 상태에서 달렸는지. View가 이동 애니메이션 속도에 쓴다
+        // 마지막으로 이동 입력을 반영할 때 달렸는지. View가 이동 애니메이션 속도에 쓴다
         public bool isRunning;
 
         // 체력

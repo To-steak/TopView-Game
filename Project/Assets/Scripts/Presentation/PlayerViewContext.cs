@@ -10,7 +10,11 @@ namespace TopView.Presentation
         public PlayerView view;
         // view의 무기 소켓에 붙인 무기 모델. 번호는 무기 번호와 같다
         public GameObject[] weaponModels;
-        // view Animator의 상체 레이어 번호. 레이어가 없으면 -1
-        public int upperLayerIndex;
+        // view Animator의 원거리 레이어 번호. 레이어가 없으면 -1
+        public int rangedLayerIndex;
+        // view Animator의 근접 레이어 번호. 레이어가 없으면 -1
+        public int meleeLayerIndex;
+        // view Animator의 투척 레이어 번호. 레이어가 없으면 -1
+        public int throwLayerIndex;
     }
 }

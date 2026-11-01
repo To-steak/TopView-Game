@@ -44,6 +44,7 @@ MonoBehaviour:
   action:
     dodgeTicks: 40
     landTicks: 32
+    swapStartTicks: 13
     swapTicks: 30
     reloadTicks: 140
     dieTicks: 74
@@ -54,4 +55,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 926e7ffa61c566e47a9215ee6c0acf1e, type: 2}
   viewPrefab: {fileID: 8657122809230754077, guid: 01c18da25d44ad64b983d140cc66a067, type: 3}
   cameraPriority: 2
-  upperLayerBlendInTicks: 10
+  rangedLayerBlendInTicks: 10

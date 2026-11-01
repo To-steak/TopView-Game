@@ -59,16 +59,19 @@ namespace TopView.Systems
         }
 
         /// <summary>
-        /// 공격 상태를 끝낼 때인지 판정한다. Melee는 후딜레이까지 기다리고, Ranged와 Throw는 투사체를 내보내면 바로 끝난다.
+        /// 공격 상태를 끝낼 때인지 판정한다. Ranged는 투사체를 내보내면 바로 끝나고, Melee와 Throw는 공격이 나간 뒤 attackDurationTicks까지 기다린다.
         /// </summary>
         /// <param name="player">플레이어</param>
         /// <param name="weapon">들고 있는 무기</param>
         /// <returns>공격 상태를 끝낼 때면 true</returns>
         public static bool IsAttackFinished(in PlayerEntity player, in WeaponComponent weapon)
         {
-            return weapon.kind == WeaponKind.Melee
-                ? player.stateElapsedTicks >= weapon.attackDurationTicks
-                : player.isAttackCommitted;
+            if (!player.isAttackCommitted)
+            {
+                return false;
+            }
+
+            return weapon.kind == WeaponKind.Ranged || player.stateElapsedTicks >= weapon.attackDurationTicks;
         }
 
         /// <summary>
@@ -102,16 +105,6 @@ namespace TopView.Systems
             }
 
             return false;
-        }
-
-        /// <summary>
-        /// Ranged의 연사 간격을 기다리는 중인지 판정한다. 공격 상태에 들어가야 대기가 생기므로 무기 번호는 유효하다.
-        /// </summary>
-        /// <param name="player">플레이어</param>
-        /// <returns>기다리는 중이면 true</returns>
-        public static bool IsWaitingNextShot(in PlayerEntity player)
-        {
-            return player.attackCooldownTicks > 0 && player.weapons[player.currentWeaponIndex].kind == WeaponKind.Ranged;
         }
 
         /// <summary>

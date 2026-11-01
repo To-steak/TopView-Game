@@ -17,14 +17,14 @@ namespace TopView.Components
         public int currentAmmo;
         // 예비 탄약 수. Ranged와 Throw가 쓴다
         public int reserveAmmo;
-        // 공격 상태에 들어간 뒤 공격이 나가기까지의 시간(틱). Melee는 판정이 시작되고, Ranged와 Throw는 투사체를 내보낸 뒤 공격 상태가 끝난다
+        // 공격 상태에 들어간 뒤 공격이 나가기까지의 시간(틱). Melee는 판정이 시작되고, Ranged와 Throw는 투사체를 내보낸다
         [FormerlySerializedAs("attackCommitTicks")]
         public int attackStartTicks;
         // 공격 상태에 들어간 뒤 근접 판정이 끝나기까지의 시간(틱). attackStartTicks보다 커야 한다. Melee만 쓴다
         public int attackEndTicks;
-        // 공격 상태에 들어간 뒤 공격 상태가 끝나기까지의 시간(틱). attackEndTicks 이후는 판정 없는 후딜레이다. Melee만 쓴다
+        // 공격 상태에 들어간 뒤 공격 상태가 끝나기까지의 시간(틱). Melee는 attackEndTicks 이후가 판정 없는 후딜레이다. Melee와 Throw가 쓴다
         public int attackDurationTicks;
-        // 공격 상태에 들어간 뒤 다음 공격 상태에 들어갈 수 있기까지의 시간(틱). 공격 상태가 끝나는 시간보다 짧으면 효과가 없다
+        // 공격 상태에 들어간 뒤 다음 공격 상태에 들어갈 수 있기까지의 시간(틱). 공격 상태가 끝나는 시간보다 짧으면 효과가 없다. Ranged와 Melee가 쓴다
         public int attackIntervalTicks;
         // 내보내는 투사체. Ranged와 Throw가 쓴다
         public ProjectileComponent projectile;
