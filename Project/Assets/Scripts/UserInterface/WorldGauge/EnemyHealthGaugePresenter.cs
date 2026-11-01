@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace TopView.UserInterface.WorldGauge
 {
@@ -7,8 +8,8 @@ namespace TopView.UserInterface.WorldGauge
     // 같은 모양의 GaugeWorldView 여러 개를 Presenter 하나가 맡는 것은 사용자가 정한 규칙 예외다.
     public class EnemyHealthGaugePresenter : MonoBehaviour
     {
-        [SerializeField] private GaugeWorldView gaugePrefab;
-        [SerializeField] private Transform gaugeParent;
+        [SerializeField] private GaugeWorldView _gaugePrefab;
+        [SerializeField] private Transform _gaugeParent;
 
         private readonly Stack<GaugeWorldView> _pool = new Stack<GaugeWorldView>();
         // 적 저장소 칸별 게이지. 빈 칸은 null
@@ -64,7 +65,7 @@ namespace TopView.UserInterface.WorldGauge
             if (gauge == null || _targets[slotIndex] != target)
             {
                 Release(slotIndex);
-                gauge = _pool.Count > 0 ? _pool.Pop() : Instantiate(gaugePrefab, gaugeParent);
+                gauge = _pool.Count > 0 ? _pool.Pop() : Instantiate(_gaugePrefab, _gaugeParent);
                 gauge.SetTarget(target, _offsetsByKind[kind]);
                 gauge.SetColor(_colorsByKind[kind]);
                 gauge.gameObject.SetActive(true);

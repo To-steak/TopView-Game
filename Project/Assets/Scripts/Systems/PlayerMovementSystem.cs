@@ -140,7 +140,7 @@ namespace TopView.Systems
 
             Vector3 previousOffset = player.previousPosition - center;
             previousOffset.y = 0f;
-            if (distance >= previousOffset.magnitude)
+            if (distance * distance >= previousOffset.sqrMagnitude)
             {
                 return;
             }

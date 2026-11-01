@@ -38,12 +38,12 @@ namespace TopView.Editor
 
         private void LoadAssets()
         {
-            string[] guids = AssetDatabase.FindAssets(TAB_FILTERS[(int)_currentTab]);
-            _assets = new ScriptableObject[guids.Length];
+            string[] assetIdentifiers = AssetDatabase.FindAssets(TAB_FILTERS[(int)_currentTab]);
+            _assets = new ScriptableObject[assetIdentifiers.Length];
 
-            for (int assetIndex = 0; assetIndex < guids.Length; assetIndex++)
+            for (int assetIndex = 0; assetIndex < assetIdentifiers.Length; assetIndex++)
             {
-                string path = AssetDatabase.GUIDToAssetPath(guids[assetIndex]);
+                string path = AssetDatabase.GUIDToAssetPath(assetIdentifiers[assetIndex]);
                 _assets[assetIndex] = AssetDatabase.LoadAssetAtPath<ScriptableObject>(path);
             }
         }

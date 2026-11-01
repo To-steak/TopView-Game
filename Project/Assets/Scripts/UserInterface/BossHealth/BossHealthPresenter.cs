@@ -1,11 +1,12 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace TopView.UserInterface.BossHealth
 {
     // 보스가 처음 나타나면 BossHealthView를 보이고, 보스가 살아 있는 동안 Runner가 매 프레임 넘기는 체력을 보여 준다.
     public class BossHealthPresenter : MonoBehaviour
     {
-        [SerializeField] private BossHealthView view;
+        [SerializeField] private BossHealthView _view;
 
         private bool _isShown;
         // 같은 값을 매 프레임 다시 쓰지 않도록 마지막으로 보여 준 값을 기억한다
@@ -17,7 +18,7 @@ namespace TopView.UserInterface.BossHealth
         /// </summary>
         public void Initialize()
         {
-            view.SetVisible(false);
+            _view.SetVisible(false);
             _isShown = false;
         }
 
@@ -36,9 +37,9 @@ namespace TopView.UserInterface.BossHealth
 
             if (!_isShown)
             {
-                view.SetVisible(true);
+                _view.SetVisible(true);
                 _isShown = true;
-                view.SetHealth(health, maxHealth);
+                _view.SetHealth(health, maxHealth);
                 _presentedHealth = health;
                 _presentedMaxHealth = maxHealth;
                 return;
@@ -46,7 +47,7 @@ namespace TopView.UserInterface.BossHealth
 
             if (health != _presentedHealth || maxHealth != _presentedMaxHealth)
             {
-                view.SetHealth(health, maxHealth);
+                _view.SetHealth(health, maxHealth);
                 _presentedHealth = health;
                 _presentedMaxHealth = maxHealth;
             }

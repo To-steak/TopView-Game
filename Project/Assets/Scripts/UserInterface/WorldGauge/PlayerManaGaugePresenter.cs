@@ -1,11 +1,12 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace TopView.UserInterface.WorldGauge
 {
     // 플레이어 View가 있는 동안 마나 게이지를 플레이어 위에 띄우고, Runner가 매 프레임 넘기는 마나를 보여 준다.
     public class PlayerManaGaugePresenter : MonoBehaviour
     {
-        [SerializeField] private GaugeWorldView view;
+        [SerializeField] private GaugeWorldView _view;
 
         private Vector3 _offset;
         private Transform _presentedTarget;
@@ -23,8 +24,8 @@ namespace TopView.UserInterface.WorldGauge
             _offset = offset;
             _presentedTarget = null;
             _hasPresentedValues = false;
-            view.SetTarget(null, Vector3.zero);
-            view.gameObject.SetActive(false);
+            _view.SetTarget(null, Vector3.zero);
+            _view.gameObject.SetActive(false);
         }
 
         /// <summary>
@@ -39,8 +40,8 @@ namespace TopView.UserInterface.WorldGauge
             {
                 if (_presentedTarget != null)
                 {
-                    view.SetTarget(null, Vector3.zero);
-                    view.gameObject.SetActive(false);
+                    _view.SetTarget(null, Vector3.zero);
+                    _view.gameObject.SetActive(false);
                     _presentedTarget = null;
                 }
                 return;
@@ -48,14 +49,14 @@ namespace TopView.UserInterface.WorldGauge
 
             if (target != _presentedTarget)
             {
-                view.SetTarget(target, _offset);
-                view.gameObject.SetActive(true);
+                _view.SetTarget(target, _offset);
+                _view.gameObject.SetActive(true);
                 _presentedTarget = target;
             }
 
             if (!_hasPresentedValues || mana != _presentedMana || maxMana != _presentedMaxMana)
             {
-                view.UpdateGauge(mana, maxMana);
+                _view.UpdateGauge(mana, maxMana);
                 _presentedMana = mana;
                 _presentedMaxMana = maxMana;
                 _hasPresentedValues = true;

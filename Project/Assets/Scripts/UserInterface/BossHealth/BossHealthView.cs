@@ -7,8 +7,7 @@ namespace TopView.UserInterface.BossHealth
     // 보스 체력 게이지를 보여 준다.
     public class BossHealthView : UserInterfaceView
     {
-        [FormerlySerializedAs("hPGauge")]
-        [SerializeField] private Image healthGauge;
+        [SerializeField] private Image _healthGauge;
 
         /// <summary>
         /// 게이지를 현재 체력 / 최대 체력만큼 채운다.
@@ -17,7 +16,7 @@ namespace TopView.UserInterface.BossHealth
         /// <param name="max">최대 체력</param>
         public void SetHealth(float current, float max)
         {
-            healthGauge.fillAmount = current / max;
+            _healthGauge.fillAmount = current / max;
         }
     }
 }

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace TopView.UserInterface.WorldGauge
@@ -6,7 +7,7 @@ namespace TopView.UserInterface.WorldGauge
     // 월드 공간에 뜨는 게이지. 대상을 따라다니며 카메라를 바라본다.
     public class GaugeWorldView : MonoBehaviour
     {
-        [SerializeField] private Image gaugeFront;
+        [SerializeField] private Image _gaugeFront;
 
         private Transform _cameraTransform;
         private Transform _target;
@@ -29,7 +30,7 @@ namespace TopView.UserInterface.WorldGauge
         /// <param name="color">게이지 색</param>
         public void SetColor(Color color)
         {
-            gaugeFront.color = color;
+            _gaugeFront.color = color;
         }
 
         /// <summary>
@@ -39,9 +40,9 @@ namespace TopView.UserInterface.WorldGauge
         /// <param name="max">최대 값. 0 이하면 바꾸지 않는다</param>
         public void UpdateGauge(float current, float max)
         {
-            if (gaugeFront != null && max > 0)
+            if (_gaugeFront != null && max > 0)
             {
-                gaugeFront.fillAmount = current / max;
+                _gaugeFront.fillAmount = current / max;
             }
         }
 
