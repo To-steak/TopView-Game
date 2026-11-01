@@ -102,7 +102,7 @@ GameObject:
   - component: {fileID: 3250196645098199015}
   - component: {fileID: 5276967004449942712}
   m_Layer: 8
-  m_Name: Rifle_Bullet
+  m_Name: Rifle Bullet Projectile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

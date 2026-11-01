@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TopView.Components;
 using TopView.Entities;
 using TopView.Presentation.Player.Views;
 using TopView.Records;
@@ -186,7 +187,7 @@ namespace TopView.Presentation.Player.ViewSystems
             animator.SetFloat(MOVEMENT_SPEED_HASH, speed);
         }
 
-        // Dodge, Jump, Land, Swap, Die는 전신 모션이라 상체 레이어를 바로 끄고, 다른 상태에서는 upperLayerBlendInTicks에 걸쳐 켠다.
+        // 조준 자세는 Ranged만 쓴다. Ranged가 아니거나 전신 모션(Dodge, Jump, Land, Swap, Die)이면 상체 레이어를 바로 끄고, 그 밖에는 upperLayerBlendInTicks에 걸쳐 켠다.
         private static void ApplyUpperLayerWeight(in PlayerEntity player, Animator animator, int upperLayerIndex, int upperLayerBlendInTicks)
         {
             if (upperLayerIndex < 0)
@@ -195,7 +196,8 @@ namespace TopView.Presentation.Player.ViewSystems
             }
 
             bool isFullBodyState = player.state == PlayerState.Dodge || player.state == PlayerState.Jump || player.state == PlayerState.Land || player.state == PlayerState.Swap || player.state == PlayerState.Die;
-            if (isFullBodyState)
+            bool isHoldingRanged = player.currentWeaponIndex < player.weapons.Length && player.weapons[player.currentWeaponIndex].kind == WeaponKind.Ranged;
+            if (isFullBodyState || !isHoldingRanged)
             {
                 animator.SetLayerWeight(upperLayerIndex, UPPER_LAYER_OFF_WEIGHT);
                 return;
