@@ -18,11 +18,9 @@ namespace TopView.Systems
         /// <param name="players">플레이어 저장소</param>
         /// <param name="enemies">적 저장소</param>
         /// <param name="bosses">보스 저장소</param>
-        /// <param name="playerDamageRequests">플레이어 피해 요청 큐</param>
-        /// <param name="enemyDamageRequests">적 피해 요청 큐</param>
-        /// <param name="bossDamageRequests">보스 피해 요청 큐</param>
+        /// <param name="damageRequests">피해 요청 큐</param>
         /// <param name="hitRecords">명중·폭발 기록</param>
-        public static void Tick(ProjectileStorage projectiles, PlayerStorage players, EnemyStorage enemies, BossStorage bosses, Queue<PlayerDamageRequest> playerDamageRequests, Queue<EnemyDamageRequest> enemyDamageRequests, Queue<BossDamageRequest> bossDamageRequests, List<ProjectileHitRecord> hitRecords)
+        public static void Tick(ProjectileStorage projectiles, PlayerStorage players, EnemyStorage enemies, BossStorage bosses, Queue<DamageRequest> damageRequests, List<ProjectileHitRecord> hitRecords)
         {
             bool hasPlayer = TargetingSystem.TryGetPlayerTarget(players, out EntityIdentifier playerIdentifier, out Vector3 playerPosition, out float playerRadius);
 
@@ -38,15 +36,15 @@ namespace TopView.Systems
                 {
                     if (projectile.elapsedTicks >= projectile.projectile.fuseTicks)
                     {
-                        Explode(in projectile, enemies, bosses, enemyDamageRequests, bossDamageRequests, hitRecords);
+                        Explode(in projectile, enemies, bosses, damageRequests, hitRecords);
                         ProjectileSystem.Despawn(projectiles, projectileIndex);
                     }
                     continue;
                 }
 
-                bool isHit = projectile.isTargetingPlayer
-                    ? HitPlayer(in projectile, hasPlayer, in playerIdentifier, playerPosition, playerRadius, playerDamageRequests, hitRecords)
-                    : HitNearestEnemy(in projectile, enemies, bosses, enemyDamageRequests, bossDamageRequests, hitRecords);
+                bool isHit = projectile.faction == Faction.Enemy
+                    ? HitPlayer(in projectile, hasPlayer, in playerIdentifier, playerPosition, playerRadius, damageRequests, hitRecords)
+                    : HitNearestEnemy(in projectile, enemies, bosses, damageRequests, hitRecords);
                 if (isHit)
                 {
                     ProjectileSystem.Despawn(projectiles, projectileIndex);
@@ -59,7 +57,7 @@ namespace TopView.Systems
                 ref PlayerEntity player = ref players.entities[playerIndex];
                 if (player.isAlive && player.isMeleeAttacking)
                 {
-                    droppedMeleeHitCount += HitByMelee(ref player, enemies, bosses, enemyDamageRequests, bossDamageRequests);
+                    droppedMeleeHitCount += HitByMelee(ref player, enemies, bosses, damageRequests);
                 }
             }
 
@@ -69,20 +67,20 @@ namespace TopView.Systems
             }
         }
 
-        private static bool HitPlayer(in ProjectileEntity projectile, bool hasPlayer, in EntityIdentifier playerIdentifier, Vector3 playerPosition, float playerRadius, Queue<PlayerDamageRequest> playerDamageRequests, List<ProjectileHitRecord> hitRecords)
+        private static bool HitPlayer(in ProjectileEntity projectile, bool hasPlayer, in EntityIdentifier playerIdentifier, Vector3 playerPosition, float playerRadius, Queue<DamageRequest> damageRequests, List<ProjectileHitRecord> hitRecords)
         {
             if (!hasPlayer || !TryHitSegment(projectile.previousPosition, projectile.currentPosition, playerPosition, projectile.projectile.radius + playerRadius, out float hitFraction))
             {
                 return false;
             }
 
-            playerDamageRequests.Enqueue(new PlayerDamageRequest { target = playerIdentifier, amount = projectile.damage });
+            RequestDamage(damageRequests, EntityKind.Player, in playerIdentifier, projectile.damage);
             AddHitRecord(in projectile, hitFraction, hitRecords);
             return true;
         }
 
         // 이동 선분에서 가장 먼저 닿는 적이나 보스 하나에게 피해를 준다.
-        private static bool HitNearestEnemy(in ProjectileEntity projectile, EnemyStorage enemies, BossStorage bosses, Queue<EnemyDamageRequest> enemyDamageRequests, Queue<BossDamageRequest> bossDamageRequests, List<ProjectileHitRecord> hitRecords)
+        private static bool HitNearestEnemy(in ProjectileEntity projectile, EnemyStorage enemies, BossStorage bosses, Queue<DamageRequest> damageRequests, List<ProjectileHitRecord> hitRecords)
         {
             float nearestFraction = float.MaxValue;
             int nearestEnemyIndex = -1;
@@ -115,19 +113,13 @@ namespace TopView.Systems
 
             if (nearestBossIndex >= 0)
             {
-                bossDamageRequests.Enqueue(new BossDamageRequest
-                {
-                    target = new EntityIdentifier { index = nearestBossIndex, generation = bosses.entities[nearestBossIndex].generation },
-                    amount = projectile.damage
-                });
+                EntityIdentifier target = new EntityIdentifier { index = nearestBossIndex, generation = bosses.entities[nearestBossIndex].generation };
+                RequestDamage(damageRequests, EntityKind.Boss, in target, projectile.damage);
             }
             else if (nearestEnemyIndex >= 0)
             {
-                enemyDamageRequests.Enqueue(new EnemyDamageRequest
-                {
-                    target = new EntityIdentifier { index = nearestEnemyIndex, generation = enemies.entities[nearestEnemyIndex].generation },
-                    amount = projectile.damage
-                });
+                EntityIdentifier target = new EntityIdentifier { index = nearestEnemyIndex, generation = enemies.entities[nearestEnemyIndex].generation };
+                RequestDamage(damageRequests, EntityKind.Enemy, in target, projectile.damage);
             }
             else
             {
@@ -138,18 +130,15 @@ namespace TopView.Systems
             return true;
         }
 
-        private static void Explode(in ProjectileEntity projectile, EnemyStorage enemies, BossStorage bosses, Queue<EnemyDamageRequest> enemyDamageRequests, Queue<BossDamageRequest> bossDamageRequests, List<ProjectileHitRecord> hitRecords)
+        private static void Explode(in ProjectileEntity projectile, EnemyStorage enemies, BossStorage bosses, Queue<DamageRequest> damageRequests, List<ProjectileHitRecord> hitRecords)
         {
             for (int enemyIndex = 0; enemyIndex < enemies.entities.Length; enemyIndex++)
             {
                 ref readonly EnemyEntity enemy = ref enemies.entities[enemyIndex];
                 if (enemy.isAlive && TargetingSystem.IsWithin(projectile.currentPosition, enemy.currentPosition, projectile.projectile.explosionRadius + enemy.stats.hitRadius))
                 {
-                    enemyDamageRequests.Enqueue(new EnemyDamageRequest
-                    {
-                        target = new EntityIdentifier { index = enemyIndex, generation = enemy.generation },
-                        amount = projectile.damage
-                    });
+                    EntityIdentifier target = new EntityIdentifier { index = enemyIndex, generation = enemy.generation };
+                    RequestDamage(damageRequests, EntityKind.Enemy, in target, projectile.damage);
                 }
             }
 
@@ -158,11 +147,8 @@ namespace TopView.Systems
                 ref readonly BossEntity boss = ref bosses.entities[bossIndex];
                 if (boss.isAlive && TargetingSystem.IsWithin(projectile.currentPosition, boss.currentPosition, projectile.projectile.explosionRadius + boss.stats.hitRadius))
                 {
-                    bossDamageRequests.Enqueue(new BossDamageRequest
-                    {
-                        target = new EntityIdentifier { index = bossIndex, generation = boss.generation },
-                        amount = projectile.damage
-                    });
+                    EntityIdentifier target = new EntityIdentifier { index = bossIndex, generation = boss.generation };
+                    RequestDamage(damageRequests, EntityKind.Boss, in target, projectile.damage);
                 }
             }
 
@@ -170,7 +156,7 @@ namespace TopView.Systems
         }
 
         // 근접 판정 구 안에서 이번 공격에 아직 맞지 않은 적·보스를 한 틱에 최대 대상 수까지 맞힌다. 맞힌 적을 기록할 칸이 모자라 건너뛴 수를 돌려준다.
-        private static int HitByMelee(ref PlayerEntity player, EnemyStorage enemies, BossStorage bosses, Queue<EnemyDamageRequest> enemyDamageRequests, Queue<BossDamageRequest> bossDamageRequests)
+        private static int HitByMelee(ref PlayerEntity player, EnemyStorage enemies, BossStorage bosses, Queue<DamageRequest> damageRequests)
         {
             ref readonly WeaponComponent weapon = ref player.weapons[player.currentWeaponIndex];
             Vector3 center = player.currentPosition + player.currentRotation * Vector3.forward * weapon.meleeOffset;
@@ -199,7 +185,7 @@ namespace TopView.Systems
 
                 player.meleeHitEnemies[player.meleeHitEnemyCount] = target;
                 player.meleeHitEnemyCount++;
-                enemyDamageRequests.Enqueue(new EnemyDamageRequest { target = target, amount = weapon.damage });
+                RequestDamage(damageRequests, EntityKind.Enemy, in target, weapon.damage);
                 hitCount++;
             }
 
@@ -219,11 +205,20 @@ namespace TopView.Systems
 
                 player.isMeleeBossHit = true;
                 player.meleeHitBoss = target;
-                bossDamageRequests.Enqueue(new BossDamageRequest { target = target, amount = weapon.damage });
+                RequestDamage(damageRequests, EntityKind.Boss, in target, weapon.damage);
                 hitCount++;
             }
 
             return droppedCount;
+        }
+
+        private static void RequestDamage(Queue<DamageRequest> damageRequests, EntityKind kind, in EntityIdentifier identifier, float amount)
+        {
+            damageRequests.Enqueue(new DamageRequest
+            {
+                target = new EntityReference { kind = kind, identifier = identifier },
+                amount = amount
+            });
         }
 
         private static bool IsAlreadyHit(in PlayerEntity player, in EntityIdentifier target)

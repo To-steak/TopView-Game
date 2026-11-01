@@ -65,19 +65,17 @@ namespace TopView.Core
             }
 
             bool isPlaying = _world.progress.phase == GamePhase.Playing;
-            PlayerDamageSystem.Tick(_world.progress.phase, _world.players, _world.playerDamageRequests, _world.playerStateChangedRecords);
-            EnemyDamageSystem.Tick(ref _world.progress, _world.enemies, _world.enemyDamageRequests, _world.enemyStateChangedRecords);
-            BossDamageSystem.Tick(ref _world.progress, _world.bosses, _world.bossDamageRequests, _world.bossStateChangedRecords);
+            DamageSystem.Tick(ref _world.progress, _world.players, _world.enemies, _world.bosses, _world.damageRequests);
             if (isPlaying)
             {
                 PlayerStateSystem.Tick(_world.players, in _world.commandBuffer.playerCommand, _world.playerStateChangedRecords, _world.projectileSpawnRequests, _world.gameOverRequests);
                 PlayerMovementSystem.Tick(_world.players, in _world.commandBuffer.playerCommand, _world.enemies, _world.bosses);
                 PlayerStaminaSystem.Tick(_world.players);
-                EnemyBehaviorSystem.Tick(_world.enemies, _world.players, _world.random, _world.enemyStateChangedRecords, _world.projectileSpawnRequests, _world.playerDamageRequests);
-                BossBehaviorSystem.Tick(_world.bosses, _world.players, _world.random, _world.bossStateChangedRecords, _world.projectileSpawnRequests, _world.playerDamageRequests, _world.gameOverRequests);
+                EnemyBehaviorSystem.Tick(_world.enemies, _world.players, _world.random, _world.enemyStateChangedRecords, _world.projectileSpawnRequests, _world.damageRequests);
+                BossBehaviorSystem.Tick(_world.bosses, _world.players, _world.random, _world.bossStateChangedRecords, _world.projectileSpawnRequests, _world.damageRequests, _world.gameOverRequests);
                 EnemyNavigationSystem.Tick(_world.enemies, _world.navigationPath);
                 ProjectileSystem.Tick(_world.projectiles);
-                HitSystem.Tick(_world.projectiles, _world.players, _world.enemies, _world.bosses, _world.playerDamageRequests, _world.enemyDamageRequests, _world.bossDamageRequests, _world.projectileHitRecords);
+                HitSystem.Tick(_world.projectiles, _world.players, _world.enemies, _world.bosses, _world.damageRequests, _world.projectileHitRecords);
             }
 
             GameRuleSystem.Tick(ref _world.progress, _world.gameOverRequests);

@@ -12,7 +12,7 @@ namespace TopView.Systems
     public static class PlayerStateSystem
     {
         /// <summary>
-        /// 누름 입력을 지금 상태에 맞게 처리한 뒤, 상태별 갱신과 타이머(공격 발동, 상태 종료)를 처리한다.
+        /// 체력이 0이면 사망 상태로 바꾼다. 누름 입력을 지금 상태에 맞게 처리한 뒤, 상태별 갱신과 타이머(공격 발동, 상태 종료)를 처리한다.
         /// </summary>
         /// <param name="players">플레이어 저장소</param>
         /// <param name="command">플레이어 입력</param>
@@ -30,6 +30,11 @@ namespace TopView.Systems
                 }
 
                 EntityIdentifier identifier = new EntityIdentifier { index = playerIndex, generation = player.generation };
+                if (player.health <= 0f && player.state != PlayerState.Die)
+                {
+                    ChangeState(ref player, in identifier, PlayerState.Die, Vector3.zero, stateRecords);
+                }
+
                 player.stateElapsedTicks++;
                 HandlePresses(ref player, in identifier, in command, stateRecords);
                 UpdateState(ref player, in identifier, in command, stateRecords, projectileSpawnRequests, gameOverRequests);
@@ -263,7 +268,7 @@ namespace TopView.Systems
             projectileSpawnRequests.Enqueue(new ProjectileSpawnRequest
             {
                 projectile = weapon.projectile,
-                isTargetingPlayer = false,
+                faction = Faction.Player,
                 damage = weapon.damage,
                 position = player.currentPosition + player.currentRotation * player.movement.muzzleOffset,
                 rotation = player.currentRotation,

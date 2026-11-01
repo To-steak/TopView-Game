@@ -22,8 +22,8 @@ namespace TopView.Systems
         /// <param name="playerPosition">플레이어 위치(월드)</param>
         /// <param name="playerRadius">플레이어 피격 반지름</param>
         /// <param name="projectileSpawnRequests">투사체 생성 요청 큐</param>
-        /// <param name="playerDamageRequests">플레이어 피해 요청 큐</param>
-        public static void CommitAttack(in EnemyAttackComponent attack, Vector3 position, Quaternion rotation, float attackDamage, ref int missileShotCount, bool hasPlayer, in EntityIdentifier playerIdentifier, Vector3 playerPosition, float playerRadius, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<PlayerDamageRequest> playerDamageRequests)
+        /// <param name="damageRequests">피해 요청 큐</param>
+        public static void CommitAttack(in EnemyAttackComponent attack, Vector3 position, Quaternion rotation, float attackDamage, ref int missileShotCount, bool hasPlayer, in EntityIdentifier playerIdentifier, Vector3 playerPosition, float playerRadius, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<DamageRequest> damageRequests)
         {
             float damage = attackDamage * attack.damageMultiplier;
 
@@ -32,7 +32,7 @@ namespace TopView.Systems
                 Vector3 center = position + rotation * Vector3.forward * attack.bodyOffset;
                 if (hasPlayer && TargetingSystem.IsWithin(center, playerPosition, attack.bodyRadius + playerRadius))
                 {
-                    playerDamageRequests.Enqueue(new PlayerDamageRequest { target = playerIdentifier, amount = damage });
+                    damageRequests.Enqueue(new DamageRequest { target = new EntityReference { kind = EntityKind.Player, identifier = playerIdentifier }, amount = damage });
                 }
                 return;
             }
@@ -47,7 +47,7 @@ namespace TopView.Systems
             projectileSpawnRequests.Enqueue(new ProjectileSpawnRequest
             {
                 projectile = attack.projectile,
-                isTargetingPlayer = true,
+                faction = Faction.Enemy,
                 damage = damage,
                 position = position + rotation * spawnOffset,
                 rotation = rotation,

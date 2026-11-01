@@ -11,16 +11,16 @@ namespace TopView.Systems
     public static class BossBehaviorSystem
     {
         /// <summary>
-        /// 살아 있는 보스마다 상태 시간을 1틱 늘리고, 상태별로 도발·대기·공격·소멸을 처리한다. 사망 후 사라질 때 게임오버를 요청한다.
+        /// 살아 있는 보스마다 체력이 0이면 사망 상태로 바꾸고, 상태 시간을 1틱 늘린 뒤 상태별로 도발·대기·공격·소멸을 처리한다. 사망 후 사라질 때 게임오버를 요청한다.
         /// </summary>
         /// <param name="bosses">보스 저장소</param>
         /// <param name="players">플레이어 저장소. 바라보고 공격할 대상이다</param>
         /// <param name="random">World의 난수 생성기</param>
         /// <param name="stateRecords">보스 상태 변경 기록</param>
         /// <param name="projectileSpawnRequests">투사체 생성 요청 큐</param>
-        /// <param name="playerDamageRequests">플레이어 피해 요청 큐</param>
+        /// <param name="damageRequests">피해 요청 큐</param>
         /// <param name="gameOverRequests">게임오버 요청 큐</param>
-        public static void Tick(BossStorage bosses, PlayerStorage players, System.Random random, List<BossStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<PlayerDamageRequest> playerDamageRequests, Queue<GameOverRequest> gameOverRequests)
+        public static void Tick(BossStorage bosses, PlayerStorage players, System.Random random, List<BossStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<DamageRequest> damageRequests, Queue<GameOverRequest> gameOverRequests)
         {
             bool hasPlayer = TargetingSystem.TryGetPlayerTarget(players, out EntityIdentifier playerIdentifier, out Vector3 playerPosition, out float playerRadius);
             float deltaTime = Time.fixedDeltaTime;
@@ -34,6 +34,11 @@ namespace TopView.Systems
                 }
 
                 EntityIdentifier identifier = new EntityIdentifier { index = bossIndex, generation = boss.generation };
+                if (boss.health <= 0f && boss.state != BossState.Die)
+                {
+                    ChangeState(ref boss, in identifier, BossState.Die, stateRecords);
+                }
+
                 boss.stateElapsedTicks++;
 
                 switch (boss.state)
@@ -62,7 +67,7 @@ namespace TopView.Systems
                         if (!boss.isAttackCommitted && boss.stateElapsedTicks >= attack.commitTicks)
                         {
                             boss.isAttackCommitted = true;
-                            EnemyAttackSystem.CommitAttack(in attack, boss.currentPosition, boss.currentRotation, boss.attackDamage, ref boss.missileShotCount, hasPlayer, in playerIdentifier, playerPosition, playerRadius, projectileSpawnRequests, playerDamageRequests);
+                            EnemyAttackSystem.CommitAttack(in attack, boss.currentPosition, boss.currentRotation, boss.attackDamage, ref boss.missileShotCount, hasPlayer, in playerIdentifier, playerPosition, playerRadius, projectileSpawnRequests, damageRequests);
                         }
                         if (boss.stateElapsedTicks >= attack.durationTicks)
                         {

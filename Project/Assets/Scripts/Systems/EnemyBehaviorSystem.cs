@@ -12,15 +12,15 @@ namespace TopView.Systems
     public static class EnemyBehaviorSystem
     {
         /// <summary>
-        /// 살아 있는 적마다 상태 시간을 1틱 늘리고, 상태별로 감지·배회·추적·공격·소멸을 처리한다.
+        /// 살아 있는 적마다 체력이 0이면 사망 상태로 바꾸고, 상태 시간을 1틱 늘린 뒤 상태별로 감지·배회·추적·공격·소멸을 처리한다.
         /// </summary>
         /// <param name="enemies">적 저장소</param>
         /// <param name="players">플레이어 저장소. 감지와 공격 대상이다</param>
         /// <param name="random">World의 난수 생성기</param>
         /// <param name="stateRecords">적 상태 변경 기록</param>
         /// <param name="projectileSpawnRequests">투사체 생성 요청 큐</param>
-        /// <param name="playerDamageRequests">플레이어 피해 요청 큐</param>
-        public static void Tick(EnemyStorage enemies, PlayerStorage players, System.Random random, List<EnemyStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<PlayerDamageRequest> playerDamageRequests)
+        /// <param name="damageRequests">피해 요청 큐</param>
+        public static void Tick(EnemyStorage enemies, PlayerStorage players, System.Random random, List<EnemyStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<DamageRequest> damageRequests)
         {
             bool hasPlayer = TargetingSystem.TryGetPlayerTarget(players, out EntityIdentifier playerIdentifier, out Vector3 playerPosition, out float playerRadius);
             float deltaTime = Time.fixedDeltaTime;
@@ -37,6 +37,11 @@ namespace TopView.Systems
                 }
 
                 EntityIdentifier identifier = new EntityIdentifier { index = enemyIndex, generation = enemy.generation };
+                if (enemy.health <= 0f && enemy.state != EnemyState.Die)
+                {
+                    ChangeState(ref enemy, in identifier, EnemyState.Die, stateRecords);
+                }
+
                 enemy.stateElapsedTicks++;
                 bool isPlayerDetected = hasPlayer && TargetingSystem.IsWithin(enemy.currentPosition, playerPosition, enemy.behavior.detectionRadius + playerRadius);
 
@@ -73,7 +78,7 @@ namespace TopView.Systems
                         break;
 
                     case EnemyState.Attack:
-                        UpdateAttack(ref enemy, in identifier, hasPlayer, in playerIdentifier, playerPosition, playerRadius, deltaTime, stateRecords, projectileSpawnRequests, playerDamageRequests);
+                        UpdateAttack(ref enemy, in identifier, hasPlayer, in playerIdentifier, playerPosition, playerRadius, deltaTime, stateRecords, projectileSpawnRequests, damageRequests);
                         break;
 
                     case EnemyState.Die:
@@ -160,7 +165,7 @@ namespace TopView.Systems
             return true;
         }
 
-        private static void UpdateAttack(ref EnemyEntity enemy, in EntityIdentifier identifier, bool hasPlayer, in EntityIdentifier playerIdentifier, Vector3 playerPosition, float playerRadius, float deltaTime, List<EnemyStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<PlayerDamageRequest> playerDamageRequests)
+        private static void UpdateAttack(ref EnemyEntity enemy, in EntityIdentifier identifier, bool hasPlayer, in EntityIdentifier playerIdentifier, Vector3 playerPosition, float playerRadius, float deltaTime, List<EnemyStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<DamageRequest> damageRequests)
         {
             if (enemy.hasAttackTarget && !enemy.isAttackCommitted && hasPlayer)
             {
@@ -172,7 +177,7 @@ namespace TopView.Systems
             {
                 enemy.isAttackCommitted = true;
                 int missileShotCount = 0;
-                EnemyAttackSystem.CommitAttack(in attack, enemy.currentPosition, enemy.currentRotation, enemy.attackDamage, ref missileShotCount, hasPlayer, in playerIdentifier, playerPosition, playerRadius, projectileSpawnRequests, playerDamageRequests);
+                EnemyAttackSystem.CommitAttack(in attack, enemy.currentPosition, enemy.currentRotation, enemy.attackDamage, ref missileShotCount, hasPlayer, in playerIdentifier, playerPosition, playerRadius, projectileSpawnRequests, damageRequests);
             }
 
             if (enemy.stateElapsedTicks >= attack.durationTicks)

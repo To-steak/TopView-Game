@@ -31,7 +31,7 @@ namespace TopView.Systems
                     isAlive = true,
                     generation = slot.generation + 1,
                     projectile = request.projectile,
-                    isTargetingPlayer = request.isTargetingPlayer,
+                    faction = request.faction,
                     damage = request.damage,
                     previousPosition = request.position,
                     currentPosition = request.position,

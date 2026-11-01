@@ -48,12 +48,8 @@ namespace TopView.Core
         public Queue<BossSpawnRequest> bossSpawnRequests = new Queue<BossSpawnRequest>();
         // 투사체 생성 요청 큐
         public Queue<ProjectileSpawnRequest> projectileSpawnRequests = new Queue<ProjectileSpawnRequest>();
-        // 플레이어 피해 요청 큐
-        public Queue<PlayerDamageRequest> playerDamageRequests = new Queue<PlayerDamageRequest>();
-        // 적 피해 요청 큐
-        public Queue<EnemyDamageRequest> enemyDamageRequests = new Queue<EnemyDamageRequest>();
-        // 보스 피해 요청 큐
-        public Queue<BossDamageRequest> bossDamageRequests = new Queue<BossDamageRequest>();
+        // 피해 요청 큐
+        public Queue<DamageRequest> damageRequests = new Queue<DamageRequest>();
         // 게임오버 요청 큐
         public Queue<GameOverRequest> gameOverRequests = new Queue<GameOverRequest>();
 
