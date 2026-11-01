@@ -25,7 +25,8 @@ namespace TopView.Presentation.Enemy.ViewSystems
                 // 적 저장소는 종류별 구간으로 나뉘어 있어 칸 번호로 종류를 안다
                 int kind = enemyIndex / enemies.capacityPerKind;
 
-                if (enemyView == null)
+                // 게이지 프리팹이 없는 종류는 판을 준비할 때 경고를 남겼으므로 여기서는 건너뛴다
+                if (enemyView == null || gaugePrefabsByKind[kind] == null)
                 {
                     if (gauge != null)
                     {

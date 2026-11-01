@@ -60,5 +60,6 @@ MonoBehaviour:
   attackProjectilePitchSpeeds:
   - 0
   viewPrefab: {fileID: 7360897978464151965, guid: 3b02148a60e7b3f4189f63f9ca2715b8, type: 3}
+  healthGaugePrefab: {fileID: 9209888098781872359, guid: c1a762b0df58d464db55729b66fdff26, type: 3}
   healthGaugeOffset: {x: 0, y: -1, z: 0}
   healthGaugeColor: {r: 1, g: 0, b: 0, a: 1}

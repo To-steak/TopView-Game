@@ -67,8 +67,7 @@ namespace TopView.Core
 
             if (playerDefinition.cameraPriority <= 0)
             {
-                Debug.LogError("Runner >> Player Definition의 Camera Priority가 0 이하라 판을 시작할 수 없다.");
-                return false;
+                Debug.LogWarning("Runner >> Player Definition의 Camera Priority가 0 이하라 플레이어 카메라로 바뀌지 않을 수 있다.");
             }
 
             spawnRequest = new PlayerSpawnRequest
@@ -103,10 +102,7 @@ namespace TopView.Core
                 weaponModelPrefabs[weaponIndex] = definition.modelPrefab;
 
                 bool hasProjectile = definition.weapon.kind != WeaponKind.Melee;
-                if (!TryAssignProjectileViews(definition.name, hasProjectile, definition.projectilePrefab, definition.hitEffectPrefab, 0f, ref weapons[weaponIndex].projectile, projectilePrefabs, projectilePitchSpeeds, hitEffectPrefabs))
-                {
-                    return false;
-                }
+                AssignProjectileViews(definition.name, hasProjectile, definition.projectilePrefab, definition.hitEffectPrefab, 0f, ref weapons[weaponIndex].projectile, projectilePrefabs, projectilePitchSpeeds, hitEffectPrefabs);
             }
 
             return true;

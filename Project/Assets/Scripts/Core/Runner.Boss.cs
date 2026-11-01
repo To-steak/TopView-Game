@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using TopView.Authoring;
 using TopView.Components;
 using TopView.Definitions;
+using TopView.Entities;
 using TopView.Presentation.Boss.Views;
 using TopView.Requests;
 using UnityEngine;
@@ -37,10 +38,7 @@ namespace TopView.Core
             }
 
             EnemyAttackComponent[] attacks = (EnemyAttackComponent[])bossDefinition.attacks.Clone();
-            if (!TryAssignAttackViews(bossDefinition.name, attacks, bossDefinition.attackProjectilePrefabs, bossDefinition.attackHitEffectPrefabs, bossDefinition.attackProjectilePitchSpeeds, projectilePrefabs, projectilePitchSpeeds, hitEffectPrefabs))
-            {
-                return false;
-            }
+            AssignAttackViews(bossDefinition.name, attacks, bossDefinition.attackProjectilePrefabs, bossDefinition.attackHitEffectPrefabs, bossDefinition.attackProjectilePitchSpeeds, projectilePrefabs, projectilePitchSpeeds, hitEffectPrefabs);
 
             spawnTemplate = new BossSpawnRequest
             {
@@ -51,5 +49,21 @@ namespace TopView.Core
             };
             return true;
         }
+
+#if UNITY_EDITOR
+        // 살아 있는 보스의 Body 공격 판정 원을 Logic 위치에 그린다.
+        private void DrawBossGizmos()
+        {
+            BossEntity[] bosses = _world.bosses.entities;
+            for (int bossIndex = 0; bossIndex < bosses.Length; bossIndex++)
+            {
+                ref readonly BossEntity boss = ref bosses[bossIndex];
+                if (boss.isAlive)
+                {
+                    DrawBodyAttackGizmos(boss.attacks, boss.currentPosition, boss.currentRotation);
+                }
+            }
+        }
+#endif
     }
 }

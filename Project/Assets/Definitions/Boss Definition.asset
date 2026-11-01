@@ -69,7 +69,6 @@ MonoBehaviour:
   - {fileID: 3605412627769871624, guid: 297f4eb88c308ae4d83672b047e78024, type: 3}
   attackHitEffectPrefabs:
   - {fileID: 8142776624367745201, guid: be16a2ead503d12418c1f228fcee2f7c, type: 3}
-  - {fileID: 8142776624367745201, guid: be16a2ead503d12418c1f228fcee2f7c, type: 3}
   attackProjectilePitchSpeeds:
   - 0
   - 720

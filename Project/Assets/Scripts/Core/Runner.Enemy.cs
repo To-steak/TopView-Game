@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using TopView.Authoring;
 using TopView.Components;
 using TopView.Definitions;
+using TopView.Entities;
 using TopView.Presentation.Enemy.Views;
 using TopView.Requests;
 using UnityEngine;
@@ -66,18 +67,6 @@ namespace TopView.Core
             for (int kind = 0; kind < enemyKindCount; kind++)
             {
                 EnemyDefinition definition = enemyDefinitions[kind];
-                if (definition.viewPrefab == null || definition.viewPrefab.GetComponent<EnemyView>() == null)
-                {
-                    Debug.LogError($"Runner >> {definition.name}의 View Prefab이 없거나 EnemyView가 붙어 있지 않아 판을 시작할 수 없다.");
-                    return false;
-                }
-
-                if (definition.healthGaugePrefab == null || definition.healthGaugePrefab.GetComponent<EnemyHealthGaugeView>() == null)
-                {
-                    Debug.LogError($"Runner >> {definition.name}의 Health Gauge Prefab이 없거나 EnemyHealthGaugeView가 붙어 있지 않아 판을 시작할 수 없다.");
-                    return false;
-                }
-
                 if (definition.navigation.navMeshSampleDistance <= 0f || definition.navigation.maxPathCorners <= 0)
                 {
                     Debug.LogError($"Runner >> {definition.name}의 Nav Mesh Sample Distance나 Max Path Corners가 0 이하라 판을 시작할 수 없다.");
@@ -85,10 +74,7 @@ namespace TopView.Core
                 }
 
                 EnemyAttackComponent[] attacks = (EnemyAttackComponent[])definition.attacks.Clone();
-                if (!TryAssignAttackViews(definition.name, attacks, definition.attackProjectilePrefabs, definition.attackHitEffectPrefabs, definition.attackProjectilePitchSpeeds, projectilePrefabs, projectilePitchSpeeds, hitEffectPrefabs))
-                {
-                    return false;
-                }
+                AssignAttackViews(definition.name, attacks, definition.attackProjectilePrefabs, definition.attackHitEffectPrefabs, definition.attackProjectilePitchSpeeds, projectilePrefabs, projectilePitchSpeeds, hitEffectPrefabs);
 
                 spawnTemplates[kind] = new EnemySpawnRequest
                 {
@@ -98,8 +84,24 @@ namespace TopView.Core
                     navigation = definition.navigation,
                     attacks = attacks
                 };
-                viewPrefabs[kind] = definition.viewPrefab;
-                gaugePrefabs[kind] = definition.healthGaugePrefab;
+                // View는 표시용이라 빠져 있어도 판은 시작하고, 그 종류는 보이지 않게 둔다
+                if (definition.viewPrefab == null || definition.viewPrefab.GetComponent<EnemyView>() == null)
+                {
+                    Debug.LogWarning($"Runner >> {definition.name}의 View Prefab이 없거나 EnemyView가 붙어 있지 않아 이 적 종류는 보이지 않게 진행한다.");
+                }
+                else
+                {
+                    viewPrefabs[kind] = definition.viewPrefab;
+                }
+                // 체력 게이지는 표시용이라 빠져 있어도 판은 시작하고, 그 종류는 게이지 없이 둔다
+                if (definition.healthGaugePrefab == null || definition.healthGaugePrefab.GetComponent<EnemyHealthGaugeView>() == null)
+                {
+                    Debug.LogWarning($"Runner >> {definition.name}의 Health Gauge Prefab이 없거나 EnemyHealthGaugeView가 붙어 있지 않아 이 적 종류는 체력 게이지 없이 진행한다.");
+                }
+                else
+                {
+                    gaugePrefabs[kind] = definition.healthGaugePrefab;
+                }
                 gaugeOffsets[kind] = definition.healthGaugeOffset;
                 gaugeColors[kind] = definition.healthGaugeColor;
             }
@@ -170,5 +172,42 @@ namespace TopView.Core
                 spawners[insertIndex] = current;
             }
         }
+
+#if UNITY_EDITOR
+        // 살아 있는 적마다 감지 반경(노랑), 공격 거리(주황), Body 공격 판정 원(빨강)을 Logic 위치에 XZ 원으로 그린다.
+        // 감지와 공격 판정은 여기에 플레이어 반지름을 더해 비교하므로, 원은 플레이어 중심이 아니라 가장자리가 닿는 기준이다
+        private void DrawEnemyGizmos()
+        {
+            EnemyEntity[] enemies = _world.enemies.entities;
+            for (int enemyIndex = 0; enemyIndex < enemies.Length; enemyIndex++)
+            {
+                ref readonly EnemyEntity enemy = ref enemies[enemyIndex];
+                if (!enemy.isAlive)
+                {
+                    continue;
+                }
+
+                Gizmos.color = Color.yellow;
+                DrawCircleGizmo(enemy.currentPosition, enemy.behavior.detectionRadius);
+                Gizmos.color = new Color(1f, 0.5f, 0f);
+                DrawCircleGizmo(enemy.currentPosition, enemy.behavior.attackDistance);
+                DrawBodyAttackGizmos(enemy.attacks, enemy.currentPosition, enemy.currentRotation);
+            }
+        }
+
+        // 공격 목록의 Body 공격마다 공격이 나갈 때의 판정 원을 빨강으로 그린다.
+        private static void DrawBodyAttackGizmos(EnemyAttackComponent[] attacks, Vector3 position, Quaternion rotation)
+        {
+            Gizmos.color = Color.red;
+            for (int attackIndex = 0; attackIndex < attacks.Length; attackIndex++)
+            {
+                ref readonly EnemyAttackComponent attack = ref attacks[attackIndex];
+                if (attack.kind == EnemyAttackKind.Body)
+                {
+                    DrawCircleGizmo(position + rotation * Vector3.forward * attack.bodyOffset, attack.bodyRadius);
+                }
+            }
+        }
+#endif
     }
 }
