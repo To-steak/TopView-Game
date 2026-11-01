@@ -1,9 +1,8 @@
-using TopView.Components;
 using UnityEngine;
 
 namespace TopView.UserInterface.RemainingTime
 {
-    // 판이 시작된 뒤부터 Runner가 매 프레임 넘기는 남은 시간을 초 단위로 보여 준다.
+    // Runner가 매 프레임 넘기는 남은 시간을 초 단위로 보여 준다.
     public class RemainingTimePresenter : MonoBehaviour
     {
         [SerializeField] private RemainingTimeView _view;
@@ -22,17 +21,11 @@ namespace TopView.UserInterface.RemainingTime
         }
 
         /// <summary>
-        /// 시작 전에는 씬에 놓인 그대로 두고, 시작한 뒤부터 남은 시간을 갱신한다.
+        /// 남은 시간을 초 단위로 바꿔, 바뀌었을 때만 View에 보여 준다.
         /// </summary>
-        /// <param name="phase">진행 단계</param>
         /// <param name="remainingTicks">남은 시간(틱)</param>
-        public void Present(GamePhase phase, int remainingTicks)
+        public void Present(int remainingTicks)
         {
-            if (phase == GamePhase.Ready)
-            {
-                return;
-            }
-
             int ticksPerSecond = Mathf.RoundToInt(1f / Time.fixedDeltaTime);
             int seconds = remainingTicks / ticksPerSecond;
             if (seconds != _presentedSeconds)

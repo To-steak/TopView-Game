@@ -35,8 +35,6 @@ namespace TopView.Core
         // 투사체 저장소
         public ProjectileStorage projectiles;
 
-        // 판을 준비할 때 Definition 값으로 채워 둔 플레이어 생성 요청. 시작 명령을 처리할 때 큐에 넣는다
-        public PlayerSpawnRequest playerSpawnTemplate;
         // 판을 준비할 때 종류별로 Definition 값을 채워 둔 적 생성 요청. 번호가 적 종류 번호다
         public EnemySpawnRequest[] enemySpawnTemplates;
         // 판을 준비할 때 Definition 값과 Boss Spawner Authoring의 위치로 채워 둔 보스 생성 요청

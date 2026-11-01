@@ -3,8 +3,6 @@ namespace TopView.Commands
     // 판 흐름 명령의 종류
     public enum GameFlowCommandType
     {
-        // 판을 시작한다
-        Start,
         // 씬을 다시 불러 새 판을 준비한다
         Restart,
         // 게임을 끝낸다

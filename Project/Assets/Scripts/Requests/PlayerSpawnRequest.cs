@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace TopView.Requests
 {
-    // 플레이어를 만들어 달라는 요청. 판을 준비할 때 Core가 Definition 값으로 채워 두고, 시작 명령을 처리할 때 큐에 넣는다.
+    // 플레이어를 만들어 달라는 요청. 판을 준비할 때 Core가 Authoring과 Definition 값으로 채워 큐에 넣는다.
     public struct PlayerSpawnRequest
     {
         // 위치(월드)

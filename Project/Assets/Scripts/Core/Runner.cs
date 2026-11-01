@@ -20,7 +20,6 @@ using TopView.Systems;
 using TopView.UserInterface.Ammo;
 using TopView.UserInterface.BossHealth;
 using TopView.UserInterface.GameOver;
-using TopView.UserInterface.GameStart;
 using TopView.UserInterface.PlayerHealth;
 using TopView.UserInterface.RemainingTime;
 using TopView.UserInterface.Score;
@@ -47,7 +46,6 @@ namespace TopView.Core
         private GameObject[] _projectilePrefabs;
         private float[] _projectilePitchSpeeds;
         private GameObject[] _hitEffectPrefabs;
-        private GameStartPresenter _gameStartPresenter;
         private GameOverPresenter _gameOverPresenter;
         private RemainingTimePresenter _remainingTimePresenter;
         private ScorePresenter _scorePresenter;
@@ -95,8 +93,6 @@ namespace TopView.Core
             {
                 return;
             }
-
-            CommandSystem.Tick(_world.commandBuffer.gameFlowCommands, ref _world.progress, in _world.playerSpawnTemplate, _world.playerSpawnRequests);
 
             bool isPlaying = _world.progress.phase == GamePhase.Playing;
             PlayerDamageSystem.Tick(_world.progress.phase, _world.players, _world.playerDamageRequests, _world.playerStateChangedRecords);
@@ -167,7 +163,6 @@ namespace TopView.Core
         {
             _world = null;
             _viewContext = null;
-            _gameStartPresenter = null;
             _gameOverPresenter = null;
             _remainingTimePresenter = null;
             _scorePresenter = null;
@@ -177,6 +172,20 @@ namespace TopView.Core
             _bossHealthPresenter = null;
             _enemyHealthGaugePresenter = null;
 
+            // Player Spawner Authoring이 없는 씬(메뉴 등)은 판을 하지 않는 씬이다
+            PlayerSpawnerAuthoring[] playerSpawners = FindObjectsByType<PlayerSpawnerAuthoring>(FindObjectsSortMode.None);
+            if (playerSpawners.Length == 0)
+            {
+                return;
+            }
+
+            if (playerSpawners.Length > 1)
+            {
+                Debug.LogError($"Runner >> 씬에 Player Spawner Authoring이 하나여야 하는데 {playerSpawners.Length}개라 판을 시작할 수 없다.");
+                return;
+            }
+
+            PlayerSpawnerAuthoring playerSpawner = playerSpawners[0];
             if (_catalog == null)
             {
                 Debug.LogError("Runner >> Definition Catalog가 없어 판을 시작할 수 없다.");
@@ -187,11 +196,6 @@ namespace TopView.Core
             if (gameSettings == null)
             {
                 Debug.LogError("Runner >> Definition Catalog에 Game Settings Definition이 연결되어 있지 않아 판을 시작할 수 없다.");
-                return;
-            }
-
-            if (!TryFindPlayerSpawner(out PlayerSpawnerAuthoring playerSpawner))
-            {
                 return;
             }
 
@@ -259,7 +263,7 @@ namespace TopView.Core
             world.enemySpawnPointsByKind = CollectEnemySpawnPoints(enemyDefinitions);
             world.random = new System.Random(world.rule.randomSeed);
             world.players = new PlayerStorage(PLAYER_CAPACITY);
-            world.playerSpawnTemplate = new PlayerSpawnRequest
+            world.playerSpawnRequests.Enqueue(new PlayerSpawnRequest
             {
                 position = playerSpawner.transform.position,
                 rotation = Quaternion.identity,
@@ -268,7 +272,7 @@ namespace TopView.Core
                 action = playerDefinition.action,
                 weapons = weapons,
                 meleeHitCapacity = playerDefinition.meleeHitCapacity
-            };
+            });
             world.enemies = new EnemyStorage(enemyKindCount, gameSettings.enemyCapacityPerKind);
             world.enemySpawnTemplates = enemySpawnTemplates;
             world.bosses = new BossStorage(BOSS_CAPACITY);
@@ -283,7 +287,7 @@ namespace TopView.Core
 
             world.progress = new GameProgressComponent
             {
-                phase = GamePhase.Ready,
+                phase = GamePhase.Playing,
                 remainingTicks = world.rule.timeLimitTicks,
                 score = 0,
                 isWaveStarted = new bool[world.waves.Length],
@@ -342,16 +346,6 @@ namespace TopView.Core
 
         private void BindPresenters(PlayerDefinition playerDefinition, Vector3[] gaugeOffsets, Color[] gaugeColors)
         {
-            _gameStartPresenter = FindAnyObjectByType<GameStartPresenter>();
-            if (_gameStartPresenter == null)
-            {
-                Debug.LogError("Runner >> 씬에 GameStartPresenter가 없다.");
-            }
-            else
-            {
-                _gameStartPresenter.Initialize(_world.commandBuffer);
-            }
-
             _gameOverPresenter = FindAnyObjectByType<GameOverPresenter>();
             if (_gameOverPresenter == null)
             {
@@ -683,21 +677,17 @@ namespace TopView.Core
         private void PresentUserInterface()
         {
             GamePhase phase = _world.progress.phase;
-            if (_gameStartPresenter != null)
-            {
-                _gameStartPresenter.Present(phase);
-            }
             if (_gameOverPresenter != null)
             {
                 _gameOverPresenter.Present(phase);
             }
             if (_remainingTimePresenter != null)
             {
-                _remainingTimePresenter.Present(phase, _world.progress.remainingTicks);
+                _remainingTimePresenter.Present(_world.progress.remainingTicks);
             }
             if (_scorePresenter != null)
             {
-                _scorePresenter.Present(phase, _world.progress.score);
+                _scorePresenter.Present(_world.progress.score);
             }
 
             if (!TryFindAlivePlayer(out int playerIndex))
@@ -813,7 +803,6 @@ namespace TopView.Core
                     gameFlowCommands.RemoveAt(commandIndex);
                     _world = null;
                     _viewContext = null;
-                    _gameStartPresenter = null;
                     _gameOverPresenter = null;
                     _remainingTimePresenter = null;
                     _scorePresenter = null;
@@ -882,21 +871,6 @@ namespace TopView.Core
             }
 
             return spawnPointsByKind;
-        }
-
-        // 씬의 Player Spawner Authoring을 찾는다. 없거나 둘 이상이면 false
-        private static bool TryFindPlayerSpawner(out PlayerSpawnerAuthoring playerSpawner)
-        {
-            PlayerSpawnerAuthoring[] playerSpawners = FindObjectsByType<PlayerSpawnerAuthoring>(FindObjectsSortMode.None);
-            playerSpawner = null;
-            if (playerSpawners.Length != 1)
-            {
-                Debug.LogError($"Runner >> 씬에 Player Spawner Authoring이 하나여야 하는데 {playerSpawners.Length}개라 판을 시작할 수 없다.");
-                return false;
-            }
-
-            playerSpawner = playerSpawners[0];
-            return true;
         }
 
         // 씬의 Boss Spawner Authoring을 찾는다. 없거나 둘 이상이면 false

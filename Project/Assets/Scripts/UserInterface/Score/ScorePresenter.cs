@@ -1,9 +1,8 @@
-using TopView.Components;
 using UnityEngine;
 
 namespace TopView.UserInterface.Score
 {
-    // 판이 시작된 뒤부터 Runner가 매 프레임 넘기는 점수를 보여 준다.
+    // Runner가 매 프레임 넘기는 점수를 보여 준다.
     public class ScorePresenter : MonoBehaviour
     {
         [SerializeField] private ScoreView _view;
@@ -22,17 +21,11 @@ namespace TopView.UserInterface.Score
         }
 
         /// <summary>
-        /// 시작 전에는 씬에 놓인 그대로 두고, 시작한 뒤부터 점수를 갱신한다.
+        /// 점수가 바뀌었을 때만 View에 보여 준다.
         /// </summary>
-        /// <param name="phase">진행 단계</param>
         /// <param name="score">점수</param>
-        public void Present(GamePhase phase, int score)
+        public void Present(int score)
         {
-            if (phase == GamePhase.Ready)
-            {
-                return;
-            }
-
             if (score != _presentedScore)
             {
                 _view.SetScore(score);
