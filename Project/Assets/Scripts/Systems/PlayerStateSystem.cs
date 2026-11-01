@@ -165,6 +165,7 @@ namespace TopView.Systems
                     break;
 
                 case PlayerState.Swap:
+                    ApplyMoveInput(ref player, in command);
                     PlayerWeaponSystem.CommitSwap(ref player);
                     if (player.stateElapsedTicks >= player.action.swapTicks)
                     {
@@ -299,10 +300,6 @@ namespace TopView.Systems
 
                 case PlayerState.Throw:
                     player.isRotationLocked = true;
-                    break;
-
-                case PlayerState.Swap:
-                    player.moveDirection = Vector3.zero;
                     break;
 
                 case PlayerState.Die:

@@ -27,8 +27,7 @@ namespace TopView.Presentation.Player.ViewSystems
         private const float RUN_SPEED = 2f;
 
         private const string RANGED_LAYER_NAME = "Ranged Layer";
-        private const string MELEE_LAYER_NAME = "Melee Layer";
-        private const string THROW_LAYER_NAME = "Throw Layer";
+        private const string ACTION_LAYER_NAME = "Action Layer";
         private const float LAYER_ON_WEIGHT = 1f;
         private const float LAYER_OFF_WEIGHT = 0f;
 
@@ -68,8 +67,7 @@ namespace TopView.Presentation.Player.ViewSystems
             ApplyStateRecords(in identifier, stateRecords, animator);
             ApplyMovementAnimation(in player, animator);
             ApplyRangedLayerWeight(in player, animator, context.rangedLayerIndex, rangedLayerBlendInTicks);
-            ApplyActionLayerWeight(animator, context.meleeLayerIndex, player.state == PlayerState.Swing);
-            ApplyActionLayerWeight(animator, context.throwLayerIndex, player.state == PlayerState.Throw);
+            ApplyActionLayerWeight(in player, animator, context.actionLayerIndex);
             ApplyWeaponModels(in player, context.weaponModels);
             ApplyTransform(in player, context.view.transform);
         }
@@ -93,8 +91,7 @@ namespace TopView.Presentation.Player.ViewSystems
             GameObject viewObject = Object.Instantiate(viewPrefab, player.currentPosition, player.currentRotation);
             context.view = viewObject.GetComponent<PlayerView>();
             context.rangedLayerIndex = FindLayerIndex(context.view.animator, RANGED_LAYER_NAME);
-            context.meleeLayerIndex = FindLayerIndex(context.view.animator, MELEE_LAYER_NAME);
-            context.throwLayerIndex = FindLayerIndex(context.view.animator, THROW_LAYER_NAME);
+            context.actionLayerIndex = FindLayerIndex(context.view.animator, ACTION_LAYER_NAME);
 
             context.weaponModels = new GameObject[weaponModelPrefabs.Length];
             for (int weaponIndex = 0; weaponIndex < weaponModelPrefabs.Length; weaponIndex++)
@@ -182,10 +179,10 @@ namespace TopView.Presentation.Player.ViewSystems
             }
         }
 
-        // 움직일 수 있는 상태(Move, Land, 공격, Reload)에서만 이동 입력과 달리기 여부로 MovementSpeed를 정한다. 다른 상태에서는 그대로 둔다.
+        // 움직일 수 있는 상태(Move, Land, 공격, Swap, Reload)에서만 이동 입력과 달리기 여부로 MovementSpeed를 정한다. 다른 상태에서는 그대로 둔다.
         private static void ApplyMovementAnimation(in PlayerEntity player, Animator animator)
         {
-            bool canMove = player.state == PlayerState.Move || player.state == PlayerState.Land || player.state == PlayerState.Shot || player.state == PlayerState.Swing || player.state == PlayerState.Throw || player.state == PlayerState.Reload;
+            bool canMove = player.state == PlayerState.Move || player.state == PlayerState.Land || player.state == PlayerState.Shot || player.state == PlayerState.Swing || player.state == PlayerState.Throw || player.state == PlayerState.Swap || player.state == PlayerState.Reload;
             if (!canMove)
             {
                 return;
@@ -199,7 +196,7 @@ namespace TopView.Presentation.Player.ViewSystems
             animator.SetFloat(MOVEMENT_SPEED_HASH, speed);
         }
 
-        // 조준 자세는 Ranged만 쓴다. Ranged가 아니거나 전신 모션(Dodge, Jump, Land, Swap, Die)이면 원거리 레이어를 바로 끄고, 그 밖에는 rangedLayerBlendInTicks에 걸쳐 켠다.
+        // 조준 자세는 Ranged만 쓴다. Ranged가 아니거나 조준하지 않는 상태(Dodge, Jump, Land, Swap, Die)이면 원거리 레이어를 바로 끄고, 그 밖에는 rangedLayerBlendInTicks에 걸쳐 켠다.
         private static void ApplyRangedLayerWeight(in PlayerEntity player, Animator animator, int rangedLayerIndex, int rangedLayerBlendInTicks)
         {
             if (rangedLayerIndex < 0)
@@ -207,9 +204,9 @@ namespace TopView.Presentation.Player.ViewSystems
                 return;
             }
 
-            bool isFullBodyState = player.state == PlayerState.Dodge || player.state == PlayerState.Jump || player.state == PlayerState.Land || player.state == PlayerState.Swap || player.state == PlayerState.Die;
+            bool isNotAimingState = player.state == PlayerState.Dodge || player.state == PlayerState.Jump || player.state == PlayerState.Land || player.state == PlayerState.Swap || player.state == PlayerState.Die;
             bool isHoldingRanged = player.currentWeaponIndex < player.weapons.Length && player.weapons[player.currentWeaponIndex].kind == WeaponKind.Ranged;
-            if (isFullBodyState || !isHoldingRanged)
+            if (isNotAimingState || !isHoldingRanged)
             {
                 animator.SetLayerWeight(rangedLayerIndex, LAYER_OFF_WEIGHT);
                 return;
@@ -225,15 +222,16 @@ namespace TopView.Presentation.Player.ViewSystems
             animator.SetLayerWeight(rangedLayerIndex, Mathf.MoveTowards(animator.GetLayerWeight(rangedLayerIndex), LAYER_ON_WEIGHT, maxWeightDelta));
         }
 
-        // Swing과 Throw는 자기 레이어에서 재생되므로 그 상태 동안만 켠다. 처음부터 보이도록 서서히 올리지 않는다.
-        private static void ApplyActionLayerWeight(Animator animator, int layerIndex, bool isOn)
+        // Swing, Throw, Swap은 행동 레이어에서 재생되므로 그 상태 동안만 켠다. 처음부터 보이도록 서서히 올리지 않는다.
+        private static void ApplyActionLayerWeight(in PlayerEntity player, Animator animator, int actionLayerIndex)
         {
-            if (layerIndex < 0)
+            if (actionLayerIndex < 0)
             {
                 return;
             }
 
-            animator.SetLayerWeight(layerIndex, isOn ? LAYER_ON_WEIGHT : LAYER_OFF_WEIGHT);
+            bool isActionState = player.state == PlayerState.Swing || player.state == PlayerState.Throw || player.state == PlayerState.Swap;
+            animator.SetLayerWeight(actionLayerIndex, isActionState ? LAYER_ON_WEIGHT : LAYER_OFF_WEIGHT);
         }
 
         private static void ApplyWeaponModels(in PlayerEntity player, GameObject[] weaponModels)

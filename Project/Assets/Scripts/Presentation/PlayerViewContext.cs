@@ -12,9 +12,7 @@ namespace TopView.Presentation
         public GameObject[] weaponModels;
         // view Animator의 원거리 레이어 번호. 레이어가 없으면 -1
         public int rangedLayerIndex;
-        // view Animator의 근접 레이어 번호. 레이어가 없으면 -1
-        public int meleeLayerIndex;
-        // view Animator의 투척 레이어 번호. 레이어가 없으면 -1
-        public int throwLayerIndex;
+        // view Animator의 행동 레이어(Swing, Throw, Swap) 번호. 레이어가 없으면 -1
+        public int actionLayerIndex;
     }
 }
