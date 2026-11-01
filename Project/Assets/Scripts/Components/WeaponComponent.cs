@@ -26,7 +26,5 @@ namespace TopView.Components
         public float meleeRadius;
         // 근접 판정 구 중심을 플레이어 앞쪽으로 띄우는 거리(유닛). Melee만 쓴다
         public float meleeOffset;
-        // 근접 판정이 한 틱에 맞히는 최대 대상 수. Melee만 쓴다
-        public int meleeMaxTargets;
     }
 }

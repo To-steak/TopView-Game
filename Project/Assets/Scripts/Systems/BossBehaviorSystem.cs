@@ -18,11 +18,11 @@ namespace TopView.Systems
         /// <param name="random">World의 난수 생성기</param>
         /// <param name="stateRecords">보스 상태 변경 기록</param>
         /// <param name="projectileSpawnRequests">투사체 생성 요청 큐</param>
-        /// <param name="damageRequests">피해 요청 큐</param>
+        /// <param name="meleeSpawnRequests">근접 판정 생성 요청 큐</param>
         /// <param name="gameOverRequests">게임오버 요청 큐</param>
-        public static void Tick(BossStorage bosses, PlayerStorage players, System.Random random, List<BossStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<DamageRequest> damageRequests, Queue<GameOverRequest> gameOverRequests)
+        public static void Tick(BossStorage bosses, PlayerStorage players, System.Random random, List<BossStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, Queue<GameOverRequest> gameOverRequests)
         {
-            bool hasPlayer = TargetingSystem.TryGetPlayerTarget(players, out EntityIdentifier playerIdentifier, out Vector3 playerPosition, out float playerRadius);
+            bool hasPlayer = TargetingSystem.TryGetPlayerTarget(players, out EntityIdentifier _, out Vector3 playerPosition, out float _);
             float deltaTime = Time.fixedDeltaTime;
 
             for (int bossIndex = 0; bossIndex < bosses.entities.Length; bossIndex++)
@@ -67,7 +67,8 @@ namespace TopView.Systems
                         if (!boss.isAttackCommitted && boss.stateElapsedTicks >= attack.commitTicks)
                         {
                             boss.isAttackCommitted = true;
-                            EnemyAttackSystem.CommitAttack(in attack, boss.currentPosition, boss.currentRotation, boss.attackDamage, ref boss.missileShotCount, hasPlayer, in playerIdentifier, playerPosition, playerRadius, projectileSpawnRequests, damageRequests);
+                            EntityReference owner = new EntityReference { kind = EntityKind.Boss, identifier = identifier };
+                            EnemyAttackSystem.CommitAttack(in attack, boss.currentPosition, boss.currentRotation, boss.attackDamage, ref boss.missileShotCount, in owner, projectileSpawnRequests, meleeSpawnRequests);
                         }
                         if (boss.stateElapsedTicks >= attack.durationTicks)
                         {

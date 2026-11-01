@@ -65,9 +65,9 @@ namespace TopView.Core
                 return false;
             }
 
-            if (playerDefinition.meleeHitCapacity <= 0 || playerDefinition.cameraPriority <= 0)
+            if (playerDefinition.cameraPriority <= 0)
             {
-                Debug.LogError("Runner >> Player Definition의 Melee Hit Capacity나 Camera Priority가 0 이하라 판을 시작할 수 없다.");
+                Debug.LogError("Runner >> Player Definition의 Camera Priority가 0 이하라 판을 시작할 수 없다.");
                 return false;
             }
 
@@ -78,8 +78,7 @@ namespace TopView.Core
                 movement = playerDefinition.movement,
                 vitals = playerDefinition.vitals,
                 action = playerDefinition.action,
-                weapons = weapons,
-                meleeHitCapacity = playerDefinition.meleeHitCapacity
+                weapons = weapons
             };
             return true;
         }

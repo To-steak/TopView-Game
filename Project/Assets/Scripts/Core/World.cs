@@ -34,6 +34,8 @@ namespace TopView.Core
         public BossStorage bosses;
         // 투사체 저장소
         public ProjectileStorage projectiles;
+        // 근접 판정 저장소
+        public MeleeStorage melees;
         // 이번 틱의 피격 대상 목록. 판 시작 때 플레이어·적·보스 저장소 칸 수의 합으로 만들고, 매 틱 HitTargetSystem이 다시 채운다
         public HitTargetComponent[] hitTargets;
         // 피격 대상 목록에서 이번 틱에 채운 대상 수
@@ -52,6 +54,8 @@ namespace TopView.Core
         public Queue<BossSpawnRequest> bossSpawnRequests = new Queue<BossSpawnRequest>();
         // 투사체 생성 요청 큐
         public Queue<ProjectileSpawnRequest> projectileSpawnRequests = new Queue<ProjectileSpawnRequest>();
+        // 근접 판정 생성 요청 큐
+        public Queue<MeleeSpawnRequest> meleeSpawnRequests = new Queue<MeleeSpawnRequest>();
         // 피해 요청 큐
         public Queue<DamageRequest> damageRequests = new Queue<DamageRequest>();
         // 게임오버 요청 큐

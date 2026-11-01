@@ -33,16 +33,6 @@ namespace TopView.Entities
         public int stateElapsedTicks;
         // 지금 공격 상태에서 공격이 이미 나갔는지
         public bool isAttackCommitted;
-        // 근접 공격 판정이 켜져 있는지. 공격이 나간 뒤부터 공격 상태가 끝날 때까지 true
-        public bool isMeleeAttacking;
-        // 이번 근접 공격에서 이미 맞힌 적. 재사용하는 배열이며 meleeHitEnemyCount까지만 쓴다
-        public EntityIdentifier[] meleeHitEnemies;
-        // 이번 근접 공격에서 이미 맞힌 적 수
-        public int meleeHitEnemyCount;
-        // 이번 근접 공격에서 보스를 이미 맞혔는지
-        public bool isMeleeBossHit;
-        // isMeleeBossHit가 가리키는 보스
-        public EntityIdentifier meleeHitBoss;
 
         // 이동 방향(월드, XZ). 크기는 입력 크기다
         public Vector3 moveDirection;

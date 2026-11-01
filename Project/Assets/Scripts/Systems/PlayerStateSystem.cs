@@ -18,8 +18,10 @@ namespace TopView.Systems
         /// <param name="command">플레이어 입력</param>
         /// <param name="stateRecords">상태 변경 기록</param>
         /// <param name="projectileSpawnRequests">투사체 생성 요청 큐</param>
+        /// <param name="meleeSpawnRequests">근접 판정 생성 요청 큐</param>
+        /// <param name="melees">근접 판정 저장소. 사망할 때 자기 근접 판정을 없앤다</param>
         /// <param name="gameOverRequests">게임오버 요청 큐</param>
-        public static void Tick(PlayerStorage players, in PlayerCommand command, List<PlayerStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<GameOverRequest> gameOverRequests)
+        public static void Tick(PlayerStorage players, in PlayerCommand command, List<PlayerStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, MeleeStorage melees, Queue<GameOverRequest> gameOverRequests)
         {
             for (int playerIndex = 0; playerIndex < players.entities.Length; playerIndex++)
             {
@@ -33,11 +35,12 @@ namespace TopView.Systems
                 if (player.health <= 0f && player.state != PlayerState.Die)
                 {
                     ChangeState(ref player, in identifier, PlayerState.Die, Vector3.zero, stateRecords);
+                    MeleeHitSystem.DespawnOwnedBy(melees, new EntityReference { kind = EntityKind.Player, identifier = identifier });
                 }
 
                 player.stateElapsedTicks++;
                 HandlePresses(ref player, in identifier, in command, stateRecords);
-                UpdateState(ref player, in identifier, in command, stateRecords, projectileSpawnRequests, gameOverRequests);
+                UpdateState(ref player, in identifier, in command, stateRecords, projectileSpawnRequests, meleeSpawnRequests, gameOverRequests);
             }
         }
 
@@ -116,7 +119,7 @@ namespace TopView.Systems
             }
         }
 
-        private static void UpdateState(ref PlayerEntity player, in EntityIdentifier identifier, in PlayerCommand command, List<PlayerStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<GameOverRequest> gameOverRequests)
+        private static void UpdateState(ref PlayerEntity player, in EntityIdentifier identifier, in PlayerCommand command, List<PlayerStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, Queue<GameOverRequest> gameOverRequests)
         {
             switch (player.state)
             {
@@ -157,7 +160,7 @@ namespace TopView.Systems
                 case PlayerState.Shot:
                 case PlayerState.Swing:
                 case PlayerState.Throw:
-                    UpdateAttack(ref player, in identifier, command.moveDirection, stateRecords, projectileSpawnRequests);
+                    UpdateAttack(ref player, in identifier, command.moveDirection, stateRecords, projectileSpawnRequests, meleeSpawnRequests);
                     break;
 
                 case PlayerState.Swap:
@@ -211,13 +214,13 @@ namespace TopView.Systems
             player.isRunning = isRunning;
         }
 
-        private static void UpdateAttack(ref PlayerEntity player, in EntityIdentifier identifier, Vector3 moveInput, List<PlayerStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests)
+        private static void UpdateAttack(ref PlayerEntity player, in EntityIdentifier identifier, Vector3 moveInput, List<PlayerStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
         {
             ref WeaponComponent weapon = ref player.weapons[player.currentWeaponIndex];
 
             if (!player.isAttackCommitted && player.stateElapsedTicks >= weapon.attackCommitTicks)
             {
-                CommitAttack(ref player, ref weapon, projectileSpawnRequests);
+                CommitAttack(ref player, in identifier, ref weapon, projectileSpawnRequests, meleeSpawnRequests);
             }
 
             if (player.stateElapsedTicks >= weapon.attackDurationTicks)
@@ -226,8 +229,8 @@ namespace TopView.Systems
             }
         }
 
-        // 공격을 내보낸다. 탄약이 없으면 아무것도 하지 않는다. Ranged와 Throw는 투사체 생성 요청을 넣고, Melee는 근접 판정을 켠다.
-        private static void CommitAttack(ref PlayerEntity player, ref WeaponComponent weapon, Queue<ProjectileSpawnRequest> projectileSpawnRequests)
+        // 공격을 내보낸다. 탄약이 없으면 아무것도 하지 않는다. Ranged와 Throw는 투사체 생성 요청을, Melee는 공격 상태가 끝날 때까지 이어지는 근접 판정 생성 요청을 넣는다.
+        private static void CommitAttack(ref PlayerEntity player, in EntityIdentifier identifier, ref WeaponComponent weapon, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
         {
             player.isAttackCommitted = true;
 
@@ -255,9 +258,15 @@ namespace TopView.Systems
                     break;
 
                 case WeaponKind.Melee:
-                    player.isMeleeAttacking = true;
-                    player.meleeHitEnemyCount = 0;
-                    player.isMeleeBossHit = false;
+                    meleeSpawnRequests.Enqueue(new MeleeSpawnRequest
+                    {
+                        owner = new EntityReference { kind = EntityKind.Player, identifier = identifier },
+                        faction = Faction.Player,
+                        center = player.currentPosition + player.currentRotation * Vector3.forward * weapon.meleeOffset,
+                        radius = weapon.meleeRadius,
+                        damage = weapon.damage,
+                        durationTicks = weapon.attackDurationTicks - weapon.attackCommitTicks
+                    });
                     break;
             }
         }
@@ -350,7 +359,6 @@ namespace TopView.Systems
                 case PlayerState.Swing:
                 case PlayerState.Throw:
                     player.isRotationLocked = false;
-                    player.isMeleeAttacking = false;
                     break;
             }
         }

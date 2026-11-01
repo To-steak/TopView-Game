@@ -19,10 +19,10 @@ namespace TopView.Systems
         /// <param name="random">World의 난수 생성기</param>
         /// <param name="stateRecords">적 상태 변경 기록</param>
         /// <param name="projectileSpawnRequests">투사체 생성 요청 큐</param>
-        /// <param name="damageRequests">피해 요청 큐</param>
-        public static void Tick(EnemyStorage enemies, PlayerStorage players, System.Random random, List<EnemyStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<DamageRequest> damageRequests)
+        /// <param name="meleeSpawnRequests">근접 판정 생성 요청 큐</param>
+        public static void Tick(EnemyStorage enemies, PlayerStorage players, System.Random random, List<EnemyStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
         {
-            bool hasPlayer = TargetingSystem.TryGetPlayerTarget(players, out EntityIdentifier playerIdentifier, out Vector3 playerPosition, out float playerRadius);
+            bool hasPlayer = TargetingSystem.TryGetPlayerTarget(players, out EntityIdentifier _, out Vector3 playerPosition, out float playerRadius);
             float deltaTime = Time.fixedDeltaTime;
             int failedWanderCount = 0;
             int missingAttackCount = 0;
@@ -78,7 +78,7 @@ namespace TopView.Systems
                         break;
 
                     case EnemyState.Attack:
-                        UpdateAttack(ref enemy, in identifier, hasPlayer, in playerIdentifier, playerPosition, playerRadius, deltaTime, stateRecords, projectileSpawnRequests, damageRequests);
+                        UpdateAttack(ref enemy, in identifier, hasPlayer, playerPosition, deltaTime, stateRecords, projectileSpawnRequests, meleeSpawnRequests);
                         break;
 
                     case EnemyState.Die:
@@ -165,7 +165,7 @@ namespace TopView.Systems
             return true;
         }
 
-        private static void UpdateAttack(ref EnemyEntity enemy, in EntityIdentifier identifier, bool hasPlayer, in EntityIdentifier playerIdentifier, Vector3 playerPosition, float playerRadius, float deltaTime, List<EnemyStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<DamageRequest> damageRequests)
+        private static void UpdateAttack(ref EnemyEntity enemy, in EntityIdentifier identifier, bool hasPlayer, Vector3 playerPosition, float deltaTime, List<EnemyStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
         {
             if (enemy.hasAttackTarget && !enemy.isAttackCommitted && hasPlayer)
             {
@@ -177,7 +177,8 @@ namespace TopView.Systems
             {
                 enemy.isAttackCommitted = true;
                 int missileShotCount = 0;
-                EnemyAttackSystem.CommitAttack(in attack, enemy.currentPosition, enemy.currentRotation, enemy.attackDamage, ref missileShotCount, hasPlayer, in playerIdentifier, playerPosition, playerRadius, projectileSpawnRequests, damageRequests);
+                EntityReference owner = new EntityReference { kind = EntityKind.Enemy, identifier = identifier };
+                EnemyAttackSystem.CommitAttack(in attack, enemy.currentPosition, enemy.currentRotation, enemy.attackDamage, ref missileShotCount, in owner, projectileSpawnRequests, meleeSpawnRequests);
             }
 
             if (enemy.stateElapsedTicks >= attack.durationTicks)

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using TopView.Components;
 using TopView.Entities;
@@ -39,12 +38,6 @@ namespace TopView.Systems
         private static void Spawn(ref PlayerEntity slot, in PlayerSpawnRequest request)
         {
             WeaponComponent[] weapons = SpawnSystem.ReuseArray(slot.weapons, request.weapons);
-            EntityIdentifier[] meleeHitEnemies = slot.meleeHitEnemies;
-            if (meleeHitEnemies == null || meleeHitEnemies.Length != request.meleeHitCapacity)
-            {
-                meleeHitEnemies = new EntityIdentifier[request.meleeHitCapacity];
-            }
-            Array.Clear(meleeHitEnemies, 0, meleeHitEnemies.Length);
 
             slot = new PlayerEntity
             {
@@ -63,7 +56,6 @@ namespace TopView.Systems
                 mana = request.vitals.maxMana,
                 manaRecoveryElapsedTicks = request.vitals.manaRecoveryDelayTicks,
                 weapons = weapons,
-                meleeHitEnemies = meleeHitEnemies,
                 currentWeaponIndex = 0,
                 pendingWeaponIndex = 0
             };

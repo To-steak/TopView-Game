@@ -68,16 +68,16 @@ namespace TopView.Core
             DamageSystem.Tick(ref _world.progress, _world.players, _world.enemies, _world.bosses, _world.damageRequests);
             if (isPlaying)
             {
-                PlayerStateSystem.Tick(_world.players, in _world.commandBuffer.playerCommand, _world.playerStateChangedRecords, _world.projectileSpawnRequests, _world.gameOverRequests);
+                PlayerStateSystem.Tick(_world.players, in _world.commandBuffer.playerCommand, _world.playerStateChangedRecords, _world.projectileSpawnRequests, _world.meleeSpawnRequests, _world.melees, _world.gameOverRequests);
                 PlayerMovementSystem.Tick(_world.players, in _world.commandBuffer.playerCommand, _world.enemies, _world.bosses);
                 PlayerStaminaSystem.Tick(_world.players);
-                EnemyBehaviorSystem.Tick(_world.enemies, _world.players, _world.random, _world.enemyStateChangedRecords, _world.projectileSpawnRequests, _world.damageRequests);
-                BossBehaviorSystem.Tick(_world.bosses, _world.players, _world.random, _world.bossStateChangedRecords, _world.projectileSpawnRequests, _world.damageRequests, _world.gameOverRequests);
+                EnemyBehaviorSystem.Tick(_world.enemies, _world.players, _world.random, _world.enemyStateChangedRecords, _world.projectileSpawnRequests, _world.meleeSpawnRequests);
+                BossBehaviorSystem.Tick(_world.bosses, _world.players, _world.random, _world.bossStateChangedRecords, _world.projectileSpawnRequests, _world.meleeSpawnRequests, _world.gameOverRequests);
                 EnemyNavigationSystem.Tick(_world.enemies, _world.navigationPath);
                 ProjectileSystem.Tick(_world.projectiles);
                 HitTargetSystem.Tick(_world.players, _world.enemies, _world.bosses, _world.hitTargets, ref _world.hitTargetCount);
                 ProjectileHitSystem.Tick(_world.projectiles, _world.hitTargets, _world.hitTargetCount, _world.damageRequests, _world.projectileHitRecords);
-                HitSystem.Tick(_world.players, _world.enemies, _world.bosses, _world.damageRequests);
+                MeleeHitSystem.Tick(_world.melees, _world.hitTargets, _world.hitTargetCount, _world.damageRequests);
             }
 
             GameRuleSystem.Tick(ref _world.progress, _world.gameOverRequests);
@@ -88,6 +88,7 @@ namespace TopView.Core
                 EnemySpawnSystem.Tick(_world.enemies, _world.enemySpawnRequests);
                 BossSpawnSystem.Tick(_world.bosses, _world.bossSpawnRequests, _world.players);
                 ProjectileSpawnSystem.Tick(_world.projectiles, _world.projectileSpawnRequests);
+                MeleeSpawnSystem.Tick(_world.melees, _world.meleeSpawnRequests);
             }
 
             CommandSystem.ClearPlayerPresses(ref _world.commandBuffer.playerCommand);
@@ -200,7 +201,10 @@ namespace TopView.Core
             world.bosses = new BossStorage(BOSS_CAPACITY);
             world.bossSpawnTemplate = bossSpawnTemplate;
             world.projectiles = new ProjectileStorage(gameSettings.projectileCapacity);
-            world.hitTargets = new HitTargetComponent[world.players.entities.Length + world.enemies.entities.Length + world.bosses.entities.Length];
+            // 피격 대상은 세 저장소의 칸 수를 넘지 않고, 공격하는 쪽 하나는 근접 판정을 동시에 하나만 가지므로 근접 판정도 이 수로 넘치지 않는다
+            int combatantCapacity = world.players.entities.Length + world.enemies.entities.Length + world.bosses.entities.Length;
+            world.hitTargets = new HitTargetComponent[combatantCapacity];
+            world.melees = new MeleeStorage(combatantCapacity, combatantCapacity);
 
             world.progress = new GameProgressComponent
             {
