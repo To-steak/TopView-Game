@@ -85,7 +85,7 @@ namespace TopView.Systems
                 }
             }
 
-            if (command.isDodgePressed && player.state == PlayerState.Move)
+            if (command.isDodgePressed && IsIdleOrMove(player.state))
             {
                 if (player.isGrounded && PlayerStaminaSystem.HasEnoughMana(in player, player.vitals.dodgeManaCost))
                 {
@@ -308,14 +308,19 @@ namespace TopView.Systems
 
                 case PlayerState.Dodge:
                     player.isRotationLocked = true;
-                    if (!IsZero(moveInput))
+                    // 이동 입력이 있으면 그쪽으로, 서 있으면 바라보는 쪽(XZ)으로 회피한다
+                    Vector3 dodgeDirection = moveInput;
+                    if (IsZero(dodgeDirection))
                     {
-                        player.moveDirection = moveInput;
+                        dodgeDirection = player.currentRotation * Vector3.forward;
+                        dodgeDirection.y = 0f;
+                        dodgeDirection.Normalize();
                     }
+                    player.moveDirection = dodgeDirection;
                     player.currentSpeed = player.movement.dodgeSpeed;
                     if (IsZero(player.moveDirection))
                     {
-                        Debug.LogWarning("PlayerStateSystem >> 이동 방향이 없어 회피 방향으로 돌지 않았다.");
+                        Debug.LogWarning("PlayerStateSystem >> 회피 방향을 정하지 못해 회피 방향으로 돌지 않았다.");
                     }
                     else
                     {

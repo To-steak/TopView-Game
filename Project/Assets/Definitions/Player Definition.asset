@@ -42,11 +42,11 @@ MonoBehaviour:
     dodgeManaCost: 15
     jumpManaCost: 10
   action:
-    dodgeTicks: 0
-    landTicks: 0
-    swapTicks: 0
-    reloadTicks: 0
-    dieTicks: 0
+    dodgeTicks: 40
+    landTicks: 51
+    swapTicks: 48
+    reloadTicks: 224
+    dieTicks: 118
   weapons:
   - {fileID: 11400000, guid: 1ce7fea57a5a36c42bf8d0de4ca734db, type: 2}
   - {fileID: 11400000, guid: 9e5cd050810c0a8469911b9292b1da62, type: 2}
