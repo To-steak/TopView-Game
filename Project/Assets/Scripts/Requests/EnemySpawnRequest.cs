@@ -8,7 +8,7 @@ namespace TopView.Requests
     {
         // 적 종류 번호
         public int enemyKindIndex;
-        // 위치(월드). SpawnSystem이 NavMesh 위로 맞춘다
+        // 위치(월드). EnemySpawnSystem이 NavMesh 위로 맞춘다
         public Vector3 position;
         // 회전(월드)
         public Quaternion rotation;
@@ -20,7 +20,7 @@ namespace TopView.Requests
         public EnemyBehaviorComponent behavior;
         // 길찾기 이동 값
         public EnemyNavigationComponent navigation;
-        // 공격 목록. SpawnSystem이 엔티티의 배열로 복사한다
+        // 공격 목록. EnemySpawnSystem이 엔티티의 배열로 복사한다
         public EnemyAttackComponent[] attacks;
     }
 }

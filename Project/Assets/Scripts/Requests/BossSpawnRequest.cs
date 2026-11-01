@@ -14,7 +14,7 @@ namespace TopView.Requests
         public EnemyStatsComponent stats;
         // 행동 값
         public BossBehaviorComponent behavior;
-        // 공격 목록. SpawnSystem이 엔티티의 배열로 복사한다
+        // 공격 목록. BossSpawnSystem이 엔티티의 배열로 복사한다
         public EnemyAttackComponent[] attacks;
     }
 }

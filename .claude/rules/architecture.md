@@ -54,9 +54,9 @@ ECS 패키지(DOTS)는 쓰지 않는다. "System은 함수, 상태는 데이터"
 MoveSystem.Tick(_world.enemies, _world.enemyMovedRecords);
 ```
 
-- **엔티티는 모두 `~Storage`에 담고, 생성은 SpawnSystem(틱 마지막)에서만 한다.** 하나뿐인 엔티티(플레이어)도 예외가 없다. 다른 System과 Core는 생성 요청 큐(`Queue<~SpawnRequest>`)에 넣기만 한다.
+- **엔티티는 모두 `~Storage`에 담고, 생성은 엔티티 종류별 `~SpawnSystem`(예: `EnemySpawnSystem`, 틱 마지막)에서만 한다.** 하나뿐인 엔티티(플레이어)도 예외가 없다. 다른 System과 Core는 생성 요청 큐(`Queue<~SpawnRequest>`)에 넣기만 한다.
   - 이유: 순회 도중 Storage가 바뀌지 않고, 새 엔티티는 항상 다음 틱부터 동작한다. 슬롯 할당이 한 곳에 모인다.
-- **SpawnSystem은 슬롯을 채울 때 필드를 하나씩 대입하지 않고 `new ~Entity { … }`로 struct 전체를 대입한다.** 이전 값에서는 `generation`만 이어받는다. 할당을 피하려고 재사용하는 배열 필드는 대입 전에 꺼내 두었다가 새 struct에 다시 넣고 내용을 비운다.
+- **`~SpawnSystem`은 슬롯을 채울 때 필드를 하나씩 대입하지 않고 `new ~Entity { … }`로 struct 전체를 대입한다.** 이전 값에서는 `generation`만 이어받는다. 할당을 피하려고 재사용하는 배열 필드는 대입 전에 꺼내 두었다가 새 struct에 다시 넣고 내용을 비운다.
   - 이유: 엔티티에 필드를 추가하고 대입을 빠뜨리면 그 칸을 쓰던 이전 엔티티의 값이 남는다. 전체를 대입하면 빠뜨린 필드는 기본값이 된다.
 - 소멸은 즉시 한다(`isAlive = false`, 슬롯 반납). 이후 System은 `isAlive`로 건너뛴다.
   - 이유: 고정 배열이라 플래그만 바꾸면 되고, 같은 틱의 뒤 System이 이미 죽은 엔티티를 처리하지 않는다.
@@ -78,7 +78,7 @@ MoveSystem.Tick(_world.enemies, _world.enemyMovedRecords);
   - 이유: 수치를 코드 수정 없이 에디터에서 조정한다.
 - **데이터는 struct로 품는다.** Logic이 쓰는 값은 `Components/`의 `[Serializable]` struct(`~Component`)로 정의하고, `~Definition`과 `~Authoring`은 그 struct를 필드로 가진다. 같은 필드를 두 곳에 정의하지 않는다. 프리팹 등 View용 참조는 struct 밖에 둔다.
   - 이유: 같은 값을 여러 곳에 정의하면 어긋난다. struct라서 복사 한 번으로 엔티티에 담긴다.
-- **로딩:** Core가 `~Definition`의 struct를 World에 대입한다. 판 시작 시 Core는 `~Authoring`마다 Transform 위치 등 씬 값을 채운 생성 요청을 큐에 넣고, 엔티티는 첫 틱의 SpawnSystem이 만든다. Core는 World에 엔티티를 직접 넣지 않는다. System은 Definition과 Authoring을 참조하지 않는다.
+- **로딩:** Core가 `~Definition`의 struct를 World에 대입한다. 판 시작 시 Core는 `~Authoring`마다 Transform 위치 등 씬 값을 채운 생성 요청을 큐에 넣고, 엔티티는 첫 틱의 `~SpawnSystem`이 만든다. Core는 World에 엔티티를 직접 넣지 않는다. System은 Definition과 Authoring을 참조하지 않는다.
   - 이유: 씬에 놓인 엔티티와 게임 중 생긴 엔티티가 같은 경로로 만들어진다. Logic이 에셋에 묶이지 않는다.
 - 씬에 배치한 엔티티의 종류는 `~Authoring`이 `~Definition`을 필드로 가리켜 정한다. Authoring은 Definition을 가리키기만 하고, 판 시작 시 Core가 그 Definition의 struct를 읽어 생성 요청에 담는다.
   - 이유: 같은 종류를 씬에 여러 개 놓아도 수치는 Definition 한 곳에서 고친다.

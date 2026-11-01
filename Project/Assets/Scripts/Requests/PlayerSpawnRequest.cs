@@ -16,7 +16,7 @@ namespace TopView.Requests
         public PlayerVitalsComponent vitals;
         // 행동 상태의 길이
         public PlayerActionComponent action;
-        // 무기 목록. SpawnSystem이 엔티티의 배열로 복사한다
+        // 무기 목록. PlayerSpawnSystem이 엔티티의 배열로 복사한다
         public WeaponComponent[] weapons;
         // 한 번의 근접 공격에서 맞힌 적을 기록할 수 있는 최대 수
         public int meleeHitCapacity;

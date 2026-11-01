@@ -9,7 +9,7 @@ namespace TopView.Entities
         public EnemyEntity[] entities;
         // 종류별 칸 수
         public int capacityPerKind;
-        // 종류별 빈 칸 번호 목록. SpawnSystem이 끝에서부터 꺼낸다
+        // 종류별 빈 칸 번호 목록. EnemySpawnSystem이 끝에서부터 꺼낸다
         public List<int>[] freeIndicesByKind;
 
         /// <summary>

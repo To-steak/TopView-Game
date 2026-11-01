@@ -83,7 +83,10 @@ namespace TopView.Core
             if (isPlaying)
             {
                 WaveSystem.Tick(in _world.rule, _world.waves, _world.enemySpawnPointsByKind, _world.enemySpawnTemplates, in _world.bossSpawnTemplate, ref _world.progress, _world.random, _world.enemySpawnRequests, _world.bossSpawnRequests);
-                SpawnSystem.Tick(_world.players, _world.playerSpawnRequests, _world.enemies, _world.enemySpawnRequests, _world.bosses, _world.bossSpawnRequests, _world.projectiles, _world.projectileSpawnRequests);
+                PlayerSpawnSystem.Tick(_world.players, _world.playerSpawnRequests);
+                EnemySpawnSystem.Tick(_world.enemies, _world.enemySpawnRequests);
+                BossSpawnSystem.Tick(_world.bosses, _world.bossSpawnRequests, _world.players);
+                ProjectileSpawnSystem.Tick(_world.projectiles, _world.projectileSpawnRequests);
             }
 
             CommandSystem.ClearPlayerPresses(ref _world.commandBuffer.playerCommand);

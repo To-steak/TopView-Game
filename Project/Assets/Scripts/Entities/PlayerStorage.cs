@@ -7,7 +7,7 @@ namespace TopView.Entities
     {
         // 엔티티 배열. isAlive가 false인 칸은 비어 있다
         public PlayerEntity[] entities;
-        // 빈 칸 번호 목록. SpawnSystem이 끝에서부터 꺼낸다
+        // 빈 칸 번호 목록. PlayerSpawnSystem이 끝에서부터 꺼낸다
         public List<int> freeIndices;
 
         /// <summary>
