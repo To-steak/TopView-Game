@@ -8,7 +8,5 @@ namespace TopView.Definitions
     {
         // 한 판의 규칙과 웨이브 구성
         public GameSettingsDefinition gameSettings;
-        // 플레이어의 값과 무기 구성
-        public PlayerDefinition player;
     }
 }

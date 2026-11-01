@@ -190,7 +190,7 @@ namespace TopView.Systems
             bool isRunning = command.isRunning;
             if (isRunning)
             {
-                float requiredMana = player.vitals.runManaCostPerSecond * Time.fixedDeltaTime;
+                float requiredMana = player.vitals.runManaCostPerTick;
                 if (PlayerStaminaSystem.HasEnoughMana(in player, requiredMana))
                 {
                     PlayerStaminaSystem.UseMana(ref player, requiredMana);

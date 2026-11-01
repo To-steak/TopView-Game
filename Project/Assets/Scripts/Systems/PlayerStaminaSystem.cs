@@ -27,7 +27,7 @@ namespace TopView.Systems
 
                 if (player.mana < player.vitals.maxMana && player.manaRecoveryElapsedTicks >= player.vitals.manaRecoveryDelayTicks)
                 {
-                    player.mana = Mathf.Min(player.mana + player.vitals.manaRecoveryPerSecond * Time.fixedDeltaTime, player.vitals.maxMana);
+                    player.mana = Mathf.Min(player.mana + player.vitals.manaRecoveryPerTick, player.vitals.maxMana);
                 }
             }
         }

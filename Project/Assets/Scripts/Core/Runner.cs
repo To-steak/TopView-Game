@@ -31,6 +31,8 @@ namespace TopView.Core
         private PlayerActions _playerActions;
         private World _world;
         private ViewContext _viewContext;
+        private GameObject _playerViewPrefab;
+        private int _playerCameraPriority;
         private GameObject[] _playerWeaponModelPrefabs;
         private GameObject[] _enemyViewPrefabs;
         private GameObject _bossViewPrefab;
@@ -135,11 +137,11 @@ namespace TopView.Core
                 return;
             }
 
-            PlayerViewSystem.Present(_world.players, _world.playerStateChangedRecords, _catalog.player.viewPrefab, _playerWeaponModelPrefabs, _viewContext);
+            PlayerViewSystem.Present(_world.players, _world.playerStateChangedRecords, _playerViewPrefab, _playerWeaponModelPrefabs, _viewContext);
             EnemyViewSystem.Present(_world.enemies, _world.enemyStateChangedRecords, _enemyViewPrefabs, _viewContext);
             BossViewSystem.Present(_world.bosses, _world.bossStateChangedRecords, _bossViewPrefab, _viewContext);
             ProjectileViewSystem.Present(_world.projectiles, _projectilePrefabs, _projectilePitchSpeeds, _world.projectileHitRecords, _hitEffectPrefabs, _viewContext);
-            CameraViewSystem.Present(_viewContext, _catalog.player.cameraPriority);
+            CameraViewSystem.Present(_viewContext, _playerCameraPriority);
 
             PresentUserInterface();
 
@@ -167,10 +169,21 @@ namespace TopView.Core
             }
 
             GameSettingsDefinition gameSettings = _catalog.gameSettings;
-            PlayerDefinition playerDefinition = _catalog.player;
-            if (gameSettings == null || playerDefinition == null)
+            if (gameSettings == null)
             {
-                Debug.LogError("Runner >> Definition Catalog에 Game Settings Definition이나 Player Definition이 연결되어 있지 않아 판을 시작할 수 없다.");
+                Debug.LogError("Runner >> Definition Catalog에 Game Settings Definition이 연결되어 있지 않아 판을 시작할 수 없다.");
+                return;
+            }
+
+            if (!TryFindPlayerSpawner(out PlayerSpawnerAuthoring playerSpawner))
+            {
+                return;
+            }
+
+            PlayerDefinition playerDefinition = playerSpawner.definition;
+            if (playerDefinition == null)
+            {
+                Debug.LogError("Runner >> Player Spawner Authoring에 Player Definition이 연결되어 있지 않아 판을 시작할 수 없다.");
                 return;
             }
 
@@ -233,7 +246,7 @@ namespace TopView.Core
             world.players = new PlayerStorage(PLAYER_CAPACITY);
             world.playerSpawnTemplate = new PlayerSpawnRequest
             {
-                position = world.rule.playerStartPosition,
+                position = playerSpawner.transform.position,
                 rotation = Quaternion.identity,
                 movement = playerDefinition.movement,
                 vitals = playerDefinition.vitals,
@@ -265,6 +278,8 @@ namespace TopView.Core
 
             Application.targetFrameRate = gameSettings.targetFrameRate;
             _world = world;
+            _playerViewPrefab = playerDefinition.viewPrefab;
+            _playerCameraPriority = playerDefinition.cameraPriority;
             _playerWeaponModelPrefabs = weaponModelPrefabs;
             _enemyViewPrefabs = enemyViewPrefabs;
             _bossViewPrefab = bossDefinition.viewPrefab;
@@ -786,6 +801,21 @@ namespace TopView.Core
             }
 
             return spawnPointsByKind;
+        }
+
+        // 씬의 Player Spawner Authoring을 찾는다. 없거나 둘 이상이면 false
+        private static bool TryFindPlayerSpawner(out PlayerSpawnerAuthoring playerSpawner)
+        {
+            PlayerSpawnerAuthoring[] playerSpawners = FindObjectsByType<PlayerSpawnerAuthoring>(FindObjectsSortMode.None);
+            playerSpawner = null;
+            if (playerSpawners.Length != 1)
+            {
+                Debug.LogError($"Runner >> 씬에 Player Spawner Authoring이 하나여야 하는데 {playerSpawners.Length}개라 판을 시작할 수 없다.");
+                return false;
+            }
+
+            playerSpawner = playerSpawners[0];
+            return true;
         }
 
         // 씬의 Boss Spawner Authoring을 찾는다. 없거나 둘 이상이면 false
