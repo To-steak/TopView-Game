@@ -24,7 +24,7 @@ namespace TopView.Systems
         /// <param name="hitRecords">명중·폭발 기록</param>
         public static void Tick(ProjectileStorage projectiles, PlayerStorage players, EnemyStorage enemies, BossStorage bosses, Queue<PlayerDamageRequest> playerDamageRequests, Queue<EnemyDamageRequest> enemyDamageRequests, Queue<BossDamageRequest> bossDamageRequests, List<ProjectileHitRecord> hitRecords)
         {
-            bool hasPlayer = EnemyBehaviorSystem.TryGetPlayerTarget(players, out EntityIdentifier playerIdentifier, out Vector3 playerPosition, out float playerRadius);
+            bool hasPlayer = TargetingSystem.TryGetPlayerTarget(players, out EntityIdentifier playerIdentifier, out Vector3 playerPosition, out float playerRadius);
 
             for (int projectileIndex = 0; projectileIndex < projectiles.entities.Length; projectileIndex++)
             {
@@ -143,7 +143,7 @@ namespace TopView.Systems
             for (int enemyIndex = 0; enemyIndex < enemies.entities.Length; enemyIndex++)
             {
                 ref readonly EnemyEntity enemy = ref enemies.entities[enemyIndex];
-                if (enemy.isAlive && IsWithin(projectile.currentPosition, enemy.currentPosition, projectile.projectile.explosionRadius + enemy.stats.hitRadius))
+                if (enemy.isAlive && TargetingSystem.IsWithin(projectile.currentPosition, enemy.currentPosition, projectile.projectile.explosionRadius + enemy.stats.hitRadius))
                 {
                     enemyDamageRequests.Enqueue(new EnemyDamageRequest
                     {
@@ -156,7 +156,7 @@ namespace TopView.Systems
             for (int bossIndex = 0; bossIndex < bosses.entities.Length; bossIndex++)
             {
                 ref readonly BossEntity boss = ref bosses.entities[bossIndex];
-                if (boss.isAlive && IsWithin(projectile.currentPosition, boss.currentPosition, projectile.projectile.explosionRadius + boss.stats.hitRadius))
+                if (boss.isAlive && TargetingSystem.IsWithin(projectile.currentPosition, boss.currentPosition, projectile.projectile.explosionRadius + boss.stats.hitRadius))
                 {
                     bossDamageRequests.Enqueue(new BossDamageRequest
                     {
@@ -180,7 +180,7 @@ namespace TopView.Systems
             for (int enemyIndex = 0; enemyIndex < enemies.entities.Length && hitCount < weapon.meleeMaxTargets; enemyIndex++)
             {
                 ref readonly EnemyEntity enemy = ref enemies.entities[enemyIndex];
-                if (!enemy.isAlive || !IsWithin(center, enemy.currentPosition, weapon.meleeRadius + enemy.stats.hitRadius))
+                if (!enemy.isAlive || !TargetingSystem.IsWithin(center, enemy.currentPosition, weapon.meleeRadius + enemy.stats.hitRadius))
                 {
                     continue;
                 }
@@ -206,7 +206,7 @@ namespace TopView.Systems
             for (int bossIndex = 0; bossIndex < bosses.entities.Length && hitCount < weapon.meleeMaxTargets; bossIndex++)
             {
                 ref readonly BossEntity boss = ref bosses.entities[bossIndex];
-                if (!boss.isAlive || !IsWithin(center, boss.currentPosition, weapon.meleeRadius + boss.stats.hitRadius))
+                if (!boss.isAlive || !TargetingSystem.IsWithin(center, boss.currentPosition, weapon.meleeRadius + boss.stats.hitRadius))
                 {
                     continue;
                 }
@@ -251,13 +251,6 @@ namespace TopView.Systems
             hitFraction = segmentLengthSquared > 0f ? Mathf.Clamp01(Vector2.Dot(toCenter, segment) / segmentLengthSquared) : 0f;
             Vector2 closestOffset = toCenter - segment * hitFraction;
             return closestOffset.sqrMagnitude <= radius * radius;
-        }
-
-        private static bool IsWithin(Vector3 from, Vector3 to, float distance)
-        {
-            float x = to.x - from.x;
-            float z = to.z - from.z;
-            return x * x + z * z <= distance * distance;
         }
 
         private static void AddHitRecord(in ProjectileEntity projectile, float hitFraction, List<ProjectileHitRecord> hitRecords)

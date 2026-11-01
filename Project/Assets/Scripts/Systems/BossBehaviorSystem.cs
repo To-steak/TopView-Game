@@ -22,7 +22,7 @@ namespace TopView.Systems
         /// <param name="gameOverRequests">게임오버 요청 큐</param>
         public static void Tick(BossStorage bosses, PlayerStorage players, System.Random random, List<BossStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<PlayerDamageRequest> playerDamageRequests, Queue<GameOverRequest> gameOverRequests)
         {
-            bool hasPlayer = EnemyBehaviorSystem.TryGetPlayerTarget(players, out EntityIdentifier playerIdentifier, out Vector3 playerPosition, out float playerRadius);
+            bool hasPlayer = TargetingSystem.TryGetPlayerTarget(players, out EntityIdentifier playerIdentifier, out Vector3 playerPosition, out float playerRadius);
             float deltaTime = Time.fixedDeltaTime;
 
             for (int bossIndex = 0; bossIndex < bosses.entities.Length; bossIndex++)
@@ -53,7 +53,7 @@ namespace TopView.Systems
                         }
                         if (hasPlayer)
                         {
-                            EnemyBehaviorSystem.TurnToward(ref boss.currentRotation, boss.currentPosition, playerPosition, deltaTime * boss.behavior.rotationSpeed);
+                            TargetingSystem.TurnToward(ref boss.currentRotation, boss.currentPosition, playerPosition, deltaTime * boss.behavior.rotationSpeed);
                         }
                         break;
 
@@ -62,7 +62,7 @@ namespace TopView.Systems
                         if (!boss.isAttackCommitted && boss.stateElapsedTicks >= attack.commitTicks)
                         {
                             boss.isAttackCommitted = true;
-                            EnemyBehaviorSystem.CommitAttack(in attack, boss.currentPosition, boss.currentRotation, boss.attackDamage, ref boss.missileShotCount, hasPlayer, in playerIdentifier, playerPosition, playerRadius, projectileSpawnRequests, playerDamageRequests);
+                            EnemyAttackSystem.CommitAttack(in attack, boss.currentPosition, boss.currentRotation, boss.attackDamage, ref boss.missileShotCount, hasPlayer, in playerIdentifier, playerPosition, playerRadius, projectileSpawnRequests, playerDamageRequests);
                         }
                         if (boss.stateElapsedTicks >= attack.durationTicks)
                         {

@@ -11,9 +11,6 @@ namespace TopView.Systems
     // 적의 행동 상태를 플레이어 감지와 상태 타이머로 바꾸고, 목적지와 공격을 정한다. 실제 이동은 EnemyNavigationSystem이 한다.
     public static class EnemyBehaviorSystem
     {
-        // 이보다 가까운 방향으로는 돌지 않는다(유닛²)
-        private const float MIN_TURN_DISTANCE_SQUARED = 0.001f;
-
         /// <summary>
         /// 살아 있는 적마다 상태 시간을 1틱 늘리고, 상태별로 감지·배회·추적·공격·소멸을 처리한다.
         /// </summary>
@@ -25,7 +22,7 @@ namespace TopView.Systems
         /// <param name="playerDamageRequests">플레이어 피해 요청 큐</param>
         public static void Tick(EnemyStorage enemies, PlayerStorage players, System.Random random, List<EnemyStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<PlayerDamageRequest> playerDamageRequests)
         {
-            bool hasPlayer = TryGetPlayerTarget(players, out EntityIdentifier playerIdentifier, out Vector3 playerPosition, out float playerRadius);
+            bool hasPlayer = TargetingSystem.TryGetPlayerTarget(players, out EntityIdentifier playerIdentifier, out Vector3 playerPosition, out float playerRadius);
             float deltaTime = Time.fixedDeltaTime;
             int failedWanderCount = 0;
             int missingAttackCount = 0;
@@ -41,7 +38,7 @@ namespace TopView.Systems
 
                 EntityIdentifier identifier = new EntityIdentifier { index = enemyIndex, generation = enemy.generation };
                 enemy.stateElapsedTicks++;
-                bool isPlayerDetected = hasPlayer && IsWithin(enemy.currentPosition, playerPosition, enemy.behavior.detectionRadius + playerRadius);
+                bool isPlayerDetected = hasPlayer && TargetingSystem.IsWithin(enemy.currentPosition, playerPosition, enemy.behavior.detectionRadius + playerRadius);
 
                 switch (enemy.state)
                 {
@@ -136,99 +133,6 @@ namespace TopView.Systems
             }
         }
 
-        /// <summary>
-        /// 살아 있는 플레이어의 위치와 피격 반지름을 돌려준다.
-        /// </summary>
-        /// <param name="players">플레이어 저장소</param>
-        /// <param name="playerIdentifier">플레이어를 가리키는 값</param>
-        /// <param name="playerPosition">플레이어 위치(월드)</param>
-        /// <param name="playerRadius">플레이어 이동 충돌 캡슐의 반지름. 감지와 공격 범위에 더한다</param>
-        /// <returns>살아 있는 플레이어가 있으면 true</returns>
-        public static bool TryGetPlayerTarget(PlayerStorage players, out EntityIdentifier playerIdentifier, out Vector3 playerPosition, out float playerRadius)
-        {
-            for (int playerIndex = 0; playerIndex < players.entities.Length; playerIndex++)
-            {
-                ref readonly PlayerEntity player = ref players.entities[playerIndex];
-                if (!player.isAlive)
-                {
-                    continue;
-                }
-
-                playerIdentifier = new EntityIdentifier { index = playerIndex, generation = player.generation };
-                playerPosition = player.currentPosition;
-                playerRadius = player.movement.capsuleRadius;
-                return true;
-            }
-
-            playerIdentifier = default;
-            playerPosition = Vector3.zero;
-            playerRadius = 0f;
-            return false;
-        }
-
-        /// <summary>
-        /// 공격 하나를 내보낸다. Body는 범위 안의 플레이어에게 피해 요청을 넣고, 나머지는 투사체 생성 요청을 넣는다.
-        /// </summary>
-        /// <param name="attack">공격 값</param>
-        /// <param name="position">공격하는 쪽의 위치(월드)</param>
-        /// <param name="rotation">공격하는 쪽의 회전(월드)</param>
-        /// <param name="attackDamage">공격하는 쪽의 공격력</param>
-        /// <param name="missileShotCount">BossMissile을 쏜 횟수. 짝수·홀수로 발사 위치를 고르고 1 늘린다</param>
-        /// <param name="hasPlayer">살아 있는 플레이어가 있는지</param>
-        /// <param name="playerIdentifier">플레이어를 가리키는 값</param>
-        /// <param name="playerPosition">플레이어 위치(월드)</param>
-        /// <param name="playerRadius">플레이어 피격 반지름</param>
-        /// <param name="projectileSpawnRequests">투사체 생성 요청 큐</param>
-        /// <param name="playerDamageRequests">플레이어 피해 요청 큐</param>
-        public static void CommitAttack(in EnemyAttackComponent attack, Vector3 position, Quaternion rotation, float attackDamage, ref int missileShotCount, bool hasPlayer, in EntityIdentifier playerIdentifier, Vector3 playerPosition, float playerRadius, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<PlayerDamageRequest> playerDamageRequests)
-        {
-            float damage = attackDamage * attack.damageMultiplier;
-
-            if (attack.kind == EnemyAttackKind.Body)
-            {
-                Vector3 center = position + rotation * Vector3.forward * attack.bodyOffset;
-                if (hasPlayer && IsWithin(center, playerPosition, attack.bodyRadius + playerRadius))
-                {
-                    playerDamageRequests.Enqueue(new PlayerDamageRequest { target = playerIdentifier, amount = damage });
-                }
-                return;
-            }
-
-            Vector3 spawnOffset = attack.spawnOffset;
-            if (attack.kind == EnemyAttackKind.BossMissile)
-            {
-                spawnOffset = missileShotCount % 2 == 0 ? attack.spawnOffset : attack.alternateSpawnOffset;
-                missileShotCount++;
-            }
-
-            projectileSpawnRequests.Enqueue(new ProjectileSpawnRequest
-            {
-                projectile = attack.projectile,
-                isTargetingPlayer = true,
-                damage = damage,
-                position = position + rotation * spawnOffset,
-                rotation = rotation,
-                velocity = rotation * Vector3.forward * attack.projectile.speed
-            });
-        }
-
-        /// <summary>
-        /// 목표 쪽(XZ)으로 남은 각도의 일부만큼 돈다.
-        /// </summary>
-        /// <param name="rotation">돌릴 회전</param>
-        /// <param name="position">도는 쪽의 위치(월드)</param>
-        /// <param name="targetPosition">바라볼 위치(월드)</param>
-        /// <param name="fraction">이번 틱에 돌 비율(0~1)</param>
-        public static void TurnToward(ref Quaternion rotation, Vector3 position, Vector3 targetPosition, float fraction)
-        {
-            Vector3 direction = targetPosition - position;
-            direction.y = 0f;
-            if (direction.sqrMagnitude > MIN_TURN_DISTANCE_SQUARED)
-            {
-                rotation = Quaternion.Slerp(rotation, Quaternion.LookRotation(direction), fraction);
-            }
-        }
-
         // 플레이어를 감지하면 쫓고, 아니면 배회 시간이 될 때마다 배회 지점으로 걷는다. 배회 지점을 고르지 못했으면 false를 돌려준다.
         private static bool UpdateIdle(ref EnemyEntity enemy, in EntityIdentifier identifier, bool isPlayerDetected, Vector3 playerPosition, System.Random random, List<EnemyStateChangedRecord> stateRecords)
         {
@@ -260,7 +164,7 @@ namespace TopView.Systems
         {
             if (enemy.hasAttackTarget && !enemy.isAttackCommitted && hasPlayer)
             {
-                TurnToward(ref enemy.currentRotation, enemy.currentPosition, playerPosition, deltaTime * enemy.behavior.attackRotationSpeed);
+                TargetingSystem.TurnToward(ref enemy.currentRotation, enemy.currentPosition, playerPosition, deltaTime * enemy.behavior.attackRotationSpeed);
             }
 
             ref readonly EnemyAttackComponent attack = ref enemy.attacks[enemy.attackIndex];
@@ -268,7 +172,7 @@ namespace TopView.Systems
             {
                 enemy.isAttackCommitted = true;
                 int missileShotCount = 0;
-                CommitAttack(in attack, enemy.currentPosition, enemy.currentRotation, enemy.attackDamage, ref missileShotCount, hasPlayer, in playerIdentifier, playerPosition, playerRadius, projectileSpawnRequests, playerDamageRequests);
+                EnemyAttackSystem.CommitAttack(in attack, enemy.currentPosition, enemy.currentRotation, enemy.attackDamage, ref missileShotCount, hasPlayer, in playerIdentifier, playerPosition, playerRadius, projectileSpawnRequests, playerDamageRequests);
             }
 
             if (enemy.stateElapsedTicks >= attack.durationTicks)
@@ -339,13 +243,6 @@ namespace TopView.Systems
             enemy.pathCornerCount = 0;
             enemy.pathCornerIndex = 0;
             enemy.velocity = Vector3.zero;
-        }
-
-        private static bool IsWithin(Vector3 from, Vector3 to, float distance)
-        {
-            float x = to.x - from.x;
-            float z = to.z - from.z;
-            return x * x + z * z <= distance * distance;
         }
     }
 }
