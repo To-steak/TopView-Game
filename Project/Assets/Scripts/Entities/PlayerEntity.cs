@@ -60,7 +60,7 @@ namespace TopView.Entities
         public WeaponComponent[] weapons;
         // 들고 있는 무기 번호
         public int currentWeaponIndex;
-        // 교체 상태에 들어갈 때 바꿀 무기 번호
+        // 교체 상태에서 swapStartTicks에 바꿀 무기 번호
         public int pendingWeaponIndex;
     }
 }

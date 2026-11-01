@@ -10,6 +10,8 @@ namespace TopView.Components
         public int dodgeTicks;
         // 착지 동작 상태의 길이(틱)
         public int landTicks;
+        // 무기 교체 상태에 들어간 뒤 무기가 바뀌기까지의 시간(틱)
+        public int swapStartTicks;
         // 무기 교체 상태의 길이(틱)
         public int swapTicks;
         // 재장전 상태의 길이(틱). 끝날 때 탄약이 채워진다

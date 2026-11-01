@@ -171,6 +171,13 @@ namespace TopView.Systems
                     break;
 
                 case PlayerState.Swap:
+                    // swapStartTicks가 상태 길이보다 길어도 상태가 끝나기 전에 무기를 바꾼다
+                    if (player.currentWeaponIndex != player.pendingWeaponIndex && player.stateElapsedTicks >= Mathf.Min(player.action.swapStartTicks, player.action.swapTicks))
+                    {
+                        player.currentWeaponIndex = player.pendingWeaponIndex;
+                        player.attackCooldownTicks = 0;
+                    }
+
                     if (player.stateElapsedTicks >= player.action.swapTicks)
                     {
                         FinishAction(ref player, in identifier, command.moveDirection, stateRecords);
@@ -356,8 +363,6 @@ namespace TopView.Systems
 
                 case PlayerState.Swap:
                     player.moveDirection = Vector3.zero;
-                    player.currentWeaponIndex = player.pendingWeaponIndex;
-                    player.attackCooldownTicks = 0;
                     break;
 
                 case PlayerState.Reload:
