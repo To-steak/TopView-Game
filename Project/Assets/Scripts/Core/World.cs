@@ -34,6 +34,10 @@ namespace TopView.Core
         public BossStorage bosses;
         // 투사체 저장소
         public ProjectileStorage projectiles;
+        // 이번 틱의 피격 대상 목록. 판 시작 때 플레이어·적·보스 저장소 칸 수의 합으로 만들고, 매 틱 HitTargetSystem이 다시 채운다
+        public HitTargetComponent[] hitTargets;
+        // 피격 대상 목록에서 이번 틱에 채운 대상 수
+        public int hitTargetCount;
 
         // 판을 준비할 때 종류별로 Definition 값을 채워 둔 적 생성 요청. 번호가 적 종류 번호다
         public EnemySpawnRequest[] enemySpawnTemplates;

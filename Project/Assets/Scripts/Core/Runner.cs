@@ -75,7 +75,9 @@ namespace TopView.Core
                 BossBehaviorSystem.Tick(_world.bosses, _world.players, _world.random, _world.bossStateChangedRecords, _world.projectileSpawnRequests, _world.damageRequests, _world.gameOverRequests);
                 EnemyNavigationSystem.Tick(_world.enemies, _world.navigationPath);
                 ProjectileSystem.Tick(_world.projectiles);
-                HitSystem.Tick(_world.projectiles, _world.players, _world.enemies, _world.bosses, _world.damageRequests, _world.projectileHitRecords);
+                HitTargetSystem.Tick(_world.players, _world.enemies, _world.bosses, _world.hitTargets, ref _world.hitTargetCount);
+                ProjectileHitSystem.Tick(_world.projectiles, _world.hitTargets, _world.hitTargetCount, _world.damageRequests, _world.projectileHitRecords);
+                HitSystem.Tick(_world.players, _world.enemies, _world.bosses, _world.damageRequests);
             }
 
             GameRuleSystem.Tick(ref _world.progress, _world.gameOverRequests);
@@ -198,6 +200,7 @@ namespace TopView.Core
             world.bosses = new BossStorage(BOSS_CAPACITY);
             world.bossSpawnTemplate = bossSpawnTemplate;
             world.projectiles = new ProjectileStorage(gameSettings.projectileCapacity);
+            world.hitTargets = new HitTargetComponent[world.players.entities.Length + world.enemies.entities.Length + world.bosses.entities.Length];
 
             world.progress = new GameProgressComponent
             {
