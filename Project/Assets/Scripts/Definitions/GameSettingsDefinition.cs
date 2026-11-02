@@ -11,11 +11,11 @@ namespace TopView.Definitions
         public GameRuleComponent rule;
         // Application.targetFrameRate에 넣을 값. Logic은 쓰지 않는다
         public int targetFrameRate;
-        // 적 종류마다 동시에 있을 수 있는 최대 수. 판을 준비할 때 적 저장소 칸 수로 쓴다
+        // 적 종류마다 동시에 있을 수 있는 최대 수. 판을 준비할 때 적 구간 칸 수로 쓴다
         public int enemyCapacityPerKind;
         // 적 하나의 경로에 담을 수 있는 꺾이는 점의 최대 수. 시작점도 한 칸을 쓴다
         public int enemyPathCornerCapacity;
-        // 동시에 있을 수 있는 투사체 최대 수. 판을 준비할 때 투사체 저장소 칸 수로 쓴다
+        // 동시에 있을 수 있는 투사체 최대 수. 판을 준비할 때 투사체 구간 칸 수로 쓴다
         public int projectileCapacity;
     }
 }
