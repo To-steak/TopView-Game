@@ -1,6 +1,6 @@
 namespace TopView.Components
 {
-    // 런타임 값. 적과 보스의 레벨과 그에 맞춰 생성 때 계산한 공격력.
+    // 런타임 값. 적의 레벨과 그에 맞춰 생성 때 계산한 공격력.
     public struct CombatComponent
     {
         // 레벨

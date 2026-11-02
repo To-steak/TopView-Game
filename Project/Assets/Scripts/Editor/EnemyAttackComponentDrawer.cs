@@ -6,7 +6,7 @@ namespace TopView.Editor
 {
     // EnemyAttackComponent 아래에 클립 구간 변환 칸을 붙인다.
     // Body는 시작·끝 백분율과 클립 길이로 Start/End/Duration Ticks를, 투사체 공격은 시작 백분율과 클립 길이로 Start/Duration Ticks를 채우고 End 칸을 숨긴다.
-    // 공격 종류가 쓰지 않는 칸도 숨긴다. Body는 투사체와 발사 위치, 투사체 공격은 Body 판정, BossMissile이 아닌 공격은 번갈아 쏘는 위치, 보스 공격은 사거리와 대기시간이다.
+    // 공격 종류가 쓰지 않는 칸도 숨긴다. Body는 투사체와 발사 위치, 투사체 공격은 Body 판정, BossMissile이 아닌 공격은 번갈아 쏘는 위치다.
     [CustomPropertyDrawer(typeof(EnemyAttackComponent))]
     public class EnemyAttackComponentDrawer : AnimationTicksDrawer
     {
@@ -25,11 +25,6 @@ namespace TopView.Editor
             }
 
             EnemyAttackKind kind = (EnemyAttackKind)property.FindPropertyRelative(nameof(EnemyAttackComponent.kind)).intValue;
-            if (childName == nameof(EnemyAttackComponent.attackRange) || childName == nameof(EnemyAttackComponent.cooldownTicks))
-            {
-                return kind != EnemyAttackKind.Missile;
-            }
-
             if (childName == nameof(EnemyAttackComponent.alternateSpawnOffset))
             {
                 return kind != EnemyAttackKind.BossMissile;

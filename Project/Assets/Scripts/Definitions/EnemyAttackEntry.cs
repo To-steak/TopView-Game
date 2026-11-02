@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace TopView.Definitions
 {
-    // 적·보스 공격 하나의 Logic 값과 View용 프리팹 묶음
+    // 적 공격 하나의 Logic 값과 View용 프리팹 묶음
     [Serializable]
     public struct EnemyAttackEntry
     {

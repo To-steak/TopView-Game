@@ -14,7 +14,7 @@ namespace TopView.Core
         private GameObject[] _projectilePrefabs;
         private GameObject[] _hitEffectPrefabs;
 
-        // 적·보스 공격 목록에서 엔티티에 담을 공격 값을 꺼내고, 투사체마다 View와 피격 이펙트를 표에 올린다.
+        // 적 공격 목록에서 엔티티에 담을 공격 값을 꺼내고, 투사체마다 View와 피격 이펙트를 표에 올린다.
         private static EnemyAttackComponent[] ReadAttacks(string definitionName, EnemyAttackEntry[] entries, List<GameObject> projectilePrefabs, List<GameObject> hitEffectPrefabs)
         {
             EnemyAttackComponent[] attacks = new EnemyAttackComponent[entries.Length];

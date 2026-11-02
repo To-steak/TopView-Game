@@ -13,6 +13,7 @@ namespace TopView.Presentation.Enemy.ViewSystems
         private static readonly int IS_WALK_HASH = Animator.StringToHash("isWalk");
         private static readonly int ATTACK_HASH = Animator.StringToHash("Attack");
         private static readonly int SHOT_HASH = Animator.StringToHash("Shot");
+        private static readonly int BIG_SHOT_HASH = Animator.StringToHash("BigShot");
         private static readonly int DIE_HASH = Animator.StringToHash("Die");
         private static readonly int IDLE_STATE_HASH = Animator.StringToHash("Idle");
 
@@ -112,11 +113,24 @@ namespace TopView.Presentation.Enemy.ViewSystems
                     break;
                 case EnemyState.Attack:
                     animator.SetBool(IS_WALK_HASH, false);
-                    animator.SetTrigger(record.attackKind == EnemyAttackKind.Body ? ATTACK_HASH : SHOT_HASH);
+                    animator.SetTrigger(GetAttackTriggerHash(record.attackKind));
                     break;
                 case EnemyState.Die:
                     animator.SetTrigger(DIE_HASH);
                     break;
+            }
+        }
+
+        private static int GetAttackTriggerHash(EnemyAttackKind attackKind)
+        {
+            switch (attackKind)
+            {
+                case EnemyAttackKind.Body:
+                    return ATTACK_HASH;
+                case EnemyAttackKind.BossRock:
+                    return BIG_SHOT_HASH;
+                default:
+                    return SHOT_HASH;
             }
         }
 

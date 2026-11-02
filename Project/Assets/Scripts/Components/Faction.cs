@@ -5,7 +5,7 @@ namespace TopView.Components
     {
         // 플레이어 편
         Player,
-        // 적과 보스 편
+        // 적 편
         Enemy
     }
 }

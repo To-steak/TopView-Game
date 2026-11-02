@@ -17,7 +17,6 @@ namespace TopView.Core
 
             DrawPlayerGizmos();
             DrawEnemyGizmos();
-            DrawBossGizmos();
             DrawMeleeGizmos();
             DrawProjectileGizmos();
         }

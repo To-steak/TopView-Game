@@ -25,7 +25,7 @@ namespace TopView.Systems
         /// <param name="enemyStats">피격 반지름 값</param>
         /// <param name="playerHitTargets">플레이어 피격 대상 목록. 길이는 플레이어 칸 수다</param>
         /// <param name="playerHitTargetCount">플레이어 피격 대상 목록에서 이번 틱에 채운 대상 수</param>
-        /// <param name="enemyHitTargets">적 피격 대상 목록. 길이는 적·보스 칸 수의 합이다</param>
+        /// <param name="enemyHitTargets">적 피격 대상 목록. 길이는 적 칸 수다</param>
         /// <param name="enemyHitTargetCount">적 피격 대상 목록에서 이번 틱에 채운 대상 수</param>
         public static void Tick(ComponentMask[] masks, int[] generations, PositionComponent[] positions, RotationComponent[] rotations, HealthComponent[] healths, PlayerMovementComponent[] movements, EnemyStatsComponent[] enemyStats, HitTargetComponent[] playerHitTargets, ref int playerHitTargetCount, HitTargetComponent[] enemyHitTargets, ref int enemyHitTargetCount)
         {

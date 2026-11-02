@@ -13,8 +13,6 @@ namespace TopView.Entities
         Combat = 1UL << 8,
         EnemyStats = 1UL << 9,
         AttackList = 1UL << 10,
-        BossBehavior = 1UL << 11,
-        BossActionState = 1UL << 12,
         EnemyKind = 1UL << 13,
         EnemyBehavior = 1UL << 14,
         EnemyActionState = 1UL << 15,
@@ -30,8 +28,6 @@ namespace TopView.Entities
 
         // 적이 가지는 컴포넌트 조합
         EnemyArchetype = Position | Rotation | Health | Combat | EnemyStats | AttackList | EnemyKind | EnemyBehavior | EnemyActionState | NavigationAgent,
-        // 보스가 가지는 컴포넌트 조합
-        BossArchetype = Position | Rotation | Health | Combat | EnemyStats | AttackList | BossBehavior | BossActionState,
         // 플레이어가 가지는 컴포넌트 조합
         PlayerArchetype = Position | Rotation | Health | Mana | PlayerMovement | PlayerVitals | PlayerAction | PlayerActionState | PlayerMotion | WeaponList | WeaponSlots
     }

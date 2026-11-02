@@ -15,8 +15,6 @@ namespace TopView.Entities
 
         // 적 종류별 구간의 빈 칸 번호 목록. EnemySpawnSystem이 끝에서부터 꺼낸다
         public List<int>[] freeEnemyIndicesByKind;
-        // 보스 구간의 빈 칸 번호 목록. BossSpawnSystem이 끝에서부터 꺼낸다
-        public List<int> freeBossIndices;
         // 플레이어 구간의 빈 칸 번호 목록. PlayerSpawnSystem이 끝에서부터 꺼낸다
         public List<int> freePlayerIndices;
 
@@ -32,10 +30,6 @@ namespace TopView.Entities
         public EnemyStatsComponent[] enemyStats;
         // 공격 목록
         public AttackListComponent[] attackLists;
-        // 보스 행동 값. 생성 때 Definition에서 복사한다
-        public BossBehaviorComponent[] bossBehaviors;
-        // 보스 행동 상태와 공격 진행
-        public BossActionStateComponent[] bossActionStates;
         // 적 종류 번호
         public EnemyKindComponent[] enemyKinds;
         // 적 행동 값. 생성 때 Definition에서 복사한다
@@ -67,13 +61,11 @@ namespace TopView.Entities
         /// <param name="enemyKindCount">적 종류 수</param>
         /// <param name="enemyCapacityPerKind">적 종류별 칸 수</param>
         /// <param name="pathCornerCapacity">적 칸마다 미리 만들어 둘 경로 배열의 크기</param>
-        /// <param name="bossCapacity">보스 칸 수</param>
         /// <param name="playerCapacity">플레이어 칸 수</param>
-        public EntityStorage(int enemyKindCount, int enemyCapacityPerKind, int pathCornerCapacity, int bossCapacity, int playerCapacity)
+        public EntityStorage(int enemyKindCount, int enemyCapacityPerKind, int pathCornerCapacity, int playerCapacity)
         {
             int enemyEnd = enemyKindCount * enemyCapacityPerKind;
-            int bossEnd = enemyEnd + bossCapacity;
-            int capacity = bossEnd + playerCapacity;
+            int capacity = enemyEnd + playerCapacity;
             masks = new ComponentMask[capacity];
             generations = new int[capacity];
             positions = new PositionComponent[capacity];
@@ -82,8 +74,6 @@ namespace TopView.Entities
             combats = new CombatComponent[capacity];
             enemyStats = new EnemyStatsComponent[capacity];
             attackLists = new AttackListComponent[capacity];
-            bossBehaviors = new BossBehaviorComponent[capacity];
-            bossActionStates = new BossActionStateComponent[capacity];
             enemyKinds = new EnemyKindComponent[capacity];
             enemyBehaviors = new EnemyBehaviorComponent[capacity];
             enemyActionStates = new EnemyActionStateComponent[capacity];
@@ -109,14 +99,8 @@ namespace TopView.Entities
                 }
             }
 
-            freeBossIndices = new List<int>(bossCapacity);
-            for (int index = bossEnd - 1; index >= enemyEnd; index--)
-            {
-                freeBossIndices.Add(index);
-            }
-
             freePlayerIndices = new List<int>(playerCapacity);
-            for (int index = capacity - 1; index >= bossEnd; index--)
+            for (int index = capacity - 1; index >= enemyEnd; index--)
             {
                 freePlayerIndices.Add(index);
             }

@@ -60,8 +60,7 @@ namespace TopView.Systems
                 if (!actionState.isAttackCommitted && actionState.elapsedTicks >= attack.startTicks)
                 {
                     actionState.isAttackCommitted = true;
-                    int missileShotCount = 0;
-                    EnemyAttackSystem.CommitAttack(in attack, position, rotation.current, combats[index].attackDamage, ref missileShotCount, in identifier, projectileSpawnRequests, meleeSpawnRequests);
+                    EnemyAttackSystem.CommitAttack(in attack, position, rotation.current, combats[index].attackDamage, ref actionState.missileShotCount, in identifier, projectileSpawnRequests, meleeSpawnRequests);
                 }
 
                 if (EnemyAttackSystem.IsAttackFinished(in attack, actionState.elapsedTicks, actionState.isAttackCommitted))

@@ -39,23 +39,6 @@ namespace TopView.Systems
         }
 
         /// <summary>
-        /// 목표 쪽(XZ)으로 남은 각도의 일부만큼 돈다.
-        /// </summary>
-        /// <param name="rotation">돌릴 회전</param>
-        /// <param name="position">도는 쪽의 위치(월드)</param>
-        /// <param name="targetPosition">바라볼 위치(월드)</param>
-        /// <param name="fraction">이번 틱에 돌 비율(0~1)</param>
-        public static void TurnToward(ref Quaternion rotation, Vector3 position, Vector3 targetPosition, float fraction)
-        {
-            Vector3 direction = targetPosition - position;
-            direction.y = 0f;
-            if (direction.sqrMagnitude > MIN_TURN_DISTANCE_SQUARED)
-            {
-                rotation = Quaternion.Slerp(rotation, Quaternion.LookRotation(direction), fraction);
-            }
-        }
-
-        /// <summary>
         /// 목표 쪽(XZ)으로 주어진 각도까지 돈다.
         /// </summary>
         /// <param name="rotation">돌릴 회전</param>

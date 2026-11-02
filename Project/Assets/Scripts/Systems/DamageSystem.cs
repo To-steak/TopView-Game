@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace TopView.Systems
 {
-    // 피해 요청을 방향별로 체력에 반영하고, 적·보스를 처치하면 점수와 골드를 더한다. 사망 상태로 바꾸는 일은 각 상태 System이 체력을 보고 한다.
+    // 피해 요청을 방향별로 체력에 반영하고, 적을 처치하면 점수와 골드를 더한다. 사망 상태로 바꾸는 일은 각 상태 System이 체력을 보고 한다.
     public static class DamageSystem
     {
         /// <summary>

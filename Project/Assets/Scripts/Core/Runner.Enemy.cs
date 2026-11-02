@@ -90,6 +90,11 @@ namespace TopView.Core
                 {
                     viewPrefabs[kind] = definition.viewPrefab;
                 }
+                // 오버레이 체력 바로 체력을 보여 주는 종류는 게이지를 두지 않아도 된다
+                if (definition.healthGaugePrefab == null && definition.behavior.showsOverlayHealthBar)
+                {
+                    continue;
+                }
                 // 체력 게이지는 표시용이라 빠져 있어도 판은 시작하고, 그 종류는 게이지 없이 둔다
                 if (definition.healthGaugePrefab == null || definition.healthGaugePrefab.GetComponent<EnemyHealthGaugeView>() == null)
                 {

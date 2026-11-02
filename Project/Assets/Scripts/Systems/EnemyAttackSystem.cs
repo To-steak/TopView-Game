@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace TopView.Systems
 {
-    // 적·보스가 함께 쓰는 공격 내보내기 도구.
+    // 적의 공격 내보내기 도구.
     public static class EnemyAttackSystem
     {
         /// <summary>

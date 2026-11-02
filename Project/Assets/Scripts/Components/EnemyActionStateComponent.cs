@@ -17,5 +17,7 @@ namespace TopView.Components
         public int[] attackCooldownRemainingTicks;
         // 지금 공격 상태에서 공격이 이미 나갔는지
         public bool isAttackCommitted;
+        // BossMissile을 쏜 횟수. 짝수·홀수로 발사 위치를 번갈아 고른다
+        public int missileShotCount;
     }
 }
