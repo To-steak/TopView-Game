@@ -6,7 +6,7 @@ namespace TopView.Components
     public struct MeleeComponent
     {
         // 공격한 엔티티
-        public EntityReference owner;
+        public EntityIdentifier owner;
         // 판정 원의 반지름(유닛, XZ)
         public float radius;
         // 판정하는 시간(틱). 1 이하이면 한 틱만 판정한다

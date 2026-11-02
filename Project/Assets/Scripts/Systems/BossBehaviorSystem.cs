@@ -23,15 +23,15 @@ namespace TopView.Systems
         /// <param name="behaviors">보스 행동 값</param>
         /// <param name="actionStates">보스 행동 상태와 공격 진행</param>
         /// <param name="freeBossIndices">보스 구간의 빈 칸 번호 목록</param>
-        /// <param name="players">플레이어 저장소. 바라보고 공격할 대상이다</param>
+        /// <param name="playerMovements">플레이어 이동 값. 바라보고 공격할 대상의 반지름을 읽는다</param>
         /// <param name="random">World의 난수 생성기</param>
         /// <param name="stateRecords">보스 상태 변경 기록</param>
         /// <param name="projectileSpawnRequests">투사체 생성 요청 큐</param>
         /// <param name="meleeSpawnRequests">근접 판정 생성 요청 큐</param>
         /// <param name="gameOverRequests">게임오버 요청 큐</param>
-        public static void Tick(ComponentMask[] masks, int[] generations, HealthComponent[] healths, CombatComponent[] combats, PositionComponent[] positions, RotationComponent[] rotations, AttackListComponent[] attackLists, BossBehaviorComponent[] behaviors, BossActionStateComponent[] actionStates, List<int> freeBossIndices, PlayerStorage players, System.Random random, List<BossStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, Queue<GameOverRequest> gameOverRequests)
+        public static void Tick(ComponentMask[] masks, int[] generations, HealthComponent[] healths, CombatComponent[] combats, PositionComponent[] positions, RotationComponent[] rotations, AttackListComponent[] attackLists, BossBehaviorComponent[] behaviors, BossActionStateComponent[] actionStates, List<int> freeBossIndices, PlayerMovementComponent[] playerMovements, System.Random random, List<BossStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, Queue<GameOverRequest> gameOverRequests)
         {
-            bool hasPlayer = TargetingSystem.TryGetPlayerTarget(players, out Vector3 playerPosition, out float _);
+            bool hasPlayer = TargetingSystem.TryGetPlayerTarget(masks, positions, playerMovements, out Vector3 playerPosition, out float _);
             float deltaTime = Time.fixedDeltaTime;
 
             for (int index = 0; index < masks.Length; index++)
@@ -79,8 +79,7 @@ namespace TopView.Systems
                         if (!actionState.isAttackCommitted && actionState.elapsedTicks >= attack.startTicks)
                         {
                             actionState.isAttackCommitted = true;
-                            EntityReference owner = new EntityReference { kind = EntityKind.Shared, identifier = identifier };
-                            EnemyAttackSystem.CommitAttack(in attack, positions[index].current, rotations[index].current, combats[index].attackDamage, ref actionState.missileShotCount, in owner, projectileSpawnRequests, meleeSpawnRequests);
+                            EnemyAttackSystem.CommitAttack(in attack, positions[index].current, rotations[index].current, combats[index].attackDamage, ref actionState.missileShotCount, in identifier, projectileSpawnRequests, meleeSpawnRequests);
                         }
                         if (EnemyAttackSystem.IsAttackFinished(in attack, actionState.elapsedTicks, actionState.isAttackCommitted))
                         {

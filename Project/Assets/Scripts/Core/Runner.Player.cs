@@ -110,18 +110,17 @@ namespace TopView.Core
         // 플레이어 이동 충돌에 쓰는 캡슐을 Logic 위치에 그린다. 착지 중이면 초록, 공중이면 노랑
         private void DrawPlayerGizmos()
         {
-            PlayerEntity[] players = _world.players.entities;
-            for (int playerIndex = 0; playerIndex < players.Length; playerIndex++)
+            EntityStorage entities = _world.entities;
+            for (int index = 0; index < entities.masks.Length; index++)
             {
-                ref readonly PlayerEntity player = ref players[playerIndex];
-                if (!player.isAlive)
+                if ((entities.masks[index] & ComponentMask.PlayerArchetype) != ComponentMask.PlayerArchetype)
                 {
                     continue;
                 }
 
-                PlayerMovementSystem.GetCapsulePoints(in player, player.position.current, out Vector3 top, out Vector3 bottom);
-                float radius = player.movement.capsuleRadius;
-                Gizmos.color = player.motion.isGrounded ? Color.green : Color.yellow;
+                PlayerMovementSystem.GetCapsulePoints(in entities.playerMovements[index], entities.rotations[index].current, entities.positions[index].current, out Vector3 top, out Vector3 bottom);
+                float radius = entities.playerMovements[index].capsuleRadius;
+                Gizmos.color = entities.playerMotions[index].isGrounded ? Color.green : Color.yellow;
                 Gizmos.DrawWireSphere(top, radius);
                 Gizmos.DrawWireSphere(bottom, radius);
                 Gizmos.DrawLine(top + Vector3.forward * radius, bottom + Vector3.forward * radius);

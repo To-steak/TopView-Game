@@ -24,9 +24,7 @@ namespace TopView.Core
         // 적 경로 계산에 다시 쓰는 NavMeshPath
         public NavMeshPath navigationPath = new NavMeshPath();
 
-        // 플레이어 저장소
-        public PlayerStorage players;
-        // 공유 저장소. 지금은 플레이어를 뺀 모든 엔티티를 담는다
+        // 공유 저장소. 모든 엔티티를 담는다
         public EntityStorage entities;
         // 이번 틱의 피격 대상 목록. 판 시작 때 플레이어·적·보스 저장소 칸 수의 합으로 만들고, 매 틱 HitTargetSystem이 다시 채운다
         public HitTargetComponent[] hitTargets;

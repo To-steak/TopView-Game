@@ -7,7 +7,7 @@ namespace TopView.Components
     public struct HitTargetComponent
     {
         // 맞을 엔티티
-        public EntityReference target;
+        public EntityIdentifier target;
         // 대상의 진영
         public Faction faction;
         // 위치(월드)

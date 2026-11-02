@@ -8,7 +8,7 @@ namespace TopView.Requests
     public struct MeleeSpawnRequest
     {
         // 공격한 엔티티
-        public EntityReference owner;
+        public EntityIdentifier owner;
         // 공격한 쪽의 진영
         public Faction faction;
         // 판정 원의 중심(월드)

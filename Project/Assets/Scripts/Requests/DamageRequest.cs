@@ -6,7 +6,7 @@ namespace TopView.Requests
     public struct DamageRequest
     {
         // 피해를 받을 엔티티
-        public EntityReference target;
+        public EntityIdentifier target;
         // 피해량
         public float amount;
     }

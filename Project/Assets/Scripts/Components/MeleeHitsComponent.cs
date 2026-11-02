@@ -6,7 +6,7 @@ namespace TopView.Components
     public struct MeleeHitsComponent
     {
         // 이미 맞힌 대상. 저장소를 만들 때 할당해 다시 쓰는 배열이며 count까지만 쓴다
-        public EntityReference[] targets;
+        public EntityIdentifier[] targets;
         // 이미 맞힌 대상 수
         public int count;
     }
