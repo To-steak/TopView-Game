@@ -13,42 +13,34 @@ namespace TopView.Systems
         /// <summary>
         /// Straight 투사체는 이번 틱의 이동 선분에서 가장 먼저 닿은 대상 하나에, 시간이 된 Grenade는 폭발 반경 안의 대상 모두에게 피해 요청을 넣고 사라진다.
         /// </summary>
-        /// <param name="masks">칸별 컴포넌트 표시</param>
-        /// <param name="projectiles">투사체 값</param>
-        /// <param name="motions">투사체 이동 상태</param>
-        /// <param name="positions">위치</param>
-        /// <param name="payloads">공격의 진영과 피해량</param>
-        /// <param name="freeProjectileIndices">투사체 구간의 빈 칸 번호 목록</param>
+        /// <param name="projectiles">투사체 저장소</param>
         /// <param name="hitTargets">피격 대상 목록</param>
         /// <param name="hitTargetCount">피격 대상 목록에서 이번 틱에 채운 대상 수</param>
         /// <param name="damageRequests">피해 요청 큐</param>
         /// <param name="hitRecords">명중·폭발 기록</param>
-        public static void Tick(ComponentMask[] masks, ProjectileComponent[] projectiles, ProjectileMotionComponent[] motions, PositionComponent[] positions, AttackPayloadComponent[] payloads, List<int> freeProjectileIndices, HitTargetComponent[] hitTargets, int hitTargetCount, Queue<DamageRequest> damageRequests, List<ProjectileHitRecord> hitRecords)
+        public static void Tick(ProjectileStorage projectiles, HitTargetComponent[] hitTargets, int hitTargetCount, Queue<DamageRequest> damageRequests, List<ProjectileHitRecord> hitRecords)
         {
-            for (int index = 0; index < masks.Length; index++)
+            for (int index = 0; index < projectiles.entities.Length; index++)
             {
-                if ((masks[index] & ComponentMask.ProjectileArchetype) != ComponentMask.ProjectileArchetype)
+                ref readonly ProjectileEntity entity = ref projectiles.entities[index];
+                if (!entity.isAlive)
                 {
                     continue;
                 }
 
-                ref readonly ProjectileComponent projectile = ref projectiles[index];
-                ref readonly PositionComponent position = ref positions[index];
-                ref readonly AttackPayloadComponent payload = ref payloads[index];
-
-                if (projectile.kind == ProjectileKind.Grenade)
+                if (entity.projectile.kind == ProjectileKind.Grenade)
                 {
-                    if (motions[index].elapsedTicks >= projectile.fuseTicks)
+                    if (entity.motion.elapsedTicks >= entity.projectile.fuseTicks)
                     {
-                        Explode(in projectile, in position, in payload, hitTargets, hitTargetCount, damageRequests, hitRecords);
-                        SpawnSystem.ReleaseSlot(masks, freeProjectileIndices, index);
+                        Explode(in entity.projectile, in entity.position, in entity.payload, hitTargets, hitTargetCount, damageRequests, hitRecords);
+                        ProjectileSystem.Despawn(projectiles, index);
                     }
                     continue;
                 }
 
-                if (HitNearest(in projectile, in position, in payload, hitTargets, hitTargetCount, damageRequests, hitRecords))
+                if (HitNearest(in entity.projectile, in entity.position, in entity.payload, hitTargets, hitTargetCount, damageRequests, hitRecords))
                 {
-                    SpawnSystem.ReleaseSlot(masks, freeProjectileIndices, index);
+                    ProjectileSystem.Despawn(projectiles, index);
                 }
             }
         }

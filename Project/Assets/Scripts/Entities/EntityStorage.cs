@@ -13,8 +13,6 @@ namespace TopView.Entities
         // 칸이 채워진 횟수
         public int[] generations;
 
-        // 투사체 구간의 빈 칸 번호 목록. ProjectileSpawnSystem이 끝에서부터 꺼낸다
-        public List<int> freeProjectileIndices;
         // 적 종류별 구간의 빈 칸 번호 목록. EnemySpawnSystem이 끝에서부터 꺼낸다
         public List<int>[] freeEnemyIndicesByKind;
         // 보스 구간의 빈 칸 번호 목록. BossSpawnSystem이 끝에서부터 꺼낸다
@@ -26,12 +24,6 @@ namespace TopView.Entities
         public PositionComponent[] positions;
         // 회전
         public RotationComponent[] rotations;
-        // 투사체 값. 생성 때 무기나 공격의 값에서 복사한다
-        public ProjectileComponent[] projectiles;
-        // 투사체의 이동 상태
-        public ProjectileMotionComponent[] projectileMotions;
-        // 공격의 진영과 피해량
-        public AttackPayloadComponent[] attackPayloads;
         // 체력
         public HealthComponent[] healths;
         // 레벨과 공격력
@@ -74,24 +66,20 @@ namespace TopView.Entities
         /// <summary>
         /// 모든 칸이 빈 저장소를 만들고, 적 구간의 칸마다 경로 배열을 할당한다.
         /// </summary>
-        /// <param name="projectileCapacity">투사체 칸 수</param>
         /// <param name="enemyKindCount">적 종류 수</param>
         /// <param name="enemyCapacityPerKind">적 종류별 칸 수</param>
         /// <param name="pathCornerCapacity">적 칸마다 미리 만들어 둘 경로 배열의 크기</param>
         /// <param name="bossCapacity">보스 칸 수</param>
         /// <param name="playerCapacity">플레이어 칸 수</param>
-        public EntityStorage(int projectileCapacity, int enemyKindCount, int enemyCapacityPerKind, int pathCornerCapacity, int bossCapacity, int playerCapacity)
+        public EntityStorage(int enemyKindCount, int enemyCapacityPerKind, int pathCornerCapacity, int bossCapacity, int playerCapacity)
         {
-            int enemyEnd = projectileCapacity + enemyKindCount * enemyCapacityPerKind;
+            int enemyEnd = enemyKindCount * enemyCapacityPerKind;
             int bossEnd = enemyEnd + bossCapacity;
             int capacity = bossEnd + playerCapacity;
             masks = new ComponentMask[capacity];
             generations = new int[capacity];
             positions = new PositionComponent[capacity];
             rotations = new RotationComponent[capacity];
-            projectiles = new ProjectileComponent[capacity];
-            projectileMotions = new ProjectileMotionComponent[capacity];
-            attackPayloads = new AttackPayloadComponent[capacity];
             healths = new HealthComponent[capacity];
             combats = new CombatComponent[capacity];
             enemyStats = new EnemyStatsComponent[capacity];
@@ -112,17 +100,11 @@ namespace TopView.Entities
             weaponLists = new WeaponListComponent[capacity];
             weaponSlots = new PlayerWeaponSlotsComponent[capacity];
 
-            freeProjectileIndices = new List<int>(projectileCapacity);
-            for (int index = projectileCapacity - 1; index >= 0; index--)
-            {
-                freeProjectileIndices.Add(index);
-            }
-
             freeEnemyIndicesByKind = new List<int>[enemyKindCount];
             for (int kind = 0; kind < enemyKindCount; kind++)
             {
                 freeEnemyIndicesByKind[kind] = new List<int>(enemyCapacityPerKind);
-                int kindStart = projectileCapacity + kind * enemyCapacityPerKind;
+                int kindStart = kind * enemyCapacityPerKind;
                 for (int index = kindStart + enemyCapacityPerKind - 1; index >= kindStart; index--)
                 {
                     navigationAgents[index].pathCorners = new Vector3[pathCornerCapacity];

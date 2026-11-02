@@ -9,9 +9,6 @@ namespace TopView.Entities
         None = 0,
         Position = 1UL << 0,
         Rotation = 1UL << 1,
-        Projectile = 1UL << 2,
-        ProjectileMotion = 1UL << 3,
-        AttackPayload = 1UL << 4,
         Health = 1UL << 7,
         Combat = 1UL << 8,
         EnemyStats = 1UL << 9,
@@ -32,8 +29,6 @@ namespace TopView.Entities
         WeaponList = 1UL << 24,
         WeaponSlots = 1UL << 25,
 
-        // 투사체가 가지는 컴포넌트 조합
-        ProjectileArchetype = Position | Rotation | Projectile | ProjectileMotion | AttackPayload,
         // 적이 가지는 컴포넌트 조합
         EnemyArchetype = Position | Rotation | Health | Faction | Combat | EnemyStats | AttackList | EnemyKind | EnemyBehavior | EnemyActionState | NavigationAgent,
         // 보스가 가지는 컴포넌트 조합
