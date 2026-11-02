@@ -34,22 +34,15 @@ namespace TopView.Presentation.Player.ViewSystems
         /// <summary>
         /// 살아 있는 플레이어가 있으면 View를 만들거나 맞추고, 없으면 View를 끈다.
         /// </summary>
-        /// <param name="masks">칸별 컴포넌트 표시</param>
-        /// <param name="generations">칸이 채워진 횟수</param>
-        /// <param name="positions">위치</param>
-        /// <param name="rotations">회전</param>
-        /// <param name="actionStates">플레이어 행동 상태</param>
-        /// <param name="motions">플레이어 이동 상태</param>
-        /// <param name="weaponLists">무기 목록</param>
-        /// <param name="weaponSlots">든 무기와 무기별 탄약</param>
+        /// <param name="entities">플레이어 엔티티 배열</param>
         /// <param name="stateRecords">이번 프레임의 상태 변경 기록</param>
         /// <param name="viewPrefab">PlayerView가 붙은 프리팹</param>
         /// <param name="weaponModelPrefabs">무기 번호 순서의 무기 모델 프리팹. 없는 칸은 null</param>
         /// <param name="rangedLayerBlendInTicks">원거리 레이어 가중치가 0에서 1로 올라오는 시간(틱)</param>
         /// <param name="context">플레이어 View 실행 상태</param>
-        public static void Present(ComponentMask[] masks, int[] generations, PositionComponent[] positions, RotationComponent[] rotations, PlayerActionStateComponent[] actionStates, PlayerMotionComponent[] motions, WeaponListComponent[] weaponLists, PlayerWeaponSlotsComponent[] weaponSlots, List<PlayerStateChangedRecord> stateRecords, GameObject viewPrefab, GameObject[] weaponModelPrefabs, int rangedLayerBlendInTicks, PlayerViewContext context)
+        public static void Present(PlayerEntity[] entities, List<PlayerStateChangedRecord> stateRecords, GameObject viewPrefab, GameObject[] weaponModelPrefabs, int rangedLayerBlendInTicks, PlayerViewContext context)
         {
-            if (!TryFindAlivePlayer(masks, out int playerIndex))
+            if (!TryFindAlivePlayer(entities, out int playerIndex))
             {
                 if (context.view != null && context.view.gameObject.activeSelf)
                 {
@@ -58,11 +51,12 @@ namespace TopView.Presentation.Player.ViewSystems
                 return;
             }
 
-            ref readonly PositionComponent position = ref positions[playerIndex];
-            ref readonly RotationComponent rotation = ref rotations[playerIndex];
-            ref readonly PlayerActionStateComponent actionState = ref actionStates[playerIndex];
-            ref readonly PlayerWeaponSlotsComponent weaponSlot = ref weaponSlots[playerIndex];
-            EntityIdentifier identifier = new EntityIdentifier { index = playerIndex, generation = generations[playerIndex] };
+            ref readonly PlayerEntity entity = ref entities[playerIndex];
+            ref readonly PositionComponent position = ref entity.position;
+            ref readonly RotationComponent rotation = ref entity.rotation;
+            ref readonly PlayerActionStateComponent actionState = ref entity.actionState;
+            ref readonly PlayerWeaponSlotsComponent weaponSlot = ref entity.weaponSlots;
+            EntityIdentifier identifier = new EntityIdentifier { index = playerIndex, generation = entity.generation };
 
             if (context.view == null)
             {
@@ -75,18 +69,18 @@ namespace TopView.Presentation.Player.ViewSystems
 
             Animator animator = context.view.animator;
             ApplyStateRecords(in identifier, stateRecords, animator);
-            ApplyMovementAnimation(in actionState, in motions[playerIndex], animator);
-            ApplyRangedLayerWeight(in actionState, in weaponSlot, weaponLists[playerIndex].weapons, animator, context.rangedLayerIndex, rangedLayerBlendInTicks);
+            ApplyMovementAnimation(in actionState, in entity.motion, animator);
+            ApplyRangedLayerWeight(in actionState, in weaponSlot, entity.weaponList.weapons, animator, context.rangedLayerIndex, rangedLayerBlendInTicks);
             ApplyActionLayerWeight(in actionState, animator, context.actionLayerIndex);
             ApplyWeaponModels(in weaponSlot, context.weaponModels);
             ApplyTransform(in position, in rotation, context.view.transform);
         }
 
-        private static bool TryFindAlivePlayer(ComponentMask[] masks, out int playerIndex)
+        private static bool TryFindAlivePlayer(PlayerEntity[] entities, out int playerIndex)
         {
-            for (playerIndex = 0; playerIndex < masks.Length; playerIndex++)
+            for (playerIndex = 0; playerIndex < entities.Length; playerIndex++)
             {
-                if ((masks[playerIndex] & ComponentMask.PlayerArchetype) == ComponentMask.PlayerArchetype)
+                if (entities[playerIndex].isAlive)
                 {
                     return true;
                 }

@@ -12,36 +12,28 @@ namespace TopView.Systems
         /// <summary>
         /// Idle이나 Move인 플레이어에게 누름 입력을 반영한다.
         /// </summary>
-        /// <param name="masks">칸별 컴포넌트 표시</param>
-        /// <param name="generations">칸이 채워진 횟수</param>
-        /// <param name="rotations">회전</param>
-        /// <param name="manas">마나</param>
-        /// <param name="movements">플레이어 이동 값</param>
-        /// <param name="vitals">플레이어 체력과 마나 값</param>
-        /// <param name="actionStates">플레이어 행동 상태와 공격 진행</param>
-        /// <param name="motions">플레이어 이동 상태</param>
-        /// <param name="weaponLists">무기 목록</param>
-        /// <param name="weaponSlots">든 무기와 무기별 탄약</param>
+        /// <param name="players">플레이어 저장소</param>
         /// <param name="command">플레이어 입력</param>
         /// <param name="stateRecords">상태 변경 기록</param>
-        public static void Tick(ComponentMask[] masks, int[] generations, RotationComponent[] rotations, ManaComponent[] manas, PlayerMovementComponent[] movements, PlayerVitalsComponent[] vitals, PlayerActionStateComponent[] actionStates, PlayerMotionComponent[] motions, WeaponListComponent[] weaponLists, PlayerWeaponSlotsComponent[] weaponSlots, in PlayerCommand command, List<PlayerStateChangedRecord> stateRecords)
+        public static void Tick(PlayerStorage players, in PlayerCommand command, List<PlayerStateChangedRecord> stateRecords)
         {
-            for (int index = 0; index < masks.Length; index++)
+            for (int index = 0; index < players.entities.Length; index++)
             {
-                if ((masks[index] & ComponentMask.PlayerArchetype) != ComponentMask.PlayerArchetype)
+                ref PlayerEntity entity = ref players.entities[index];
+                if (!entity.isAlive)
                 {
                     continue;
                 }
 
-                ref PlayerActionStateComponent actionState = ref actionStates[index];
-                ref PlayerMotionComponent motion = ref motions[index];
-                ref RotationComponent rotation = ref rotations[index];
-                ref ManaComponent mana = ref manas[index];
-                ref PlayerWeaponSlotsComponent weaponSlot = ref weaponSlots[index];
-                ref readonly PlayerMovementComponent movement = ref movements[index];
-                ref readonly PlayerVitalsComponent vital = ref vitals[index];
-                WeaponComponent[] weapons = weaponLists[index].weapons;
-                EntityIdentifier identifier = new EntityIdentifier { index = index, generation = generations[index] };
+                ref PlayerActionStateComponent actionState = ref entity.actionState;
+                ref PlayerMotionComponent motion = ref entity.motion;
+                ref RotationComponent rotation = ref entity.rotation;
+                ref ManaComponent mana = ref entity.mana;
+                ref PlayerWeaponSlotsComponent weaponSlot = ref entity.weaponSlots;
+                ref readonly PlayerMovementComponent movement = ref entity.movement;
+                ref readonly PlayerVitalsComponent vital = ref entity.vitals;
+                WeaponComponent[] weapons = entity.weaponList.weapons;
+                EntityIdentifier identifier = new EntityIdentifier { index = index, generation = entity.generation };
 
                 if (command.isJumpPressed && IsIdleOrMove(actionState.state))
                 {

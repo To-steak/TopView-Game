@@ -152,10 +152,10 @@ namespace TopView.Core
 
         private bool TryFindAlivePlayer(out int playerIndex)
         {
-            ComponentMask[] masks = _world.entities.masks;
-            for (playerIndex = 0; playerIndex < masks.Length; playerIndex++)
+            PlayerEntity[] entities = _world.players.entities;
+            for (playerIndex = 0; playerIndex < entities.Length; playerIndex++)
             {
-                if ((masks[playerIndex] & ComponentMask.PlayerArchetype) == ComponentMask.PlayerArchetype)
+                if (entities[playerIndex].isAlive)
                 {
                     return true;
                 }
@@ -167,17 +167,17 @@ namespace TopView.Core
 
         private void PresentPlayerInterface(int playerIndex)
         {
-            EntityStorage entities = _world.entities;
+            ref readonly PlayerEntity entity = ref _world.players.entities[playerIndex];
 
             if (_playerHealthPresenter != null)
             {
-                _playerHealthPresenter.Present(true, entities.healths[playerIndex].current, entities.healths[playerIndex].max);
+                _playerHealthPresenter.Present(true, entity.health.current, entity.health.max);
             }
 
             if (_ammoPresenter != null)
             {
-                WeaponComponent[] weapons = entities.weaponLists[playerIndex].weapons;
-                ref readonly PlayerWeaponSlotsComponent weaponSlot = ref entities.weaponSlots[playerIndex];
+                WeaponComponent[] weapons = entity.weaponList.weapons;
+                ref readonly PlayerWeaponSlotsComponent weaponSlot = ref entity.weaponSlots;
                 int weaponIndex = weaponSlot.currentIndex;
                 if (weaponIndex >= 0 && weaponIndex < weapons.Length)
                 {
@@ -191,7 +191,7 @@ namespace TopView.Core
 
             if (_playerManaPresenter != null)
             {
-                _playerManaPresenter.Present(true, entities.manas[playerIndex].current, entities.playerVitals[playerIndex].maxMana);
+                _playerManaPresenter.Present(true, entity.mana.current, entity.vitals.maxMana);
             }
         }
 

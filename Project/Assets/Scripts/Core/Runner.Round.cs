@@ -76,7 +76,7 @@ namespace TopView.Core
             world.enemyHitTargets = new HitTargetComponent[enemyCapacity];
             // 공격하는 쪽 하나는 근접 판정을 동시에 하나만 가지고, 한 판정이 맞힐 대상도 플레이어와 적의 칸 수를 넘지 않는다
             int combatantCapacity = PLAYER_CAPACITY + enemyCapacity;
-            world.entities = new EntityStorage(PLAYER_CAPACITY);
+            world.players = new PlayerStorage(PLAYER_CAPACITY);
             world.enemies = new EnemyStorage(enemyKindCount, gameSettings.enemyCapacityPerKind, gameSettings.enemyPathCornerCapacity);
             world.melees = new MeleeStorage(combatantCapacity, combatantCapacity);
             world.projectiles = new ProjectileStorage(gameSettings.projectileCapacity);

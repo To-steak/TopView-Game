@@ -7,35 +7,18 @@ namespace TopView.Systems
     // 플레이어 마나의 소모와 회복을 처리한다.
     public static class PlayerStaminaSystem
     {
-        // 마나가 회복되는 엔티티가 가지는 컴포넌트
-        private const ComponentMask RECOVERY_QUERY = ComponentMask.Mana | ComponentMask.PlayerVitals;
-
         /// <summary>
         /// 마나 회복 지연 시간을 1틱 늘리고, 지연 시간이 지났으면 마나를 회복한다.
         /// </summary>
-        /// <param name="masks">칸별 컴포넌트 표시</param>
-        /// <param name="manas">마나</param>
-        /// <param name="vitals">플레이어 체력과 마나 값</param>
-        public static void Tick(ComponentMask[] masks, ManaComponent[] manas, PlayerVitalsComponent[] vitals)
+        /// <param name="players">플레이어 저장소</param>
+        public static void Tick(PlayerStorage players)
         {
-            for (int index = 0; index < masks.Length; index++)
+            for (int index = 0; index < players.entities.Length; index++)
             {
-                if ((masks[index] & RECOVERY_QUERY) != RECOVERY_QUERY)
+                ref PlayerEntity entity = ref players.entities[index];
+                if (entity.isAlive)
                 {
-                    continue;
-                }
-
-                ref ManaComponent mana = ref manas[index];
-                ref readonly PlayerVitalsComponent vital = ref vitals[index];
-
-                if (mana.recoveryElapsedTicks < vital.manaRecoveryDelayTicks)
-                {
-                    mana.recoveryElapsedTicks++;
-                }
-
-                if (mana.current < vital.maxMana && mana.recoveryElapsedTicks >= vital.manaRecoveryDelayTicks)
-                {
-                    mana.current = Mathf.Min(mana.current + vital.manaRecoveryPerTick, vital.maxMana);
+                    Recover(ref entity.mana, in entity.vitals);
                 }
             }
         }
@@ -60,6 +43,19 @@ namespace TopView.Systems
         {
             mana.current = Mathf.Max(mana.current - amount, 0f);
             mana.recoveryElapsedTicks = 0;
+        }
+
+        private static void Recover(ref ManaComponent mana, in PlayerVitalsComponent vital)
+        {
+            if (mana.recoveryElapsedTicks < vital.manaRecoveryDelayTicks)
+            {
+                mana.recoveryElapsedTicks++;
+            }
+
+            if (mana.current < vital.maxMana && mana.recoveryElapsedTicks >= vital.manaRecoveryDelayTicks)
+            {
+                mana.current = Mathf.Min(mana.current + vital.manaRecoveryPerTick, vital.maxMana);
+            }
         }
     }
 }

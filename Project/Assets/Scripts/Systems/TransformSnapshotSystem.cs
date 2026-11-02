@@ -7,30 +7,16 @@ namespace TopView.Systems
     public static class TransformSnapshotSystem
     {
         /// <summary>
-        /// 위치와 회전을 가진 엔티티의 직전 값을 남긴다. 위치나 회전을 바꾸는 System보다 먼저 부른다.
+        /// 움직이는 엔티티의 직전 값을 남긴다. 위치나 회전을 바꾸는 System보다 먼저 부른다. 근접 판정은 위치가 바뀌지 않아 남기지 않는다.
         /// </summary>
-        /// <param name="masks">칸별 컴포넌트 표시</param>
-        /// <param name="positions">위치</param>
-        /// <param name="rotations">회전</param>
-        /// <param name="projectiles">투사체 저장소</param>
+        /// <param name="players">플레이어 저장소</param>
         /// <param name="enemies">적 저장소</param>
-        public static void Tick(ComponentMask[] masks, PositionComponent[] positions, RotationComponent[] rotations, ProjectileStorage projectiles, EnemyStorage enemies)
+        /// <param name="projectiles">투사체 저장소</param>
+        public static void Tick(PlayerStorage players, EnemyStorage enemies, ProjectileStorage projectiles)
         {
-            for (int index = 0; index < masks.Length; index++)
+            for (int index = 0; index < players.entities.Length; index++)
             {
-                if ((masks[index] & ComponentMask.Position) != 0)
-                {
-                    Snapshot(ref positions[index]);
-                }
-                if ((masks[index] & ComponentMask.Rotation) != 0)
-                {
-                    Snapshot(ref rotations[index]);
-                }
-            }
-
-            for (int index = 0; index < projectiles.entities.Length; index++)
-            {
-                ref ProjectileEntity entity = ref projectiles.entities[index];
+                ref PlayerEntity entity = ref players.entities[index];
                 if (entity.isAlive)
                 {
                     Snapshot(ref entity.position);
@@ -41,6 +27,16 @@ namespace TopView.Systems
             for (int index = 0; index < enemies.entities.Length; index++)
             {
                 ref EnemyEntity entity = ref enemies.entities[index];
+                if (entity.isAlive)
+                {
+                    Snapshot(ref entity.position);
+                    Snapshot(ref entity.rotation);
+                }
+            }
+
+            for (int index = 0; index < projectiles.entities.Length; index++)
+            {
+                ref ProjectileEntity entity = ref projectiles.entities[index];
                 if (entity.isAlive)
                 {
                     Snapshot(ref entity.position);

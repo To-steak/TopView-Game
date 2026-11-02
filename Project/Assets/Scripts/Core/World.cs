@@ -24,8 +24,8 @@ namespace TopView.Core
         // 적 경로 계산에 다시 쓰는 NavMeshPath
         public NavMeshPath navigationPath = new NavMeshPath();
 
-        // 공유 저장소. 모든 엔티티를 담는다
-        public EntityStorage entities;
+        // 플레이어 저장소
+        public PlayerStorage players;
         // 적 저장소
         public EnemyStorage enemies;
         // 근접 판정 저장소

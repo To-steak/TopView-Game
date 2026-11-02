@@ -11,37 +11,31 @@ namespace TopView.Systems
         /// <summary>
         /// Shot, Swing, Throw 상태에서 attackStartTicks가 지났고 아직 공격이 나가지 않았으면 공격을 내보낸다. PlayerMoveInputSystem 다음에 부른다.
         /// </summary>
-        /// <param name="masks">칸별 컴포넌트 표시</param>
-        /// <param name="generations">칸이 채워진 횟수</param>
-        /// <param name="positions">위치</param>
-        /// <param name="rotations">회전</param>
-        /// <param name="movements">플레이어 이동 값</param>
-        /// <param name="actionStates">플레이어 행동 상태와 공격 진행</param>
-        /// <param name="weaponLists">무기 목록</param>
-        /// <param name="weaponSlots">든 무기와 무기별 탄약</param>
+        /// <param name="players">플레이어 저장소</param>
         /// <param name="projectileSpawnRequests">투사체 생성 요청 큐</param>
         /// <param name="meleeSpawnRequests">근접 판정 생성 요청 큐</param>
-        public static void Tick(ComponentMask[] masks, int[] generations, PositionComponent[] positions, RotationComponent[] rotations, PlayerMovementComponent[] movements, PlayerActionStateComponent[] actionStates, WeaponListComponent[] weaponLists, PlayerWeaponSlotsComponent[] weaponSlots, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
+        public static void Tick(PlayerStorage players, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
         {
-            for (int index = 0; index < masks.Length; index++)
+            for (int index = 0; index < players.entities.Length; index++)
             {
-                if ((masks[index] & ComponentMask.PlayerArchetype) != ComponentMask.PlayerArchetype)
+                ref PlayerEntity entity = ref players.entities[index];
+                if (!entity.isAlive)
                 {
                     continue;
                 }
 
-                ref PlayerActionStateComponent actionState = ref actionStates[index];
+                ref PlayerActionStateComponent actionState = ref entity.actionState;
                 if (actionState.state != PlayerState.Shot && actionState.state != PlayerState.Swing && actionState.state != PlayerState.Throw)
                 {
                     continue;
                 }
 
-                ref PlayerWeaponSlotsComponent weaponSlot = ref weaponSlots[index];
-                ref readonly WeaponComponent weapon = ref weaponLists[index].weapons[weaponSlot.currentIndex];
+                ref PlayerWeaponSlotsComponent weaponSlot = ref entity.weaponSlots;
+                ref readonly WeaponComponent weapon = ref entity.weaponList.weapons[weaponSlot.currentIndex];
                 if (!actionState.isAttackCommitted && actionState.elapsedTicks >= weapon.attackStartTicks)
                 {
-                    EntityIdentifier identifier = new EntityIdentifier { index = index, generation = generations[index] };
-                    PlayerWeaponSystem.CommitAttack(ref actionState, ref weaponSlot, in movements[index], positions[index].current, rotations[index].current, in identifier, in weapon, projectileSpawnRequests, meleeSpawnRequests);
+                    EntityIdentifier identifier = new EntityIdentifier { index = index, generation = entity.generation };
+                    PlayerWeaponSystem.CommitAttack(ref actionState, ref weaponSlot, in entity.movement, entity.position.current, entity.rotation.current, in identifier, in weapon, projectileSpawnRequests, meleeSpawnRequests);
                 }
             }
         }

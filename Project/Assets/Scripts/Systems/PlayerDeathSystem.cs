@@ -12,45 +12,41 @@ namespace TopView.Systems
         /// <summary>
         /// 체력이 0이고 아직 사망 상태가 아닌 플레이어를 사망 상태로 바꾼다. 움직임을 멈추고 회전을 잠근다.
         /// </summary>
-        /// <param name="masks">칸별 컴포넌트 표시</param>
-        /// <param name="generations">칸이 채워진 횟수</param>
-        /// <param name="healths">체력</param>
-        /// <param name="actionStates">플레이어 행동 상태와 공격 진행</param>
-        /// <param name="motions">플레이어 이동 상태</param>
+        /// <param name="players">플레이어 저장소</param>
         /// <param name="melees">근접 판정 저장소</param>
         /// <param name="stateRecords">상태 변경 기록</param>
-        public static void Tick(ComponentMask[] masks, int[] generations, HealthComponent[] healths, PlayerActionStateComponent[] actionStates, PlayerMotionComponent[] motions, MeleeStorage melees, List<PlayerStateChangedRecord> stateRecords)
+        public static void Tick(PlayerStorage players, MeleeStorage melees, List<PlayerStateChangedRecord> stateRecords)
         {
-            for (int index = 0; index < masks.Length; index++)
+            for (int index = 0; index < players.entities.Length; index++)
             {
-                if ((masks[index] & ComponentMask.PlayerArchetype) != ComponentMask.PlayerArchetype)
+                ref PlayerEntity entity = ref players.entities[index];
+                if (!entity.isAlive || entity.health.current > 0f || entity.actionState.state == PlayerState.Die)
                 {
                     continue;
                 }
 
-                ref PlayerActionStateComponent actionState = ref actionStates[index];
-                if (healths[index].current > 0f || actionState.state == PlayerState.Die)
-                {
-                    continue;
-                }
-
-                EntityIdentifier identifier = new EntityIdentifier { index = index, generation = generations[index] };
+                EntityIdentifier identifier = new EntityIdentifier { index = index, generation = entity.generation };
                 stateRecords.Add(new PlayerStateChangedRecord
                 {
                     player = identifier,
-                    previousState = actionState.state,
+                    previousState = entity.actionState.state,
                     state = PlayerState.Die
                 });
 
-                actionState.state = PlayerState.Die;
-                actionState.elapsedTicks = 0;
-                actionState.isAttackCommitted = false;
-
-                motions[index].moveDirection = Vector3.zero;
-                motions[index].isRotationLocked = true;
+                Die(ref entity.actionState, ref entity.motion);
 
                 MeleeHitSystem.DespawnOwnedBy(melees, in identifier, Faction.Player);
             }
+        }
+
+        private static void Die(ref PlayerActionStateComponent actionState, ref PlayerMotionComponent motion)
+        {
+            actionState.state = PlayerState.Die;
+            actionState.elapsedTicks = 0;
+            actionState.isAttackCommitted = false;
+
+            motion.moveDirection = Vector3.zero;
+            motion.isRotationLocked = true;
         }
     }
 }
