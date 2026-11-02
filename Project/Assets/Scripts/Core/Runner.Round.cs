@@ -54,37 +54,26 @@ namespace TopView.Core
                 return;
             }
 
-            if (gameSettings.rule.navMeshSampleDistance <= 0f)
+            if (gameSettings.rule.navMeshSampleDistance <= 0f || gameSettings.rule.spawnIntervalTicks <= 0)
             {
-                Debug.LogError("Runner >> Game Settings Definition의 Nav Mesh Sample Distance가 0 이하라 판을 시작할 수 없다.");
+                Debug.LogError("Runner >> Game Settings Definition의 Nav Mesh Sample Distance나 Spawn Interval Ticks가 0 이하라 판을 시작할 수 없다.");
                 return;
             }
 
-            WaveComponent[] waves = (WaveComponent[])gameSettings.waves.Clone();
-            if (!TryAssignWaveEnemyKinds(waves, gameSettings.waveEnemies, out EnemyDefinition[] enemyDefinitions))
-            {
-                return;
-            }
+            ReadEnemySpawners(out EnemyDefinition[] enemyDefinitions, out SpawnPointComponent[] enemySpawnPoints);
 
             int enemyKindCount = enemyDefinitions.Length;
             ReadEnemies(enemyDefinitions, projectilePrefabs, hitEffectPrefabs, out EnemySpawnRequest[] enemySpawnTemplates, out GameObject[] enemyViewPrefabs, out GameObject[] enemyHealthGaugePrefabs);
 
-            if (!TryReadBoss(projectilePrefabs, hitEffectPrefabs, out BossDefinition bossDefinition, out BossSpawnRequest bossSpawnTemplate))
-            {
-                return;
-            }
-
             World world = new World();
             world.rule = gameSettings.rule;
-            world.waves = waves;
-            world.enemySpawnPointsByKind = CollectEnemySpawnPoints(enemyDefinitions);
+            world.enemySpawnPoints = enemySpawnPoints;
             world.random = new System.Random(world.rule.randomSeed);
             world.players = new PlayerStorage(PLAYER_CAPACITY);
             world.playerSpawnRequests.Enqueue(playerSpawnRequest);
             world.enemies = new EnemyStorage(enemyKindCount, gameSettings.enemyCapacityPerKind, gameSettings.enemyPathCornerCapacity);
             world.enemySpawnTemplates = enemySpawnTemplates;
             world.bosses = new BossStorage(BOSS_CAPACITY);
-            world.bossSpawnTemplate = bossSpawnTemplate;
             world.projectiles = new ProjectileStorage(gameSettings.projectileCapacity);
             // 피격 대상은 세 저장소의 칸 수를 넘지 않고, 공격하는 쪽 하나는 근접 판정을 동시에 하나만 가지므로 근접 판정도 이 수로 넘치지 않는다
             int combatantCapacity = world.players.entities.Length + world.enemies.entities.Length + world.bosses.entities.Length;
@@ -97,9 +86,8 @@ namespace TopView.Core
                 remainingTicks = world.rule.timeLimitTicks,
                 score = 0,
                 gold = 0,
-                isWaveStarted = new bool[world.waves.Length],
-                isEnemyKindSpawning = new bool[enemyKindCount],
-                enemyKindSpawnRemainingTicks = new int[enemyKindCount]
+                // 첫 틱에 바로 적을 내보낸다
+                enemySpawnRemainingTicks = 1
             };
 
             Application.targetFrameRate = gameSettings.targetFrameRate;
@@ -110,7 +98,6 @@ namespace TopView.Core
             _playerWeaponModelPrefabs = weaponModelPrefabs;
             _enemyViewPrefabs = enemyViewPrefabs;
             _enemyHealthGaugePrefabs = enemyHealthGaugePrefabs;
-            _bossViewPrefab = bossDefinition.viewPrefab;
             _projectilePrefabs = projectilePrefabs.ToArray();
             _hitEffectPrefabs = hitEffectPrefabs.ToArray();
             _viewContext = CreateViewContext(enemyKindCount);
