@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f66de62ed319374ea203bf3d286176b, type: 3}
+  m_Name: Player Definition
+  m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.PlayerDefinition
+  movement:
+    walkSpeed: 2
+    runSpeed: 5
+    jumpPower: 5
+    dodgeSpeed: 5
+    inAirSpeed: 1
+    gravity: -9.81
+    groundPressure: -2
+    groundCheckOffset: {x: 0, y: -0.51, z: 0}
+    groundCheckRadius: 0.2
+    groundLayer:
+      serializedVersion: 2
+      m_Bits: 64
+    capsuleRadius: 0.26
+    capsuleHeight: 1
+    capsuleCenter: {x: 0, y: 0.18, z: 0.06}
+    skinWidth: 0.08
+    collisionLayer:
+      serializedVersion: 2
+      m_Bits: 64
+    muzzleOffset: {x: 0, y: 0, z: 0.5}
+  vitals:
+    maxHealth: 100
+    maxMana: 100
+    manaRecoveryPerTick: 0.5
+    manaRecoveryDelayTicks: 150
+    runManaCostPerTick: 0.1
+    dodgeManaCost: 15
+    jumpManaCost: 10
+  action:
+    dodgeTicks: 40
+    landTicks: 32
+    swapStartTicks: 13
+    swapTicks: 30
+    reloadTicks: 140
+    dieTicks: 74
+  weapons:
+  - {fileID: 11400000, guid: 1ce7fea57a5a36c42bf8d0de4ca734db, type: 2}
+  - {fileID: 11400000, guid: 9e5cd050810c0a8469911b9292b1da62, type: 2}
+  - {fileID: 11400000, guid: 97f47044f0265de4cb031f24fa72de3a, type: 2}
+  - {fileID: 11400000, guid: 926e7ffa61c566e47a9215ee6c0acf1e, type: 2}
+  viewPrefab: {fileID: 8657122809230754077, guid: 01c18da25d44ad64b983d140cc66a067, type: 3}
+  cameraPriority: 2
+  rangedLayerBlendInTicks: 10

@@ -1,0 +1,17 @@
+{
+    "name": "TopView.Authoring",
+    "rootNamespace": "TopView.Authoring",
+    "references": [
+        "TopView.Entity",
+        "TopView.Definitions"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

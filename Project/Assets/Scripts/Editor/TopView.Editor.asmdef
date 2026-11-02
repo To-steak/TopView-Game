@@ -1,0 +1,25 @@
+{
+    "name": "TopView.Editor",
+    "rootNamespace": "TopView.Editor",
+    "references": [
+        "TopView.Entity",
+        "TopView.Systems",
+        "TopView.Definitions",
+        "TopView.Authoring",
+        "TopView.Presentation",
+        "TopView.UserInterface",
+        "TopView.Core",
+        "UnityEngine.UI"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

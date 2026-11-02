@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5ae9619f9bef9542a8b18fe1f1cd54e, type: 3}
+  m_Name: Grenade Weapon Definition
+  m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.WeaponDefinition
+  weapon:
+    kind: 2
+    damage: 150
+    maxAmmo: 0
+    currentAmmo: 0
+    reserveAmmo: 5
+    attackStartTicks: 15
+    attackEndTicks: 0
+    attackDurationTicks: 30
+    projectile:
+      kind: 1
+      speed: 10
+      radius: 0.15
+      lifetimeTicks: 0
+      upwardRatio: 0.75
+      gravity: -9.81
+      fuseTicks: 75
+      explosionRadius: 3
+      collisionLayer:
+        serializedVersion: 2
+        m_Bits: 4294966344
+    meleeRadius: 0
+    meleeOffset: 0
+  modelPrefab: {fileID: 3006573835764851770, guid: 88eec3c3ac7a9b54c966aeba2bec804e, type: 3}
+  projectilePrefab: {fileID: 3006573835764851770, guid: c8836d5c1f9260a41aafb72573635c50, type: 3}
+  hitEffectPrefab: {fileID: 1599315238913598529, guid: 46ffadbb188f9ab498b623c4290ef656, type: 3}

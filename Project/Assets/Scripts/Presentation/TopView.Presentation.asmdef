@@ -1,0 +1,20 @@
+{
+    "name": "TopView.Presentation",
+    "rootNamespace": "TopView.Presentation",
+    "references": [
+        "TopView.Entity",
+        "TopView.Definitions",
+        "Unity.Cinemachine",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
