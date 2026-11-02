@@ -54,7 +54,7 @@ namespace TopView.Systems
         /// <param name="melees">근접 판정 값과 진행 시간</param>
         /// <param name="freeMeleeIndices">근접 판정 구간의 빈 칸 번호 목록</param>
         /// <param name="owner">공격한 엔티티</param>
-        public static void DespawnOwnedBy(ComponentMask[] masks, MeleeComponent[] melees, List<int> freeMeleeIndices, in EntityReference owner)
+        public static void DespawnOwnedBy(ComponentMask[] masks, MeleeComponent[] melees, List<int> freeMeleeIndices, in EntityIdentifier owner)
         {
             for (int index = 0; index < masks.Length; index++)
             {
@@ -93,7 +93,7 @@ namespace TopView.Systems
             return droppedCount;
         }
 
-        private static bool IsAlreadyHit(in MeleeHitsComponent hits, in EntityReference target)
+        private static bool IsAlreadyHit(in MeleeHitsComponent hits, in EntityIdentifier target)
         {
             for (int hitIndex = 0; hitIndex < hits.count; hitIndex++)
             {
@@ -106,11 +106,9 @@ namespace TopView.Systems
             return false;
         }
 
-        private static bool IsSame(in EntityReference left, in EntityReference right)
+        private static bool IsSame(in EntityIdentifier left, in EntityIdentifier right)
         {
-            return left.kind == right.kind
-                && left.identifier.index == right.identifier.index
-                && left.identifier.generation == right.identifier.generation;
+            return left.index == right.index && left.generation == right.generation;
         }
     }
 }

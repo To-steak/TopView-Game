@@ -27,7 +27,7 @@ namespace TopView.Systems
                     continue;
                 }
 
-                EntityReference[] hitTargets = entities.meleeHits[index].targets;
+                EntityIdentifier[] hitTargets = entities.meleeHits[index].targets;
                 Array.Clear(hitTargets, 0, hitTargets.Length);
 
                 SpawnSystem.ClaimSlot(entities, index, ComponentMask.MeleeArchetype);

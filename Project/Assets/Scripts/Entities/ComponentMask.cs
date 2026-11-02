@@ -24,14 +24,25 @@ namespace TopView.Entities
         EnemyBehavior = 1UL << 14,
         EnemyActionState = 1UL << 15,
         NavigationAgent = 1UL << 16,
+        Faction = 1UL << 17,
+        Mana = 1UL << 18,
+        PlayerMovement = 1UL << 19,
+        PlayerVitals = 1UL << 20,
+        PlayerAction = 1UL << 21,
+        PlayerActionState = 1UL << 22,
+        PlayerMotion = 1UL << 23,
+        WeaponList = 1UL << 24,
+        WeaponSlots = 1UL << 25,
 
         // 투사체가 가지는 컴포넌트 조합
         ProjectileArchetype = Position | Rotation | Projectile | ProjectileMotion | AttackPayload,
         // 근접 판정이 가지는 컴포넌트 조합
         MeleeArchetype = Position | Melee | MeleeHits | AttackPayload,
         // 적이 가지는 컴포넌트 조합
-        EnemyArchetype = Position | Rotation | Health | Combat | EnemyStats | AttackList | EnemyKind | EnemyBehavior | EnemyActionState | NavigationAgent,
+        EnemyArchetype = Position | Rotation | Health | Faction | Combat | EnemyStats | AttackList | EnemyKind | EnemyBehavior | EnemyActionState | NavigationAgent,
         // 보스가 가지는 컴포넌트 조합
-        BossArchetype = Position | Rotation | Health | Combat | EnemyStats | AttackList | BossBehavior | BossActionState
+        BossArchetype = Position | Rotation | Health | Faction | Combat | EnemyStats | AttackList | BossBehavior | BossActionState,
+        // 플레이어가 가지는 컴포넌트 조합
+        PlayerArchetype = Position | Rotation | Health | Faction | Mana | PlayerMovement | PlayerVitals | PlayerAction | PlayerActionState | PlayerMotion | WeaponList | WeaponSlots
     }
 }

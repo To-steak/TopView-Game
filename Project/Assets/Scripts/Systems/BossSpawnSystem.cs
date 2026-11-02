@@ -14,10 +14,9 @@ namespace TopView.Systems
         /// </summary>
         /// <param name="entities">공유 저장소</param>
         /// <param name="bossSpawnRequests">보스 생성 요청 큐</param>
-        /// <param name="players">플레이어 저장소. 보스가 생길 때 바라볼 방향을 정한다</param>
-        public static void Tick(EntityStorage entities, Queue<BossSpawnRequest> bossSpawnRequests, PlayerStorage players)
+        public static void Tick(EntityStorage entities, Queue<BossSpawnRequest> bossSpawnRequests)
         {
-            bool hasPlayer = TargetingSystem.TryGetPlayerTarget(players, out Vector3 playerPosition, out float _);
+            bool hasPlayer = TargetingSystem.TryGetPlayerTarget(entities.masks, entities.positions, entities.playerMovements, out Vector3 playerPosition, out float _);
             int droppedCount = 0;
             while (bossSpawnRequests.Count > 0)
             {
@@ -53,6 +52,7 @@ namespace TopView.Systems
             float maxHealth = request.stats.baseMaxHealth + request.level * request.stats.maxHealthIncrement;
 
             SpawnSystem.ClaimSlot(entities, index, ComponentMask.BossArchetype);
+            entities.factions[index] = new FactionComponent { faction = Faction.Enemy };
             entities.enemyStats[index] = request.stats;
             entities.bossBehaviors[index] = request.behavior;
             entities.attackLists[index] = new AttackListComponent { attacks = attacks };

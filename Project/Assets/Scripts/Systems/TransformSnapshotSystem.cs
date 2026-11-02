@@ -7,24 +7,13 @@ namespace TopView.Systems
     public static class TransformSnapshotSystem
     {
         /// <summary>
-        /// 살아 있는 플레이어와 공유 저장소 엔티티의 직전 값을 남긴다. 위치나 회전을 바꾸는 System보다 먼저 부른다.
+        /// 위치와 회전을 가진 엔티티의 직전 값을 남긴다. 위치나 회전을 바꾸는 System보다 먼저 부른다.
         /// </summary>
-        /// <param name="players">플레이어 저장소</param>
-        /// <param name="masks">공유 저장소의 칸별 컴포넌트 표시</param>
-        /// <param name="positions">공유 저장소의 위치</param>
-        /// <param name="rotations">공유 저장소의 회전</param>
-        public static void Tick(PlayerStorage players, ComponentMask[] masks, PositionComponent[] positions, RotationComponent[] rotations)
+        /// <param name="masks">칸별 컴포넌트 표시</param>
+        /// <param name="positions">위치</param>
+        /// <param name="rotations">회전</param>
+        public static void Tick(ComponentMask[] masks, PositionComponent[] positions, RotationComponent[] rotations)
         {
-            for (int playerIndex = 0; playerIndex < players.entities.Length; playerIndex++)
-            {
-                ref PlayerEntity player = ref players.entities[playerIndex];
-                if (player.isAlive)
-                {
-                    Snapshot(ref player.position);
-                    Snapshot(ref player.rotation);
-                }
-            }
-
             for (int index = 0; index < masks.Length; index++)
             {
                 if ((masks[index] & ComponentMask.Position) != 0)

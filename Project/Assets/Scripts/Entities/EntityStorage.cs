@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace TopView.Entities
 {
-    // 공유 저장소. 엔티티는 칸 번호이고, 컴포넌트마다 같은 번호로 읽는 배열을 둔다. 지금은 플레이어를 뺀 모든 엔티티를 담는다.
+    // 공유 저장소. 엔티티는 칸 번호이고, 컴포넌트마다 같은 번호로 읽는 배열을 둔다. 모든 엔티티를 담는다.
     // 칸은 엔티티 종류별 구간으로 나눈다. 구간마다 칸 수가 정해져 있어 한 종류가 다른 종류의 칸을 차지하지 않는다.
     public class EntityStorage
     {
@@ -21,6 +21,8 @@ namespace TopView.Entities
         public List<int>[] freeEnemyIndicesByKind;
         // 보스 구간의 빈 칸 번호 목록. BossSpawnSystem이 끝에서부터 꺼낸다
         public List<int> freeBossIndices;
+        // 플레이어 구간의 빈 칸 번호 목록. PlayerSpawnSystem이 끝에서부터 꺼낸다
+        public List<int> freePlayerIndices;
 
         // 위치
         public PositionComponent[] positions;
@@ -56,6 +58,24 @@ namespace TopView.Entities
         public EnemyActionStateComponent[] enemyActionStates;
         // 목적지와 경로
         public NavigationAgentComponent[] navigationAgents;
+        // 공격을 맞는 진영
+        public FactionComponent[] factions;
+        // 마나
+        public ManaComponent[] manas;
+        // 플레이어 이동 값. 생성 때 Definition에서 복사한다
+        public PlayerMovementComponent[] playerMovements;
+        // 플레이어 체력과 마나 값. 생성 때 Definition에서 복사한다
+        public PlayerVitalsComponent[] playerVitals;
+        // 플레이어 행동 상태의 길이. 생성 때 Definition에서 복사한다
+        public PlayerActionComponent[] playerActions;
+        // 플레이어 행동 상태와 공격 진행
+        public PlayerActionStateComponent[] playerActionStates;
+        // 플레이어 이동 상태
+        public PlayerMotionComponent[] playerMotions;
+        // 무기 목록
+        public WeaponListComponent[] weaponLists;
+        // 든 무기와 무기별 탄약
+        public PlayerWeaponSlotsComponent[] weaponSlots;
 
         /// <summary>
         /// 모든 칸이 빈 저장소를 만들고, 근접 판정 구간의 칸마다 이미 맞힌 대상을 기록할 배열을, 적 구간의 칸마다 경로 배열을 할당한다.
@@ -67,11 +87,13 @@ namespace TopView.Entities
         /// <param name="enemyCapacityPerKind">적 종류별 칸 수</param>
         /// <param name="pathCornerCapacity">적 칸마다 미리 만들어 둘 경로 배열의 크기</param>
         /// <param name="bossCapacity">보스 칸 수</param>
-        public EntityStorage(int projectileCapacity, int meleeCapacity, int meleeHitCapacity, int enemyKindCount, int enemyCapacityPerKind, int pathCornerCapacity, int bossCapacity)
+        /// <param name="playerCapacity">플레이어 칸 수</param>
+        public EntityStorage(int projectileCapacity, int meleeCapacity, int meleeHitCapacity, int enemyKindCount, int enemyCapacityPerKind, int pathCornerCapacity, int bossCapacity, int playerCapacity)
         {
             int meleeEnd = projectileCapacity + meleeCapacity;
             int enemyEnd = meleeEnd + enemyKindCount * enemyCapacityPerKind;
-            int capacity = enemyEnd + bossCapacity;
+            int bossEnd = enemyEnd + bossCapacity;
+            int capacity = bossEnd + playerCapacity;
             masks = new ComponentMask[capacity];
             generations = new int[capacity];
             positions = new PositionComponent[capacity];
@@ -91,6 +113,15 @@ namespace TopView.Entities
             enemyBehaviors = new EnemyBehaviorComponent[capacity];
             enemyActionStates = new EnemyActionStateComponent[capacity];
             navigationAgents = new NavigationAgentComponent[capacity];
+            factions = new FactionComponent[capacity];
+            manas = new ManaComponent[capacity];
+            playerMovements = new PlayerMovementComponent[capacity];
+            playerVitals = new PlayerVitalsComponent[capacity];
+            playerActions = new PlayerActionComponent[capacity];
+            playerActionStates = new PlayerActionStateComponent[capacity];
+            playerMotions = new PlayerMotionComponent[capacity];
+            weaponLists = new WeaponListComponent[capacity];
+            weaponSlots = new PlayerWeaponSlotsComponent[capacity];
 
             freeProjectileIndices = new List<int>(projectileCapacity);
             for (int index = projectileCapacity - 1; index >= 0; index--)
@@ -101,7 +132,7 @@ namespace TopView.Entities
             freeMeleeIndices = new List<int>(meleeCapacity);
             for (int index = meleeEnd - 1; index >= projectileCapacity; index--)
             {
-                meleeHits[index].targets = new EntityReference[meleeHitCapacity];
+                meleeHits[index].targets = new EntityIdentifier[meleeHitCapacity];
                 freeMeleeIndices.Add(index);
             }
 
@@ -118,9 +149,15 @@ namespace TopView.Entities
             }
 
             freeBossIndices = new List<int>(bossCapacity);
-            for (int index = capacity - 1; index >= enemyEnd; index--)
+            for (int index = bossEnd - 1; index >= enemyEnd; index--)
             {
                 freeBossIndices.Add(index);
+            }
+
+            freePlayerIndices = new List<int>(playerCapacity);
+            for (int index = capacity - 1; index >= bossEnd; index--)
+            {
+                freePlayerIndices.Add(index);
             }
         }
     }

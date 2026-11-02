@@ -152,9 +152,10 @@ namespace TopView.Core
 
         private bool TryFindAlivePlayer(out int playerIndex)
         {
-            for (playerIndex = 0; playerIndex < _world.players.entities.Length; playerIndex++)
+            ComponentMask[] masks = _world.entities.masks;
+            for (playerIndex = 0; playerIndex < masks.Length; playerIndex++)
             {
-                if (_world.players.entities[playerIndex].isAlive)
+                if ((masks[playerIndex] & ComponentMask.PlayerArchetype) == ComponentMask.PlayerArchetype)
                 {
                     return true;
                 }
@@ -166,19 +167,21 @@ namespace TopView.Core
 
         private void PresentPlayerInterface(int playerIndex)
         {
-            ref readonly PlayerEntity player = ref _world.players.entities[playerIndex];
+            EntityStorage entities = _world.entities;
 
             if (_playerHealthPresenter != null)
             {
-                _playerHealthPresenter.Present(true, player.health.current, player.health.max);
+                _playerHealthPresenter.Present(true, entities.healths[playerIndex].current, entities.healths[playerIndex].max);
             }
 
             if (_ammoPresenter != null)
             {
-                int weaponIndex = player.weaponSlots.currentIndex;
-                if (weaponIndex >= 0 && weaponIndex < player.weapons.Length)
+                WeaponComponent[] weapons = entities.weaponLists[playerIndex].weapons;
+                ref readonly PlayerWeaponSlotsComponent weaponSlot = ref entities.weaponSlots[playerIndex];
+                int weaponIndex = weaponSlot.currentIndex;
+                if (weaponIndex >= 0 && weaponIndex < weapons.Length)
                 {
-                    _ammoPresenter.Present(true, true, player.weapons[weaponIndex].kind, player.weaponSlots.currentAmmo[weaponIndex], player.weaponSlots.reserveAmmo[weaponIndex]);
+                    _ammoPresenter.Present(true, true, weapons[weaponIndex].kind, weaponSlot.currentAmmo[weaponIndex], weaponSlot.reserveAmmo[weaponIndex]);
                 }
                 else
                 {
@@ -188,7 +191,7 @@ namespace TopView.Core
 
             if (_playerManaPresenter != null)
             {
-                _playerManaPresenter.Present(true, player.mana.current, player.vitals.maxMana);
+                _playerManaPresenter.Present(true, entities.manas[playerIndex].current, entities.playerVitals[playerIndex].maxMana);
             }
         }
 
