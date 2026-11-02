@@ -12,32 +12,27 @@ namespace TopView.Systems
         /// <summary>
         /// 근접 판정마다 원 안에서 아직 맞지 않은 대상 모두에게 피해 요청을 넣고, 판정 시간을 1틱 늘려 다 되면 없앤다.
         /// </summary>
-        /// <param name="masks">칸별 컴포넌트 표시</param>
-        /// <param name="melees">근접 판정 값과 진행 시간</param>
-        /// <param name="meleeHits">근접 판정이 이미 맞힌 대상</param>
-        /// <param name="positions">위치. 근접 판정에서는 판정 원의 중심이다</param>
-        /// <param name="payloads">공격의 진영과 피해량</param>
-        /// <param name="freeMeleeIndices">근접 판정 구간의 빈 칸 번호 목록</param>
+        /// <param name="melees">근접 판정 저장소</param>
         /// <param name="hitTargets">피격 대상 목록</param>
         /// <param name="hitTargetCount">피격 대상 목록에서 이번 틱에 채운 대상 수</param>
         /// <param name="damageRequests">피해 요청 큐</param>
-        public static void Tick(ComponentMask[] masks, MeleeComponent[] melees, MeleeHitsComponent[] meleeHits, PositionComponent[] positions, AttackPayloadComponent[] payloads, List<int> freeMeleeIndices, HitTargetComponent[] hitTargets, int hitTargetCount, Queue<DamageRequest> damageRequests)
+        public static void Tick(MeleeStorage melees, HitTargetComponent[] hitTargets, int hitTargetCount, Queue<DamageRequest> damageRequests)
         {
             int droppedHitCount = 0;
-            for (int index = 0; index < masks.Length; index++)
+            for (int index = 0; index < melees.entities.Length; index++)
             {
-                if ((masks[index] & ComponentMask.MeleeArchetype) != ComponentMask.MeleeArchetype)
+                ref MeleeEntity entity = ref melees.entities[index];
+                if (!entity.isAlive)
                 {
                     continue;
                 }
 
-                ref MeleeComponent melee = ref melees[index];
-                droppedHitCount += Hit(in melee, ref meleeHits[index], positions[index].current, in payloads[index], hitTargets, hitTargetCount, damageRequests);
+                droppedHitCount += Hit(in entity.melee, ref entity.hits, entity.position.current, in entity.payload, hitTargets, hitTargetCount, damageRequests);
 
-                melee.elapsedTicks++;
-                if (melee.elapsedTicks >= melee.durationTicks)
+                entity.melee.elapsedTicks++;
+                if (entity.melee.elapsedTicks >= entity.melee.durationTicks)
                 {
-                    SpawnSystem.ReleaseSlot(masks, freeMeleeIndices, index);
+                    Despawn(melees, index);
                 }
             }
 
@@ -49,20 +44,28 @@ namespace TopView.Systems
 
         /// <summary>
         /// 공격한 엔티티가 owner인 근접 판정을 모두 없앤다. 공격한 쪽이 사망할 때 부른다.
+        /// 저장소마다 칸 번호를 따로 쓰므로 EntityIdentifier만으로는 다른 진영의 엔티티와 겹칠 수 있어 진영도 함께 비교한다.
         /// </summary>
-        /// <param name="masks">칸별 컴포넌트 표시</param>
-        /// <param name="melees">근접 판정 값과 진행 시간</param>
-        /// <param name="freeMeleeIndices">근접 판정 구간의 빈 칸 번호 목록</param>
+        /// <param name="melees">근접 판정 저장소</param>
         /// <param name="owner">공격한 엔티티</param>
-        public static void DespawnOwnedBy(ComponentMask[] masks, MeleeComponent[] melees, List<int> freeMeleeIndices, in EntityIdentifier owner)
+        /// <param name="ownerFaction">공격한 엔티티의 진영</param>
+        public static void DespawnOwnedBy(MeleeStorage melees, in EntityIdentifier owner, Faction ownerFaction)
         {
-            for (int index = 0; index < masks.Length; index++)
+            for (int index = 0; index < melees.entities.Length; index++)
             {
-                if ((masks[index] & ComponentMask.MeleeArchetype) == ComponentMask.MeleeArchetype && IsSame(in melees[index].owner, in owner))
+                ref readonly MeleeEntity entity = ref melees.entities[index];
+                if (entity.isAlive && entity.payload.faction == ownerFaction && IsSame(in entity.melee.owner, in owner))
                 {
-                    SpawnSystem.ReleaseSlot(masks, freeMeleeIndices, index);
+                    Despawn(melees, index);
                 }
             }
+        }
+
+        // 엔티티를 즉시 없애고 칸을 반납한다.
+        private static void Despawn(MeleeStorage melees, int index)
+        {
+            melees.entities[index].isAlive = false;
+            melees.freeIndices.Add(index);
         }
 
         // 원 안에서 아직 맞지 않은 대상을 맞힌다. 기록할 칸이 모자라 건너뛴 수를 돌려준다.

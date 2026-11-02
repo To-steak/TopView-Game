@@ -26,6 +26,8 @@ namespace TopView.Core
 
         // 공유 저장소. 모든 엔티티를 담는다
         public EntityStorage entities;
+        // 근접 판정 저장소
+        public MeleeStorage melees;
         // 이번 틱의 피격 대상 목록. 판 시작 때 플레이어·적·보스 칸 수의 합으로 만들고, 매 틱 HitTargetSystem이 다시 채운다
         public HitTargetComponent[] hitTargets;
         // 피격 대상 목록에서 이번 틱에 채운 대상 수

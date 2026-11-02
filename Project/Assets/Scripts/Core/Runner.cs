@@ -62,7 +62,7 @@ namespace TopView.Core
             if (isPlaying)
             {
                 TransformSnapshotSystem.Tick(_world.entities.masks, _world.entities.positions, _world.entities.rotations);
-                PlayerDeathSystem.Tick(_world.entities.masks, _world.entities.generations, _world.entities.healths, _world.entities.playerActionStates, _world.entities.playerMotions, _world.entities.melees, _world.entities.freeMeleeIndices, _world.playerStateChangedRecords);
+                PlayerDeathSystem.Tick(_world.entities.masks, _world.entities.generations, _world.entities.healths, _world.entities.playerActionStates, _world.entities.playerMotions, _world.melees, _world.playerStateChangedRecords);
                 PlayerStateTimerSystem.Tick(_world.entities.masks, _world.entities.playerActionStates);
                 // 누름 입력으로 정해진 상태를 뒤의 셋이 함께 읽는다. 이동 입력과 공격을 반영한 뒤에 상태를 넘기므로 이 순서를 지킨다
                 PlayerPressSystem.Tick(_world.entities.masks, _world.entities.generations, _world.entities.rotations, _world.entities.manas, _world.entities.playerMovements, _world.entities.playerVitals, _world.entities.playerActionStates, _world.entities.playerMotions, _world.entities.weaponLists, _world.entities.weaponSlots, in _world.commandBuffer.playerCommand, _world.playerStateChangedRecords);
@@ -85,7 +85,7 @@ namespace TopView.Core
                 ProjectileSystem.Tick(_world.entities.masks, _world.entities.projectiles, _world.entities.projectileMotions, _world.entities.positions, _world.entities.freeProjectileIndices);
                 HitTargetSystem.Tick(_world.entities.masks, _world.entities.generations, _world.entities.positions, _world.entities.rotations, _world.entities.healths, _world.entities.factions, _world.entities.playerMovements, _world.entities.enemyStats, _world.hitTargets, ref _world.hitTargetCount);
                 ProjectileHitSystem.Tick(_world.entities.masks, _world.entities.projectiles, _world.entities.projectileMotions, _world.entities.positions, _world.entities.attackPayloads, _world.entities.freeProjectileIndices, _world.hitTargets, _world.hitTargetCount, _world.damageRequests, _world.projectileHitRecords);
-                MeleeHitSystem.Tick(_world.entities.masks, _world.entities.melees, _world.entities.meleeHits, _world.entities.positions, _world.entities.attackPayloads, _world.entities.freeMeleeIndices, _world.hitTargets, _world.hitTargetCount, _world.damageRequests);
+                MeleeHitSystem.Tick(_world.melees, _world.hitTargets, _world.hitTargetCount, _world.damageRequests);
             }
 
             GameRuleSystem.Tick(ref _world.progress, _world.gameOverRequests);
@@ -96,7 +96,7 @@ namespace TopView.Core
                 EnemySpawnSystem.Tick(_world.entities, _world.enemySpawnRequests, _world.rule.navMeshSampleDistance);
                 BossSpawnSystem.Tick(_world.entities, _world.bossSpawnRequests);
                 ProjectileSpawnSystem.Tick(_world.entities, _world.projectileSpawnRequests);
-                MeleeSpawnSystem.Tick(_world.entities, _world.meleeSpawnRequests);
+                MeleeSpawnSystem.Tick(_world.melees, _world.meleeSpawnRequests);
             }
 
             CommandSystem.ClearPlayerPresses(ref _world.commandBuffer.playerCommand);

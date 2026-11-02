@@ -74,7 +74,8 @@ namespace TopView.Core
             // 피격 대상은 플레이어·적·보스의 칸 수를 넘지 않고, 공격하는 쪽 하나는 근접 판정을 동시에 하나만 가지므로 근접 판정도 이 수로 넘치지 않는다
             int combatantCapacity = PLAYER_CAPACITY + enemyKindCount * gameSettings.enemyCapacityPerKind + BOSS_CAPACITY;
             world.hitTargets = new HitTargetComponent[combatantCapacity];
-            world.entities = new EntityStorage(gameSettings.projectileCapacity, combatantCapacity, combatantCapacity, enemyKindCount, gameSettings.enemyCapacityPerKind, gameSettings.enemyPathCornerCapacity, BOSS_CAPACITY, PLAYER_CAPACITY);
+            world.entities = new EntityStorage(gameSettings.projectileCapacity, enemyKindCount, gameSettings.enemyCapacityPerKind, gameSettings.enemyPathCornerCapacity, BOSS_CAPACITY, PLAYER_CAPACITY);
+            world.melees = new MeleeStorage(combatantCapacity, combatantCapacity);
 
             world.progress = new GameProgressComponent
             {

@@ -10,13 +10,13 @@ namespace TopView.Core
         // 지금 살아 있는 근접 판정마다 판정 원을 자홍으로 그린다. 플레이어·적·보스의 근접 공격이 모두 여기에 나온다.
         private void DrawMeleeGizmos()
         {
-            EntityStorage entities = _world.entities;
+            MeleeEntity[] entities = _world.melees.entities;
             Gizmos.color = Color.magenta;
-            for (int index = 0; index < entities.masks.Length; index++)
+            for (int index = 0; index < entities.Length; index++)
             {
-                if ((entities.masks[index] & ComponentMask.MeleeArchetype) == ComponentMask.MeleeArchetype)
+                if (entities[index].isAlive)
                 {
-                    DrawCircleGizmo(entities.positions[index].current, entities.melees[index].radius);
+                    DrawCircleGizmo(entities[index].position.current, entities[index].melee.radius);
                 }
             }
         }
