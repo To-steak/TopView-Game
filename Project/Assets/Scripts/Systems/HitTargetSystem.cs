@@ -22,7 +22,7 @@ namespace TopView.Systems
             for (int playerIndex = 0; playerIndex < players.entities.Length; playerIndex++)
             {
                 ref readonly PlayerEntity player = ref players.entities[playerIndex];
-                if (player.isAlive && player.state != PlayerState.Die)
+                if (player.isAlive && player.actionState.state != PlayerState.Die)
                 {
                     // 점프로 적 투사체를 피할 수 있도록 플레이어만 캡슐 높이로 맞는다
                     PlayerMovementSystem.GetCapsulePoints(in player, player.position.current, out Vector3 top, out Vector3 bottom);
@@ -34,7 +34,7 @@ namespace TopView.Systems
             for (int enemyIndex = 0; enemyIndex < enemies.entities.Length; enemyIndex++)
             {
                 ref readonly EnemyEntity enemy = ref enemies.entities[enemyIndex];
-                if (enemy.isAlive && enemy.state != EnemyState.Die)
+                if (enemy.isAlive && enemy.actionState.state != EnemyState.Die)
                 {
                     Add(hitTargets, ref hitTargetCount, EntityKind.Enemy, enemyIndex, enemy.generation, Faction.Enemy, enemy.position.current, enemy.stats.hitRadius, float.NegativeInfinity, float.PositiveInfinity);
                 }
@@ -43,7 +43,7 @@ namespace TopView.Systems
             for (int bossIndex = 0; bossIndex < bosses.entities.Length; bossIndex++)
             {
                 ref readonly BossEntity boss = ref bosses.entities[bossIndex];
-                if (boss.isAlive && boss.state != BossState.Die)
+                if (boss.isAlive && boss.actionState.state != BossState.Die)
                 {
                     Add(hitTargets, ref hitTargetCount, EntityKind.Boss, bossIndex, boss.generation, Faction.Enemy, boss.position.current, boss.stats.hitRadius, float.NegativeInfinity, float.PositiveInfinity);
                 }

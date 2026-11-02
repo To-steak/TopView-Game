@@ -33,7 +33,7 @@ namespace TopView.Systems
                     continue;
                 }
 
-                if (enemy.hasDestination && enemy.isPathDirty && !TryRecalculatePath(ref enemy, path, navMeshSampleDistance))
+                if (enemy.agent.hasDestination && enemy.agent.isPathDirty && !TryRecalculatePath(ref enemy, path, navMeshSampleDistance))
                 {
                     failedPathCount++;
                 }
@@ -51,7 +51,7 @@ namespace TopView.Systems
             for (int enemyIndex = 0; enemyIndex < enemies.entities.Length; enemyIndex++)
             {
                 ref EnemyEntity enemy = ref enemies.entities[enemyIndex];
-                if (enemy.isAlive && enemy.hasDestination && NavMesh.Raycast(enemy.position.previous, enemy.position.current, out NavMeshHit hit, NavMesh.AllAreas))
+                if (enemy.isAlive && enemy.agent.hasDestination && NavMesh.Raycast(enemy.position.previous, enemy.position.current, out NavMeshHit hit, NavMesh.AllAreas))
                 {
                     enemy.position.current = hit.position;
                 }
@@ -66,11 +66,11 @@ namespace TopView.Systems
         /// <param name="stoppingDistance">남은 경로가 이 거리 안이면 도착한 것으로 본다(유닛)</param>
         public static void SetDestination(ref EnemyEntity enemy, Vector3 destination, float stoppingDistance)
         {
-            enemy.hasDestination = true;
-            enemy.destination = destination;
-            enemy.stoppingDistance = stoppingDistance;
-            enemy.isPathDirty = true;
-            enemy.hasReachedDestination = false;
+            enemy.agent.hasDestination = true;
+            enemy.agent.destination = destination;
+            enemy.agent.stoppingDistance = stoppingDistance;
+            enemy.agent.isPathDirty = true;
+            enemy.agent.hasReachedDestination = false;
         }
 
         /// <summary>
@@ -79,22 +79,22 @@ namespace TopView.Systems
         /// <param name="enemy">적</param>
         public static void StopMove(ref EnemyEntity enemy)
         {
-            enemy.hasDestination = false;
-            enemy.isPathDirty = false;
-            enemy.hasReachedDestination = false;
-            enemy.pathCornerCount = 0;
-            enemy.pathCornerIndex = 0;
-            enemy.velocity = Vector3.zero;
+            enemy.agent.hasDestination = false;
+            enemy.agent.isPathDirty = false;
+            enemy.agent.hasReachedDestination = false;
+            enemy.agent.pathCornerCount = 0;
+            enemy.agent.pathCornerIndex = 0;
+            enemy.agent.velocity = Vector3.zero;
         }
 
         // 목적지까지의 경로를 다시 구한다. 구하지 못하면 꺾이는 점이 없는 채로 false를 돌려주고, Move가 도착한 것으로 본다.
         private static bool TryRecalculatePath(ref EnemyEntity enemy, NavMeshPath path, float navMeshSampleDistance)
         {
-            enemy.isPathDirty = false;
-            enemy.pathCornerCount = 0;
-            enemy.pathCornerIndex = 0;
+            enemy.agent.isPathDirty = false;
+            enemy.agent.pathCornerCount = 0;
+            enemy.agent.pathCornerIndex = 0;
 
-            Vector3 destination = enemy.destination;
+            Vector3 destination = enemy.agent.destination;
             if (NavMesh.SamplePosition(destination, out NavMeshHit destinationHit, navMeshSampleDistance, NavMesh.AllAreas))
             {
                 destination = destinationHit.position;
@@ -105,51 +105,51 @@ namespace TopView.Systems
                 return false;
             }
 
-            enemy.pathCornerCount = path.GetCornersNonAlloc(enemy.pathCorners);
-            enemy.pathCornerIndex = enemy.pathCornerCount > 1 ? 1 : enemy.pathCornerCount;
+            enemy.agent.pathCornerCount = path.GetCornersNonAlloc(enemy.agent.pathCorners);
+            enemy.agent.pathCornerIndex = enemy.agent.pathCornerCount > 1 ? 1 : enemy.agent.pathCornerCount;
             return true;
         }
 
         // 남은 경로가 멈추는 거리 안이면 멈춘다. 아니면 다음 꺾이는 점 쪽으로 가속·도착 감속하며 움직이고, 진행 방향으로 돈다.
         private static void Move(ref EnemyEntity enemy, float deltaTime)
         {
-            if (!enemy.hasDestination)
+            if (!enemy.agent.hasDestination)
             {
                 return;
             }
 
             float remainingDistance = GetRemainingDistance(in enemy);
-            if (enemy.pathCornerIndex >= enemy.pathCornerCount || remainingDistance <= enemy.stoppingDistance)
+            if (enemy.agent.pathCornerIndex >= enemy.agent.pathCornerCount || remainingDistance <= enemy.agent.stoppingDistance)
             {
-                enemy.velocity = Vector3.zero;
-                enemy.hasReachedDestination = true;
+                enemy.agent.velocity = Vector3.zero;
+                enemy.agent.hasReachedDestination = true;
                 return;
             }
 
-            enemy.hasReachedDestination = false;
+            enemy.agent.hasReachedDestination = false;
 
-            float brakingSpeed = Mathf.Sqrt(2f * enemy.behavior.acceleration * (remainingDistance - enemy.stoppingDistance));
-            float desiredSpeed = Mathf.Min(enemy.maxSpeed, brakingSpeed);
-            Vector3 toCorner = enemy.pathCorners[enemy.pathCornerIndex] - enemy.position.current;
+            float brakingSpeed = Mathf.Sqrt(2f * enemy.behavior.acceleration * (remainingDistance - enemy.agent.stoppingDistance));
+            float desiredSpeed = Mathf.Min(enemy.agent.maxSpeed, brakingSpeed);
+            Vector3 toCorner = enemy.agent.pathCorners[enemy.agent.pathCornerIndex] - enemy.position.current;
             Vector3 desiredVelocity = toCorner.normalized * desiredSpeed;
-            enemy.velocity = Vector3.MoveTowards(enemy.velocity, desiredVelocity, enemy.behavior.acceleration * deltaTime);
+            enemy.agent.velocity = Vector3.MoveTowards(enemy.agent.velocity, desiredVelocity, enemy.behavior.acceleration * deltaTime);
 
-            Vector3 step = enemy.velocity * deltaTime;
+            Vector3 step = enemy.agent.velocity * deltaTime;
             if (step.sqrMagnitude >= toCorner.sqrMagnitude)
             {
-                enemy.position.current = enemy.pathCorners[enemy.pathCornerIndex];
-                enemy.pathCornerIndex++;
+                enemy.position.current = enemy.agent.pathCorners[enemy.agent.pathCornerIndex];
+                enemy.agent.pathCornerIndex++;
             }
             else
             {
                 enemy.position.current += step;
-                if ((enemy.pathCorners[enemy.pathCornerIndex] - enemy.position.current).sqrMagnitude <= CORNER_REACH_DISTANCE * CORNER_REACH_DISTANCE)
+                if ((enemy.agent.pathCorners[enemy.agent.pathCornerIndex] - enemy.position.current).sqrMagnitude <= CORNER_REACH_DISTANCE * CORNER_REACH_DISTANCE)
                 {
-                    enemy.pathCornerIndex++;
+                    enemy.agent.pathCornerIndex++;
                 }
             }
 
-            Vector3 flatVelocity = enemy.velocity;
+            Vector3 flatVelocity = enemy.agent.velocity;
             flatVelocity.y = 0f;
             if (flatVelocity.sqrMagnitude > MIN_TURN_SPEED_SQUARED)
             {
@@ -159,15 +159,15 @@ namespace TopView.Systems
 
         private static float GetRemainingDistance(in EnemyEntity enemy)
         {
-            if (enemy.pathCornerIndex >= enemy.pathCornerCount)
+            if (enemy.agent.pathCornerIndex >= enemy.agent.pathCornerCount)
             {
                 return 0f;
             }
 
-            float distance = Vector3.Distance(enemy.position.current, enemy.pathCorners[enemy.pathCornerIndex]);
-            for (int cornerIndex = enemy.pathCornerIndex + 1; cornerIndex < enemy.pathCornerCount; cornerIndex++)
+            float distance = Vector3.Distance(enemy.position.current, enemy.agent.pathCorners[enemy.agent.pathCornerIndex]);
+            for (int cornerIndex = enemy.agent.pathCornerIndex + 1; cornerIndex < enemy.agent.pathCornerCount; cornerIndex++)
             {
-                distance += Vector3.Distance(enemy.pathCorners[cornerIndex - 1], enemy.pathCorners[cornerIndex]);
+                distance += Vector3.Distance(enemy.agent.pathCorners[cornerIndex - 1], enemy.agent.pathCorners[cornerIndex]);
             }
 
             return distance;
@@ -188,7 +188,7 @@ namespace TopView.Systems
                 for (int secondIndex = firstIndex + 1; secondIndex < entities.Length; secondIndex++)
                 {
                     ref EnemyEntity second = ref entities[secondIndex];
-                    if (!second.isAlive || (!first.hasDestination && !second.hasDestination))
+                    if (!second.isAlive || (!first.agent.hasDestination && !second.agent.hasDestination))
                     {
                         continue;
                     }
@@ -203,12 +203,12 @@ namespace TopView.Systems
                     }
 
                     Vector3 push = delta / distance * (minimumDistance - distance);
-                    if (first.hasDestination && second.hasDestination)
+                    if (first.agent.hasDestination && second.agent.hasDestination)
                     {
                         first.position.current -= push * 0.5f;
                         second.position.current += push * 0.5f;
                     }
-                    else if (first.hasDestination)
+                    else if (first.agent.hasDestination)
                     {
                         first.position.current -= push;
                     }

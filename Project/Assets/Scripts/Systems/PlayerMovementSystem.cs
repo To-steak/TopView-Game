@@ -27,15 +27,15 @@ namespace TopView.Systems
                     continue;
                 }
 
-                player.isGrounded = Physics.CheckSphere(player.position.current + player.movement.groundCheckOffset, player.movement.groundCheckRadius, player.movement.groundLayer);
-                if (player.isGrounded && player.verticalVelocity < 0f)
+                player.motion.isGrounded = Physics.CheckSphere(player.position.current + player.movement.groundCheckOffset, player.movement.groundCheckRadius, player.movement.groundLayer);
+                if (player.motion.isGrounded && player.motion.verticalVelocity < 0f)
                 {
-                    player.verticalVelocity = player.movement.groundPressure;
+                    player.motion.verticalVelocity = player.movement.groundPressure;
                 }
-                player.verticalVelocity += player.movement.gravity * deltaTime;
+                player.motion.verticalVelocity += player.movement.gravity * deltaTime;
 
-                Vector3 displacement = player.moveDirection * player.currentSpeed * deltaTime;
-                displacement.y = player.verticalVelocity * deltaTime;
+                Vector3 displacement = player.motion.moveDirection * player.motion.currentSpeed * deltaTime;
+                displacement.y = player.motion.verticalVelocity * deltaTime;
                 player.position.current = Slide(in player, player.position.current, displacement);
             }
         }

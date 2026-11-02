@@ -37,16 +37,16 @@ namespace TopView.Systems
                 }
 
                 EntityIdentifier identifier = new EntityIdentifier { index = enemyIndex, generation = enemy.generation };
-                if (enemy.health.current <= 0f && enemy.state != EnemyState.Die)
+                if (enemy.health.current <= 0f && enemy.actionState.state != EnemyState.Die)
                 {
                     ChangeState(ref enemy, in identifier, EnemyState.Die, stateRecords);
                 }
 
-                enemy.stateElapsedTicks++;
+                enemy.actionState.elapsedTicks++;
                 DecreaseAttackCooldowns(ref enemy);
                 bool isPlayerDetected = hasPlayer && TargetingSystem.IsWithin(enemy.position.current, playerPosition, enemy.behavior.detectionRadius + playerRadius);
 
-                switch (enemy.state)
+                switch (enemy.actionState.state)
                 {
                     case EnemyState.Idle:
                         if (!UpdateIdle(ref enemy, in identifier, isPlayerDetected, playerPosition, playerRadius, deltaTime, random, stateRecords))
@@ -57,7 +57,7 @@ namespace TopView.Systems
 
                     case EnemyState.Walk:
                         // SetDestination이 도착 여부를 지우므로 먼저 읽어 둔다
-                        bool hasReachedDestination = enemy.hasReachedDestination;
+                        bool hasReachedDestination = enemy.agent.hasReachedDestination;
                         if (isPlayerDetected)
                         {
                             if (TryBeginAttackInRange(ref enemy, in identifier, playerPosition, playerRadius, random, stateRecords))
@@ -82,7 +82,7 @@ namespace TopView.Systems
                         break;
 
                     case EnemyState.Die:
-                        if (enemy.stateElapsedTicks >= enemy.behavior.dieTicks)
+                        if (enemy.actionState.elapsedTicks >= enemy.behavior.dieTicks)
                         {
                             enemy.isAlive = false;
                             enemies.freeIndicesByKind[enemy.kind].Add(enemyIndex);
@@ -104,7 +104,7 @@ namespace TopView.Systems
         // 지금 상태에서 나가고 새 상태에 들어간다. Die 상태에서는 바꾸지 않는다. Attack 상태는 TryBeginAttackInRange로 들어간다.
         private static void ChangeState(ref EnemyEntity enemy, in EntityIdentifier identifier, EnemyState newState, List<EnemyStateChangedRecord> stateRecords)
         {
-            if (enemy.state == EnemyState.Die)
+            if (enemy.actionState.state == EnemyState.Die)
             {
                 return;
             }
@@ -112,18 +112,18 @@ namespace TopView.Systems
             stateRecords.Add(new EnemyStateChangedRecord
             {
                 enemy = identifier,
-                previousState = enemy.state,
+                previousState = enemy.actionState.state,
                 state = newState,
-                attackKind = newState == EnemyState.Attack ? enemy.attacks[enemy.attackIndex].kind : default
+                attackKind = newState == EnemyState.Attack ? enemy.attacks[enemy.actionState.attackIndex].kind : default
             });
 
-            enemy.state = newState;
-            enemy.stateElapsedTicks = 0;
+            enemy.actionState.state = newState;
+            enemy.actionState.elapsedTicks = 0;
 
             switch (newState)
             {
                 case EnemyState.Idle:
-                    enemy.wanderElapsedTicks = 0;
+                    enemy.actionState.wanderElapsedTicks = 0;
                     EnemyNavigationSystem.StopMove(ref enemy);
                     break;
                 case EnemyState.Attack:
@@ -156,13 +156,13 @@ namespace TopView.Systems
                 return true;
             }
 
-            enemy.wanderElapsedTicks++;
-            if (enemy.wanderElapsedTicks < enemy.behavior.wanderIntervalTicks)
+            enemy.actionState.wanderElapsedTicks++;
+            if (enemy.actionState.wanderElapsedTicks < enemy.behavior.wanderIntervalTicks)
             {
                 return true;
             }
 
-            enemy.wanderElapsedTicks = 0;
+            enemy.actionState.wanderElapsedTicks = 0;
             if (!TryGetWanderPoint(in enemy, random, out Vector3 wanderPoint))
             {
                 return false;
@@ -176,34 +176,34 @@ namespace TopView.Systems
         private static void UpdateAttack(ref EnemyEntity enemy, in EntityIdentifier identifier, bool hasPlayer, Vector3 playerPosition, float deltaTime, List<EnemyStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
         {
             // 공격이 나가기 전까지 플레이어 쪽으로 돈다
-            if (!enemy.isAttackCommitted && hasPlayer)
+            if (!enemy.actionState.isAttackCommitted && hasPlayer)
             {
                 TargetingSystem.RotateToward(ref enemy.rotation.current, enemy.position.current, playerPosition, enemy.behavior.angularSpeed * deltaTime);
             }
 
-            ref readonly EnemyAttackComponent attack = ref enemy.attacks[enemy.attackIndex];
-            if (!enemy.isAttackCommitted && enemy.stateElapsedTicks >= attack.startTicks)
+            ref readonly EnemyAttackComponent attack = ref enemy.attacks[enemy.actionState.attackIndex];
+            if (!enemy.actionState.isAttackCommitted && enemy.actionState.elapsedTicks >= attack.startTicks)
             {
-                enemy.isAttackCommitted = true;
+                enemy.actionState.isAttackCommitted = true;
                 int missileShotCount = 0;
                 EntityReference owner = new EntityReference { kind = EntityKind.Enemy, identifier = identifier };
-                EnemyAttackSystem.CommitAttack(in attack, enemy.position.current, enemy.rotation.current, enemy.attackDamage, ref missileShotCount, in owner, projectileSpawnRequests, meleeSpawnRequests);
+                EnemyAttackSystem.CommitAttack(in attack, enemy.position.current, enemy.rotation.current, enemy.combat.attackDamage, ref missileShotCount, in owner, projectileSpawnRequests, meleeSpawnRequests);
             }
 
-            if (EnemyAttackSystem.IsAttackFinished(in attack, enemy.stateElapsedTicks, enemy.isAttackCommitted))
+            if (EnemyAttackSystem.IsAttackFinished(in attack, enemy.actionState.elapsedTicks, enemy.actionState.isAttackCommitted))
             {
-                enemy.attackCooldownRemainingTicks[enemy.attackIndex] = attack.cooldownTicks;
+                enemy.actionState.attackCooldownRemainingTicks[enemy.actionState.attackIndex] = attack.cooldownTicks;
                 ChangeState(ref enemy, in identifier, EnemyState.Idle, stateRecords);
             }
         }
 
         private static void DecreaseAttackCooldowns(ref EnemyEntity enemy)
         {
-            for (int attackIndex = 0; attackIndex < enemy.attackCooldownRemainingTicks.Length; attackIndex++)
+            for (int attackIndex = 0; attackIndex < enemy.actionState.attackCooldownRemainingTicks.Length; attackIndex++)
             {
-                if (enemy.attackCooldownRemainingTicks[attackIndex] > 0)
+                if (enemy.actionState.attackCooldownRemainingTicks[attackIndex] > 0)
                 {
-                    enemy.attackCooldownRemainingTicks[attackIndex]--;
+                    enemy.actionState.attackCooldownRemainingTicks[attackIndex]--;
                 }
             }
         }
@@ -235,20 +235,20 @@ namespace TopView.Systems
 
                 if (remainingCount == 0)
                 {
-                    enemy.attackIndex = attackIndex;
+                    enemy.actionState.attackIndex = attackIndex;
                     break;
                 }
                 remainingCount--;
             }
 
-            enemy.isAttackCommitted = false;
+            enemy.actionState.isAttackCommitted = false;
             ChangeState(ref enemy, in identifier, EnemyState.Attack, stateRecords);
             return true;
         }
 
         private static bool IsAttackAvailable(in EnemyEntity enemy, int attackIndex, Vector3 playerPosition, float playerRadius)
         {
-            return enemy.attackCooldownRemainingTicks[attackIndex] <= 0
+            return enemy.actionState.attackCooldownRemainingTicks[attackIndex] <= 0
                 && TargetingSystem.IsWithin(enemy.position.current, playerPosition, enemy.attacks[attackIndex].attackRange + playerRadius);
         }
 

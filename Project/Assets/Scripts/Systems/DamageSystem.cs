@@ -94,7 +94,7 @@ namespace TopView.Systems
 
             if (ApplyDamage(ref enemy.health, amount))
             {
-                AddKillReward(ref progress, in enemy.stats, enemy.level);
+                AddKillReward(ref progress, in enemy.stats, enemy.combat.level);
             }
             return true;
         }
@@ -114,7 +114,7 @@ namespace TopView.Systems
 
             if (ApplyDamage(ref boss.health, amount))
             {
-                AddKillReward(ref progress, in boss.stats, boss.level);
+                AddKillReward(ref progress, in boss.stats, boss.combat.level);
             }
             return true;
         }

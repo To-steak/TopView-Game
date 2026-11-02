@@ -17,27 +17,17 @@ namespace TopView.Entities
         // 공격 목록. 생성 때 Definition에서 복사한다
         public EnemyAttackComponent[] attacks;
 
-        // 레벨
-        public int level;
+        // 레벨과 공격력
+        public CombatComponent combat;
         // 체력
         public HealthComponent health;
-        // 공격력. 공격마다 배율을 곱한다
-        public float attackDamage;
 
         // 위치
         public PositionComponent position;
         // 회전
         public RotationComponent rotation;
 
-        // 행동 상태
-        public BossState state;
-        // 지금 상태에 들어간 뒤 지난 시간(틱). 들어간 틱은 0이다
-        public int stateElapsedTicks;
-        // 지금 공격 상태에서 쓰는 공격 번호
-        public int attackIndex;
-        // 지금 공격 상태에서 공격이 이미 나갔는지
-        public bool isAttackCommitted;
-        // BossMissile을 쏜 횟수. 짝수·홀수로 발사 위치를 번갈아 고른다
-        public int missileShotCount;
+        // 행동 상태와 공격 진행
+        public BossActionStateComponent actionState;
     }
 }

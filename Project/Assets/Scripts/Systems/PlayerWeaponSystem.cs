@@ -19,28 +19,28 @@ namespace TopView.Systems
         /// <param name="meleeSpawnRequests">근접 판정 생성 요청 큐</param>
         public static void CommitAttack(ref PlayerEntity player, in EntityIdentifier identifier, in WeaponComponent weapon, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
         {
-            player.isAttackCommitted = true;
-            int weaponIndex = player.currentWeaponIndex;
+            player.actionState.isAttackCommitted = true;
+            int weaponIndex = player.weaponSlots.currentIndex;
 
             switch (weapon.kind)
             {
                 case WeaponKind.Ranged:
-                    if (player.weaponCurrentAmmo[weaponIndex] <= 0)
+                    if (player.weaponSlots.currentAmmo[weaponIndex] <= 0)
                     {
-                        Debug.LogWarning($"PlayerWeaponSystem >> 탄창 탄약이 {player.weaponCurrentAmmo[weaponIndex]}이라 원거리 공격을 내보내지 않았다.");
+                        Debug.LogWarning($"PlayerWeaponSystem >> 탄창 탄약이 {player.weaponSlots.currentAmmo[weaponIndex]}이라 원거리 공격을 내보내지 않았다.");
                         return;
                     }
-                    player.weaponCurrentAmmo[weaponIndex]--;
+                    player.weaponSlots.currentAmmo[weaponIndex]--;
                     RequestProjectile(in player, in weapon, player.rotation.current * Vector3.forward, projectileSpawnRequests);
                     break;
 
                 case WeaponKind.Throw:
-                    if (player.weaponReserveAmmo[weaponIndex] <= 0)
+                    if (player.weaponSlots.reserveAmmo[weaponIndex] <= 0)
                     {
-                        Debug.LogWarning($"PlayerWeaponSystem >> 남은 탄약이 {player.weaponReserveAmmo[weaponIndex]}이라 투척 공격을 내보내지 않았다.");
+                        Debug.LogWarning($"PlayerWeaponSystem >> 남은 탄약이 {player.weaponSlots.reserveAmmo[weaponIndex]}이라 투척 공격을 내보내지 않았다.");
                         return;
                     }
-                    player.weaponReserveAmmo[weaponIndex]--;
+                    player.weaponSlots.reserveAmmo[weaponIndex]--;
                     Vector3 throwDirection = (player.rotation.current * Vector3.forward + Vector3.up * weapon.projectile.upwardRatio).normalized;
                     RequestProjectile(in player, in weapon, throwDirection, projectileSpawnRequests);
                     break;
@@ -67,12 +67,12 @@ namespace TopView.Systems
         /// <returns>공격 상태를 끝낼 때면 true</returns>
         public static bool IsAttackFinished(in PlayerEntity player, in WeaponComponent weapon)
         {
-            if (!player.isAttackCommitted)
+            if (!player.actionState.isAttackCommitted)
             {
                 return false;
             }
 
-            return weapon.kind == WeaponKind.Ranged || player.stateElapsedTicks >= weapon.attackDurationTicks;
+            return weapon.kind == WeaponKind.Ranged || player.actionState.elapsedTicks >= weapon.attackDurationTicks;
         }
 
         /// <summary>
@@ -84,12 +84,12 @@ namespace TopView.Systems
         public static bool TryGetAttackState(in PlayerEntity player, out PlayerState attackState)
         {
             attackState = PlayerState.Idle;
-            if (!IsValidWeaponIndex(in player, player.currentWeaponIndex))
+            if (!IsValidWeaponIndex(in player, player.weaponSlots.currentIndex))
             {
                 return false;
             }
 
-            ref readonly WeaponComponent weapon = ref player.weapons[player.currentWeaponIndex];
+            ref readonly WeaponComponent weapon = ref player.weapons[player.weaponSlots.currentIndex];
             switch (weapon.kind)
             {
                 case WeaponKind.Melee:
@@ -98,11 +98,11 @@ namespace TopView.Systems
 
                 case WeaponKind.Ranged:
                     attackState = PlayerState.Shot;
-                    return player.weaponCurrentAmmo[player.currentWeaponIndex] > 0;
+                    return player.weaponSlots.currentAmmo[player.weaponSlots.currentIndex] > 0;
 
                 case WeaponKind.Throw:
                     attackState = PlayerState.Throw;
-                    return player.weaponReserveAmmo[player.currentWeaponIndex] > 0;
+                    return player.weaponSlots.reserveAmmo[player.weaponSlots.currentIndex] > 0;
             }
 
             return false;
@@ -116,7 +116,7 @@ namespace TopView.Systems
         /// <returns>들고 있지 않은 유효한 무기면 true</returns>
         public static bool CanSwap(in PlayerEntity player, int weaponIndex)
         {
-            return weaponIndex != player.currentWeaponIndex && IsValidWeaponIndex(in player, weaponIndex);
+            return weaponIndex != player.weaponSlots.currentIndex && IsValidWeaponIndex(in player, weaponIndex);
         }
 
         /// <summary>
@@ -125,10 +125,10 @@ namespace TopView.Systems
         /// <param name="player">플레이어</param>
         public static void CommitSwap(ref PlayerEntity player)
         {
-            if (player.currentWeaponIndex != player.pendingWeaponIndex && player.stateElapsedTicks >= Mathf.Min(player.action.swapStartTicks, player.action.swapTicks))
+            if (player.weaponSlots.currentIndex != player.weaponSlots.pendingIndex && player.actionState.elapsedTicks >= Mathf.Min(player.action.swapStartTicks, player.action.swapTicks))
             {
-                player.currentWeaponIndex = player.pendingWeaponIndex;
-                player.attackCooldownTicks = 0;
+                player.weaponSlots.currentIndex = player.weaponSlots.pendingIndex;
+                player.actionState.attackCooldownTicks = 0;
             }
         }
 
@@ -139,14 +139,14 @@ namespace TopView.Systems
         /// <returns>Ranged이고 탄창이 덜 찼으며 예비 탄약이 있으면 true</returns>
         public static bool CanReload(in PlayerEntity player)
         {
-            if (!IsValidWeaponIndex(in player, player.currentWeaponIndex))
+            if (!IsValidWeaponIndex(in player, player.weaponSlots.currentIndex))
             {
                 return false;
             }
 
-            int weaponIndex = player.currentWeaponIndex;
+            int weaponIndex = player.weaponSlots.currentIndex;
             ref readonly WeaponComponent weapon = ref player.weapons[weaponIndex];
-            return weapon.kind == WeaponKind.Ranged && player.weaponCurrentAmmo[weaponIndex] < weapon.maxAmmo && player.weaponReserveAmmo[weaponIndex] > 0;
+            return weapon.kind == WeaponKind.Ranged && player.weaponSlots.currentAmmo[weaponIndex] < weapon.maxAmmo && player.weaponSlots.reserveAmmo[weaponIndex] > 0;
         }
 
         /// <summary>
@@ -155,10 +155,10 @@ namespace TopView.Systems
         /// <param name="player">플레이어</param>
         public static void Reload(ref PlayerEntity player)
         {
-            int weaponIndex = player.currentWeaponIndex;
-            int loadAmmo = Mathf.Min(player.weapons[weaponIndex].maxAmmo - player.weaponCurrentAmmo[weaponIndex], player.weaponReserveAmmo[weaponIndex]);
-            player.weaponCurrentAmmo[weaponIndex] += loadAmmo;
-            player.weaponReserveAmmo[weaponIndex] -= loadAmmo;
+            int weaponIndex = player.weaponSlots.currentIndex;
+            int loadAmmo = Mathf.Min(player.weapons[weaponIndex].maxAmmo - player.weaponSlots.currentAmmo[weaponIndex], player.weaponSlots.reserveAmmo[weaponIndex]);
+            player.weaponSlots.currentAmmo[weaponIndex] += loadAmmo;
+            player.weaponSlots.reserveAmmo[weaponIndex] -= loadAmmo;
         }
 
         // 총구 위치에서 플레이어 회전으로 투사체를 내보낸다.

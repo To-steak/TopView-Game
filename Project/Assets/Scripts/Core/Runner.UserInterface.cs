@@ -175,10 +175,10 @@ namespace TopView.Core
 
             if (_ammoPresenter != null)
             {
-                int weaponIndex = player.currentWeaponIndex;
+                int weaponIndex = player.weaponSlots.currentIndex;
                 if (weaponIndex >= 0 && weaponIndex < player.weapons.Length)
                 {
-                    _ammoPresenter.Present(true, true, player.weapons[weaponIndex].kind, player.weaponCurrentAmmo[weaponIndex], player.weaponReserveAmmo[weaponIndex]);
+                    _ammoPresenter.Present(true, true, player.weapons[weaponIndex].kind, player.weaponSlots.currentAmmo[weaponIndex], player.weaponSlots.reserveAmmo[weaponIndex]);
                 }
                 else
                 {
@@ -188,7 +188,7 @@ namespace TopView.Core
 
             if (_playerManaPresenter != null)
             {
-                _playerManaPresenter.Present(true, player.mana, player.vitals.maxMana);
+                _playerManaPresenter.Present(true, player.mana.current, player.vitals.maxMana);
             }
         }
 
