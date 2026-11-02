@@ -7,15 +7,14 @@ namespace TopView.Systems
     public static class TransformSnapshotSystem
     {
         /// <summary>
-        /// 살아 있는 플레이어, 적, 보스와 공유 저장소 엔티티의 직전 값을 남긴다. 위치나 회전을 바꾸는 System보다 먼저 부른다.
+        /// 살아 있는 플레이어, 적과 공유 저장소 엔티티의 직전 값을 남긴다. 위치나 회전을 바꾸는 System보다 먼저 부른다.
         /// </summary>
         /// <param name="players">플레이어 저장소</param>
         /// <param name="enemies">적 저장소</param>
-        /// <param name="bosses">보스 저장소</param>
         /// <param name="masks">공유 저장소의 칸별 컴포넌트 표시</param>
         /// <param name="positions">공유 저장소의 위치</param>
         /// <param name="rotations">공유 저장소의 회전</param>
-        public static void Tick(PlayerStorage players, EnemyStorage enemies, BossStorage bosses, ComponentMask[] masks, PositionComponent[] positions, RotationComponent[] rotations)
+        public static void Tick(PlayerStorage players, EnemyStorage enemies, ComponentMask[] masks, PositionComponent[] positions, RotationComponent[] rotations)
         {
             for (int playerIndex = 0; playerIndex < players.entities.Length; playerIndex++)
             {
@@ -34,16 +33,6 @@ namespace TopView.Systems
                 {
                     Snapshot(ref enemy.position);
                     Snapshot(ref enemy.rotation);
-                }
-            }
-
-            for (int bossIndex = 0; bossIndex < bosses.entities.Length; bossIndex++)
-            {
-                ref BossEntity boss = ref bosses.entities[bossIndex];
-                if (boss.isAlive)
-                {
-                    Snapshot(ref boss.position);
-                    Snapshot(ref boss.rotation);
                 }
             }
 

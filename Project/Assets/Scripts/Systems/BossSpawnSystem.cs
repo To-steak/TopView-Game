@@ -6,29 +6,29 @@ using UnityEngine;
 
 namespace TopView.Systems
 {
-    // 보스 생성 요청을 받아 BossStorage의 빈 칸에 엔티티를 채운다. 틱 마지막에 부른다.
+    // 보스 생성 요청을 받아 공유 저장소의 보스 구간 빈 칸에 컴포넌트를 채운다. 틱 마지막에 부른다.
     public static class BossSpawnSystem
     {
         /// <summary>
         /// 보스 생성 요청을 모두 처리한다. 빈 칸이 없으면 요청을 버린다.
         /// </summary>
-        /// <param name="bosses">보스 저장소</param>
+        /// <param name="entities">공유 저장소</param>
         /// <param name="bossSpawnRequests">보스 생성 요청 큐</param>
         /// <param name="players">플레이어 저장소. 보스가 생길 때 바라볼 방향을 정한다</param>
-        public static void Tick(BossStorage bosses, Queue<BossSpawnRequest> bossSpawnRequests, PlayerStorage players)
+        public static void Tick(EntityStorage entities, Queue<BossSpawnRequest> bossSpawnRequests, PlayerStorage players)
         {
             bool hasPlayer = TargetingSystem.TryGetPlayerTarget(players, out Vector3 playerPosition, out float _);
             int droppedCount = 0;
             while (bossSpawnRequests.Count > 0)
             {
                 BossSpawnRequest request = bossSpawnRequests.Dequeue();
-                if (!SpawnSystem.TryTakeFreeIndex(bosses.freeIndices, out int index))
+                if (!SpawnSystem.TryTakeFreeIndex(entities.freeBossIndices, out int index))
                 {
                     droppedCount++;
                     continue;
                 }
 
-                Spawn(ref bosses.entities[index], in request, hasPlayer, playerPosition);
+                Spawn(entities, index, in request, hasPlayer, playerPosition);
             }
 
             if (droppedCount > 0)
@@ -38,9 +38,9 @@ namespace TopView.Systems
         }
 
         // 보스는 도발 상태로 생기며, 도발을 시작할 때처럼 플레이어 쪽(XZ)을 바로 바라본다.
-        private static void Spawn(ref BossEntity slot, in BossSpawnRequest request, bool hasPlayer, Vector3 playerPosition)
+        private static void Spawn(EntityStorage entities, int index, in BossSpawnRequest request, bool hasPlayer, Vector3 playerPosition)
         {
-            EnemyAttackComponent[] attacks = SpawnSystem.ReuseArray(slot.attacks, request.attacks);
+            EnemyAttackComponent[] attacks = SpawnSystem.ReuseArray(entities.attackLists[index].attacks, request.attacks);
 
             Quaternion rotation = Quaternion.identity;
             Vector3 toPlayer = playerPosition - request.position;
@@ -51,23 +51,20 @@ namespace TopView.Systems
             }
 
             float maxHealth = request.stats.baseMaxHealth + request.level * request.stats.maxHealthIncrement;
-            slot = new BossEntity
+
+            SpawnSystem.ClaimSlot(entities, index, ComponentMask.BossArchetype);
+            entities.enemyStats[index] = request.stats;
+            entities.bossBehaviors[index] = request.behavior;
+            entities.attackLists[index] = new AttackListComponent { attacks = attacks };
+            entities.combats[index] = new CombatComponent
             {
-                isAlive = true,
-                generation = slot.generation + 1,
-                stats = request.stats,
-                behavior = request.behavior,
-                attacks = attacks,
-                combat = new CombatComponent
-                {
-                    level = request.level,
-                    attackDamage = request.stats.baseAttackDamage + request.level * request.stats.attackDamageIncrement
-                },
-                health = new HealthComponent { current = maxHealth, max = maxHealth },
-                position = new PositionComponent { previous = request.position, current = request.position },
-                rotation = new RotationComponent { previous = rotation, current = rotation },
-                actionState = new BossActionStateComponent { state = BossState.Taunt }
+                level = request.level,
+                attackDamage = request.stats.baseAttackDamage + request.level * request.stats.attackDamageIncrement
             };
+            entities.healths[index] = new HealthComponent { current = maxHealth, max = maxHealth };
+            entities.positions[index] = new PositionComponent { previous = request.position, current = request.position };
+            entities.rotations[index] = new RotationComponent { previous = rotation, current = rotation };
+            entities.bossActionStates[index] = new BossActionStateComponent { state = BossState.Taunt };
         }
     }
 }

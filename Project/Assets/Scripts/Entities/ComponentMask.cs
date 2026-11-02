@@ -14,10 +14,18 @@ namespace TopView.Entities
         AttackPayload = 1UL << 4,
         Melee = 1UL << 5,
         MeleeHits = 1UL << 6,
+        Health = 1UL << 7,
+        Combat = 1UL << 8,
+        EnemyStats = 1UL << 9,
+        AttackList = 1UL << 10,
+        BossBehavior = 1UL << 11,
+        BossActionState = 1UL << 12,
 
         // 투사체가 가지는 컴포넌트 조합
         ProjectileArchetype = Position | Rotation | Projectile | ProjectileMotion | AttackPayload,
         // 근접 판정이 가지는 컴포넌트 조합
-        MeleeArchetype = Position | Melee | MeleeHits | AttackPayload
+        MeleeArchetype = Position | Melee | MeleeHits | AttackPayload,
+        // 보스가 가지는 컴포넌트 조합
+        BossArchetype = Position | Rotation | Health | Combat | EnemyStats | AttackList | BossBehavior | BossActionState
     }
 }

@@ -15,15 +15,14 @@ namespace TopView.Core
         // 살아 있는 보스의 피격 판정 원(청록)과 Body 공격 판정 원(빨강)을 Logic 위치에 그린다.
         private void DrawBossGizmos()
         {
-            BossEntity[] bosses = _world.bosses.entities;
-            for (int bossIndex = 0; bossIndex < bosses.Length; bossIndex++)
+            EntityStorage entities = _world.entities;
+            for (int index = 0; index < entities.masks.Length; index++)
             {
-                ref readonly BossEntity boss = ref bosses[bossIndex];
-                if (boss.isAlive)
+                if ((entities.masks[index] & ComponentMask.BossArchetype) == ComponentMask.BossArchetype)
                 {
                     Gizmos.color = Color.cyan;
-                    DrawCircleGizmo(boss.position.current, boss.stats.hitRadius);
-                    DrawBodyAttackGizmos(boss.attacks, boss.position.current, boss.rotation.current);
+                    DrawCircleGizmo(entities.positions[index].current, entities.enemyStats[index].hitRadius);
+                    DrawBodyAttackGizmos(entities.attackLists[index].attacks, entities.positions[index].current, entities.rotations[index].current);
                 }
             }
         }
