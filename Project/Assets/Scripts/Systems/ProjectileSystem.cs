@@ -8,37 +8,19 @@ namespace TopView.Systems
     public static class ProjectileSystem
     {
         /// <summary>
-        /// 살아 있는 투사체마다 직전 위치를 남기고 시간을 1틱 늘린 뒤 움직인다.
+        /// 투사체마다 시간을 1틱 늘린 뒤 움직인다.
         /// </summary>
         /// <param name="projectiles">투사체 저장소</param>
         public static void Tick(ProjectileStorage projectiles)
         {
             float deltaTime = Time.fixedDeltaTime;
 
-            for (int projectileIndex = 0; projectileIndex < projectiles.entities.Length; projectileIndex++)
+            for (int index = 0; index < projectiles.entities.Length; index++)
             {
-                ref ProjectileEntity projectile = ref projectiles.entities[projectileIndex];
-                if (!projectile.isAlive)
+                ref ProjectileEntity entity = ref projectiles.entities[index];
+                if (entity.isAlive && Move(in entity.projectile, ref entity.motion, ref entity.position, deltaTime))
                 {
-                    continue;
-                }
-
-                projectile.previousPosition = projectile.currentPosition;
-                projectile.elapsedTicks++;
-
-                if (projectile.projectile.kind == ProjectileKind.Straight)
-                {
-                    projectile.currentPosition += projectile.velocity * deltaTime;
-                    if (projectile.elapsedTicks >= projectile.projectile.lifetimeTicks)
-                    {
-                        Despawn(projectiles, projectileIndex);
-                    }
-                    continue;
-                }
-
-                if (!projectile.isResting)
-                {
-                    MoveGrenade(ref projectile, deltaTime);
+                    Despawn(projectiles, index);
                 }
             }
         }
@@ -47,18 +29,36 @@ namespace TopView.Systems
         /// 투사체를 즉시 없애고 칸을 반납한다.
         /// </summary>
         /// <param name="projectiles">투사체 저장소</param>
-        /// <param name="projectileIndex">없앨 칸 번호</param>
-        public static void Despawn(ProjectileStorage projectiles, int projectileIndex)
+        /// <param name="index">없앨 칸 번호</param>
+        public static void Despawn(ProjectileStorage projectiles, int index)
         {
-            projectiles.entities[projectileIndex].isAlive = false;
-            projectiles.freeIndices.Add(projectileIndex);
+            projectiles.entities[index].isAlive = false;
+            projectiles.freeIndices.Add(index);
+        }
+
+        // 시간을 1틱 늘리고 움직인다. 수명이 다한 Straight 투사체면 true를 돌려준다.
+        private static bool Move(in ProjectileComponent projectile, ref ProjectileMotionComponent motion, ref PositionComponent position, float deltaTime)
+        {
+            motion.elapsedTicks++;
+
+            if (projectile.kind == ProjectileKind.Straight)
+            {
+                position.current += motion.velocity * deltaTime;
+                return motion.elapsedTicks >= projectile.lifetimeTicks;
+            }
+
+            if (!motion.isResting)
+            {
+                MoveGrenade(in projectile, ref motion, ref position, deltaTime);
+            }
+            return false;
         }
 
         // 중력을 받아 움직이다가 환경 레이어에 닿으면 그 자리에서 멈춘다.
-        private static void MoveGrenade(ref ProjectileEntity projectile, float deltaTime)
+        private static void MoveGrenade(in ProjectileComponent projectile, ref ProjectileMotionComponent motion, ref PositionComponent position, float deltaTime)
         {
-            projectile.velocity.y += projectile.projectile.gravity * deltaTime;
-            Vector3 displacement = projectile.velocity * deltaTime;
+            motion.velocity.y += projectile.gravity * deltaTime;
+            Vector3 displacement = motion.velocity * deltaTime;
             float distance = displacement.magnitude;
             if (distance <= 0f)
             {
@@ -66,15 +66,15 @@ namespace TopView.Systems
             }
 
             Vector3 direction = displacement / distance;
-            if (Physics.SphereCast(projectile.currentPosition, projectile.projectile.radius, direction, out RaycastHit hit, distance, projectile.projectile.collisionLayer, QueryTriggerInteraction.Ignore))
+            if (Physics.SphereCast(position.current, projectile.radius, direction, out RaycastHit hit, distance, projectile.collisionLayer, QueryTriggerInteraction.Ignore))
             {
-                projectile.currentPosition += direction * hit.distance;
-                projectile.velocity = Vector3.zero;
-                projectile.isResting = true;
+                position.current += direction * hit.distance;
+                motion.velocity = Vector3.zero;
+                motion.isResting = true;
                 return;
             }
 
-            projectile.currentPosition += displacement;
+            position.current += displacement;
         }
     }
 }

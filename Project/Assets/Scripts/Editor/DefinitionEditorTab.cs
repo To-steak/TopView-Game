@@ -10,8 +10,6 @@ namespace TopView.Editor
         // Player Definition
         Player,
         // Enemy Definition
-        Enemy,
-        // Boss Definition
-        Boss
+        Enemy
     }
 }

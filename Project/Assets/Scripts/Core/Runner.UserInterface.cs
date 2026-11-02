@@ -3,6 +3,7 @@ using TopView.Entities;
 using TopView.UserInterface.Ammo;
 using TopView.UserInterface.BossHealth;
 using TopView.UserInterface.GameOver;
+using TopView.UserInterface.Gold;
 using TopView.UserInterface.PlayerHealth;
 using TopView.UserInterface.PlayerMana;
 using TopView.UserInterface.RemainingTime;
@@ -17,6 +18,7 @@ namespace TopView.Core
         private GameOverPresenter _gameOverPresenter;
         private RemainingTimePresenter _remainingTimePresenter;
         private ScorePresenter _scorePresenter;
+        private GoldPresenter _goldPresenter;
         private PlayerHealthPresenter _playerHealthPresenter;
         private AmmoPresenter _ammoPresenter;
         private PlayerManaPresenter _playerManaPresenter;
@@ -52,6 +54,16 @@ namespace TopView.Core
             else
             {
                 _scorePresenter.Initialize();
+            }
+
+            _goldPresenter = FindAnyObjectByType<GoldPresenter>();
+            if (_goldPresenter == null)
+            {
+                Debug.LogError("Runner >> 씬에 GoldPresenter가 없다.");
+            }
+            else
+            {
+                _goldPresenter.Initialize();
             }
 
             _playerHealthPresenter = FindAnyObjectByType<PlayerHealthPresenter>();
@@ -110,6 +122,10 @@ namespace TopView.Core
             {
                 _scorePresenter.Present(_world.progress.score);
             }
+            if (_goldPresenter != null)
+            {
+                _goldPresenter.Present(_world.progress.gold);
+            }
 
             if (!TryFindAlivePlayer(out int playerIndex))
             {
@@ -136,9 +152,10 @@ namespace TopView.Core
 
         private bool TryFindAlivePlayer(out int playerIndex)
         {
-            for (playerIndex = 0; playerIndex < _world.players.entities.Length; playerIndex++)
+            PlayerEntity[] entities = _world.players.entities;
+            for (playerIndex = 0; playerIndex < entities.Length; playerIndex++)
             {
-                if (_world.players.entities[playerIndex].isAlive)
+                if (entities[playerIndex].isAlive)
                 {
                     return true;
                 }
@@ -150,20 +167,21 @@ namespace TopView.Core
 
         private void PresentPlayerInterface(int playerIndex)
         {
-            ref readonly PlayerEntity player = ref _world.players.entities[playerIndex];
+            ref readonly PlayerEntity entity = ref _world.players.entities[playerIndex];
 
             if (_playerHealthPresenter != null)
             {
-                _playerHealthPresenter.Present(true, player.health, player.vitals.maxHealth);
+                _playerHealthPresenter.Present(true, entity.health.current, entity.health.max);
             }
 
             if (_ammoPresenter != null)
             {
-                int weaponIndex = player.currentWeaponIndex;
-                if (weaponIndex >= 0 && weaponIndex < player.weapons.Length)
+                WeaponComponent[] weapons = entity.weaponList.weapons;
+                ref readonly PlayerWeaponSlotsComponent weaponSlot = ref entity.weaponSlots;
+                int weaponIndex = weaponSlot.currentIndex;
+                if (weaponIndex >= 0 && weaponIndex < weapons.Length)
                 {
-                    ref readonly WeaponComponent weapon = ref player.weapons[weaponIndex];
-                    _ammoPresenter.Present(true, true, weapon.kind, weapon.currentAmmo, weapon.reserveAmmo);
+                    _ammoPresenter.Present(true, true, weapons[weaponIndex].kind, weaponSlot.currentAmmo[weaponIndex], weaponSlot.reserveAmmo[weaponIndex]);
                 }
                 else
                 {
@@ -173,7 +191,7 @@ namespace TopView.Core
 
             if (_playerManaPresenter != null)
             {
-                _playerManaPresenter.Present(true, player.mana, player.vitals.maxMana);
+                _playerManaPresenter.Present(true, entity.mana.current, entity.vitals.maxMana);
             }
         }
 
@@ -181,19 +199,19 @@ namespace TopView.Core
         {
             if (_bossHealthPresenter != null)
             {
-                BossEntity[] bosses = _world.bosses.entities;
-                bool hasBoss = false;
-                for (int bossIndex = 0; bossIndex < bosses.Length; bossIndex++)
+                EnemyEntity[] entities = _world.enemies.entities;
+                bool hasOverlayEnemy = false;
+                for (int index = 0; index < entities.Length; index++)
                 {
-                    ref readonly BossEntity boss = ref bosses[bossIndex];
-                    if (boss.isAlive)
+                    ref readonly EnemyEntity entity = ref entities[index];
+                    if (entity.isAlive && entity.behavior.showsOverlayHealthBar)
                     {
-                        _bossHealthPresenter.Present(true, boss.health, boss.maxHealth);
-                        hasBoss = true;
+                        _bossHealthPresenter.Present(true, entity.health.current, entity.health.max);
+                        hasOverlayEnemy = true;
                         break;
                     }
                 }
-                if (!hasBoss)
+                if (!hasOverlayEnemy)
                 {
                     _bossHealthPresenter.Present(false, 0f, 0f);
                 }

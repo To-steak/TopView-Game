@@ -13,8 +13,8 @@ namespace TopView.Editor
         private Vector2 _listScrollPosition;
         private Vector2 _detailScrollPosition;
         // 번호가 DefinitionEditorTab과 같다
-        private static readonly string[] TAB_LABELS = { "Game Settings", "Weapons", "Player", "Enemy", "Boss" };
-        private static readonly string[] TAB_FILTERS = { "t:GameSettingsDefinition", "t:WeaponDefinition", "t:PlayerDefinition", "t:EnemyDefinition", "t:BossDefinition" };
+        private static readonly string[] TAB_LABELS = { "Game Settings", "Weapons", "Player", "Enemy" };
+        private static readonly string[] TAB_FILTERS = { "t:GameSettingsDefinition", "t:WeaponDefinition", "t:PlayerDefinition", "t:EnemyDefinition" };
 
         private const string WINDOW_TITLE = "Definition Editor";
         private const string BOX_STYLE = "box";

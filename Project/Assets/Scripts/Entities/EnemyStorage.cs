@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace TopView.Entities
 {
@@ -7,26 +8,26 @@ namespace TopView.Entities
     {
         // 엔티티 배열. isAlive가 false인 칸은 비어 있다
         public EnemyEntity[] entities;
-        // 종류별 칸 수
-        public int capacityPerKind;
         // 종류별 빈 칸 번호 목록. EnemySpawnSystem이 끝에서부터 꺼낸다
         public List<int>[] freeIndicesByKind;
 
         /// <summary>
-        /// 모든 칸이 빈 저장소를 만든다.
+        /// 모든 칸이 빈 저장소를 만들고, 칸마다 경로 배열을 할당한다.
         /// </summary>
         /// <param name="kindCount">적 종류 수</param>
         /// <param name="capacityPerKind">종류별 칸 수</param>
-        public EnemyStorage(int kindCount, int capacityPerKind)
+        /// <param name="pathCornerCapacity">칸마다 미리 만들어 둘 경로 배열의 크기</param>
+        public EnemyStorage(int kindCount, int capacityPerKind, int pathCornerCapacity)
         {
-            this.capacityPerKind = capacityPerKind;
             entities = new EnemyEntity[kindCount * capacityPerKind];
             freeIndicesByKind = new List<int>[kindCount];
             for (int kind = 0; kind < kindCount; kind++)
             {
                 freeIndicesByKind[kind] = new List<int>(capacityPerKind);
-                for (int index = (kind + 1) * capacityPerKind - 1; index >= kind * capacityPerKind; index--)
+                int kindStart = kind * capacityPerKind;
+                for (int index = kindStart + capacityPerKind - 1; index >= kindStart; index--)
                 {
+                    entities[index].agent.pathCorners = new Vector3[pathCornerCapacity];
                     freeIndicesByKind[kind].Add(index);
                 }
             }

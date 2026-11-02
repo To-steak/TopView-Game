@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace TopView.Systems
 {
-    // 플레이어 생성 요청을 받아 PlayerStorage의 빈 칸에 엔티티를 채운다. 틱 마지막에 부른다.
+    // 플레이어 생성 요청을 받아 저장소의 빈 칸을 채운다. 틱 마지막에 부른다.
     public static class PlayerSpawnSystem
     {
         /// <summary>
@@ -35,30 +35,47 @@ namespace TopView.Systems
             }
         }
 
-        private static void Spawn(ref PlayerEntity slot, in PlayerSpawnRequest request)
+        // 칸 전체를 새 값으로 바꿔 이전 값이 남지 않게 한다. 무기 목록과 탄약 배열만 다시 쓴다.
+        private static void Spawn(ref PlayerEntity entity, in PlayerSpawnRequest request)
         {
-            WeaponComponent[] weapons = SpawnSystem.ReuseArray(slot.weapons, request.weapons);
+            int generation = entity.generation + 1;
+            WeaponComponent[] weapons = SpawnSystem.ReuseArray(entity.weaponList.weapons, request.weapons);
+            int[] currentAmmo = ReuseAmmoArray(entity.weaponSlots.currentAmmo, weapons.Length);
+            int[] reserveAmmo = ReuseAmmoArray(entity.weaponSlots.reserveAmmo, weapons.Length);
+            for (int weaponIndex = 0; weaponIndex < weapons.Length; weaponIndex++)
+            {
+                currentAmmo[weaponIndex] = weapons[weaponIndex].startingCurrentAmmo;
+                reserveAmmo[weaponIndex] = weapons[weaponIndex].startingReserveAmmo;
+            }
 
-            slot = new PlayerEntity
+            entity = new PlayerEntity
             {
                 isAlive = true,
-                generation = slot.generation + 1,
+                generation = generation,
                 movement = request.movement,
                 vitals = request.vitals,
                 action = request.action,
-                previousPosition = request.position,
-                currentPosition = request.position,
-                previousRotation = request.rotation,
-                currentRotation = request.rotation,
-                state = PlayerState.Idle,
-                currentSpeed = request.movement.walkSpeed,
-                health = request.vitals.maxHealth,
-                mana = request.vitals.maxMana,
-                manaRecoveryElapsedTicks = request.vitals.manaRecoveryDelayTicks,
-                weapons = weapons,
-                currentWeaponIndex = 0,
-                pendingWeaponIndex = 0
+                position = new PositionComponent { previous = request.position, current = request.position },
+                rotation = new RotationComponent { previous = request.rotation, current = request.rotation },
+                actionState = new PlayerActionStateComponent { state = PlayerState.Idle },
+                motion = new PlayerMotionComponent { currentSpeed = request.movement.walkSpeed },
+                health = new HealthComponent { current = request.vitals.maxHealth, max = request.vitals.maxHealth },
+                mana = new ManaComponent { current = request.vitals.maxMana, recoveryElapsedTicks = request.vitals.manaRecoveryDelayTicks },
+                weaponList = new WeaponListComponent { weapons = weapons },
+                weaponSlots = new PlayerWeaponSlotsComponent
+                {
+                    currentAmmo = currentAmmo,
+                    reserveAmmo = reserveAmmo,
+                    currentIndex = 0,
+                    pendingIndex = 0
+                }
             };
+        }
+
+        // 칸이 쓰던 탄약 배열을 길이가 같으면 다시 쓴다. 내용은 부르는 쪽이 모두 채운다.
+        private static int[] ReuseAmmoArray(int[] slotArray, int length)
+        {
+            return slotArray != null && slotArray.Length == length ? slotArray : new int[length];
         }
     }
 }

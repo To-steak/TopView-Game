@@ -137,8 +137,7 @@ AnimatorState:
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions: []
-  m_StateMachineBehaviours:
-  - {fileID: 2820998860113506353}
+  m_StateMachineBehaviours: []
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
@@ -180,9 +179,7 @@ AnimatorState:
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: -5706532569841688754}
-  m_StateMachineBehaviours:
-  - {fileID: 3568179668832061970}
-  - {fileID: -3894624420267590315}
+  m_StateMachineBehaviours: []
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
@@ -290,6 +287,12 @@ AnimatorController:
     m_DefaultInt: 0
     m_DefaultBool: 0
     m_Controller: {fileID: 9100000}
+  - m_Name: isWalk
+    m_Type: 4
+    m_DefaultFloat: 0
+    m_DefaultInt: 0
+    m_DefaultBool: 0
+    m_Controller: {fileID: 9100000}
   m_AnimatorLayers:
   - serializedVersion: 5
     m_Name: Base Layer
@@ -337,9 +340,7 @@ AnimatorState:
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: 158458049720351209}
-  m_StateMachineBehaviours:
-  - {fileID: 3887071665381278662}
-  - {fileID: 5169380630303842829}
+  m_StateMachineBehaviours: []
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
@@ -454,8 +455,7 @@ AnimatorState:
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: -214449170663022739}
-  m_StateMachineBehaviours:
-  - {fileID: -1249268658578441550}
+  m_StateMachineBehaviours: []
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1

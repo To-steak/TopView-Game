@@ -13,54 +13,50 @@ MonoBehaviour:
   m_Name: Enemy A Definition
   m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.EnemyDefinition
   stats:
-    basicMaxHealth: 10
-    basicAttackDamage: 10
-    levelIncrement: 10
-    score: 350
+    baseMaxHealth: 100
+    baseAttackDamage: 20
+    baseSpeed: 1
+    baseScore: 10
+    baseGold: 10
+    maxHealthIncrement: 20
+    attackDamageIncrement: 2
+    speedIncrement: 0.2
+    scoreIncrement: 3
+    goldIncrement: 5
     hitRadius: 0.75
   behavior:
-    detectionRadius: 10
+    detectionRadius: 25
     wanderIntervalTicks: 100
-    attackDistance: 2
-    attackRotationSpeed: 10
-    dieTicks: 36
-  navigation:
-    speed: 5
+    stopDistance: 1
     acceleration: 8
-    angularSpeed: 120
-    radius: 0.4
-    baseOffset: 0.1
-    navMeshSampleDistance: 3
-    maxPathCorners: 3
+    angularSpeed: 360
+    dieTicks: 36
   attacks:
-  - kind: 0
-    startTicks: 30
-    endTicks: 55
-    durationTicks: 50
-    damageMultiplier: 1
-    bodyRadius: 1
-    bodyOffset: 1.5
-    projectile:
+  - attack:
       kind: 0
-      speed: 0
-      radius: 0
-      lifetimeTicks: 0
-      upwardRatio: 0
-      gravity: 0
-      fuseTicks: 0
-      explosionRadius: 0
-      collisionLayer:
-        serializedVersion: 2
-        m_Bits: 0
-    spawnOffset: {x: 0, y: 0, z: 0}
-    alternateSpawnOffset: {x: 0, y: 0, z: 0}
-  attackProjectilePrefabs:
-  - {fileID: 0}
-  attackHitEffectPrefabs:
-  - {fileID: 0}
-  attackProjectilePitchSpeeds:
-  - 0
+      attackRange: 1
+      cooldownTicks: 200
+      startTicks: 15
+      endTicks: 27
+      durationTicks: 50
+      damageMultiplier: 1
+      bodyRadius: 1
+      bodyOffset: 0.5
+      projectile:
+        kind: 0
+        speed: 0
+        radius: 0
+        lifetimeTicks: 0
+        upwardRatio: 0
+        gravity: 0
+        fuseTicks: 0
+        explosionRadius: 0
+        collisionLayer:
+          serializedVersion: 2
+          m_Bits: 0
+      spawnOffset: {x: 0, y: 0, z: 0}
+      alternateSpawnOffset: {x: 0, y: 0, z: 0}
+    projectilePrefab: {fileID: 0}
+    hitEffectPrefab: {fileID: 0}
   viewPrefab: {fileID: 7360897978464151965, guid: 3b02148a60e7b3f4189f63f9ca2715b8, type: 3}
   healthGaugePrefab: {fileID: 7240100042028206097, guid: 61bf5277b80621842967d75ffba1dcbe, type: 3}
-  healthGaugeOffset: {x: 0, y: 2, z: 0}
-  healthGaugeColor: {r: 1, g: 1, b: 1, a: 1}
