@@ -23,7 +23,7 @@ MonoBehaviour:
     wanderIntervalTicks: 100
     attackDistance: 2
     attackRotationSpeed: 10
-    dieTicks: 0
+    dieTicks: 36
   navigation:
     speed: 5
     acceleration: 8
@@ -34,8 +34,9 @@ MonoBehaviour:
     maxPathCorners: 3
   attacks:
   - kind: 0
-    commitTicks: 0
-    durationTicks: 0
+    startTicks: 30
+    endTicks: 55
+    durationTicks: 50
     damageMultiplier: 1
     bodyRadius: 1
     bodyOffset: 1.5
@@ -60,6 +61,6 @@ MonoBehaviour:
   attackProjectilePitchSpeeds:
   - 0
   viewPrefab: {fileID: 7360897978464151965, guid: 3b02148a60e7b3f4189f63f9ca2715b8, type: 3}
-  healthGaugePrefab: {fileID: 9209888098781872359, guid: c1a762b0df58d464db55729b66fdff26, type: 3}
+  healthGaugePrefab: {fileID: 0}
   healthGaugeOffset: {x: 0, y: -1, z: 0}
   healthGaugeColor: {r: 1, g: 0, b: 0, a: 1}

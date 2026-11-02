@@ -37,4 +37,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 5c5cbd46eaead144ca431125be8ed13c, type: 2}
   targetFrameRate: 144
   enemyCapacityPerKind: 10
-  projectileCapacity: 10
+  projectileCapacity: 25
