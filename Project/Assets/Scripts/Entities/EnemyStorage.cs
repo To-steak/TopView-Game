@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace TopView.Entities
 {
@@ -17,10 +18,15 @@ namespace TopView.Entities
         /// </summary>
         /// <param name="kindCount">적 종류 수</param>
         /// <param name="capacityPerKind">종류별 칸 수</param>
-        public EnemyStorage(int kindCount, int capacityPerKind)
+        /// <param name="pathCornerCapacity">칸마다 미리 만들어 둘 경로 배열의 크기</param>
+        public EnemyStorage(int kindCount, int capacityPerKind, int pathCornerCapacity)
         {
             this.capacityPerKind = capacityPerKind;
             entities = new EnemyEntity[kindCount * capacityPerKind];
+            for (int index = 0; index < entities.Length; index++)
+            {
+                entities[index].pathCorners = new Vector3[pathCornerCapacity];
+            }
             freeIndicesByKind = new List<int>[kindCount];
             for (int kind = 0; kind < kindCount; kind++)
             {

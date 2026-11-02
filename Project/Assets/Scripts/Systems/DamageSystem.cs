@@ -94,8 +94,8 @@ namespace TopView.Systems
 
             if (ApplyDamage(ref enemy.health, amount))
             {
-                progress.score += enemy.stats.score * enemy.level;
-                progress.gold += enemy.stats.baseGold * enemy.level;
+                progress.score += enemy.stats.baseScore + enemy.level * enemy.stats.scoreIncrement;
+                progress.gold += enemy.stats.baseGold + enemy.level * enemy.stats.goldIncrement;
             }
             return true;
         }
@@ -115,8 +115,8 @@ namespace TopView.Systems
 
             if (ApplyDamage(ref boss.health, amount))
             {
-                progress.score += boss.stats.score * boss.level;
-                progress.gold += boss.stats.baseGold * boss.level;
+                progress.score += boss.stats.baseScore + boss.level * boss.stats.scoreIncrement;
+                progress.gold += boss.stats.baseGold + boss.level * boss.stats.goldIncrement;
             }
             return true;
         }

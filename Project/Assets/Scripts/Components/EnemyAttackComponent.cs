@@ -10,6 +10,8 @@ namespace TopView.Components
     {
         // 공격 종류
         public EnemyAttackKind kind;
+        // 이 공격을 시작할 수 있는 플레이어까지의 거리(유닛, XZ). 플레이어 반지름을 더해 비교한다. 적만 쓰고 보스는 쓰지 않는다
+        public float attackRange;
         // 공격 상태에 들어간 뒤 공격이 나가기까지의 시간(틱). Body는 판정이 시작되고, 투사체 공격은 투사체를 내보낸 뒤 공격 상태가 끝난다
         [FormerlySerializedAs("commitTicks")]
         public int startTicks;

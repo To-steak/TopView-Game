@@ -52,7 +52,6 @@ namespace TopView.Presentation.Enemy.ViewSystems
                 }
 
                 Vector3 position = Vector3.Lerp(enemy.previousPosition, enemy.currentPosition, alpha);
-                position.y += enemy.navigation.baseOffset;
                 view.transform.SetPositionAndRotation(position, Quaternion.Slerp(enemy.previousRotation, enemy.currentRotation, alpha));
             }
 

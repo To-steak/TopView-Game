@@ -41,7 +41,7 @@ namespace TopView.Core
         }
 
         // Player Spawner Authoring이 가리키는 Player Definition을 읽어 플레이어 생성 요청을 만든다. 값이 빠져 있으면 false
-        private static bool TryReadPlayer(PlayerSpawnerAuthoring playerSpawner, List<GameObject> projectilePrefabs, List<float> projectilePitchSpeeds, List<GameObject> hitEffectPrefabs, out PlayerDefinition playerDefinition, out PlayerSpawnRequest spawnRequest, out GameObject[] weaponModelPrefabs)
+        private static bool TryReadPlayer(PlayerSpawnerAuthoring playerSpawner, List<GameObject> projectilePrefabs, List<GameObject> hitEffectPrefabs, out PlayerDefinition playerDefinition, out PlayerSpawnRequest spawnRequest, out GameObject[] weaponModelPrefabs)
         {
             spawnRequest = default;
             weaponModelPrefabs = null;
@@ -52,7 +52,7 @@ namespace TopView.Core
                 return false;
             }
 
-            if (!TryReadWeapons(playerDefinition, projectilePrefabs, projectilePitchSpeeds, hitEffectPrefabs, out WeaponComponent[] weapons, out weaponModelPrefabs))
+            if (!TryReadWeapons(playerDefinition, projectilePrefabs, hitEffectPrefabs, out WeaponComponent[] weapons, out weaponModelPrefabs))
             {
                 return false;
             }
@@ -81,7 +81,7 @@ namespace TopView.Core
         }
 
         // Player Definition의 무기 목록에서 엔티티에 담을 값과 View가 쓸 모델 프리팹을 꺼내고, 투사체 View와 피격 이펙트를 표에 올린다. 빈 칸이 있으면 false
-        private static bool TryReadWeapons(PlayerDefinition playerDefinition, List<GameObject> projectilePrefabs, List<float> projectilePitchSpeeds, List<GameObject> hitEffectPrefabs, out WeaponComponent[] weapons, out GameObject[] weaponModelPrefabs)
+        private static bool TryReadWeapons(PlayerDefinition playerDefinition, List<GameObject> projectilePrefabs, List<GameObject> hitEffectPrefabs, out WeaponComponent[] weapons, out GameObject[] weaponModelPrefabs)
         {
             WeaponDefinition[] weaponDefinitions = playerDefinition.weapons;
             weapons = new WeaponComponent[weaponDefinitions.Length];
@@ -100,7 +100,7 @@ namespace TopView.Core
                 weaponModelPrefabs[weaponIndex] = definition.modelPrefab;
 
                 bool hasProjectile = definition.weapon.kind != WeaponKind.Melee;
-                AssignProjectileViews(definition.name, hasProjectile, definition.projectilePrefab, definition.hitEffectPrefab, 0f, ref weapons[weaponIndex].projectile, projectilePrefabs, projectilePitchSpeeds, hitEffectPrefabs);
+                AssignProjectileViews(definition.name, hasProjectile, definition.projectilePrefab, definition.hitEffectPrefab, ref weapons[weaponIndex].projectile, projectilePrefabs, hitEffectPrefabs);
             }
 
             return true;
