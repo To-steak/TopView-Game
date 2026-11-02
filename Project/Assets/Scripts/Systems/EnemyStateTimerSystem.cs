@@ -9,27 +9,29 @@ namespace TopView.Systems
         /// <summary>
         /// 상태 시간을 1틱 늘리고 공격별 대기 시간을 1틱 줄인다.
         /// </summary>
-        /// <param name="masks">칸별 컴포넌트 표시</param>
-        /// <param name="actionStates">적 행동 상태와 공격 진행</param>
-        public static void Tick(ComponentMask[] masks, EnemyActionStateComponent[] actionStates)
+        /// <param name="enemies">적 저장소</param>
+        public static void Tick(EnemyStorage enemies)
         {
-            for (int index = 0; index < masks.Length; index++)
+            for (int index = 0; index < enemies.entities.Length; index++)
             {
-                if ((masks[index] & ComponentMask.EnemyArchetype) != ComponentMask.EnemyArchetype)
+                ref EnemyEntity entity = ref enemies.entities[index];
+                if (entity.isAlive)
                 {
-                    continue;
+                    Advance(ref entity.actionState);
                 }
+            }
+        }
 
-                ref EnemyActionStateComponent actionState = ref actionStates[index];
-                actionState.elapsedTicks++;
+        private static void Advance(ref EnemyActionStateComponent actionState)
+        {
+            actionState.elapsedTicks++;
 
-                int[] cooldowns = actionState.attackCooldownRemainingTicks;
-                for (int attackIndex = 0; attackIndex < cooldowns.Length; attackIndex++)
+            int[] cooldowns = actionState.attackCooldownRemainingTicks;
+            for (int attackIndex = 0; attackIndex < cooldowns.Length; attackIndex++)
+            {
+                if (cooldowns[attackIndex] > 0)
                 {
-                    if (cooldowns[attackIndex] > 0)
-                    {
-                        cooldowns[attackIndex]--;
-                    }
+                    cooldowns[attackIndex]--;
                 }
             }
         }

@@ -11,38 +11,34 @@ namespace TopView.Systems
         /// <summary>
         /// 체력이 0이고 아직 사망 상태가 아닌 적을 사망 상태로 바꾼다.
         /// </summary>
-        /// <param name="masks">칸별 컴포넌트 표시</param>
-        /// <param name="generations">칸이 채워진 횟수</param>
-        /// <param name="healths">체력</param>
-        /// <param name="actionStates">적 행동 상태와 공격 진행</param>
-        /// <param name="agents">목적지와 경로</param>
+        /// <param name="enemies">적 저장소</param>
         /// <param name="stateRecords">적 상태 변경 기록</param>
-        public static void Tick(ComponentMask[] masks, int[] generations, HealthComponent[] healths, EnemyActionStateComponent[] actionStates, NavigationAgentComponent[] agents, List<EnemyStateChangedRecord> stateRecords)
+        public static void Tick(EnemyStorage enemies, List<EnemyStateChangedRecord> stateRecords)
         {
-            for (int index = 0; index < masks.Length; index++)
+            for (int index = 0; index < enemies.entities.Length; index++)
             {
-                if ((masks[index] & ComponentMask.EnemyArchetype) != ComponentMask.EnemyArchetype)
-                {
-                    continue;
-                }
-
-                ref EnemyActionStateComponent actionState = ref actionStates[index];
-                if (healths[index].current > 0f || actionState.state == EnemyState.Die)
+                ref EnemyEntity entity = ref enemies.entities[index];
+                if (!entity.isAlive || entity.health.current > 0f || entity.actionState.state == EnemyState.Die)
                 {
                     continue;
                 }
 
                 stateRecords.Add(new EnemyStateChangedRecord
                 {
-                    enemy = new EntityIdentifier { index = index, generation = generations[index] },
-                    previousState = actionState.state,
+                    enemy = new EntityIdentifier { index = index, generation = entity.generation },
+                    previousState = entity.actionState.state,
                     state = EnemyState.Die
                 });
 
-                actionState.state = EnemyState.Die;
-                actionState.elapsedTicks = 0;
-                EnemyNavigationSystem.StopMove(ref agents[index]);
+                Die(ref entity.actionState, ref entity.agent);
             }
+        }
+
+        private static void Die(ref EnemyActionStateComponent actionState, ref NavigationAgentComponent agent)
+        {
+            actionState.state = EnemyState.Die;
+            actionState.elapsedTicks = 0;
+            EnemyNavigationSystem.StopMove(ref agent);
         }
     }
 }

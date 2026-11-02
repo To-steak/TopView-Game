@@ -199,13 +199,14 @@ namespace TopView.Core
         {
             if (_bossHealthPresenter != null)
             {
-                EntityStorage entities = _world.entities;
+                EnemyEntity[] entities = _world.enemies.entities;
                 bool hasOverlayEnemy = false;
-                for (int index = 0; index < entities.masks.Length; index++)
+                for (int index = 0; index < entities.Length; index++)
                 {
-                    if ((entities.masks[index] & ComponentMask.EnemyArchetype) == ComponentMask.EnemyArchetype && entities.enemyBehaviors[index].showsOverlayHealthBar)
+                    ref readonly EnemyEntity entity = ref entities[index];
+                    if (entity.isAlive && entity.behavior.showsOverlayHealthBar)
                     {
-                        _bossHealthPresenter.Present(true, entities.healths[index].current, entities.healths[index].max);
+                        _bossHealthPresenter.Present(true, entity.health.current, entity.health.max);
                         hasOverlayEnemy = true;
                         break;
                     }

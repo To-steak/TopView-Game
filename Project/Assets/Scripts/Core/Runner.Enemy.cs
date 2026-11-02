@@ -151,22 +151,23 @@ namespace TopView.Core
         // 감지와 공격 판정은 여기에 플레이어 반지름을 더해 비교하므로, 원은 플레이어 중심이 아니라 가장자리가 닿는 기준이다
         private void DrawEnemyGizmos()
         {
-            EntityStorage entities = _world.entities;
-            for (int index = 0; index < entities.masks.Length; index++)
+            EnemyEntity[] entities = _world.enemies.entities;
+            for (int index = 0; index < entities.Length; index++)
             {
-                if ((entities.masks[index] & ComponentMask.EnemyArchetype) != ComponentMask.EnemyArchetype)
+                ref readonly EnemyEntity entity = ref entities[index];
+                if (!entity.isAlive)
                 {
                     continue;
                 }
 
-                Vector3 position = entities.positions[index].current;
+                Vector3 position = entity.position.current;
                 Gizmos.color = Color.yellow;
-                DrawCircleGizmo(position, entities.enemyBehaviors[index].detectionRadius);
+                DrawCircleGizmo(position, entity.behavior.detectionRadius);
                 Gizmos.color = new Color(1f, 0.5f, 0f);
-                DrawCircleGizmo(position, entities.enemyBehaviors[index].stopDistance);
+                DrawCircleGizmo(position, entity.behavior.stopDistance);
                 Gizmos.color = Color.cyan;
-                DrawCircleGizmo(position, entities.enemyStats[index].hitRadius);
-                DrawBodyAttackGizmos(entities.attackLists[index].attacks, position, entities.rotations[index].current);
+                DrawCircleGizmo(position, entity.stats.hitRadius);
+                DrawBodyAttackGizmos(entity.attackList.attacks, position, entity.rotation.current);
             }
         }
 

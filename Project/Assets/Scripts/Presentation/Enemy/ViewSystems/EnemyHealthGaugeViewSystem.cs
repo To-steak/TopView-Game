@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TopView.Components;
+using TopView.Entities;
 using TopView.Presentation.Enemy.Views;
 using UnityEngine;
 
@@ -9,14 +10,13 @@ namespace TopView.Presentation.Enemy.ViewSystems
     public static class EnemyHealthGaugeViewSystem
     {
         /// <summary>
-        /// 공유 저장소의 칸마다 적 View와 게이지를 맞추고, 게이지의 위치·회전·너비·글자를 적에 맞춘다. EnemyViewSystem.Present 다음에 부른다.
+        /// 저장소의 칸마다 적 View와 게이지를 맞추고, 게이지의 위치·회전·너비·글자를 적에 맞춘다. EnemyViewSystem.Present 다음에 부른다.
         /// </summary>
-        /// <param name="kinds">적 종류 번호</param>
-        /// <param name="healths">체력</param>
+        /// <param name="entities">적 엔티티 배열</param>
         /// <param name="gaugePrefabsByKind">적 종류별 EnemyHealthGaugeView 프리팹</param>
         /// <param name="mainCamera">게이지가 바라볼 카메라. 없으면 null</param>
         /// <param name="context">적 View 실행 상태</param>
-        public static void Present(EnemyKindComponent[] kinds, HealthComponent[] healths, GameObject[] gaugePrefabsByKind, UnityEngine.Camera mainCamera, EnemyViewContext context)
+        public static void Present(EnemyEntity[] entities, GameObject[] gaugePrefabsByKind, UnityEngine.Camera mainCamera, EnemyViewContext context)
         {
             for (int index = 0; index < context.views.Length; index++)
             {
@@ -28,7 +28,7 @@ namespace TopView.Presentation.Enemy.ViewSystems
                 }
 
                 // 칸은 종류별 구간으로 나뉘어 있어 칸을 다시 채워도 종류 번호는 그대로다
-                int kind = kinds[index].kind;
+                int kind = entities[index].kind.kind;
 
                 // 게이지 프리팹이 없는 종류는 판을 준비할 때 경고를 남겼으므로 여기서는 건너뛴다
                 if (enemyView == null || gaugePrefabsByKind[kind] == null)
@@ -53,7 +53,7 @@ namespace TopView.Presentation.Enemy.ViewSystems
                     : gauge.transform.rotation;
                 gauge.transform.SetPositionAndRotation(position, rotation);
 
-                ref readonly HealthComponent health = ref healths[index];
+                ref readonly HealthComponent health = ref entities[index].health;
                 if (health.max > 0f)
                 {
                     float healthRatio = health.current / health.max;

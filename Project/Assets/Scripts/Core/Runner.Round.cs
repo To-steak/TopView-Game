@@ -76,7 +76,8 @@ namespace TopView.Core
             world.enemyHitTargets = new HitTargetComponent[enemyCapacity];
             // 공격하는 쪽 하나는 근접 판정을 동시에 하나만 가지고, 한 판정이 맞힐 대상도 플레이어와 적의 칸 수를 넘지 않는다
             int combatantCapacity = PLAYER_CAPACITY + enemyCapacity;
-            world.entities = new EntityStorage(enemyKindCount, gameSettings.enemyCapacityPerKind, gameSettings.enemyPathCornerCapacity, PLAYER_CAPACITY);
+            world.entities = new EntityStorage(PLAYER_CAPACITY);
+            world.enemies = new EnemyStorage(enemyKindCount, gameSettings.enemyCapacityPerKind, gameSettings.enemyPathCornerCapacity);
             world.melees = new MeleeStorage(combatantCapacity, combatantCapacity);
             world.projectiles = new ProjectileStorage(gameSettings.projectileCapacity);
 
@@ -133,11 +134,11 @@ namespace TopView.Core
                 player = new PlayerViewContext(),
                 enemy = new EnemyViewContext
                 {
-                    views = new EnemyView[_world.entities.masks.Length],
-                    viewGenerations = new int[_world.entities.masks.Length],
+                    views = new EnemyView[_world.enemies.entities.Length],
+                    viewGenerations = new int[_world.enemies.entities.Length],
                     viewPools = new Stack<EnemyView>[enemyKindCount],
                     triggerHashesByKind = new int[enemyKindCount][],
-                    healthGaugeViews = new EnemyHealthGaugeView[_world.entities.masks.Length],
+                    healthGaugeViews = new EnemyHealthGaugeView[_world.enemies.entities.Length],
                     healthGaugePools = new Stack<EnemyHealthGaugeView>[enemyKindCount]
                 },
                 projectile = new ProjectileViewContext

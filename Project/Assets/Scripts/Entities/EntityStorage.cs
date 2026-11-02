@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using TopView.Components;
-using UnityEngine;
 
 namespace TopView.Entities
 {
@@ -13,8 +12,6 @@ namespace TopView.Entities
         // 칸이 채워진 횟수
         public int[] generations;
 
-        // 적 종류별 구간의 빈 칸 번호 목록. EnemySpawnSystem이 끝에서부터 꺼낸다
-        public List<int>[] freeEnemyIndicesByKind;
         // 플레이어 구간의 빈 칸 번호 목록. PlayerSpawnSystem이 끝에서부터 꺼낸다
         public List<int> freePlayerIndices;
 
@@ -24,20 +21,6 @@ namespace TopView.Entities
         public RotationComponent[] rotations;
         // 체력
         public HealthComponent[] healths;
-        // 레벨과 공격력
-        public CombatComponent[] combats;
-        // 체력·공격력·점수 값. 생성 때 Definition에서 복사한다
-        public EnemyStatsComponent[] enemyStats;
-        // 공격 목록
-        public AttackListComponent[] attackLists;
-        // 적 종류 번호
-        public EnemyKindComponent[] enemyKinds;
-        // 적 행동 값. 생성 때 Definition에서 복사한다
-        public EnemyBehaviorComponent[] enemyBehaviors;
-        // 적 행동 상태와 공격 진행
-        public EnemyActionStateComponent[] enemyActionStates;
-        // 목적지와 경로
-        public NavigationAgentComponent[] navigationAgents;
         // 마나
         public ManaComponent[] manas;
         // 플레이어 이동 값. 생성 때 Definition에서 복사한다
@@ -56,28 +39,16 @@ namespace TopView.Entities
         public PlayerWeaponSlotsComponent[] weaponSlots;
 
         /// <summary>
-        /// 모든 칸이 빈 저장소를 만들고, 적 구간의 칸마다 경로 배열을 할당한다.
+        /// 모든 칸이 빈 저장소를 만든다.
         /// </summary>
-        /// <param name="enemyKindCount">적 종류 수</param>
-        /// <param name="enemyCapacityPerKind">적 종류별 칸 수</param>
-        /// <param name="pathCornerCapacity">적 칸마다 미리 만들어 둘 경로 배열의 크기</param>
-        /// <param name="playerCapacity">플레이어 칸 수</param>
-        public EntityStorage(int enemyKindCount, int enemyCapacityPerKind, int pathCornerCapacity, int playerCapacity)
+        /// <param name="capacity">플레이어 칸 수</param>
+        public EntityStorage(int capacity)
         {
-            int enemyEnd = enemyKindCount * enemyCapacityPerKind;
-            int capacity = enemyEnd + playerCapacity;
             masks = new ComponentMask[capacity];
             generations = new int[capacity];
             positions = new PositionComponent[capacity];
             rotations = new RotationComponent[capacity];
             healths = new HealthComponent[capacity];
-            combats = new CombatComponent[capacity];
-            enemyStats = new EnemyStatsComponent[capacity];
-            attackLists = new AttackListComponent[capacity];
-            enemyKinds = new EnemyKindComponent[capacity];
-            enemyBehaviors = new EnemyBehaviorComponent[capacity];
-            enemyActionStates = new EnemyActionStateComponent[capacity];
-            navigationAgents = new NavigationAgentComponent[capacity];
             manas = new ManaComponent[capacity];
             playerMovements = new PlayerMovementComponent[capacity];
             playerVitals = new PlayerVitalsComponent[capacity];
@@ -87,20 +58,8 @@ namespace TopView.Entities
             weaponLists = new WeaponListComponent[capacity];
             weaponSlots = new PlayerWeaponSlotsComponent[capacity];
 
-            freeEnemyIndicesByKind = new List<int>[enemyKindCount];
-            for (int kind = 0; kind < enemyKindCount; kind++)
-            {
-                freeEnemyIndicesByKind[kind] = new List<int>(enemyCapacityPerKind);
-                int kindStart = kind * enemyCapacityPerKind;
-                for (int index = kindStart + enemyCapacityPerKind - 1; index >= kindStart; index--)
-                {
-                    navigationAgents[index].pathCorners = new Vector3[pathCornerCapacity];
-                    freeEnemyIndicesByKind[kind].Add(index);
-                }
-            }
-
-            freePlayerIndices = new List<int>(playerCapacity);
-            for (int index = capacity - 1; index >= enemyEnd; index--)
+            freePlayerIndices = new List<int>(capacity);
+            for (int index = capacity - 1; index >= 0; index--)
             {
                 freePlayerIndices.Add(index);
             }

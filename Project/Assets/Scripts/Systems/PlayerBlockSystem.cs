@@ -11,8 +11,6 @@ namespace TopView.Systems
         private const float MIN_BLOCK_DISTANCE = 0.00001f;
         // 막히는 엔티티가 가지는 컴포넌트
         private const ComponentMask BLOCKED_QUERY = ComponentMask.Position | ComponentMask.PlayerMovement;
-        // 플레이어를 막는 엔티티가 가지는 컴포넌트
-        private const ComponentMask BLOCKER_QUERY = ComponentMask.Position | ComponentMask.EnemyStats;
 
         /// <summary>
         /// 이번 틱에 적의 피격 원 쪽으로 가까워졌다면 원 밖(XZ)으로 되돌린다. 적이 다가와 겹친 경우는 밀어내지 않는다.
@@ -20,25 +18,26 @@ namespace TopView.Systems
         /// <param name="masks">칸별 컴포넌트 표시</param>
         /// <param name="positions">위치</param>
         /// <param name="movements">플레이어 이동 값</param>
-        /// <param name="enemyStats">피격 반지름 값</param>
-        public static void Tick(ComponentMask[] masks, PositionComponent[] positions, PlayerMovementComponent[] movements, EnemyStatsComponent[] enemyStats)
+        /// <param name="enemies">적 저장소</param>
+        public static void Tick(ComponentMask[] masks, PositionComponent[] positions, PlayerMovementComponent[] movements, EnemyStorage enemies)
         {
             for (int index = 0; index < masks.Length; index++)
             {
                 if ((masks[index] & BLOCKED_QUERY) == BLOCKED_QUERY)
                 {
-                    BlockByEnemies(ref positions[index], movements[index].capsuleRadius, masks, positions, enemyStats);
+                    BlockByEnemies(ref positions[index], movements[index].capsuleRadius, enemies.entities);
                 }
             }
         }
 
-        private static void BlockByEnemies(ref PositionComponent position, float capsuleRadius, ComponentMask[] masks, PositionComponent[] positions, EnemyStatsComponent[] enemyStats)
+        private static void BlockByEnemies(ref PositionComponent position, float capsuleRadius, EnemyEntity[] enemies)
         {
-            for (int index = 0; index < masks.Length; index++)
+            for (int index = 0; index < enemies.Length; index++)
             {
-                if ((masks[index] & BLOCKER_QUERY) == BLOCKER_QUERY)
+                ref readonly EnemyEntity enemy = ref enemies[index];
+                if (enemy.isAlive)
                 {
-                    BlockByCircle(ref position, positions[index].current, capsuleRadius + enemyStats[index].hitRadius);
+                    BlockByCircle(ref position, enemy.position.current, capsuleRadius + enemy.stats.hitRadius);
                 }
             }
         }
