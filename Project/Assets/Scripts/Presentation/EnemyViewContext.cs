@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TopView.Presentation.Enemy.Views;
+using UnityEngine;
 
 namespace TopView.Presentation
 {
@@ -18,5 +19,7 @@ namespace TopView.Presentation
         public EnemyHealthGaugeView[] healthGaugeViews;
         // 적 종류별로 쉬고 있는 체력 게이지
         public Stack<EnemyHealthGaugeView>[] healthGaugePools;
+        // 체력 게이지를 만들 때 부모로 쓸 월드 공간 Canvas. 씬에 없으면 null
+        public Transform healthGaugeParent;
     }
 }

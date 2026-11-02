@@ -5,7 +5,8 @@
         "TopView.Entity",
         "TopView.Definitions",
         "Unity.Cinemachine",
-        "UnityEngine.UI"
+        "UnityEngine.UI",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

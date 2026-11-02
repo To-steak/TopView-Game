@@ -7,6 +7,7 @@ using TopView.Presentation;
 using TopView.Presentation.Camera.Views;
 using TopView.Presentation.Enemy.Views;
 using TopView.Presentation.Projectile.Views;
+using TopView.Presentation.WorldCanvas.Views;
 using TopView.Requests;
 using UnityEngine;
 
@@ -184,6 +185,15 @@ namespace TopView.Core
             if (viewContext.camera.playerCameraView == null)
             {
                 Debug.LogError("Runner >> 씬에 PlayerCameraView가 없다.");
+            }
+            WorldCanvasView worldCanvasView = FindAnyObjectByType<WorldCanvasView>();
+            if (worldCanvasView == null)
+            {
+                Debug.LogError("Runner >> 씬에 WorldCanvasView가 없어 적 체력 게이지가 보이지 않는다.");
+            }
+            else
+            {
+                viewContext.enemy.healthGaugeParent = worldCanvasView.transform;
             }
 
             return viewContext;

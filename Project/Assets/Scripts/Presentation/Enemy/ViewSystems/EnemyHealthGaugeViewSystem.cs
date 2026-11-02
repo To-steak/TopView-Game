@@ -5,11 +5,11 @@ using UnityEngine;
 
 namespace TopView.Presentation.Enemy.ViewSystems
 {
-    // 적 View가 있는 칸마다 체력 게이지를 풀에서 꺼내 붙이고, 적 위에 띄워 카메라를 바라보게 하고 체력만큼 채운다.
+    // 적 View가 있는 칸마다 체력 게이지를 풀에서 꺼내 붙이고, 적 위에 띄워 카메라를 바라보게 하고 체력 비율만큼 너비를 맞추고 체력을 글자로 보여 준다.
     public static class EnemyHealthGaugeViewSystem
     {
         /// <summary>
-        /// 적 저장소의 칸마다 적 View와 게이지를 맞추고, 게이지의 위치·회전·채움을 적에 맞춘다. EnemyViewSystem.Present 다음에 부른다.
+        /// 적 저장소의 칸마다 적 View와 게이지를 맞추고, 게이지의 위치·회전·너비·글자를 적에 맞춘다. EnemyViewSystem.Present 다음에 부른다.
         /// </summary>
         /// <param name="enemies">적 저장소</param>
         /// <param name="gaugePrefabsByKind">적 종류별 EnemyHealthGaugeView 프리팹</param>
@@ -36,7 +36,9 @@ namespace TopView.Presentation.Enemy.ViewSystems
                     continue;
                 }
 
-                if (gauge == null)
+                // 막 꺼낸 게이지는 비율이 같아도 글자가 이전 값이므로 체력 표시를 다시 쓴다
+                bool isAcquired = gauge == null;
+                if (isAcquired)
                 {
                     gauge = Acquire(context, enemyIndex, kind, gaugePrefabsByKind, colorsByKind);
                 }
@@ -50,10 +52,12 @@ namespace TopView.Presentation.Enemy.ViewSystems
                 ref readonly EnemyEntity enemy = ref enemies.entities[enemyIndex];
                 if (enemy.maxHealth > 0f)
                 {
-                    float fill = enemy.health / enemy.maxHealth;
-                    if (gauge.gaugeFront.fillAmount != fill)
+                    float healthRatio = enemy.health / enemy.maxHealth;
+                    RectTransform gaugeFrontTransform = gauge.gaugeFront.rectTransform;
+                    if (isAcquired || gaugeFrontTransform.anchorMax.x != healthRatio)
                     {
-                        gauge.gaugeFront.fillAmount = fill;
+                        gaugeFrontTransform.anchorMax = new Vector2(healthRatio, 1f);
+                        gauge.healthText.text = $"{enemy.health} / {enemy.maxHealth}";
                     }
                 }
             }
@@ -62,7 +66,7 @@ namespace TopView.Presentation.Enemy.ViewSystems
         private static EnemyHealthGaugeView Acquire(EnemyViewContext context, int enemyIndex, int kind, GameObject[] gaugePrefabsByKind, Color[] colorsByKind)
         {
             Stack<EnemyHealthGaugeView> pool = context.healthGaugePools[kind];
-            EnemyHealthGaugeView gauge = pool.Count > 0 ? pool.Pop() : Object.Instantiate(gaugePrefabsByKind[kind]).GetComponent<EnemyHealthGaugeView>();
+            EnemyHealthGaugeView gauge = pool.Count > 0 ? pool.Pop() : Object.Instantiate(gaugePrefabsByKind[kind], context.healthGaugeParent, false).GetComponent<EnemyHealthGaugeView>();
             gauge.gaugeFront.color = colorsByKind[kind];
             gauge.gameObject.SetActive(true);
             context.healthGaugeViews[enemyIndex] = gauge;
