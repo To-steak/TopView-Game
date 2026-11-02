@@ -71,12 +71,11 @@ namespace TopView.Core
             world.random = new System.Random(world.rule.randomSeed);
             world.players = new PlayerStorage(PLAYER_CAPACITY);
             world.playerSpawnRequests.Enqueue(playerSpawnRequest);
-            world.enemies = new EnemyStorage(enemyKindCount, gameSettings.enemyCapacityPerKind, gameSettings.enemyPathCornerCapacity);
             world.enemySpawnTemplates = enemySpawnTemplates;
             // 피격 대상은 플레이어·적·보스의 칸 수를 넘지 않고, 공격하는 쪽 하나는 근접 판정을 동시에 하나만 가지므로 근접 판정도 이 수로 넘치지 않는다
-            int combatantCapacity = world.players.entities.Length + world.enemies.entities.Length + BOSS_CAPACITY;
+            int combatantCapacity = world.players.entities.Length + enemyKindCount * gameSettings.enemyCapacityPerKind + BOSS_CAPACITY;
             world.hitTargets = new HitTargetComponent[combatantCapacity];
-            world.entities = new EntityStorage(gameSettings.projectileCapacity, combatantCapacity, combatantCapacity, BOSS_CAPACITY);
+            world.entities = new EntityStorage(gameSettings.projectileCapacity, combatantCapacity, combatantCapacity, enemyKindCount, gameSettings.enemyCapacityPerKind, gameSettings.enemyPathCornerCapacity, BOSS_CAPACITY);
 
             world.progress = new GameProgressComponent
             {
@@ -131,11 +130,11 @@ namespace TopView.Core
                 player = new PlayerViewContext(),
                 enemy = new EnemyViewContext
                 {
-                    views = new EnemyView[_world.enemies.entities.Length],
-                    viewGenerations = new int[_world.enemies.entities.Length],
+                    views = new EnemyView[_world.entities.masks.Length],
+                    viewGenerations = new int[_world.entities.masks.Length],
                     viewPools = new Stack<EnemyView>[enemyKindCount],
                     triggerHashesByKind = new int[enemyKindCount][],
-                    healthGaugeViews = new EnemyHealthGaugeView[_world.enemies.entities.Length],
+                    healthGaugeViews = new EnemyHealthGaugeView[_world.entities.masks.Length],
                     healthGaugePools = new Stack<EnemyHealthGaugeView>[enemyKindCount]
                 },
                 boss = new BossViewContext(),

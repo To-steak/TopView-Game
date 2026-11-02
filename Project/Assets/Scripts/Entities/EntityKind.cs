@@ -5,9 +5,7 @@ namespace TopView.Entities
     {
         // PlayerStorage
         Player,
-        // EnemyStorage
-        Enemy,
-        // EntityStorage의 보스 구간
-        Boss
+        // EntityStorage
+        Shared
     }
 }

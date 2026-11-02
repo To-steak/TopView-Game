@@ -30,6 +30,10 @@ namespace TopView.Systems
             entities.attackLists[index] = default;
             entities.bossBehaviors[index] = default;
             entities.bossActionStates[index] = default;
+            entities.enemyKinds[index] = default;
+            entities.enemyBehaviors[index] = default;
+            entities.enemyActionStates[index] = default;
+            entities.navigationAgents[index] = default;
         }
 
         /// <summary>
