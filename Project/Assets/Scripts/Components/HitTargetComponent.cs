@@ -14,5 +14,9 @@ namespace TopView.Components
         public Vector3 position;
         // 피격 판정 반지름(유닛, XZ)
         public float radius;
+        // Straight 투사체가 맞는 높이의 아래 끝(월드 Y). 높이를 따지지 않는 대상은 음의 무한대
+        public float bottomHeight;
+        // Straight 투사체가 맞는 높이의 위 끝(월드 Y). 높이를 따지지 않는 대상은 양의 무한대
+        public float topHeight;
     }
 }

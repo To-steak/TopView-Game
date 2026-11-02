@@ -25,7 +25,7 @@ MonoBehaviour:
     goldIncrement: 5
     hitRadius: 0.75
   behavior:
-    detectionRadius: 10
+    detectionRadius: 25
     wanderIntervalTicks: 100
     stopDistance: 1
     acceleration: 8
@@ -34,13 +34,14 @@ MonoBehaviour:
   attacks:
   - attack:
       kind: 0
-      attackRange: 2
+      attackRange: 1
+      cooldownTicks: 200
       startTicks: 15
       endTicks: 27
       durationTicks: 50
       damageMultiplier: 1
       bodyRadius: 1
-      bodyOffset: 1
+      bodyOffset: 0.5
       projectile:
         kind: 0
         speed: 0

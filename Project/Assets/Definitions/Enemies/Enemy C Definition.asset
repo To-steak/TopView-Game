@@ -13,52 +13,50 @@ MonoBehaviour:
   m_Name: Enemy C Definition
   m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.EnemyDefinition
   stats:
-    basicMaxHealth: 10
-    basicAttackDamage: 5
-    levelIncrement: 5
-    score: 1080
+    baseMaxHealth: 50
+    baseAttackDamage: 30
+    baseSpeed: 0.3
+    baseScore: 25
+    baseGold: 25
+    maxHealthIncrement: 5
+    attackDamageIncrement: 20
+    speedIncrement: 0.1
+    scoreIncrement: 20
+    goldIncrement: 20
     hitRadius: 0.5
   behavior:
     detectionRadius: 50
     wanderIntervalTicks: 100
-    attackDistance: 45
-    attackRotationSpeed: 10
-    dieTicks: 0
-  navigation:
-    speed: 2
-    acceleration: 8
-    angularSpeed: 120
-    radius: 0.5
-    baseOffset: 0.1
-    navMeshSampleDistance: 3
-    maxPathCorners: 3
+    stopDistance: 45
+    acceleration: 4
+    angularSpeed: 360
+    dieTicks: 36
   attacks:
-  - kind: 1
-    commitTicks: 0
-    durationTicks: 0
-    damageMultiplier: 1
-    bodyRadius: 0
-    bodyOffset: 0
-    projectile:
-      kind: 0
-      speed: 10
-      radius: 0.25
-      lifetimeTicks: 250
-      upwardRatio: 0
-      gravity: 0
-      fuseTicks: 0
-      explosionRadius: 0
-      collisionLayer:
-        serializedVersion: 2
-        m_Bits: 0
-    spawnOffset: {x: 0, y: 0, z: 0.5}
-    alternateSpawnOffset: {x: 0, y: 0, z: 0}
-  attackProjectilePrefabs:
-  - {fileID: 1467422185046970197, guid: 94bbe6c225f22584bbed1cfc8a479c95, type: 3}
-  attackHitEffectPrefabs:
-  - {fileID: 8231580814263889171, guid: 8bc8c0bfc14e7e74d9aa237605256a88, type: 3}
-  attackProjectilePitchSpeeds:
-  - 0
+  - attack:
+      kind: 1
+      attackRange: 50
+      cooldownTicks: 500
+      startTicks: 30
+      endTicks: 0
+      durationTicks: 50
+      damageMultiplier: 1
+      bodyRadius: 0
+      bodyOffset: 0
+      projectile:
+        kind: 0
+        speed: 5
+        radius: 0.25
+        lifetimeTicks: 500
+        upwardRatio: 0
+        gravity: 0
+        fuseTicks: 0
+        explosionRadius: 0
+        collisionLayer:
+          serializedVersion: 2
+          m_Bits: 576
+      spawnOffset: {x: 0, y: 0.5, z: 0}
+      alternateSpawnOffset: {x: 0, y: 0, z: 0}
+    projectilePrefab: {fileID: 1467422185046970197, guid: 94bbe6c225f22584bbed1cfc8a479c95, type: 3}
+    hitEffectPrefab: {fileID: 0}
   viewPrefab: {fileID: 3745814735767933518, guid: 15ce2362c6dc61145a1e9d46e36f1a8c, type: 3}
-  healthGaugeOffset: {x: 0, y: -1, z: 0}
-  healthGaugeColor: {r: 1, g: 0, b: 0, a: 1}
+  healthGaugePrefab: {fileID: 7240100042028206097, guid: 61bf5277b80621842967d75ffba1dcbe, type: 3}

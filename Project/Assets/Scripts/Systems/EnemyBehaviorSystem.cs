@@ -43,12 +43,13 @@ namespace TopView.Systems
                 }
 
                 enemy.stateElapsedTicks++;
+                DecreaseAttackCooldowns(ref enemy);
                 bool isPlayerDetected = hasPlayer && TargetingSystem.IsWithin(enemy.currentPosition, playerPosition, enemy.behavior.detectionRadius + playerRadius);
 
                 switch (enemy.state)
                 {
                     case EnemyState.Idle:
-                        if (!UpdateIdle(ref enemy, in identifier, isPlayerDetected, playerPosition, random, stateRecords))
+                        if (!UpdateIdle(ref enemy, in identifier, isPlayerDetected, playerPosition, playerRadius, deltaTime, random, stateRecords))
                         {
                             failedWanderCount++;
                         }
@@ -67,16 +68,12 @@ namespace TopView.Systems
                         }
                         if (hasReachedDestination)
                         {
-                            if (!isPlayerDetected)
-                            {
-                                ChangeState(ref enemy, in identifier, EnemyState.Idle, stateRecords);
-                            }
-                            else if (enemy.attacks.Length == 0)
+                            if (isPlayerDetected && enemy.attacks.Length == 0)
                             {
                                 missingAttackCount++;
                                 missingAttackKind = enemy.kind;
-                                ChangeState(ref enemy, in identifier, EnemyState.Idle, stateRecords);
                             }
+                            ChangeState(ref enemy, in identifier, EnemyState.Idle, stateRecords);
                         }
                         break;
 
@@ -104,7 +101,7 @@ namespace TopView.Systems
             }
         }
 
-        // 지금 상태에서 나가고 새 상태에 들어간다. Die 상태에서는 바꾸지 않는다. Attack 상태는 BeginAttack으로 들어간다.
+        // 지금 상태에서 나가고 새 상태에 들어간다. Die 상태에서는 바꾸지 않는다. Attack 상태는 TryBeginAttackInRange로 들어간다.
         private static void ChangeState(ref EnemyEntity enemy, in EntityIdentifier identifier, EnemyState newState, List<EnemyStateChangedRecord> stateRecords)
         {
             if (enemy.state == EnemyState.Die)
@@ -127,6 +124,7 @@ namespace TopView.Systems
             {
                 case EnemyState.Idle:
                     enemy.wanderElapsedTicks = 0;
+                    EnemyNavigationSystem.StopMove(ref enemy);
                     break;
                 case EnemyState.Attack:
                 case EnemyState.Die:
@@ -135,13 +133,26 @@ namespace TopView.Systems
             }
         }
 
-        // 플레이어를 감지하면 쫓고, 아니면 배회 시간이 될 때마다 배회 지점으로 걷는다. 배회 지점을 고르지 못했으면 false를 돌려준다.
-        private static bool UpdateIdle(ref EnemyEntity enemy, in EntityIdentifier identifier, bool isPlayerDetected, Vector3 playerPosition, System.Random random, List<EnemyStateChangedRecord> stateRecords)
+        // 플레이어를 감지하면 고를 수 있는 공격을 하고, 없으면 멈추는 거리 밖일 때만 쫓는다. 멈추는 거리 안이면 플레이어 쪽으로 돌며 대기시간이 끝나기를 제자리에서 기다린다.
+        // 감지하지 못했으면 배회 시간이 될 때마다 배회 지점으로 걷는다. 배회 지점을 고르지 못했으면 false를 돌려준다.
+        private static bool UpdateIdle(ref EnemyEntity enemy, in EntityIdentifier identifier, bool isPlayerDetected, Vector3 playerPosition, float playerRadius, float deltaTime, System.Random random, List<EnemyStateChangedRecord> stateRecords)
         {
             if (isPlayerDetected)
             {
-                EnemyNavigationSystem.SetDestination(ref enemy, playerPosition, enemy.behavior.stopDistance);
-                ChangeState(ref enemy, in identifier, EnemyState.Walk, stateRecords);
+                if (TryBeginAttackInRange(ref enemy, in identifier, playerPosition, playerRadius, random, stateRecords))
+                {
+                    return true;
+                }
+
+                if (TargetingSystem.IsWithin(enemy.currentPosition, playerPosition, enemy.behavior.stopDistance))
+                {
+                    TargetingSystem.RotateToward(ref enemy.currentRotation, enemy.currentPosition, playerPosition, enemy.behavior.angularSpeed * deltaTime);
+                }
+                else
+                {
+                    EnemyNavigationSystem.SetDestination(ref enemy, playerPosition, enemy.behavior.stopDistance);
+                    ChangeState(ref enemy, in identifier, EnemyState.Walk, stateRecords);
+                }
                 return true;
             }
 
@@ -181,17 +192,29 @@ namespace TopView.Systems
 
             if (EnemyAttackSystem.IsAttackFinished(in attack, enemy.stateElapsedTicks, enemy.isAttackCommitted))
             {
+                enemy.attackCooldownRemainingTicks[enemy.attackIndex] = attack.cooldownTicks;
                 ChangeState(ref enemy, in identifier, EnemyState.Idle, stateRecords);
             }
         }
 
-        // 사거리 안의 공격 중 무작위로 하나 골라 공격 상태에 들어간다. 사거리 안의 공격이 없으면 false를 돌려준다.
+        private static void DecreaseAttackCooldowns(ref EnemyEntity enemy)
+        {
+            for (int attackIndex = 0; attackIndex < enemy.attackCooldownRemainingTicks.Length; attackIndex++)
+            {
+                if (enemy.attackCooldownRemainingTicks[attackIndex] > 0)
+                {
+                    enemy.attackCooldownRemainingTicks[attackIndex]--;
+                }
+            }
+        }
+
+        // 대기시간이 끝났고 사거리 안인 공격 중 무작위로 하나 골라 공격 상태에 들어간다. 그런 공격이 없으면 false를 돌려준다.
         private static bool TryBeginAttackInRange(ref EnemyEntity enemy, in EntityIdentifier identifier, Vector3 playerPosition, float playerRadius, System.Random random, List<EnemyStateChangedRecord> stateRecords)
         {
             int inRangeCount = 0;
             for (int attackIndex = 0; attackIndex < enemy.attacks.Length; attackIndex++)
             {
-                if (IsAttackInRange(in enemy, attackIndex, playerPosition, playerRadius))
+                if (IsAttackAvailable(in enemy, attackIndex, playerPosition, playerRadius))
                 {
                     inRangeCount++;
                 }
@@ -205,7 +228,7 @@ namespace TopView.Systems
             int remainingCount = random.Next(0, inRangeCount);
             for (int attackIndex = 0; attackIndex < enemy.attacks.Length; attackIndex++)
             {
-                if (!IsAttackInRange(in enemy, attackIndex, playerPosition, playerRadius))
+                if (!IsAttackAvailable(in enemy, attackIndex, playerPosition, playerRadius))
                 {
                     continue;
                 }
@@ -223,9 +246,10 @@ namespace TopView.Systems
             return true;
         }
 
-        private static bool IsAttackInRange(in EnemyEntity enemy, int attackIndex, Vector3 playerPosition, float playerRadius)
+        private static bool IsAttackAvailable(in EnemyEntity enemy, int attackIndex, Vector3 playerPosition, float playerRadius)
         {
-            return TargetingSystem.IsWithin(enemy.currentPosition, playerPosition, enemy.attacks[attackIndex].attackRange + playerRadius);
+            return enemy.attackCooldownRemainingTicks[attackIndex] <= 0
+                && TargetingSystem.IsWithin(enemy.currentPosition, playerPosition, enemy.attacks[attackIndex].attackRange + playerRadius);
         }
 
         // 지금 위치를 중심으로 감지 반지름 안의 무작위 점을 골라, 가장 가까운 NavMesh 위의 점을 돌려준다.
