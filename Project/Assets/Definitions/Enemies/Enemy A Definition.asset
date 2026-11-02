@@ -35,9 +35,9 @@ MonoBehaviour:
   - attack:
       kind: 0
       attackRange: 2
-      startTicks: 30
-      endTicks: 55
-      durationTicks: 100
+      startTicks: 15
+      endTicks: 27
+      durationTicks: 50
       damageMultiplier: 1
       bodyRadius: 1
       bodyOffset: 1

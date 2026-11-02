@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace TopView.Core
 {
-    // 적: 웨이브의 적 종류, Definition, 스폰 지점 읽기
+    // 적: 스포너의 적 종류와 스폰 지점, Definition 읽기
     public partial class Runner
     {
         // 적 종류별 View 프리팹. 번호가 적 종류 번호다
@@ -17,37 +17,46 @@ namespace TopView.Core
         // 적 종류별 체력 게이지 프리팹. 번호가 적 종류 번호다
         private GameObject[] _enemyHealthGaugePrefabs;
 
-        // 보스가 아닌 웨이브마다 Game Settings Definition의 웨이브 적 목록에서 Enemy Definition을 읽어 적 종류 번호를 매긴다. 번호는 웨이브 순서에서 처음 나온 순서다. 칸이 모자라거나 비어 있으면 false
-        private static bool TryAssignWaveEnemyKinds(WaveComponent[] waves, EnemyDefinition[] waveEnemies, out EnemyDefinition[] enemyDefinitions)
+        // 씬의 켜진 Spawner Authoring을 이름순으로 읽어 적 종류 목록과 스폰 지점 목록을 만든다. 적 종류 번호는 스포너 이름순에서 처음 나온 순서다. 같은 시드에서 같은 결과가 나오도록 순서를 고정한다.
+        private static void ReadEnemySpawners(out EnemyDefinition[] enemyDefinitions, out SpawnPointComponent[] spawnPoints)
         {
-            List<EnemyDefinition> kinds = new List<EnemyDefinition>();
-            enemyDefinitions = null;
+            EnemySpawnerAuthoring[] spawners = FindObjectsByType<EnemySpawnerAuthoring>(FindObjectsSortMode.None);
+            SortByName(spawners);
 
-            for (int waveIndex = 0; waveIndex < waves.Length; waveIndex++)
+            List<EnemyDefinition> kinds = new List<EnemyDefinition>();
+            List<SpawnPointComponent> spawnPointList = new List<SpawnPointComponent>();
+            for (int spawnerIndex = 0; spawnerIndex < spawners.Length; spawnerIndex++)
             {
-                ref WaveComponent wave = ref waves[waveIndex];
-                if (wave.isBoss)
+                EnemySpawnerAuthoring spawner = spawners[spawnerIndex];
+                if (spawner.definition == null)
                 {
+                    Debug.LogWarning($"Runner >> Spawner Authoring {spawner.name}에 Enemy Definition이 없어 건너뛰었다.");
                     continue;
                 }
 
-                EnemyDefinition definition = waveEnemies != null && waveIndex < waveEnemies.Length ? waveEnemies[waveIndex] : null;
-                if (definition == null)
+                int kind = kinds.IndexOf(spawner.definition);
+                if (kind < 0)
                 {
-                    Debug.LogError($"Runner >> Game Settings Definition의 웨이브 {waveIndex}번에 적 종류(Wave Enemies)가 없어 판을 시작할 수 없다.");
-                    return false;
+                    kind = kinds.Count;
+                    kinds.Add(spawner.definition);
                 }
 
-                wave.enemyKindIndex = kinds.IndexOf(definition);
-                if (wave.enemyKindIndex < 0)
+                Transform spawnerTransform = spawner.transform;
+                spawnPointList.Add(new SpawnPointComponent
                 {
-                    wave.enemyKindIndex = kinds.Count;
-                    kinds.Add(definition);
-                }
+                    enemyKindIndex = kind,
+                    position = spawnerTransform.position,
+                    rotation = spawnerTransform.rotation
+                });
+            }
+
+            if (spawnPointList.Count == 0)
+            {
+                Debug.LogWarning("Runner >> 씬에 켜진 Enemy Spawner Authoring이 없어 적이 생기지 않는다.");
             }
 
             enemyDefinitions = kinds.ToArray();
-            return true;
+            spawnPoints = spawnPointList.ToArray();
         }
 
         // 적 종류별 Enemy Definition에서 생성 요청 템플릿과 View·게이지 값을 꺼낸다.
@@ -115,55 +124,6 @@ namespace TopView.Core
             {
                 Debug.LogWarning($"Runner >> {definitionName}의 Stop Distance({stopDistance})가 가장 긴 Attack Range({maxAttackRange})보다 커서 멈춘 자리에서 공격하지 못할 수 있다.");
             }
-        }
-
-        // 씬의 Spawner Authoring을 이름순으로 읽어 적 종류별 스폰 지점 목록을 만든다. 같은 시드에서 같은 지점이 골라지도록 순서를 고정한다.
-        private static SpawnPointComponent[][] CollectEnemySpawnPoints(EnemyDefinition[] enemyDefinitions)
-        {
-            EnemySpawnerAuthoring[] spawners = FindObjectsByType<EnemySpawnerAuthoring>(FindObjectsSortMode.None);
-            SortByName(spawners);
-
-            List<SpawnPointComponent>[] spawnPointLists = new List<SpawnPointComponent>[enemyDefinitions.Length];
-            for (int kind = 0; kind < enemyDefinitions.Length; kind++)
-            {
-                spawnPointLists[kind] = new List<SpawnPointComponent>();
-            }
-
-            for (int spawnerIndex = 0; spawnerIndex < spawners.Length; spawnerIndex++)
-            {
-                EnemySpawnerAuthoring spawner = spawners[spawnerIndex];
-                if (spawner.definition == null)
-                {
-                    Debug.LogWarning($"Runner >> Spawner Authoring {spawner.name}에 Enemy Definition이 없어 건너뛰었다.");
-                    continue;
-                }
-
-                int kind = System.Array.IndexOf(enemyDefinitions, spawner.definition);
-                if (kind < 0)
-                {
-                    Debug.LogWarning($"Runner >> Spawner Authoring {spawner.name}의 {spawner.definition.name}을 쓰는 웨이브가 없어 건너뛰었다.");
-                    continue;
-                }
-
-                Transform spawnerTransform = spawner.transform;
-                spawnPointLists[kind].Add(new SpawnPointComponent
-                {
-                    position = spawnerTransform.position,
-                    rotation = spawnerTransform.rotation
-                });
-            }
-
-            SpawnPointComponent[][] spawnPointsByKind = new SpawnPointComponent[enemyDefinitions.Length][];
-            for (int kind = 0; kind < enemyDefinitions.Length; kind++)
-            {
-                if (spawnPointLists[kind].Count == 0)
-                {
-                    Debug.LogWarning($"Runner >> 씬에 {enemyDefinitions[kind].name}을 가리키는 Spawner Authoring이 없어 그 적이 생기지 않는다.");
-                }
-                spawnPointsByKind[kind] = spawnPointLists[kind].ToArray();
-            }
-
-            return spawnPointsByKind;
         }
 
         private static void SortByName(EnemySpawnerAuthoring[] spawners)

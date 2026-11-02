@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace TopView.Requests
 {
-    // 보스를 만들어 달라는 요청. 판을 준비할 때 Core가 Definition 값과 Boss Spawner Authoring의 위치를 채워 두고, WaveSystem이 레벨을 넣어 큐에 넣는다.
+    // 보스를 만들어 달라는 요청. 지금은 이 요청을 넣는 곳이 없다.
     public struct BossSpawnRequest
     {
         // 위치(월드)

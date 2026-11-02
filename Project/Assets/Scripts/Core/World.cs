@@ -13,10 +13,8 @@ namespace TopView.Core
     {
         // 게임 규칙 값. 판 시작 때 Definition에서 복사한다
         public GameRuleComponent rule;
-        // 웨이브 목록. 판 시작 때 Definition에서 복사한다
-        public WaveComponent[] waves;
-        // 적 종류별 생기는 지점 목록. 판 시작 때 Spawner Authoring에서 채운다. 첫 번호가 적 종류 번호다
-        public SpawnPointComponent[][] enemySpawnPointsByKind;
+        // 적이 생기는 지점 목록. 판 시작 때 켜진 Spawner Authoring에서 채운다
+        public SpawnPointComponent[] enemySpawnPoints;
         // 한 판의 진행 상태
         public GameProgressComponent progress;
         // 시드 고정 난수 생성기
@@ -43,8 +41,6 @@ namespace TopView.Core
 
         // 판을 준비할 때 종류별로 Definition 값을 채워 둔 적 생성 요청. 번호가 적 종류 번호다
         public EnemySpawnRequest[] enemySpawnTemplates;
-        // 판을 준비할 때 Definition 값과 Boss Spawner Authoring의 위치로 채워 둔 보스 생성 요청
-        public BossSpawnRequest bossSpawnTemplate;
 
         // 플레이어 생성 요청 큐
         public Queue<PlayerSpawnRequest> playerSpawnRequests = new Queue<PlayerSpawnRequest>();

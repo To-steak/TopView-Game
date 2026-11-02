@@ -79,7 +79,7 @@ namespace TopView.Core
             GameRuleSystem.Tick(ref _world.progress, _world.gameOverRequests);
             if (isPlaying)
             {
-                WaveSystem.Tick(in _world.rule, _world.waves, _world.enemySpawnPointsByKind, _world.enemySpawnTemplates, in _world.bossSpawnTemplate, ref _world.progress, _world.random, _world.enemySpawnRequests, _world.bossSpawnRequests);
+                EnemySpawnTimerSystem.Tick(in _world.rule, _world.enemySpawnPoints, _world.enemySpawnTemplates, ref _world.progress, _world.enemySpawnRequests);
                 PlayerSpawnSystem.Tick(_world.players, _world.playerSpawnRequests);
                 EnemySpawnSystem.Tick(_world.enemies, _world.enemySpawnRequests, _world.rule.navMeshSampleDistance);
                 BossSpawnSystem.Tick(_world.bosses, _world.bossSpawnRequests, _world.players);
