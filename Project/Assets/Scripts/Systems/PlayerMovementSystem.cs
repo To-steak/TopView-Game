@@ -12,7 +12,7 @@ namespace TopView.Systems
         private const float MIN_MOVE_DISTANCE = 0.00001f;
 
         /// <summary>
-        /// 직전 위치와 회전을 남기고, 접지를 판정해 위아래 속도를 갱신한 뒤 장애물을 따라 이동한다.
+        /// 접지를 판정해 위아래 속도를 갱신한 뒤 장애물을 따라 이동한다.
         /// </summary>
         /// <param name="players">플레이어 저장소</param>
         public static void Tick(PlayerStorage players)
@@ -26,9 +26,6 @@ namespace TopView.Systems
                 {
                     continue;
                 }
-
-                player.position.previous = player.position.current;
-                player.rotation.previous = player.rotation.current;
 
                 player.isGrounded = Physics.CheckSphere(player.position.current + player.movement.groundCheckOffset, player.movement.groundCheckRadius, player.movement.groundLayer);
                 if (player.isGrounded && player.verticalVelocity < 0f)

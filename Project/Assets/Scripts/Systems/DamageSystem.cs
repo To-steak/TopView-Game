@@ -75,7 +75,7 @@ namespace TopView.Systems
                 return false;
             }
 
-            ApplyDamage(ref player.health.current, amount);
+            ApplyDamage(ref player.health, amount);
             return true;
         }
 
@@ -92,10 +92,9 @@ namespace TopView.Systems
                 return false;
             }
 
-            if (ApplyDamage(ref enemy.health.current, amount))
+            if (ApplyDamage(ref enemy.health, amount))
             {
-                progress.score += enemy.stats.baseScore + enemy.level * enemy.stats.scoreIncrement;
-                progress.gold += enemy.stats.baseGold + enemy.level * enemy.stats.goldIncrement;
+                AddKillReward(ref progress, in enemy.stats, enemy.level);
             }
             return true;
         }
@@ -113,24 +112,30 @@ namespace TopView.Systems
                 return false;
             }
 
-            if (ApplyDamage(ref boss.health.current, amount))
+            if (ApplyDamage(ref boss.health, amount))
             {
-                progress.score += boss.stats.baseScore + boss.level * boss.stats.scoreIncrement;
-                progress.gold += boss.stats.baseGold + boss.level * boss.stats.goldIncrement;
+                AddKillReward(ref progress, in boss.stats, boss.level);
             }
             return true;
         }
 
         // 체력을 깎는다. 이번 피해로 체력이 0이 되었으면 true를 돌려준다.
-        private static bool ApplyDamage(ref float health, float amount)
+        private static bool ApplyDamage(ref HealthComponent health, float amount)
         {
-            if (health <= 0f)
+            if (health.current <= 0f)
             {
                 return false;
             }
 
-            health = Mathf.Max(0f, health - amount);
-            return health <= 0f;
+            health.current = Mathf.Max(0f, health.current - amount);
+            return health.current <= 0f;
+        }
+
+        // 처치한 대상의 레벨에 맞는 점수와 골드를 더한다.
+        private static void AddKillReward(ref GameProgressComponent progress, in EnemyStatsComponent stats, int level)
+        {
+            progress.score += stats.baseScore + level * stats.scoreIncrement;
+            progress.gold += stats.baseGold + level * stats.goldIncrement;
         }
     }
 }
