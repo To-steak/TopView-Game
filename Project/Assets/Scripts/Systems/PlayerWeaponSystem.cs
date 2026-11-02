@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace TopView.Systems
 {
-    // 플레이어 무기의 조건 판정, 공격 발동, 재장전, 교체를 처리한다. 언제 부를지는 PlayerStateSystem이 정한다.
+    // 플레이어 무기의 조건 판정, 공격 발동, 재장전, 교체를 처리한다. 언제 부를지는 상태 쪽 System이 정한다.
     public static class PlayerWeaponSystem
     {
         /// <summary>
