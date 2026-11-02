@@ -2,36 +2,30 @@ using System.Collections.Generic;
 using TopView.Components;
 using TopView.Entities;
 using TopView.Records;
-using TopView.Requests;
 using UnityEngine;
 using UnityEngine.AI;
 
 namespace TopView.Systems
 {
-    // 적의 행동 상태를 플레이어 감지와 상태 타이머로 바꾸고, 목적지와 공격을 정한다. 실제 이동은 EnemyNavigationSystem이 한다.
+    // Idle과 Walk 상태의 적이 플레이어 감지로 무엇을 할지 정한다. 실제 이동은 EnemyNavigationSystem이, 공격 진행은 EnemyAttackStateSystem이 한다.
     public static class EnemyBehaviorSystem
     {
         /// <summary>
-        /// 적마다 체력이 0이면 사망 상태로 바꾸고, 상태 시간을 1틱 늘린 뒤 상태별로 감지·배회·추적·공격·소멸을 처리한다.
+        /// Idle과 Walk 상태의 적마다 플레이어를 감지해 배회, 추적, 공격 시작을 정한다.
         /// </summary>
         /// <param name="masks">칸별 컴포넌트 표시</param>
         /// <param name="generations">칸이 채워진 횟수</param>
         /// <param name="kinds">적 종류 번호</param>
-        /// <param name="healths">체력</param>
-        /// <param name="combats">레벨과 공격력</param>
         /// <param name="positions">위치</param>
         /// <param name="rotations">회전</param>
         /// <param name="attackLists">공격 목록</param>
         /// <param name="behaviors">적 행동 값</param>
         /// <param name="actionStates">적 행동 상태와 공격 진행</param>
         /// <param name="agents">목적지와 경로</param>
-        /// <param name="freeIndicesByKind">적 종류별 구간의 빈 칸 번호 목록</param>
         /// <param name="playerMovements">플레이어 이동 값. 감지와 공격 대상의 반지름을 읽는다</param>
         /// <param name="random">World의 난수 생성기</param>
         /// <param name="stateRecords">적 상태 변경 기록</param>
-        /// <param name="projectileSpawnRequests">투사체 생성 요청 큐</param>
-        /// <param name="meleeSpawnRequests">근접 판정 생성 요청 큐</param>
-        public static void Tick(ComponentMask[] masks, int[] generations, EnemyKindComponent[] kinds, HealthComponent[] healths, CombatComponent[] combats, PositionComponent[] positions, RotationComponent[] rotations, AttackListComponent[] attackLists, EnemyBehaviorComponent[] behaviors, EnemyActionStateComponent[] actionStates, NavigationAgentComponent[] agents, List<int>[] freeIndicesByKind, PlayerMovementComponent[] playerMovements, System.Random random, List<EnemyStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
+        public static void Tick(ComponentMask[] masks, int[] generations, EnemyKindComponent[] kinds, PositionComponent[] positions, RotationComponent[] rotations, AttackListComponent[] attackLists, EnemyBehaviorComponent[] behaviors, EnemyActionStateComponent[] actionStates, NavigationAgentComponent[] agents, PlayerMovementComponent[] playerMovements, System.Random random, List<EnemyStateChangedRecord> stateRecords)
         {
             bool hasPlayer = TargetingSystem.TryGetPlayerTarget(masks, positions, playerMovements, out Vector3 playerPosition, out float playerRadius);
             float deltaTime = Time.fixedDeltaTime;
@@ -52,15 +46,7 @@ namespace TopView.Systems
                 ref readonly EnemyBehaviorComponent behavior = ref behaviors[index];
                 EnemyAttackComponent[] attacks = attackLists[index].attacks;
                 Vector3 position = positions[index].current;
-
                 EntityIdentifier identifier = new EntityIdentifier { index = index, generation = generations[index] };
-                if (healths[index].current <= 0f && actionState.state != EnemyState.Die)
-                {
-                    ChangeState(ref actionState, ref agent, attacks, in identifier, EnemyState.Die, stateRecords);
-                }
-
-                actionState.elapsedTicks++;
-                DecreaseAttackCooldowns(ref actionState);
                 bool isPlayerDetected = hasPlayer && TargetingSystem.IsWithin(position, playerPosition, behavior.detectionRadius + playerRadius);
 
                 switch (actionState.state)
@@ -93,17 +79,6 @@ namespace TopView.Systems
                             ChangeState(ref actionState, ref agent, attacks, in identifier, EnemyState.Idle, stateRecords);
                         }
                         break;
-
-                    case EnemyState.Attack:
-                        UpdateAttack(ref actionState, ref agent, ref rotation, position, in behavior, combats[index].attackDamage, attacks, in identifier, hasPlayer, playerPosition, deltaTime, stateRecords, projectileSpawnRequests, meleeSpawnRequests);
-                        break;
-
-                    case EnemyState.Die:
-                        if (actionState.elapsedTicks >= behavior.dieTicks)
-                        {
-                            SpawnSystem.ReleaseSlot(masks, freeIndicesByKind[kinds[index].kind], index);
-                        }
-                        break;
                 }
             }
 
@@ -117,8 +92,16 @@ namespace TopView.Systems
             }
         }
 
-        // 지금 상태에서 나가고 새 상태에 들어간다. Die 상태에서는 바꾸지 않는다. Attack 상태는 TryBeginAttackInRange로 들어간다.
-        private static void ChangeState(ref EnemyActionStateComponent actionState, ref NavigationAgentComponent agent, EnemyAttackComponent[] attacks, in EntityIdentifier identifier, EnemyState newState, List<EnemyStateChangedRecord> stateRecords)
+        /// <summary>
+        /// 지금 상태에서 나가고 새 상태에 들어가 상태 변경을 기록한다. Die 상태에서는 바꾸지 않는다. Attack 상태는 공격 번호를 정한 뒤 들어간다.
+        /// </summary>
+        /// <param name="actionState">적 행동 상태와 공격 진행</param>
+        /// <param name="agent">목적지와 경로</param>
+        /// <param name="attacks">공격 목록</param>
+        /// <param name="identifier">적을 가리키는 값</param>
+        /// <param name="newState">새 상태</param>
+        /// <param name="stateRecords">적 상태 변경 기록</param>
+        public static void ChangeState(ref EnemyActionStateComponent actionState, ref NavigationAgentComponent agent, EnemyAttackComponent[] attacks, in EntityIdentifier identifier, EnemyState newState, List<EnemyStateChangedRecord> stateRecords)
         {
             if (actionState.state == EnemyState.Die)
             {
@@ -143,7 +126,6 @@ namespace TopView.Systems
                     EnemyNavigationSystem.StopMove(ref agent);
                     break;
                 case EnemyState.Attack:
-                case EnemyState.Die:
                     EnemyNavigationSystem.StopMove(ref agent);
                     break;
             }
@@ -187,40 +169,6 @@ namespace TopView.Systems
             EnemyNavigationSystem.SetDestination(ref agent, wanderPoint, 0f);
             ChangeState(ref actionState, ref agent, attacks, in identifier, EnemyState.Walk, stateRecords);
             return true;
-        }
-
-        private static void UpdateAttack(ref EnemyActionStateComponent actionState, ref NavigationAgentComponent agent, ref RotationComponent rotation, Vector3 position, in EnemyBehaviorComponent behavior, float attackDamage, EnemyAttackComponent[] attacks, in EntityIdentifier identifier, bool hasPlayer, Vector3 playerPosition, float deltaTime, List<EnemyStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
-        {
-            // 공격이 나가기 전까지 플레이어 쪽으로 돈다
-            if (!actionState.isAttackCommitted && hasPlayer)
-            {
-                TargetingSystem.RotateToward(ref rotation.current, position, playerPosition, behavior.angularSpeed * deltaTime);
-            }
-
-            ref readonly EnemyAttackComponent attack = ref attacks[actionState.attackIndex];
-            if (!actionState.isAttackCommitted && actionState.elapsedTicks >= attack.startTicks)
-            {
-                actionState.isAttackCommitted = true;
-                int missileShotCount = 0;
-                EnemyAttackSystem.CommitAttack(in attack, position, rotation.current, attackDamage, ref missileShotCount, in identifier, projectileSpawnRequests, meleeSpawnRequests);
-            }
-
-            if (EnemyAttackSystem.IsAttackFinished(in attack, actionState.elapsedTicks, actionState.isAttackCommitted))
-            {
-                actionState.attackCooldownRemainingTicks[actionState.attackIndex] = attack.cooldownTicks;
-                ChangeState(ref actionState, ref agent, attacks, in identifier, EnemyState.Idle, stateRecords);
-            }
-        }
-
-        private static void DecreaseAttackCooldowns(ref EnemyActionStateComponent actionState)
-        {
-            for (int attackIndex = 0; attackIndex < actionState.attackCooldownRemainingTicks.Length; attackIndex++)
-            {
-                if (actionState.attackCooldownRemainingTicks[attackIndex] > 0)
-                {
-                    actionState.attackCooldownRemainingTicks[attackIndex]--;
-                }
-            }
         }
 
         // 대기시간이 끝났고 사거리 안인 공격 중 무작위로 하나 골라 공격 상태에 들어간다. 그런 공격이 없으면 false를 돌려준다.
