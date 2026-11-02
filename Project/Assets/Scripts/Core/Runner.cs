@@ -57,10 +57,10 @@ namespace TopView.Core
             }
 
             bool isPlaying = _world.progress.phase == GamePhase.Playing;
-            DamageSystem.Tick(ref _world.progress, _world.entities.masks, _world.entities.generations, _world.entities.healths, _world.entities.combats, _world.entities.enemyStats, _world.playerDamageRequests, _world.enemyDamageRequests);
+            DamageSystem.Tick(ref _world.progress, _world.entities.masks, _world.entities.generations, _world.entities.healths, _world.enemies, _world.playerDamageRequests, _world.enemyDamageRequests);
             if (isPlaying)
             {
-                TransformSnapshotSystem.Tick(_world.entities.masks, _world.entities.positions, _world.entities.rotations, _world.projectiles);
+                TransformSnapshotSystem.Tick(_world.entities.masks, _world.entities.positions, _world.entities.rotations, _world.projectiles, _world.enemies);
                 PlayerDeathSystem.Tick(_world.entities.masks, _world.entities.generations, _world.entities.healths, _world.entities.playerActionStates, _world.entities.playerMotions, _world.melees, _world.playerStateChangedRecords);
                 PlayerStateTimerSystem.Tick(_world.entities.masks, _world.entities.playerActionStates);
                 // 누름 입력으로 정해진 상태를 뒤의 셋이 함께 읽는다. 이동 입력과 공격을 반영한 뒤에 상태를 넘기므로 이 순서를 지킨다
@@ -70,18 +70,18 @@ namespace TopView.Core
                 PlayerStateSystem.Tick(_world.entities.masks, _world.entities.generations, _world.entities.rotations, _world.entities.manas, _world.entities.playerMovements, _world.entities.playerVitals, _world.entities.playerActions, _world.entities.playerActionStates, _world.entities.playerMotions, _world.entities.weaponLists, _world.entities.weaponSlots, in _world.commandBuffer.playerCommand, _world.playerStateChangedRecords, _world.gameOverRequests);
                 // 막기는 이동이 끝난 위치를 읽고, 조준은 막힌 뒤의 위치를 읽으므로 이 순서를 지킨다
                 PlayerMovementSystem.Tick(_world.entities.masks, _world.entities.positions, _world.entities.rotations, _world.entities.playerMovements, _world.entities.playerMotions);
-                PlayerBlockSystem.Tick(_world.entities.masks, _world.entities.positions, _world.entities.playerMovements, _world.entities.enemyStats);
+                PlayerBlockSystem.Tick(_world.entities.masks, _world.entities.positions, _world.entities.playerMovements, _world.enemies);
                 PlayerAimSystem.Tick(_world.entities.masks, _world.entities.positions, _world.entities.rotations, _world.entities.playerMotions, in _world.commandBuffer.playerCommand);
                 PlayerStaminaSystem.Tick(_world.entities.masks, _world.entities.manas, _world.entities.playerVitals);
-                EnemyDeathSystem.Tick(_world.entities.masks, _world.entities.generations, _world.entities.healths, _world.entities.enemyActionStates, _world.entities.navigationAgents, _world.enemyStateChangedRecords);
-                EnemyStateTimerSystem.Tick(_world.entities.masks, _world.entities.enemyActionStates);
+                EnemyDeathSystem.Tick(_world.enemies, _world.enemyStateChangedRecords);
+                EnemyStateTimerSystem.Tick(_world.enemies);
                 // 공격 상태는 상태 시간이 0이면 건너뛰므로, 공격이 끝나 Idle이 된 적과 막 공격에 들어온 적 모두 다음 틱부터 움직이도록 이 순서를 지킨다
-                EnemyBehaviorSystem.Tick(_world.entities.masks, _world.entities.generations, _world.entities.enemyKinds, _world.entities.positions, _world.entities.rotations, _world.entities.attackLists, _world.entities.enemyBehaviors, _world.entities.enemyActionStates, _world.entities.navigationAgents, _world.entities.playerMovements, _world.random, _world.enemyStateChangedRecords);
-                EnemyAttackStateSystem.Tick(_world.entities.masks, _world.entities.generations, _world.entities.combats, _world.entities.positions, _world.entities.rotations, _world.entities.attackLists, _world.entities.enemyBehaviors, _world.entities.enemyActionStates, _world.entities.navigationAgents, _world.entities.playerMovements, _world.enemyStateChangedRecords, _world.projectileSpawnRequests, _world.meleeSpawnRequests);
-                EnemyDespawnSystem.Tick(_world.entities.masks, _world.entities.enemyKinds, _world.entities.enemyBehaviors, _world.entities.enemyActionStates, _world.entities.freeEnemyIndicesByKind, _world.gameOverRequests);
-                EnemyNavigationSystem.Tick(_world.entities.masks, _world.entities.positions, _world.entities.rotations, _world.entities.navigationAgents, _world.entities.enemyBehaviors, _world.entities.enemyStats, _world.navigationPath, _world.rule.navMeshSampleDistance);
+                EnemyBehaviorSystem.Tick(_world.enemies, _world.entities.masks, _world.entities.positions, _world.entities.playerMovements, _world.random, _world.enemyStateChangedRecords);
+                EnemyAttackStateSystem.Tick(_world.enemies, _world.entities.masks, _world.entities.positions, _world.entities.playerMovements, _world.enemyStateChangedRecords, _world.projectileSpawnRequests, _world.meleeSpawnRequests);
+                EnemyDespawnSystem.Tick(_world.enemies, _world.gameOverRequests);
+                EnemyNavigationSystem.Tick(_world.enemies, _world.navigationPath, _world.rule.navMeshSampleDistance);
                 ProjectileSystem.Tick(_world.projectiles);
-                HitTargetSystem.Tick(_world.entities.masks, _world.entities.generations, _world.entities.positions, _world.entities.rotations, _world.entities.healths, _world.entities.playerMovements, _world.entities.enemyStats, _world.playerHitTargets, ref _world.playerHitTargetCount, _world.enemyHitTargets, ref _world.enemyHitTargetCount);
+                HitTargetSystem.Tick(_world.entities.masks, _world.entities.generations, _world.entities.positions, _world.entities.rotations, _world.entities.healths, _world.entities.playerMovements, _world.enemies, _world.playerHitTargets, ref _world.playerHitTargetCount, _world.enemyHitTargets, ref _world.enemyHitTargetCount);
                 ProjectileHitSystem.Tick(_world.projectiles, _world.playerHitTargets, _world.playerHitTargetCount, _world.enemyHitTargets, _world.enemyHitTargetCount, _world.playerDamageRequests, _world.enemyDamageRequests, _world.projectileHitRecords);
                 MeleeHitSystem.Tick(_world.melees, _world.playerHitTargets, _world.playerHitTargetCount, _world.enemyHitTargets, _world.enemyHitTargetCount, _world.playerDamageRequests, _world.enemyDamageRequests);
             }
@@ -91,7 +91,7 @@ namespace TopView.Core
             {
                 EnemySpawnTimerSystem.Tick(in _world.rule, _world.enemySpawnPoints, _world.enemySpawnTemplates, ref _world.progress, _world.enemySpawnRequests);
                 PlayerSpawnSystem.Tick(_world.entities, _world.playerSpawnRequests);
-                EnemySpawnSystem.Tick(_world.entities, _world.enemySpawnRequests, _world.rule.navMeshSampleDistance);
+                EnemySpawnSystem.Tick(_world.enemies, _world.enemySpawnRequests, _world.rule.navMeshSampleDistance);
                 ProjectileSpawnSystem.Tick(_world.projectiles, _world.projectileSpawnRequests);
                 MeleeSpawnSystem.Tick(_world.melees, _world.meleeSpawnRequests);
             }
@@ -125,8 +125,8 @@ namespace TopView.Core
             }
 
             PlayerViewSystem.Present(_world.entities.masks, _world.entities.generations, _world.entities.positions, _world.entities.rotations, _world.entities.playerActionStates, _world.entities.playerMotions, _world.entities.weaponLists, _world.entities.weaponSlots, _world.playerStateChangedRecords, _playerViewPrefab, _playerWeaponModelPrefabs, _playerRangedLayerBlendInTicks, _viewContext.player);
-            EnemyViewSystem.Present(_world.entities.masks, _world.entities.generations, _world.entities.enemyKinds, _world.entities.positions, _world.entities.rotations, _world.enemyStateChangedRecords, _enemyViewPrefabs, _viewContext.enemy);
-            EnemyHealthGaugeViewSystem.Present(_world.entities.enemyKinds, _world.entities.healths, _enemyHealthGaugePrefabs, _viewContext.camera.mainCamera, _viewContext.enemy);
+            EnemyViewSystem.Present(_world.enemies.entities, _world.enemyStateChangedRecords, _enemyViewPrefabs, _viewContext.enemy);
+            EnemyHealthGaugeViewSystem.Present(_world.enemies.entities, _enemyHealthGaugePrefabs, _viewContext.camera.mainCamera, _viewContext.enemy);
             ProjectileViewSystem.Present(_world.projectiles.entities, _projectilePrefabs, _viewContext.projectile);
             HitEffectViewSystem.Present(_world.projectileHitRecords, _hitEffectPrefabs, _viewContext.hitEffect);
             CameraViewSystem.Present(_viewContext.camera, _viewContext.player.view, _playerCameraPriority);

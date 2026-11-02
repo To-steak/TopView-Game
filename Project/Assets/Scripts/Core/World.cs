@@ -26,6 +26,8 @@ namespace TopView.Core
 
         // 공유 저장소. 모든 엔티티를 담는다
         public EntityStorage entities;
+        // 적 저장소
+        public EnemyStorage enemies;
         // 근접 판정 저장소
         public MeleeStorage melees;
         // 투사체 저장소

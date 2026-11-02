@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using TopView.Components;
 using TopView.Entities;
 using TopView.Requests;
 
@@ -11,22 +10,20 @@ namespace TopView.Systems
         /// <summary>
         /// 사망 상태에서 dieTicks가 지난 적의 칸을 그 종류 구간에 반납한다. 게임을 끝내는 적이면 게임오버를 요청한다.
         /// </summary>
-        /// <param name="masks">칸별 컴포넌트 표시</param>
-        /// <param name="kinds">적 종류 번호</param>
-        /// <param name="behaviors">적 행동 값</param>
-        /// <param name="actionStates">적 행동 상태</param>
-        /// <param name="freeIndicesByKind">적 종류별 구간의 빈 칸 번호 목록</param>
+        /// <param name="enemies">적 저장소</param>
         /// <param name="gameOverRequests">게임오버 요청 큐</param>
-        public static void Tick(ComponentMask[] masks, EnemyKindComponent[] kinds, EnemyBehaviorComponent[] behaviors, EnemyActionStateComponent[] actionStates, List<int>[] freeIndicesByKind, Queue<GameOverRequest> gameOverRequests)
+        public static void Tick(EnemyStorage enemies, Queue<GameOverRequest> gameOverRequests)
         {
-            for (int index = 0; index < masks.Length; index++)
+            for (int index = 0; index < enemies.entities.Length; index++)
             {
-                if ((masks[index] & ComponentMask.EnemyArchetype) == ComponentMask.EnemyArchetype
-                    && actionStates[index].state == EnemyState.Die
-                    && actionStates[index].elapsedTicks >= behaviors[index].dieTicks)
+                ref EnemyEntity entity = ref enemies.entities[index];
+                if (entity.isAlive
+                    && entity.actionState.state == EnemyState.Die
+                    && entity.actionState.elapsedTicks >= entity.behavior.dieTicks)
                 {
-                    SpawnSystem.ReleaseSlot(masks, freeIndicesByKind[kinds[index].kind], index);
-                    if (behaviors[index].endsGameOnDeath)
+                    entity.isAlive = false;
+                    enemies.freeIndicesByKind[entity.kind.kind].Add(index);
+                    if (entity.behavior.endsGameOnDeath)
                     {
                         gameOverRequests.Enqueue(new GameOverRequest());
                     }

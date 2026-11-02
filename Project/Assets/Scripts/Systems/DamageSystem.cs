@@ -13,14 +13,13 @@ namespace TopView.Systems
         /// 진행 중이면 피해 요청을 반영하고, 진행 중이 아니면 들어온 요청을 버린다. 체력이 이미 0인 대상은 피해를 받지 않는다.
         /// </summary>
         /// <param name="progress">한 판의 진행 상태. 처치 점수와 골드를 더한다</param>
-        /// <param name="masks">칸별 컴포넌트 표시</param>
-        /// <param name="generations">칸이 채워진 횟수</param>
-        /// <param name="healths">체력</param>
-        /// <param name="combats">레벨과 공격력</param>
-        /// <param name="enemyStats">점수·골드 값</param>
+        /// <param name="masks">플레이어 칸별 컴포넌트 표시</param>
+        /// <param name="generations">플레이어 칸이 채워진 횟수</param>
+        /// <param name="healths">플레이어 체력</param>
+        /// <param name="enemies">적 저장소</param>
         /// <param name="playerDamageRequests">플레이어 피해 요청 큐</param>
         /// <param name="enemyDamageRequests">적 피해 요청 큐</param>
-        public static void Tick(ref GameProgressComponent progress, ComponentMask[] masks, int[] generations, HealthComponent[] healths, CombatComponent[] combats, EnemyStatsComponent[] enemyStats, Queue<DamageRequest> playerDamageRequests, Queue<DamageRequest> enemyDamageRequests)
+        public static void Tick(ref GameProgressComponent progress, ComponentMask[] masks, int[] generations, HealthComponent[] healths, EnemyStorage enemies, Queue<DamageRequest> playerDamageRequests, Queue<DamageRequest> enemyDamageRequests)
         {
             if (progress.phase != GamePhase.Playing)
             {
@@ -51,16 +50,16 @@ namespace TopView.Systems
             while (enemyDamageRequests.Count > 0)
             {
                 DamageRequest request = enemyDamageRequests.Dequeue();
-                if (!HasTarget(masks, generations, in request.target))
+                if (!HasEnemyTarget(enemies.entities, in request.target))
                 {
                     missingCount++;
                     continue;
                 }
 
-                int index = request.target.index;
-                if (Apply(ref healths[index], in request))
+                ref EnemyEntity enemy = ref enemies.entities[request.target.index];
+                if (Apply(ref enemy.health, in request))
                 {
-                    AddKillReward(ref progress, in enemyStats[index], combats[index].level);
+                    AddKillReward(ref progress, in enemy.stats, enemy.combat.level);
                 }
             }
 
@@ -75,6 +74,13 @@ namespace TopView.Systems
             return target.index >= 0 && target.index < masks.Length
                 && (masks[target.index] & ComponentMask.Health) != 0
                 && generations[target.index] == target.generation;
+        }
+
+        private static bool HasEnemyTarget(EnemyEntity[] enemies, in EntityIdentifier target)
+        {
+            return target.index >= 0 && target.index < enemies.Length
+                && enemies[target.index].isAlive
+                && enemies[target.index].generation == target.generation;
         }
 
         // 체력을 깎는다. 이번 피해로 체력이 0이 되었으면 true를 돌려준다.

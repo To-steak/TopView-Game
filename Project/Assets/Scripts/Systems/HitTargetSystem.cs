@@ -9,8 +9,6 @@ namespace TopView.Systems
     {
         // 캡슐 높이로 맞는 엔티티가 가지는 컴포넌트
         private const ComponentMask CAPSULE_TARGET_QUERY = ComponentMask.Position | ComponentMask.Rotation | ComponentMask.Health | ComponentMask.PlayerMovement;
-        // 높이를 따지지 않고 맞는 엔티티가 가지는 컴포넌트
-        private const ComponentMask CIRCLE_TARGET_QUERY = ComponentMask.Position | ComponentMask.Health | ComponentMask.EnemyStats;
 
         /// <summary>
         /// 체력이 남은 엔티티로 두 목록을 처음부터 다시 채운다. 이동이 끝난 뒤, 판정 전에 부른다.
@@ -22,12 +20,12 @@ namespace TopView.Systems
         /// <param name="rotations">회전</param>
         /// <param name="healths">체력</param>
         /// <param name="movements">플레이어 이동 값. 캡슐 크기를 읽는다</param>
-        /// <param name="enemyStats">피격 반지름 값</param>
+        /// <param name="enemies">적 저장소</param>
         /// <param name="playerHitTargets">플레이어 피격 대상 목록. 길이는 플레이어 칸 수다</param>
         /// <param name="playerHitTargetCount">플레이어 피격 대상 목록에서 이번 틱에 채운 대상 수</param>
         /// <param name="enemyHitTargets">적 피격 대상 목록. 길이는 적 칸 수다</param>
         /// <param name="enemyHitTargetCount">적 피격 대상 목록에서 이번 틱에 채운 대상 수</param>
-        public static void Tick(ComponentMask[] masks, int[] generations, PositionComponent[] positions, RotationComponent[] rotations, HealthComponent[] healths, PlayerMovementComponent[] movements, EnemyStatsComponent[] enemyStats, HitTargetComponent[] playerHitTargets, ref int playerHitTargetCount, HitTargetComponent[] enemyHitTargets, ref int enemyHitTargetCount)
+        public static void Tick(ComponentMask[] masks, int[] generations, PositionComponent[] positions, RotationComponent[] rotations, HealthComponent[] healths, PlayerMovementComponent[] movements, EnemyStorage enemies, HitTargetComponent[] playerHitTargets, ref int playerHitTargetCount, HitTargetComponent[] enemyHitTargets, ref int enemyHitTargetCount)
         {
             playerHitTargetCount = 0;
             enemyHitTargetCount = 0;
@@ -41,10 +39,14 @@ namespace TopView.Systems
                     float radius = movements[index].capsuleRadius;
                     Add(playerHitTargets, ref playerHitTargetCount, index, generations[index], positions[index].current, radius, bottom.y - radius, top.y + radius);
                 }
+            }
 
-                if ((masks[index] & CIRCLE_TARGET_QUERY) == CIRCLE_TARGET_QUERY && healths[index].current > 0f)
+            for (int index = 0; index < enemies.entities.Length; index++)
+            {
+                ref readonly EnemyEntity enemy = ref enemies.entities[index];
+                if (enemy.isAlive && enemy.health.current > 0f)
                 {
-                    Add(enemyHitTargets, ref enemyHitTargetCount, index, generations[index], positions[index].current, enemyStats[index].hitRadius, float.NegativeInfinity, float.PositiveInfinity);
+                    Add(enemyHitTargets, ref enemyHitTargetCount, index, enemy.generation, enemy.position.current, enemy.stats.hitRadius, float.NegativeInfinity, float.PositiveInfinity);
                 }
             }
         }

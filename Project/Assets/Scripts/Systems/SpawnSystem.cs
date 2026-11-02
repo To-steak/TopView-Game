@@ -20,13 +20,6 @@ namespace TopView.Systems
             entities.positions[index] = default;
             entities.rotations[index] = default;
             entities.healths[index] = default;
-            entities.combats[index] = default;
-            entities.enemyStats[index] = default;
-            entities.attackLists[index] = default;
-            entities.enemyKinds[index] = default;
-            entities.enemyBehaviors[index] = default;
-            entities.enemyActionStates[index] = default;
-            entities.navigationAgents[index] = default;
             entities.manas[index] = default;
             entities.playerMovements[index] = default;
             entities.playerVitals[index] = default;

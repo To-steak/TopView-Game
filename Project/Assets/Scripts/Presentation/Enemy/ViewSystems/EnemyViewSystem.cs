@@ -20,45 +20,41 @@ namespace TopView.Presentation.Enemy.ViewSystems
         private const int BASE_LAYER_INDEX = 0;
 
         /// <summary>
-        /// 공유 저장소의 칸마다 살아 있는 적과 View를 맞추고, 이번 프레임의 상태 변경 기록을 Animator에 반영한다.
+        /// 저장소의 칸마다 살아 있는 적과 View를 맞추고, 이번 프레임의 상태 변경 기록을 Animator에 반영한다.
         /// </summary>
-        /// <param name="masks">칸별 컴포넌트 표시</param>
-        /// <param name="generations">칸이 채워진 횟수</param>
-        /// <param name="kinds">적 종류 번호</param>
-        /// <param name="positions">위치</param>
-        /// <param name="rotations">회전</param>
+        /// <param name="entities">적 엔티티 배열</param>
         /// <param name="stateRecords">이번 프레임의 적 상태 변경 기록</param>
         /// <param name="viewPrefabsByKind">적 종류별 EnemyView 프리팹</param>
         /// <param name="context">적 View 실행 상태</param>
-        public static void Present(ComponentMask[] masks, int[] generations, EnemyKindComponent[] kinds, PositionComponent[] positions, RotationComponent[] rotations, List<EnemyStateChangedRecord> stateRecords, GameObject[] viewPrefabsByKind, EnemyViewContext context)
+        public static void Present(EnemyEntity[] entities, List<EnemyStateChangedRecord> stateRecords, GameObject[] viewPrefabsByKind, EnemyViewContext context)
         {
             float alpha = Mathf.Clamp01((Time.time - Time.fixedTime) / Time.fixedDeltaTime);
 
-            for (int index = 0; index < masks.Length; index++)
+            for (int index = 0; index < entities.Length; index++)
             {
-                bool isEnemy = (masks[index] & ComponentMask.EnemyArchetype) == ComponentMask.EnemyArchetype;
+                ref readonly EnemyEntity entity = ref entities[index];
                 EnemyView view = context.views[index];
 
-                if (view != null && (!isEnemy || context.viewGenerations[index] != generations[index]))
+                if (view != null && (!entity.isAlive || context.viewGenerations[index] != entity.generation))
                 {
                     // 칸은 종류별 구간으로 나뉘어 있어 칸을 다시 채워도 종류 번호는 그대로다
-                    Release(context, index, kinds[index].kind);
+                    Release(context, index, entity.kind.kind);
                     view = null;
                 }
 
                 // View 프리팹이 없는 종류는 판을 준비할 때 경고를 남겼으므로 여기서는 건너뛴다
-                if (!isEnemy || viewPrefabsByKind[kinds[index].kind] == null)
+                if (!entity.isAlive || viewPrefabsByKind[entity.kind.kind] == null)
                 {
                     continue;
                 }
 
                 if (view == null)
                 {
-                    view = Acquire(context, index, kinds[index].kind, generations[index], viewPrefabsByKind);
+                    view = Acquire(context, index, entity.kind.kind, entity.generation, viewPrefabsByKind);
                 }
 
-                Vector3 position = Vector3.Lerp(positions[index].previous, positions[index].current, alpha);
-                view.transform.SetPositionAndRotation(position, Quaternion.Slerp(rotations[index].previous, rotations[index].current, alpha));
+                Vector3 position = Vector3.Lerp(entity.position.previous, entity.position.current, alpha);
+                view.transform.SetPositionAndRotation(position, Quaternion.Slerp(entity.rotation.previous, entity.rotation.current, alpha));
             }
 
             for (int recordIndex = 0; recordIndex < stateRecords.Count; recordIndex++)
@@ -70,7 +66,7 @@ namespace TopView.Presentation.Enemy.ViewSystems
                     continue;
                 }
 
-                ApplyStateRecord(in record, view.animator, context.triggerHashesByKind[kinds[record.enemy.index].kind]);
+                ApplyStateRecord(in record, view.animator, context.triggerHashesByKind[entities[record.enemy.index].kind.kind]);
             }
         }
 

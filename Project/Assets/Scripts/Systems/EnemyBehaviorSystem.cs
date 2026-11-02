@@ -13,19 +13,13 @@ namespace TopView.Systems
         /// <summary>
         /// Idle과 Walk 상태의 적마다 플레이어를 감지해 배회, 추적, 공격 시작을 정한다.
         /// </summary>
-        /// <param name="masks">칸별 컴포넌트 표시</param>
-        /// <param name="generations">칸이 채워진 횟수</param>
-        /// <param name="kinds">적 종류 번호</param>
-        /// <param name="positions">위치</param>
-        /// <param name="rotations">회전</param>
-        /// <param name="attackLists">공격 목록</param>
-        /// <param name="behaviors">적 행동 값</param>
-        /// <param name="actionStates">적 행동 상태와 공격 진행</param>
-        /// <param name="agents">목적지와 경로</param>
+        /// <param name="enemies">적 저장소</param>
+        /// <param name="masks">플레이어 칸별 컴포넌트 표시. 플레이어를 찾는 데 쓴다</param>
+        /// <param name="positions">플레이어 위치</param>
         /// <param name="playerMovements">플레이어 이동 값. 감지와 공격 대상의 반지름을 읽는다</param>
         /// <param name="random">World의 난수 생성기</param>
         /// <param name="stateRecords">적 상태 변경 기록</param>
-        public static void Tick(ComponentMask[] masks, int[] generations, EnemyKindComponent[] kinds, PositionComponent[] positions, RotationComponent[] rotations, AttackListComponent[] attackLists, EnemyBehaviorComponent[] behaviors, EnemyActionStateComponent[] actionStates, NavigationAgentComponent[] agents, PlayerMovementComponent[] playerMovements, System.Random random, List<EnemyStateChangedRecord> stateRecords)
+        public static void Tick(EnemyStorage enemies, ComponentMask[] masks, PositionComponent[] positions, PlayerMovementComponent[] playerMovements, System.Random random, List<EnemyStateChangedRecord> stateRecords)
         {
             bool hasPlayer = TargetingSystem.TryGetPlayerTarget(masks, positions, playerMovements, out Vector3 playerPosition, out float playerRadius);
             float deltaTime = Time.fixedDeltaTime;
@@ -33,20 +27,21 @@ namespace TopView.Systems
             int missingAttackCount = 0;
             int missingAttackKind = 0;
 
-            for (int index = 0; index < masks.Length; index++)
+            for (int index = 0; index < enemies.entities.Length; index++)
             {
-                if ((masks[index] & ComponentMask.EnemyArchetype) != ComponentMask.EnemyArchetype)
+                ref EnemyEntity entity = ref enemies.entities[index];
+                if (!entity.isAlive)
                 {
                     continue;
                 }
 
-                ref EnemyActionStateComponent actionState = ref actionStates[index];
-                ref NavigationAgentComponent agent = ref agents[index];
-                ref RotationComponent rotation = ref rotations[index];
-                ref readonly EnemyBehaviorComponent behavior = ref behaviors[index];
-                EnemyAttackComponent[] attacks = attackLists[index].attacks;
-                Vector3 position = positions[index].current;
-                EntityIdentifier identifier = new EntityIdentifier { index = index, generation = generations[index] };
+                ref EnemyActionStateComponent actionState = ref entity.actionState;
+                ref NavigationAgentComponent agent = ref entity.agent;
+                ref RotationComponent rotation = ref entity.rotation;
+                ref readonly EnemyBehaviorComponent behavior = ref entity.behavior;
+                EnemyAttackComponent[] attacks = entity.attackList.attacks;
+                Vector3 position = entity.position.current;
+                EntityIdentifier identifier = new EntityIdentifier { index = index, generation = entity.generation };
                 bool isPlayerDetected = hasPlayer && TargetingSystem.IsWithin(position, playerPosition, behavior.detectionRadius + playerRadius);
 
                 switch (actionState.state)
@@ -74,7 +69,7 @@ namespace TopView.Systems
                             if (isPlayerDetected && attacks.Length == 0)
                             {
                                 missingAttackCount++;
-                                missingAttackKind = kinds[index].kind;
+                                missingAttackKind = entity.kind.kind;
                             }
                             ChangeState(ref actionState, ref agent, attacks, in identifier, EnemyState.Idle, stateRecords);
                         }

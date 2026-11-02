@@ -15,55 +15,47 @@ namespace TopView.Systems
         // 두 엔티티가 이보다 가까우면 밀어낼 방향을 정할 수 없어 건너뛴다(유닛)
         private const float MIN_SEPARATION_DISTANCE = 0.00001f;
 
-        // 경로를 따라 움직이는 엔티티가 가지는 컴포넌트
-        private const ComponentMask MOVE_QUERY = ComponentMask.Position | ComponentMask.Rotation | ComponentMask.NavigationAgent | ComponentMask.EnemyBehavior;
-        // 서로 밀어내는 엔티티가 가지는 컴포넌트
-        private const ComponentMask SEPARATE_QUERY = ComponentMask.Position | ComponentMask.NavigationAgent | ComponentMask.EnemyStats;
-
         /// <summary>
-        /// 목적지가 바뀐 엔티티는 경로를 다시 구한 뒤 경로를 따라 옮긴다. 마지막에 걷는 엔티티끼리 겹친 만큼 밀어내고 NavMesh 안으로 되돌린다.
+        /// 목적지가 바뀐 적은 경로를 다시 구한 뒤 경로를 따라 옮긴다. 마지막에 걷는 적끼리 겹친 만큼 밀어내고 NavMesh 안으로 되돌린다.
         /// </summary>
-        /// <param name="masks">칸별 컴포넌트 표시</param>
-        /// <param name="positions">위치</param>
-        /// <param name="rotations">회전</param>
-        /// <param name="agents">목적지와 경로</param>
-        /// <param name="behaviors">적 행동 값</param>
-        /// <param name="stats">피격 반지름 값</param>
+        /// <param name="enemies">적 저장소</param>
         /// <param name="path">경로 계산에 다시 쓰는 NavMeshPath</param>
         /// <param name="navMeshSampleDistance">목적지를 NavMesh 위로 맞출 때 찾는 최대 거리(유닛)</param>
-        public static void Tick(ComponentMask[] masks, PositionComponent[] positions, RotationComponent[] rotations, NavigationAgentComponent[] agents, EnemyBehaviorComponent[] behaviors, EnemyStatsComponent[] stats, NavMeshPath path, float navMeshSampleDistance)
+        public static void Tick(EnemyStorage enemies, NavMeshPath path, float navMeshSampleDistance)
         {
+            EnemyEntity[] entities = enemies.entities;
             float deltaTime = Time.fixedDeltaTime;
             int failedPathCount = 0;
 
-            for (int index = 0; index < masks.Length; index++)
+            for (int index = 0; index < entities.Length; index++)
             {
-                if ((masks[index] & MOVE_QUERY) != MOVE_QUERY)
+                ref EnemyEntity entity = ref entities[index];
+                if (!entity.isAlive)
                 {
                     continue;
                 }
 
-                ref NavigationAgentComponent agent = ref agents[index];
-                if (agent.hasDestination && agent.isPathDirty && !TryRecalculatePath(ref agent, positions[index].current, path, navMeshSampleDistance))
+                if (entity.agent.hasDestination && entity.agent.isPathDirty && !TryRecalculatePath(ref entity.agent, entity.position.current, path, navMeshSampleDistance))
                 {
                     failedPathCount++;
                 }
 
-                Move(ref agent, in behaviors[index], ref positions[index], ref rotations[index], deltaTime);
+                Move(ref entity.agent, in entity.behavior, ref entity.position, ref entity.rotation, deltaTime);
             }
 
             if (failedPathCount > 0)
             {
-                Debug.LogWarning($"EnemyNavigationSystem >> 경로를 찾지 못해 바로 도착한 것으로 본 엔티티 {failedPathCount}개가 있다.");
+                Debug.LogWarning($"EnemyNavigationSystem >> 경로를 찾지 못해 바로 도착한 것으로 본 적 {failedPathCount}마리가 있다.");
             }
 
-            Separate(masks, positions, agents, stats);
+            Separate(entities);
 
-            for (int index = 0; index < masks.Length; index++)
+            for (int index = 0; index < entities.Length; index++)
             {
-                if ((masks[index] & MOVE_QUERY) == MOVE_QUERY && agents[index].hasDestination && NavMesh.Raycast(positions[index].previous, positions[index].current, out NavMeshHit hit, NavMesh.AllAreas))
+                ref EnemyEntity entity = ref entities[index];
+                if (entity.isAlive && entity.agent.hasDestination && NavMesh.Raycast(entity.position.previous, entity.position.current, out NavMeshHit hit, NavMesh.AllAreas))
                 {
-                    positions[index].current = hit.position;
+                    entity.position.current = hit.position;
                 }
             }
         }
@@ -184,33 +176,35 @@ namespace TopView.Systems
         }
 
         // 두 엔티티가 반지름 합보다 가까우면 겹친 만큼 XZ로 밀어낸다. 목적지가 있는(걷는) 쪽만 밀려나며, 둘 다 걸으면 반씩 나눈다.
-        private static void Separate(ComponentMask[] masks, PositionComponent[] positions, NavigationAgentComponent[] agents, EnemyStatsComponent[] stats)
+        private static void Separate(EnemyEntity[] entities)
         {
-            for (int firstIndex = 0; firstIndex < masks.Length; firstIndex++)
+            for (int firstIndex = 0; firstIndex < entities.Length; firstIndex++)
             {
-                if ((masks[firstIndex] & SEPARATE_QUERY) != SEPARATE_QUERY)
+                ref EnemyEntity first = ref entities[firstIndex];
+                if (!first.isAlive)
                 {
                     continue;
                 }
 
-                bool isFirstWalking = agents[firstIndex].hasDestination;
-                for (int secondIndex = firstIndex + 1; secondIndex < masks.Length; secondIndex++)
+                bool isFirstWalking = first.agent.hasDestination;
+                for (int secondIndex = firstIndex + 1; secondIndex < entities.Length; secondIndex++)
                 {
-                    if ((masks[secondIndex] & SEPARATE_QUERY) != SEPARATE_QUERY)
+                    ref EnemyEntity second = ref entities[secondIndex];
+                    if (!second.isAlive)
                     {
                         continue;
                     }
 
-                    bool isSecondWalking = agents[secondIndex].hasDestination;
+                    bool isSecondWalking = second.agent.hasDestination;
                     if (!isFirstWalking && !isSecondWalking)
                     {
                         continue;
                     }
 
-                    Vector3 delta = positions[secondIndex].current - positions[firstIndex].current;
+                    Vector3 delta = second.position.current - first.position.current;
                     delta.y = 0f;
                     float distance = delta.magnitude;
-                    float minimumDistance = stats[firstIndex].hitRadius + stats[secondIndex].hitRadius;
+                    float minimumDistance = first.stats.hitRadius + second.stats.hitRadius;
                     if (distance >= minimumDistance || distance < MIN_SEPARATION_DISTANCE)
                     {
                         continue;
@@ -219,16 +213,16 @@ namespace TopView.Systems
                     Vector3 push = delta / distance * (minimumDistance - distance);
                     if (isFirstWalking && isSecondWalking)
                     {
-                        positions[firstIndex].current -= push * 0.5f;
-                        positions[secondIndex].current += push * 0.5f;
+                        first.position.current -= push * 0.5f;
+                        second.position.current += push * 0.5f;
                     }
                     else if (isFirstWalking)
                     {
-                        positions[firstIndex].current -= push;
+                        first.position.current -= push;
                     }
                     else
                     {
-                        positions[secondIndex].current += push;
+                        second.position.current += push;
                     }
                 }
             }
