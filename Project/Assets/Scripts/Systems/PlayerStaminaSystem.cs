@@ -1,3 +1,4 @@
+using TopView.Components;
 using TopView.Entities;
 using UnityEngine;
 
@@ -12,22 +13,12 @@ namespace TopView.Systems
         /// <param name="players">플레이어 저장소</param>
         public static void Tick(PlayerStorage players)
         {
-            for (int playerIndex = 0; playerIndex < players.entities.Length; playerIndex++)
+            for (int index = 0; index < players.entities.Length; index++)
             {
-                ref PlayerEntity player = ref players.entities[playerIndex];
-                if (!player.isAlive)
+                ref PlayerEntity entity = ref players.entities[index];
+                if (entity.isAlive)
                 {
-                    continue;
-                }
-
-                if (player.manaRecoveryElapsedTicks < player.vitals.manaRecoveryDelayTicks)
-                {
-                    player.manaRecoveryElapsedTicks++;
-                }
-
-                if (player.mana < player.vitals.maxMana && player.manaRecoveryElapsedTicks >= player.vitals.manaRecoveryDelayTicks)
-                {
-                    player.mana = Mathf.Min(player.mana + player.vitals.manaRecoveryPerTick, player.vitals.maxMana);
+                    Recover(ref entity.mana, in entity.vitals);
                 }
             }
         }
@@ -35,23 +26,36 @@ namespace TopView.Systems
         /// <summary>
         /// 마나가 충분한지 돌려준다.
         /// </summary>
-        /// <param name="player">플레이어</param>
+        /// <param name="mana">마나</param>
         /// <param name="amount">필요한 마나</param>
         /// <returns>마나가 amount 이상이면 true</returns>
-        public static bool HasEnoughMana(in PlayerEntity player, float amount)
+        public static bool HasEnoughMana(in ManaComponent mana, float amount)
         {
-            return player.mana >= amount;
+            return mana.current >= amount;
         }
 
         /// <summary>
         /// 마나를 쓰고 회복 지연 시간을 처음부터 다시 센다. 마나는 0 아래로 내려가지 않는다.
         /// </summary>
-        /// <param name="player">플레이어</param>
+        /// <param name="mana">마나</param>
         /// <param name="amount">쓸 마나</param>
-        public static void UseMana(ref PlayerEntity player, float amount)
+        public static void UseMana(ref ManaComponent mana, float amount)
         {
-            player.mana = Mathf.Max(player.mana - amount, 0f);
-            player.manaRecoveryElapsedTicks = 0;
+            mana.current = Mathf.Max(mana.current - amount, 0f);
+            mana.recoveryElapsedTicks = 0;
+        }
+
+        private static void Recover(ref ManaComponent mana, in PlayerVitalsComponent vital)
+        {
+            if (mana.recoveryElapsedTicks < vital.manaRecoveryDelayTicks)
+            {
+                mana.recoveryElapsedTicks++;
+            }
+
+            if (mana.current < vital.maxMana && mana.recoveryElapsedTicks >= vital.manaRecoveryDelayTicks)
+            {
+                mana.current = Mathf.Min(mana.current + vital.manaRecoveryPerTick, vital.maxMana);
+            }
         }
     }
 }

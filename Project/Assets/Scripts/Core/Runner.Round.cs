@@ -41,62 +41,54 @@ namespace TopView.Core
             }
 
             List<GameObject> projectilePrefabs = new List<GameObject>();
-            List<float> projectilePitchSpeeds = new List<float>();
             List<GameObject> hitEffectPrefabs = new List<GameObject>();
 
-            if (!TryReadPlayer(playerSpawner, projectilePrefabs, projectilePitchSpeeds, hitEffectPrefabs, out PlayerDefinition playerDefinition, out PlayerSpawnRequest playerSpawnRequest, out GameObject[] weaponModelPrefabs))
+            if (!TryReadPlayer(playerSpawner, projectilePrefabs, hitEffectPrefabs, out PlayerDefinition playerDefinition, out PlayerSpawnRequest playerSpawnRequest, out GameObject[] weaponModelPrefabs))
             {
                 return;
             }
 
-            if (gameSettings.enemyCapacityPerKind <= 0 || gameSettings.projectileCapacity <= 0)
+            if (gameSettings.enemyCapacityPerKind <= 0 || gameSettings.enemyPathCornerCapacity <= 0 || gameSettings.projectileCapacity <= 0)
             {
-                Debug.LogError("Runner >> Game Settings Definition의 Enemy Capacity Per Kind나 Projectile Capacity가 0 이하라 판을 시작할 수 없다.");
+                Debug.LogError("Runner >> Game Settings Definition의 Enemy Capacity Per Kind, Enemy Path Corner Capacity, Projectile Capacity 중 0 이하인 값이 있어 판을 시작할 수 없다.");
                 return;
             }
 
-            WaveComponent[] waves = (WaveComponent[])gameSettings.waves.Clone();
-            if (!TryAssignWaveEnemyKinds(waves, gameSettings.waveEnemies, out EnemyDefinition[] enemyDefinitions))
+            if (gameSettings.rule.navMeshSampleDistance <= 0f || gameSettings.rule.spawnIntervalTicks <= 0)
             {
+                Debug.LogError("Runner >> Game Settings Definition의 Nav Mesh Sample Distance나 Spawn Interval Ticks가 0 이하라 판을 시작할 수 없다.");
                 return;
             }
+
+            ReadEnemySpawners(out EnemyDefinition[] enemyDefinitions, out SpawnPointComponent[] enemySpawnPoints);
 
             int enemyKindCount = enemyDefinitions.Length;
-            if (!TryReadEnemies(enemyDefinitions, projectilePrefabs, projectilePitchSpeeds, hitEffectPrefabs, out EnemySpawnRequest[] enemySpawnTemplates, out GameObject[] enemyViewPrefabs, out GameObject[] enemyHealthGaugePrefabs, out Vector3[] enemyHealthGaugeOffsets, out Color[] enemyHealthGaugeColors))
-            {
-                return;
-            }
-
-            if (!TryReadBoss(projectilePrefabs, projectilePitchSpeeds, hitEffectPrefabs, out BossDefinition bossDefinition, out BossSpawnRequest bossSpawnTemplate))
-            {
-                return;
-            }
+            ReadEnemies(enemyDefinitions, projectilePrefabs, hitEffectPrefabs, out EnemySpawnRequest[] enemySpawnTemplates, out GameObject[] enemyViewPrefabs, out GameObject[] enemyHealthGaugePrefabs);
 
             World world = new World();
             world.rule = gameSettings.rule;
-            world.waves = waves;
-            world.enemySpawnPointsByKind = CollectEnemySpawnPoints(enemyDefinitions);
+            world.enemySpawnPoints = enemySpawnPoints;
             world.random = new System.Random(world.rule.randomSeed);
-            world.players = new PlayerStorage(PLAYER_CAPACITY);
             world.playerSpawnRequests.Enqueue(playerSpawnRequest);
-            world.enemies = new EnemyStorage(enemyKindCount, gameSettings.enemyCapacityPerKind);
             world.enemySpawnTemplates = enemySpawnTemplates;
-            world.bosses = new BossStorage(BOSS_CAPACITY);
-            world.bossSpawnTemplate = bossSpawnTemplate;
-            world.projectiles = new ProjectileStorage(gameSettings.projectileCapacity);
-            // 피격 대상은 세 저장소의 칸 수를 넘지 않고, 공격하는 쪽 하나는 근접 판정을 동시에 하나만 가지므로 근접 판정도 이 수로 넘치지 않는다
-            int combatantCapacity = world.players.entities.Length + world.enemies.entities.Length + world.bosses.entities.Length;
-            world.hitTargets = new HitTargetComponent[combatantCapacity];
+            int enemyCapacity = enemyKindCount * gameSettings.enemyCapacityPerKind;
+            world.playerHitTargets = new HitTargetComponent[PLAYER_CAPACITY];
+            world.enemyHitTargets = new HitTargetComponent[enemyCapacity];
+            // 공격하는 쪽 하나는 근접 판정을 동시에 하나만 가지고, 한 판정이 맞힐 대상도 플레이어와 적의 칸 수를 넘지 않는다
+            int combatantCapacity = PLAYER_CAPACITY + enemyCapacity;
+            world.players = new PlayerStorage(PLAYER_CAPACITY);
+            world.enemies = new EnemyStorage(enemyKindCount, gameSettings.enemyCapacityPerKind, gameSettings.enemyPathCornerCapacity);
             world.melees = new MeleeStorage(combatantCapacity, combatantCapacity);
+            world.projectiles = new ProjectileStorage(gameSettings.projectileCapacity);
 
             world.progress = new GameProgressComponent
             {
                 phase = GamePhase.Playing,
                 remainingTicks = world.rule.timeLimitTicks,
                 score = 0,
-                isWaveStarted = new bool[world.waves.Length],
-                isEnemyKindSpawning = new bool[enemyKindCount],
-                enemyKindSpawnRemainingTicks = new int[enemyKindCount]
+                gold = 0,
+                // 첫 틱에 바로 적을 내보낸다
+                enemySpawnRemainingTicks = 1
             };
 
             Application.targetFrameRate = gameSettings.targetFrameRate;
@@ -107,11 +99,7 @@ namespace TopView.Core
             _playerWeaponModelPrefabs = weaponModelPrefabs;
             _enemyViewPrefabs = enemyViewPrefabs;
             _enemyHealthGaugePrefabs = enemyHealthGaugePrefabs;
-            _enemyHealthGaugeOffsets = enemyHealthGaugeOffsets;
-            _enemyHealthGaugeColors = enemyHealthGaugeColors;
-            _bossViewPrefab = bossDefinition.viewPrefab;
             _projectilePrefabs = projectilePrefabs.ToArray();
-            _projectilePitchSpeeds = projectilePitchSpeeds.ToArray();
             _hitEffectPrefabs = hitEffectPrefabs.ToArray();
             _viewContext = CreateViewContext(enemyKindCount);
 
@@ -126,6 +114,7 @@ namespace TopView.Core
             _gameOverPresenter = null;
             _remainingTimePresenter = null;
             _scorePresenter = null;
+            _goldPresenter = null;
             _playerHealthPresenter = null;
             _ammoPresenter = null;
             _playerManaPresenter = null;
@@ -152,7 +141,6 @@ namespace TopView.Core
                     healthGaugeViews = new EnemyHealthGaugeView[_world.enemies.entities.Length],
                     healthGaugePools = new Stack<EnemyHealthGaugeView>[enemyKindCount]
                 },
-                boss = new BossViewContext(),
                 projectile = new ProjectileViewContext
                 {
                     views = new ProjectileView[_world.projectiles.entities.Length],

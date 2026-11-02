@@ -1,4 +1,5 @@
 using TopView.Commands;
+using TopView.Components;
 using TopView.Entities;
 using UnityEngine;
 
@@ -17,23 +18,23 @@ namespace TopView.Systems
         /// <param name="command">플레이어 입력</param>
         public static void Tick(PlayerStorage players, in PlayerCommand command)
         {
-            for (int playerIndex = 0; playerIndex < players.entities.Length; playerIndex++)
+            for (int index = 0; index < players.entities.Length; index++)
             {
-                ref PlayerEntity player = ref players.entities[playerIndex];
-                if (!player.isAlive)
+                ref PlayerEntity entity = ref players.entities[index];
+                if (entity.isAlive && !entity.motion.isRotationLocked && command.hasAimPoint)
                 {
-                    continue;
+                    Aim(ref entity.rotation, entity.position.current, command.aimPoint);
                 }
+            }
+        }
 
-                if (!player.isRotationLocked && command.hasAimPoint)
-                {
-                    Vector3 aimDirection = command.aimPoint - player.currentPosition;
-                    aimDirection.y = 0f;
-                    if (aimDirection.sqrMagnitude > MIN_AIM_DISTANCE_SQUARED)
-                    {
-                        player.currentRotation = Quaternion.LookRotation(aimDirection);
-                    }
-                }
+        private static void Aim(ref RotationComponent rotation, Vector3 position, Vector3 aimPoint)
+        {
+            Vector3 aimDirection = aimPoint - position;
+            aimDirection.y = 0f;
+            if (aimDirection.sqrMagnitude > MIN_AIM_DISTANCE_SQUARED)
+            {
+                rotation.current = Quaternion.LookRotation(aimDirection);
             }
         }
     }

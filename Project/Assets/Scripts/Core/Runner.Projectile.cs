@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using TopView.Components;
+using TopView.Definitions;
+using TopView.Entities;
 using TopView.Presentation.Projectile.Views;
 using UnityEngine;
 
@@ -10,25 +12,26 @@ namespace TopView.Core
     {
         // 투사체 View 표와 피격 이펙트 표. 판을 준비할 때 Definition에서 모은다
         private GameObject[] _projectilePrefabs;
-        private float[] _projectilePitchSpeeds;
         private GameObject[] _hitEffectPrefabs;
 
-        // 적·보스 공격 목록의 투사체마다 View와 피격 이펙트를 표에 올린다.
-        private static void AssignAttackViews(string definitionName, EnemyAttackComponent[] attacks, GameObject[] attackProjectilePrefabs, GameObject[] attackHitEffectPrefabs, float[] attackPitchSpeeds, List<GameObject> projectilePrefabs, List<float> projectilePitchSpeeds, List<GameObject> hitEffectPrefabs)
+        // 적 공격 목록에서 엔티티에 담을 공격 값을 꺼내고, 투사체마다 View와 피격 이펙트를 표에 올린다.
+        private static EnemyAttackComponent[] ReadAttacks(string definitionName, EnemyAttackEntry[] entries, List<GameObject> projectilePrefabs, List<GameObject> hitEffectPrefabs)
         {
-            for (int attackIndex = 0; attackIndex < attacks.Length; attackIndex++)
+            EnemyAttackComponent[] attacks = new EnemyAttackComponent[entries.Length];
+            for (int attackIndex = 0; attackIndex < entries.Length; attackIndex++)
             {
-                bool hasProjectile = attacks[attackIndex].kind != EnemyAttackKind.Body;
-                GameObject projectilePrefab = GetOrNull(attackProjectilePrefabs, attackIndex);
-                GameObject hitEffectPrefab = GetOrNull(attackHitEffectPrefabs, attackIndex);
-                float pitchSpeed = attackPitchSpeeds != null && attackIndex < attackPitchSpeeds.Length ? attackPitchSpeeds[attackIndex] : 0f;
-                AssignProjectileViews($"{definitionName} 공격 {attackIndex}번", hasProjectile, projectilePrefab, hitEffectPrefab, pitchSpeed, ref attacks[attackIndex].projectile, projectilePrefabs, projectilePitchSpeeds, hitEffectPrefabs);
+                ref readonly EnemyAttackEntry entry = ref entries[attackIndex];
+                attacks[attackIndex] = entry.attack;
+                bool hasProjectile = entry.attack.kind != EnemyAttackKind.Body;
+                AssignProjectileViews($"{definitionName} 공격 {attackIndex}번", hasProjectile, entry.projectilePrefab, entry.hitEffectPrefab, ref attacks[attackIndex].projectile, projectilePrefabs, hitEffectPrefabs);
             }
+
+            return attacks;
         }
 
         // 투사체 View 표와 피격 이펙트 표에 프리팹을 올리고(이미 있으면 그 번호를 쓰고) 번호를 투사체 값에 넣는다.
         // 투사체가 없거나 프리팹이 빠져 있으면 번호는 -1이고, 그 투사체나 이펙트는 보이지 않는다. 표시용이라 판은 시작한다.
-        private static void AssignProjectileViews(string ownerName, bool hasProjectile, GameObject projectilePrefab, GameObject hitEffectPrefab, float pitchSpeed, ref ProjectileComponent projectile, List<GameObject> projectilePrefabs, List<float> projectilePitchSpeeds, List<GameObject> hitEffectPrefabs)
+        private static void AssignProjectileViews(string ownerName, bool hasProjectile, GameObject projectilePrefab, GameObject hitEffectPrefab, ref ProjectileComponent projectile, List<GameObject> projectilePrefabs, List<GameObject> hitEffectPrefabs)
         {
             projectile.viewIndex = -1;
             projectile.hitEffectIndex = -1;
@@ -48,7 +51,6 @@ namespace TopView.Core
                 {
                     projectile.viewIndex = projectilePrefabs.Count;
                     projectilePrefabs.Add(projectilePrefab);
-                    projectilePitchSpeeds.Add(pitchSpeed);
                 }
             }
 
@@ -71,9 +73,20 @@ namespace TopView.Core
             }
         }
 
-        private static GameObject GetOrNull(GameObject[] prefabs, int index)
+#if UNITY_EDITOR
+        // 살아 있는 투사체마다 판정 구를 Logic 위치에 흰색으로 그린다.
+        private void DrawProjectileGizmos()
         {
-            return prefabs != null && index < prefabs.Length ? prefabs[index] : null;
+            ProjectileEntity[] entities = _world.projectiles.entities;
+            Gizmos.color = Color.white;
+            for (int index = 0; index < entities.Length; index++)
+            {
+                if (entities[index].isAlive)
+                {
+                    Gizmos.DrawWireSphere(entities[index].position.current, entities[index].projectile.radius);
+                }
+            }
         }
+#endif
     }
 }

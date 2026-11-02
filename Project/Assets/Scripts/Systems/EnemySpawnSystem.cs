@@ -8,7 +8,7 @@ using UnityEngine.AI;
 
 namespace TopView.Systems
 {
-    // 적 생성 요청을 받아 EnemyStorage의 그 종류 구간 빈 칸에 엔티티를 채운다. 틱 마지막에 부른다.
+    // 적 생성 요청을 받아 저장소의 그 종류 구간 빈 칸을 채운다. 틱 마지막에 부른다.
     public static class EnemySpawnSystem
     {
         /// <summary>
@@ -16,7 +16,8 @@ namespace TopView.Systems
         /// </summary>
         /// <param name="enemies">적 저장소</param>
         /// <param name="enemySpawnRequests">적 생성 요청 큐</param>
-        public static void Tick(EnemyStorage enemies, Queue<EnemySpawnRequest> enemySpawnRequests)
+        /// <param name="navMeshSampleDistance">생성 위치를 NavMesh 위로 맞출 때 찾는 최대 거리(유닛)</param>
+        public static void Tick(EnemyStorage enemies, Queue<EnemySpawnRequest> enemySpawnRequests, float navMeshSampleDistance)
         {
             int droppedCount = 0;
             int missingNavMeshCount = 0;
@@ -31,7 +32,7 @@ namespace TopView.Systems
                     continue;
                 }
 
-                if (!Spawn(ref enemies.entities[index], in request))
+                if (!Spawn(ref enemies.entities[index], in request, navMeshSampleDistance))
                 {
                     missingNavMeshCount++;
                     missingNavMeshPosition = request.position;
@@ -48,44 +49,56 @@ namespace TopView.Systems
             }
         }
 
+        // 칸 전체를 새 값으로 바꿔 이전 값이 남지 않게 한다. 공격 목록, 경로, 공격별 대기 시간 배열만 비워서 다시 쓴다.
         // 생성 위치 근처에 NavMesh가 없으면 그 위치에 그대로 만들고 false를 돌려준다.
-        private static bool Spawn(ref EnemyEntity slot, in EnemySpawnRequest request)
+        private static bool Spawn(ref EnemyEntity entity, in EnemySpawnRequest request, float navMeshSampleDistance)
         {
-            EnemyAttackComponent[] attacks = SpawnSystem.ReuseArray(slot.attacks, request.attacks);
-            Vector3[] pathCorners = slot.pathCorners;
-            if (pathCorners == null || pathCorners.Length != request.navigation.maxPathCorners)
-            {
-                pathCorners = new Vector3[request.navigation.maxPathCorners];
-            }
+            int generation = entity.generation + 1;
+            EnemyAttackComponent[] attacks = SpawnSystem.ReuseArray(entity.attackList.attacks, request.attacks);
+            Vector3[] pathCorners = entity.agent.pathCorners;
             Array.Clear(pathCorners, 0, pathCorners.Length);
+            int[] attackCooldownRemainingTicks = entity.actionState.attackCooldownRemainingTicks;
+            if (attackCooldownRemainingTicks == null || attackCooldownRemainingTicks.Length != attacks.Length)
+            {
+                attackCooldownRemainingTicks = new int[attacks.Length];
+            }
+            Array.Clear(attackCooldownRemainingTicks, 0, attackCooldownRemainingTicks.Length);
 
             Vector3 position = request.position;
-            bool hasNavMesh = NavMesh.SamplePosition(position, out NavMeshHit hit, request.navigation.navMeshSampleDistance, NavMesh.AllAreas);
+            bool hasNavMesh = NavMesh.SamplePosition(position, out NavMeshHit hit, navMeshSampleDistance, NavMesh.AllAreas);
             if (hasNavMesh)
             {
                 position = hit.position;
             }
 
-            float maxHealth = request.stats.basicMaxHealth + request.level * request.stats.levelIncrement;
-            slot = new EnemyEntity
+            float maxHealth = request.stats.baseMaxHealth + request.level * request.stats.maxHealthIncrement;
+
+            entity = new EnemyEntity
             {
                 isAlive = true,
-                generation = slot.generation + 1,
-                kind = request.enemyKindIndex,
+                generation = generation,
+                kind = new EnemyKindComponent { kind = request.enemyKindIndex },
                 stats = request.stats,
                 behavior = request.behavior,
-                navigation = request.navigation,
-                attacks = attacks,
-                level = request.level,
-                maxHealth = maxHealth,
-                health = maxHealth,
-                attackDamage = request.stats.basicAttackDamage + request.level * request.stats.levelIncrement,
-                previousPosition = position,
-                currentPosition = position,
-                previousRotation = request.rotation,
-                currentRotation = request.rotation,
-                state = EnemyState.Idle,
-                pathCorners = pathCorners
+                attackList = new AttackListComponent { attacks = attacks },
+                combat = new CombatComponent
+                {
+                    level = request.level,
+                    attackDamage = request.stats.baseAttackDamage + request.level * request.stats.attackDamageIncrement
+                },
+                health = new HealthComponent { current = maxHealth, max = maxHealth },
+                position = new PositionComponent { previous = position, current = position },
+                rotation = new RotationComponent { previous = request.rotation, current = request.rotation },
+                actionState = new EnemyActionStateComponent
+                {
+                    state = EnemyState.Idle,
+                    attackCooldownRemainingTicks = attackCooldownRemainingTicks
+                },
+                agent = new NavigationAgentComponent
+                {
+                    maxSpeed = request.stats.baseSpeed + request.level * request.stats.speedIncrement,
+                    pathCorners = pathCorners
+                }
             };
             return hasNavMesh;
         }

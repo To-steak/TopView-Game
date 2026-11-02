@@ -1,7 +1,6 @@
 using TopView.Components;
 using TopView.Definitions;
 using TopView.Presentation;
-using TopView.Presentation.Boss.ViewSystems;
 using TopView.Presentation.Camera.ViewSystems;
 using TopView.Presentation.Enemy.ViewSystems;
 using TopView.Presentation.Player.ViewSystems;
@@ -58,31 +57,41 @@ namespace TopView.Core
             }
 
             bool isPlaying = _world.progress.phase == GamePhase.Playing;
-            DamageSystem.Tick(ref _world.progress, _world.players, _world.enemies, _world.bosses, _world.damageRequests);
+            DamageSystem.Tick(ref _world.progress, _world.players, _world.enemies, _world.playerDamageRequests, _world.enemyDamageRequests);
             if (isPlaying)
             {
-                PlayerStateSystem.Tick(_world.players, in _world.commandBuffer.playerCommand, _world.playerStateChangedRecords, _world.projectileSpawnRequests, _world.meleeSpawnRequests, _world.melees, _world.gameOverRequests);
-                // 막기는 이동이 남긴 이번 틱의 previousPosition을 읽고, 조준은 막힌 뒤의 위치를 읽으므로 이 순서를 지킨다
+                TransformSnapshotSystem.Tick(_world.players, _world.enemies, _world.projectiles);
+                PlayerDeathSystem.Tick(_world.players, _world.melees, _world.playerStateChangedRecords);
+                PlayerStateTimerSystem.Tick(_world.players);
+                // 누름 입력으로 정해진 상태를 뒤의 셋이 함께 읽는다. 이동 입력과 공격을 반영한 뒤에 상태를 넘기므로 이 순서를 지킨다
+                PlayerPressSystem.Tick(_world.players, in _world.commandBuffer.playerCommand, _world.playerStateChangedRecords);
+                PlayerMoveInputSystem.Tick(_world.players, in _world.commandBuffer.playerCommand);
+                PlayerAttackSystem.Tick(_world.players, _world.projectileSpawnRequests, _world.meleeSpawnRequests);
+                PlayerStateSystem.Tick(_world.players, in _world.commandBuffer.playerCommand, _world.playerStateChangedRecords, _world.gameOverRequests);
+                // 막기는 이동이 끝난 위치를 읽고, 조준은 막힌 뒤의 위치를 읽으므로 이 순서를 지킨다
                 PlayerMovementSystem.Tick(_world.players);
-                PlayerBlockSystem.Tick(_world.players, _world.enemies, _world.bosses);
+                PlayerBlockSystem.Tick(_world.players, _world.enemies);
                 PlayerAimSystem.Tick(_world.players, in _world.commandBuffer.playerCommand);
                 PlayerStaminaSystem.Tick(_world.players);
-                EnemyBehaviorSystem.Tick(_world.enemies, _world.players, _world.random, _world.enemyStateChangedRecords, _world.projectileSpawnRequests, _world.meleeSpawnRequests);
-                BossBehaviorSystem.Tick(_world.bosses, _world.players, _world.random, _world.bossStateChangedRecords, _world.projectileSpawnRequests, _world.meleeSpawnRequests, _world.gameOverRequests);
-                EnemyNavigationSystem.Tick(_world.enemies, _world.navigationPath);
+                EnemyDeathSystem.Tick(_world.enemies, _world.enemyStateChangedRecords);
+                EnemyStateTimerSystem.Tick(_world.enemies);
+                // 공격 상태는 상태 시간이 0이면 건너뛰므로, 공격이 끝나 Idle이 된 적과 막 공격에 들어온 적 모두 다음 틱부터 움직이도록 이 순서를 지킨다
+                EnemyBehaviorSystem.Tick(_world.enemies, _world.players, _world.random, _world.enemyStateChangedRecords);
+                EnemyAttackStateSystem.Tick(_world.enemies, _world.players, _world.enemyStateChangedRecords, _world.projectileSpawnRequests, _world.meleeSpawnRequests);
+                EnemyDespawnSystem.Tick(_world.enemies, _world.gameOverRequests);
+                EnemyNavigationSystem.Tick(_world.enemies, _world.navigationPath, _world.rule.navMeshSampleDistance);
                 ProjectileSystem.Tick(_world.projectiles);
-                HitTargetSystem.Tick(_world.players, _world.enemies, _world.bosses, _world.hitTargets, ref _world.hitTargetCount);
-                ProjectileHitSystem.Tick(_world.projectiles, _world.hitTargets, _world.hitTargetCount, _world.damageRequests, _world.projectileHitRecords);
-                MeleeHitSystem.Tick(_world.melees, _world.hitTargets, _world.hitTargetCount, _world.damageRequests);
+                HitTargetSystem.Tick(_world.players, _world.enemies, _world.playerHitTargets, ref _world.playerHitTargetCount, _world.enemyHitTargets, ref _world.enemyHitTargetCount);
+                ProjectileHitSystem.Tick(_world.projectiles, _world.playerHitTargets, _world.playerHitTargetCount, _world.enemyHitTargets, _world.enemyHitTargetCount, _world.playerDamageRequests, _world.enemyDamageRequests, _world.projectileHitRecords);
+                MeleeHitSystem.Tick(_world.melees, _world.playerHitTargets, _world.playerHitTargetCount, _world.enemyHitTargets, _world.enemyHitTargetCount, _world.playerDamageRequests, _world.enemyDamageRequests);
             }
 
             GameRuleSystem.Tick(ref _world.progress, _world.gameOverRequests);
             if (isPlaying)
             {
-                WaveSystem.Tick(in _world.rule, _world.waves, _world.enemySpawnPointsByKind, _world.enemySpawnTemplates, in _world.bossSpawnTemplate, ref _world.progress, _world.random, _world.enemySpawnRequests, _world.bossSpawnRequests);
+                EnemySpawnTimerSystem.Tick(in _world.rule, _world.enemySpawnPoints, _world.enemySpawnTemplates, ref _world.progress, _world.enemySpawnRequests);
                 PlayerSpawnSystem.Tick(_world.players, _world.playerSpawnRequests);
-                EnemySpawnSystem.Tick(_world.enemies, _world.enemySpawnRequests);
-                BossSpawnSystem.Tick(_world.bosses, _world.bossSpawnRequests, _world.players);
+                EnemySpawnSystem.Tick(_world.enemies, _world.enemySpawnRequests, _world.rule.navMeshSampleDistance);
                 ProjectileSpawnSystem.Tick(_world.projectiles, _world.projectileSpawnRequests);
                 MeleeSpawnSystem.Tick(_world.melees, _world.meleeSpawnRequests);
             }
@@ -115,11 +124,10 @@ namespace TopView.Core
                 return;
             }
 
-            PlayerViewSystem.Present(_world.players, _world.playerStateChangedRecords, _playerViewPrefab, _playerWeaponModelPrefabs, _playerRangedLayerBlendInTicks, _viewContext.player);
-            EnemyViewSystem.Present(_world.enemies, _world.enemyStateChangedRecords, _enemyViewPrefabs, _viewContext.enemy);
-            EnemyHealthGaugeViewSystem.Present(_world.enemies, _enemyHealthGaugePrefabs, _enemyHealthGaugeOffsets, _enemyHealthGaugeColors, _viewContext.camera.mainCamera, _viewContext.enemy);
-            BossViewSystem.Present(_world.bosses, _world.bossStateChangedRecords, _bossViewPrefab, _viewContext.boss);
-            ProjectileViewSystem.Present(_world.projectiles, _projectilePrefabs, _projectilePitchSpeeds, _viewContext.projectile);
+            PlayerViewSystem.Present(_world.players.entities, _world.playerStateChangedRecords, _playerViewPrefab, _playerWeaponModelPrefabs, _playerRangedLayerBlendInTicks, _viewContext.player);
+            EnemyViewSystem.Present(_world.enemies.entities, _world.enemyStateChangedRecords, _enemyViewPrefabs, _viewContext.enemy);
+            EnemyHealthGaugeViewSystem.Present(_world.enemies.entities, _enemyHealthGaugePrefabs, _viewContext.camera.mainCamera, _viewContext.enemy);
+            ProjectileViewSystem.Present(_world.projectiles.entities, _projectilePrefabs, _viewContext.projectile);
             HitEffectViewSystem.Present(_world.projectileHitRecords, _hitEffectPrefabs, _viewContext.hitEffect);
             CameraViewSystem.Present(_viewContext.camera, _viewContext.player.view, _playerCameraPriority);
 
@@ -127,7 +135,6 @@ namespace TopView.Core
 
             _world.playerStateChangedRecords.Clear();
             _world.enemyStateChangedRecords.Clear();
-            _world.bossStateChangedRecords.Clear();
             _world.projectileHitRecords.Clear();
         }
     }

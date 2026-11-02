@@ -34,15 +34,15 @@ namespace TopView.Presentation.Player.ViewSystems
         /// <summary>
         /// 살아 있는 플레이어가 있으면 View를 만들거나 맞추고, 없으면 View를 끈다.
         /// </summary>
-        /// <param name="players">플레이어 저장소</param>
+        /// <param name="entities">플레이어 엔티티 배열</param>
         /// <param name="stateRecords">이번 프레임의 상태 변경 기록</param>
         /// <param name="viewPrefab">PlayerView가 붙은 프리팹</param>
         /// <param name="weaponModelPrefabs">무기 번호 순서의 무기 모델 프리팹. 없는 칸은 null</param>
         /// <param name="rangedLayerBlendInTicks">원거리 레이어 가중치가 0에서 1로 올라오는 시간(틱)</param>
         /// <param name="context">플레이어 View 실행 상태</param>
-        public static void Present(PlayerStorage players, List<PlayerStateChangedRecord> stateRecords, GameObject viewPrefab, GameObject[] weaponModelPrefabs, int rangedLayerBlendInTicks, PlayerViewContext context)
+        public static void Present(PlayerEntity[] entities, List<PlayerStateChangedRecord> stateRecords, GameObject viewPrefab, GameObject[] weaponModelPrefabs, int rangedLayerBlendInTicks, PlayerViewContext context)
         {
-            if (!TryFindAlivePlayer(players, out int playerIndex))
+            if (!TryFindAlivePlayer(entities, out int playerIndex))
             {
                 if (context.view != null && context.view.gameObject.activeSelf)
                 {
@@ -51,12 +51,16 @@ namespace TopView.Presentation.Player.ViewSystems
                 return;
             }
 
-            ref readonly PlayerEntity player = ref players.entities[playerIndex];
-            EntityIdentifier identifier = new EntityIdentifier { index = playerIndex, generation = player.generation };
+            ref readonly PlayerEntity entity = ref entities[playerIndex];
+            ref readonly PositionComponent position = ref entity.position;
+            ref readonly RotationComponent rotation = ref entity.rotation;
+            ref readonly PlayerActionStateComponent actionState = ref entity.actionState;
+            ref readonly PlayerWeaponSlotsComponent weaponSlot = ref entity.weaponSlots;
+            EntityIdentifier identifier = new EntityIdentifier { index = playerIndex, generation = entity.generation };
 
             if (context.view == null)
             {
-                CreateView(in player, viewPrefab, weaponModelPrefabs, context);
+                CreateView(in position, in rotation, viewPrefab, weaponModelPrefabs, context);
             }
             if (!context.view.gameObject.activeSelf)
             {
@@ -65,18 +69,18 @@ namespace TopView.Presentation.Player.ViewSystems
 
             Animator animator = context.view.animator;
             ApplyStateRecords(in identifier, stateRecords, animator);
-            ApplyMovementAnimation(in player, animator);
-            ApplyRangedLayerWeight(in player, animator, context.rangedLayerIndex, rangedLayerBlendInTicks);
-            ApplyActionLayerWeight(in player, animator, context.actionLayerIndex);
-            ApplyWeaponModels(in player, context.weaponModels);
-            ApplyTransform(in player, context.view.transform);
+            ApplyMovementAnimation(in actionState, in entity.motion, animator);
+            ApplyRangedLayerWeight(in actionState, in weaponSlot, entity.weaponList.weapons, animator, context.rangedLayerIndex, rangedLayerBlendInTicks);
+            ApplyActionLayerWeight(in actionState, animator, context.actionLayerIndex);
+            ApplyWeaponModels(in weaponSlot, context.weaponModels);
+            ApplyTransform(in position, in rotation, context.view.transform);
         }
 
-        private static bool TryFindAlivePlayer(PlayerStorage players, out int playerIndex)
+        private static bool TryFindAlivePlayer(PlayerEntity[] entities, out int playerIndex)
         {
-            for (playerIndex = 0; playerIndex < players.entities.Length; playerIndex++)
+            for (playerIndex = 0; playerIndex < entities.Length; playerIndex++)
             {
-                if (players.entities[playerIndex].isAlive)
+                if (entities[playerIndex].isAlive)
                 {
                     return true;
                 }
@@ -86,9 +90,9 @@ namespace TopView.Presentation.Player.ViewSystems
             return false;
         }
 
-        private static void CreateView(in PlayerEntity player, GameObject viewPrefab, GameObject[] weaponModelPrefabs, PlayerViewContext context)
+        private static void CreateView(in PositionComponent position, in RotationComponent rotation, GameObject viewPrefab, GameObject[] weaponModelPrefabs, PlayerViewContext context)
         {
-            GameObject viewObject = Object.Instantiate(viewPrefab, player.currentPosition, player.currentRotation);
+            GameObject viewObject = Object.Instantiate(viewPrefab, position.current, rotation.current);
             context.view = viewObject.GetComponent<PlayerView>();
             context.rangedLayerIndex = FindLayerIndex(context.view.animator, RANGED_LAYER_NAME);
             context.actionLayerIndex = FindLayerIndex(context.view.animator, ACTION_LAYER_NAME);
@@ -180,32 +184,32 @@ namespace TopView.Presentation.Player.ViewSystems
         }
 
         // 움직일 수 있는 상태(Move, Land, 공격, Swap, Reload)에서만 이동 입력과 달리기 여부로 MovementSpeed를 정한다. 다른 상태에서는 그대로 둔다.
-        private static void ApplyMovementAnimation(in PlayerEntity player, Animator animator)
+        private static void ApplyMovementAnimation(in PlayerActionStateComponent actionState, in PlayerMotionComponent motion, Animator animator)
         {
-            bool canMove = player.state == PlayerState.Move || player.state == PlayerState.Land || player.state == PlayerState.Shot || player.state == PlayerState.Swing || player.state == PlayerState.Throw || player.state == PlayerState.Swap || player.state == PlayerState.Reload;
+            bool canMove = actionState.state == PlayerState.Move || actionState.state == PlayerState.Land || actionState.state == PlayerState.Shot || actionState.state == PlayerState.Swing || actionState.state == PlayerState.Throw || actionState.state == PlayerState.Swap || actionState.state == PlayerState.Reload;
             if (!canMove)
             {
                 return;
             }
 
             float speed = IDLE_SPEED;
-            if (player.moveDirection != Vector3.zero)
+            if (motion.moveDirection != Vector3.zero)
             {
-                speed = player.isRunning ? RUN_SPEED : WALK_SPEED;
+                speed = motion.isRunning ? RUN_SPEED : WALK_SPEED;
             }
             animator.SetFloat(MOVEMENT_SPEED_HASH, speed);
         }
 
         // 조준 자세는 Ranged만 쓴다. Ranged가 아니거나 조준하지 않는 상태(Dodge, Jump, Land, Swap, Die)이면 원거리 레이어를 바로 끄고, 그 밖에는 rangedLayerBlendInTicks에 걸쳐 켠다.
-        private static void ApplyRangedLayerWeight(in PlayerEntity player, Animator animator, int rangedLayerIndex, int rangedLayerBlendInTicks)
+        private static void ApplyRangedLayerWeight(in PlayerActionStateComponent actionState, in PlayerWeaponSlotsComponent weaponSlot, WeaponComponent[] weapons, Animator animator, int rangedLayerIndex, int rangedLayerBlendInTicks)
         {
             if (rangedLayerIndex < 0)
             {
                 return;
             }
 
-            bool isNotAimingState = player.state == PlayerState.Dodge || player.state == PlayerState.Jump || player.state == PlayerState.Land || player.state == PlayerState.Swap || player.state == PlayerState.Die;
-            bool isHoldingRanged = player.currentWeaponIndex < player.weapons.Length && player.weapons[player.currentWeaponIndex].kind == WeaponKind.Ranged;
+            bool isNotAimingState = actionState.state == PlayerState.Dodge || actionState.state == PlayerState.Jump || actionState.state == PlayerState.Land || actionState.state == PlayerState.Swap || actionState.state == PlayerState.Die;
+            bool isHoldingRanged = weaponSlot.currentIndex < weapons.Length && weapons[weaponSlot.currentIndex].kind == WeaponKind.Ranged;
             if (isNotAimingState || !isHoldingRanged)
             {
                 animator.SetLayerWeight(rangedLayerIndex, LAYER_OFF_WEIGHT);
@@ -223,18 +227,18 @@ namespace TopView.Presentation.Player.ViewSystems
         }
 
         // Swing, Throw, Swap은 행동 레이어에서 재생되므로 그 상태 동안만 켠다. 처음부터 보이도록 서서히 올리지 않는다.
-        private static void ApplyActionLayerWeight(in PlayerEntity player, Animator animator, int actionLayerIndex)
+        private static void ApplyActionLayerWeight(in PlayerActionStateComponent actionState, Animator animator, int actionLayerIndex)
         {
             if (actionLayerIndex < 0)
             {
                 return;
             }
 
-            bool isActionState = player.state == PlayerState.Swing || player.state == PlayerState.Throw || player.state == PlayerState.Swap;
+            bool isActionState = actionState.state == PlayerState.Swing || actionState.state == PlayerState.Throw || actionState.state == PlayerState.Swap;
             animator.SetLayerWeight(actionLayerIndex, isActionState ? LAYER_ON_WEIGHT : LAYER_OFF_WEIGHT);
         }
 
-        private static void ApplyWeaponModels(in PlayerEntity player, GameObject[] weaponModels)
+        private static void ApplyWeaponModels(in PlayerWeaponSlotsComponent weaponSlot, GameObject[] weaponModels)
         {
             for (int weaponIndex = 0; weaponIndex < weaponModels.Length; weaponIndex++)
             {
@@ -244,7 +248,7 @@ namespace TopView.Presentation.Player.ViewSystems
                     continue;
                 }
 
-                bool isCurrent = weaponIndex == player.currentWeaponIndex;
+                bool isCurrent = weaponIndex == weaponSlot.currentIndex;
                 if (model.activeSelf != isCurrent)
                 {
                     model.SetActive(isCurrent);
@@ -253,12 +257,12 @@ namespace TopView.Presentation.Player.ViewSystems
         }
 
         // 직전 틱과 이번 틱 사이를 지금 시각으로 보간한다.
-        private static void ApplyTransform(in PlayerEntity player, Transform viewTransform)
+        private static void ApplyTransform(in PositionComponent position, in RotationComponent rotation, Transform viewTransform)
         {
             float alpha = Mathf.Clamp01((Time.time - Time.fixedTime) / Time.fixedDeltaTime);
             viewTransform.SetPositionAndRotation(
-                Vector3.Lerp(player.previousPosition, player.currentPosition, alpha),
-                Quaternion.Slerp(player.previousRotation, player.currentRotation, alpha));
+                Vector3.Lerp(position.previous, position.current, alpha),
+                Quaternion.Slerp(rotation.previous, rotation.current, alpha));
         }
     }
 }

@@ -3,7 +3,7 @@ using UnityEngine.Serialization;
 
 namespace TopView.Components
 {
-    // 무기 하나의 값. Definition에서는 처음 값이고, 플레이어 엔티티에 복사된 뒤에는 탄약이 바뀐다.
+    // 무기 하나의 값. 생성 때 Definition에서 복사하며, 게임 중의 탄약은 플레이어 엔티티에 있다.
     [Serializable]
     public struct WeaponComponent
     {
@@ -13,10 +13,12 @@ namespace TopView.Components
         public float damage;
         // 장전할 수 있는 최대 탄약 수. Ranged만 쓴다
         public int maxAmmo;
-        // 장전된 탄약 수. Ranged만 쓴다
-        public int currentAmmo;
-        // 예비 탄약 수. Ranged와 Throw가 쓴다
-        public int reserveAmmo;
+        // 시작할 때 장전된 탄약 수. Ranged만 쓴다
+        [FormerlySerializedAs("currentAmmo")]
+        public int startingCurrentAmmo;
+        // 시작할 때 예비 탄약 수. Ranged와 Throw가 쓴다
+        [FormerlySerializedAs("reserveAmmo")]
+        public int startingReserveAmmo;
         // 공격 상태에 들어간 뒤 공격이 나가기까지의 시간(틱). Melee는 판정이 시작되고, Ranged와 Throw는 투사체를 내보낸다
         [FormerlySerializedAs("attackCommitTicks")]
         public int attackStartTicks;

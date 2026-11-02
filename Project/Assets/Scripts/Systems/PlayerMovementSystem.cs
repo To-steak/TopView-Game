@@ -1,3 +1,4 @@
+using TopView.Components;
 using TopView.Entities;
 using UnityEngine;
 
@@ -12,54 +13,55 @@ namespace TopView.Systems
         private const float MIN_MOVE_DISTANCE = 0.00001f;
 
         /// <summary>
-        /// 직전 위치와 회전을 남기고, 접지를 판정해 위아래 속도를 갱신한 뒤 장애물을 따라 이동한다.
+        /// 접지를 판정해 위아래 속도를 갱신한 뒤 장애물을 따라 이동한다.
         /// </summary>
         /// <param name="players">플레이어 저장소</param>
         public static void Tick(PlayerStorage players)
         {
             float deltaTime = Time.fixedDeltaTime;
 
-            for (int playerIndex = 0; playerIndex < players.entities.Length; playerIndex++)
+            for (int index = 0; index < players.entities.Length; index++)
             {
-                ref PlayerEntity player = ref players.entities[playerIndex];
-                if (!player.isAlive)
+                ref PlayerEntity entity = ref players.entities[index];
+                if (entity.isAlive)
                 {
-                    continue;
+                    Move(ref entity.position, ref entity.motion, in entity.movement, entity.rotation.current, deltaTime);
                 }
-
-                player.previousPosition = player.currentPosition;
-                player.previousRotation = player.currentRotation;
-
-                player.isGrounded = Physics.CheckSphere(player.currentPosition + player.movement.groundCheckOffset, player.movement.groundCheckRadius, player.movement.groundLayer);
-                if (player.isGrounded && player.verticalVelocity < 0f)
-                {
-                    player.verticalVelocity = player.movement.groundPressure;
-                }
-                player.verticalVelocity += player.movement.gravity * deltaTime;
-
-                Vector3 displacement = player.moveDirection * player.currentSpeed * deltaTime;
-                displacement.y = player.verticalVelocity * deltaTime;
-                player.currentPosition = Slide(in player, player.currentPosition, displacement);
             }
         }
 
         /// <summary>
         /// 플레이어 이동 충돌 캡슐의 위아래 구 중심을 구한다.
         /// </summary>
-        /// <param name="player">플레이어</param>
+        /// <param name="movement">플레이어 이동 값</param>
+        /// <param name="rotation">플레이어 회전(월드)</param>
         /// <param name="position">캡슐을 놓을 플레이어 위치</param>
         /// <param name="top">위쪽 구의 중심</param>
         /// <param name="bottom">아래쪽 구의 중심</param>
-        public static void GetCapsulePoints(in PlayerEntity player, Vector3 position, out Vector3 top, out Vector3 bottom)
+        public static void GetCapsulePoints(in PlayerMovementComponent movement, Quaternion rotation, Vector3 position, out Vector3 top, out Vector3 bottom)
         {
-            Vector3 center = position + player.currentRotation * player.movement.capsuleCenter;
-            float halfLine = Mathf.Max(player.movement.capsuleHeight * 0.5f - player.movement.capsuleRadius, 0f);
+            Vector3 center = position + rotation * movement.capsuleCenter;
+            float halfLine = Mathf.Max(movement.capsuleHeight * 0.5f - movement.capsuleRadius, 0f);
             top = center + Vector3.up * halfLine;
             bottom = center - Vector3.up * halfLine;
         }
 
+        private static void Move(ref PositionComponent position, ref PlayerMotionComponent motion, in PlayerMovementComponent movement, Quaternion rotation, float deltaTime)
+        {
+            motion.isGrounded = Physics.CheckSphere(position.current + movement.groundCheckOffset, movement.groundCheckRadius, movement.groundLayer);
+            if (motion.isGrounded && motion.verticalVelocity < 0f)
+            {
+                motion.verticalVelocity = movement.groundPressure;
+            }
+            motion.verticalVelocity += movement.gravity * deltaTime;
+
+            Vector3 displacement = motion.moveDirection * motion.currentSpeed * deltaTime;
+            displacement.y = motion.verticalVelocity * deltaTime;
+            position.current = Slide(in movement, rotation, position.current, displacement);
+        }
+
         // 캡슐을 displacement만큼 옮기다가 장애물에 닿으면 닿은 면을 따라 남은 이동을 미끄러뜨린다.
-        private static Vector3 Slide(in PlayerEntity player, Vector3 position, Vector3 displacement)
+        private static Vector3 Slide(in PlayerMovementComponent movement, Quaternion rotation, Vector3 position, Vector3 displacement)
         {
             for (int iteration = 0; iteration < MAX_SLIDE_ITERATIONS; iteration++)
             {
@@ -70,14 +72,14 @@ namespace TopView.Systems
                 }
 
                 Vector3 direction = displacement / distance;
-                GetCapsulePoints(in player, position, out Vector3 top, out Vector3 bottom);
-                if (!Physics.CapsuleCast(top, bottom, player.movement.capsuleRadius, direction, out RaycastHit hit, distance + player.movement.skinWidth, player.movement.collisionLayer, QueryTriggerInteraction.Ignore))
+                GetCapsulePoints(in movement, rotation, position, out Vector3 top, out Vector3 bottom);
+                if (!Physics.CapsuleCast(top, bottom, movement.capsuleRadius, direction, out RaycastHit hit, distance + movement.skinWidth, movement.collisionLayer, QueryTriggerInteraction.Ignore))
                 {
                     position += displacement;
                     break;
                 }
 
-                float travel = Mathf.Max(hit.distance - player.movement.skinWidth, 0f);
+                float travel = Mathf.Max(hit.distance - movement.skinWidth, 0f);
                 position += direction * travel;
 
                 Vector3 remaining = direction * (distance - travel);

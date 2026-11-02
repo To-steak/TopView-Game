@@ -21,7 +21,7 @@ namespace TopView.Entities
             freeIndices = new List<int>(capacity);
             for (int index = capacity - 1; index >= 0; index--)
             {
-                entities[index].hitTargets = new EntityReference[hitCapacity];
+                entities[index].hits.targets = new EntityIdentifier[hitCapacity];
                 freeIndices.Add(index);
             }
         }

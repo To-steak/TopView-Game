@@ -6,7 +6,7 @@ namespace TopView.Definitions
     [CreateAssetMenu(fileName = "Definition Catalog", menuName = "Definitions/Definition Catalog")]
     public class DefinitionCatalog : ScriptableObject
     {
-        // 한 판의 규칙과 웨이브 구성
+        // 한 판의 규칙과 저장소 용량
         public GameSettingsDefinition gameSettings;
     }
 }

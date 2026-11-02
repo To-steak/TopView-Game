@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace TopView.Requests
 {
-    // 투사체를 만들어 달라는 요청. 공격이 나갈 때 플레이어·적·보스 System이 넣는다
+    // 투사체를 만들어 달라는 요청. 공격이 나갈 때 플레이어와 적 System이 넣는다
     public struct ProjectileSpawnRequest
     {
         // 투사체 값

@@ -9,75 +9,72 @@ namespace TopView.Presentation.Projectile.ViewSystems
     public static class ProjectileViewSystem
     {
         /// <summary>
-        /// 투사체 저장소의 칸마다 살아 있는 엔티티와 View를 맞춘다.
+        /// 저장소의 칸마다 살아 있는 투사체와 View를 맞춘다.
         /// </summary>
-        /// <param name="projectiles">투사체 저장소</param>
+        /// <param name="entities">투사체 엔티티 배열</param>
         /// <param name="projectilePrefabs">투사체 View 표. 번호별 ProjectileView 프리팹</param>
-        /// <param name="pitchSpeeds">투사체 View 표 번호별로 모델이 앞으로 구르는 각속도(도/초)</param>
         /// <param name="context">투사체 View 실행 상태</param>
-        public static void Present(ProjectileStorage projectiles, GameObject[] projectilePrefabs, float[] pitchSpeeds, ProjectileViewContext context)
+        public static void Present(ProjectileEntity[] entities, GameObject[] projectilePrefabs, ProjectileViewContext context)
         {
             float alpha = Mathf.Clamp01((Time.time - Time.fixedTime) / Time.fixedDeltaTime);
 
-            for (int projectileIndex = 0; projectileIndex < projectiles.entities.Length; projectileIndex++)
+            for (int index = 0; index < entities.Length; index++)
             {
-                ref readonly ProjectileEntity projectile = ref projectiles.entities[projectileIndex];
-                ProjectileView view = context.views[projectileIndex];
+                ref readonly ProjectileEntity entity = ref entities[index];
+                ProjectileView view = context.views[index];
 
-                if (view != null && (!projectile.isAlive || context.viewGenerations[projectileIndex] != projectile.generation))
+                if (view != null && (!entity.isAlive || context.viewGenerations[index] != entity.generation))
                 {
-                    Release(context, projectileIndex);
+                    Release(context, index);
                     view = null;
                 }
 
-                if (!projectile.isAlive || projectile.projectile.viewIndex < 0)
+                if (!entity.isAlive || entity.projectile.viewIndex < 0)
                 {
                     continue;
                 }
 
-                Vector3 position = Vector3.Lerp(projectile.previousPosition, projectile.currentPosition, alpha);
+                Vector3 position = Vector3.Lerp(entity.position.previous, entity.position.current, alpha);
                 if (view == null)
                 {
-                    view = Acquire(context, projectileIndex, in projectile, projectilePrefabs, position);
+                    view = Acquire(context, index, entity.generation, entity.projectile.viewIndex, projectilePrefabs, position, entity.rotation.current);
                 }
                 else
                 {
-                    view.transform.SetPositionAndRotation(position, projectile.rotation);
+                    view.transform.SetPositionAndRotation(position, entity.rotation.current);
                 }
 
-                float pitchSpeed = pitchSpeeds[projectile.projectile.viewIndex];
-                if (pitchSpeed != 0f && view.pitchPivot != null)
+                if (view.pitchSpeed != 0f && view.pitchPivot != null)
                 {
-                    view.pitchPivot.Rotate(Vector3.right * pitchSpeed * Time.deltaTime, Space.Self);
+                    view.pitchPivot.Rotate(Vector3.right * view.pitchSpeed * Time.deltaTime, Space.Self);
                 }
             }
         }
 
-        private static ProjectileView Acquire(ProjectileViewContext context, int projectileIndex, in ProjectileEntity projectile, GameObject[] projectilePrefabs, Vector3 position)
+        private static ProjectileView Acquire(ProjectileViewContext context, int index, int generation, int viewIndex, GameObject[] projectilePrefabs, Vector3 position, Quaternion rotation)
         {
-            int viewIndex = projectile.projectile.viewIndex;
             Stack<ProjectileView> pool = context.viewPools[viewIndex];
             ProjectileView view = pool.Count > 0 ? pool.Pop() : Object.Instantiate(projectilePrefabs[viewIndex]).GetComponent<ProjectileView>();
 
-            view.transform.SetPositionAndRotation(position, projectile.rotation);
+            view.transform.SetPositionAndRotation(position, rotation);
             view.gameObject.SetActive(true);
             if (view.trail != null)
             {
                 view.trail.Clear();
             }
 
-            context.views[projectileIndex] = view;
-            context.viewGenerations[projectileIndex] = projectile.generation;
-            context.viewIndices[projectileIndex] = viewIndex;
+            context.views[index] = view;
+            context.viewGenerations[index] = generation;
+            context.viewIndices[index] = viewIndex;
             return view;
         }
 
-        private static void Release(ProjectileViewContext context, int projectileIndex)
+        private static void Release(ProjectileViewContext context, int index)
         {
-            ProjectileView view = context.views[projectileIndex];
-            context.views[projectileIndex] = null;
+            ProjectileView view = context.views[index];
+            context.views[index] = null;
             view.gameObject.SetActive(false);
-            context.viewPools[context.viewIndices[projectileIndex]].Push(view);
+            context.viewPools[context.viewIndices[index]].Push(view);
         }
     }
 }
