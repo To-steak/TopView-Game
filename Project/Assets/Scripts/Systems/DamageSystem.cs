@@ -15,9 +15,13 @@ namespace TopView.Systems
         /// <param name="progress">한 판의 진행 상태. 처치 점수와 골드를 더한다</param>
         /// <param name="players">플레이어 저장소</param>
         /// <param name="enemies">적 저장소</param>
-        /// <param name="bosses">보스 저장소</param>
+        /// <param name="masks">공유 저장소의 칸별 컴포넌트 표시</param>
+        /// <param name="generations">공유 저장소의 칸이 채워진 횟수</param>
+        /// <param name="healths">공유 저장소의 체력</param>
+        /// <param name="combats">공유 저장소의 레벨과 공격력</param>
+        /// <param name="enemyStats">공유 저장소의 점수·골드 값</param>
         /// <param name="damageRequests">피해 요청 큐</param>
-        public static void Tick(ref GameProgressComponent progress, PlayerStorage players, EnemyStorage enemies, BossStorage bosses, Queue<DamageRequest> damageRequests)
+        public static void Tick(ref GameProgressComponent progress, PlayerStorage players, EnemyStorage enemies, ComponentMask[] masks, int[] generations, HealthComponent[] healths, CombatComponent[] combats, EnemyStatsComponent[] enemyStats, Queue<DamageRequest> damageRequests)
         {
             if (progress.phase != GamePhase.Playing)
             {
@@ -43,7 +47,7 @@ namespace TopView.Systems
                         hasTarget = DamageEnemy(ref progress, enemies, in request.target.identifier, request.amount);
                         break;
                     case EntityKind.Boss:
-                        hasTarget = DamageBoss(ref progress, bosses, in request.target.identifier, request.amount);
+                        hasTarget = DamageBoss(ref progress, masks, generations, healths, combats, enemyStats, in request.target.identifier, request.amount);
                         break;
                     default:
                         hasTarget = false;
@@ -99,22 +103,21 @@ namespace TopView.Systems
             return true;
         }
 
-        private static bool DamageBoss(ref GameProgressComponent progress, BossStorage bosses, in EntityIdentifier target, float amount)
+        private static bool DamageBoss(ref GameProgressComponent progress, ComponentMask[] masks, int[] generations, HealthComponent[] healths, CombatComponent[] combats, EnemyStatsComponent[] enemyStats, in EntityIdentifier target, float amount)
         {
-            if (target.index < 0 || target.index >= bosses.entities.Length)
+            if (target.index < 0 || target.index >= masks.Length)
             {
                 return false;
             }
 
-            ref BossEntity boss = ref bosses.entities[target.index];
-            if (!boss.isAlive || boss.generation != target.generation)
+            if ((masks[target.index] & ComponentMask.BossArchetype) != ComponentMask.BossArchetype || generations[target.index] != target.generation)
             {
                 return false;
             }
 
-            if (ApplyDamage(ref boss.health, amount))
+            if (ApplyDamage(ref healths[target.index], amount))
             {
-                AddKillReward(ref progress, in boss.stats, boss.combat.level);
+                AddKillReward(ref progress, in enemyStats[target.index], combats[target.index].level);
             }
             return true;
         }

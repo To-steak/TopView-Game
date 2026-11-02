@@ -73,11 +73,10 @@ namespace TopView.Core
             world.playerSpawnRequests.Enqueue(playerSpawnRequest);
             world.enemies = new EnemyStorage(enemyKindCount, gameSettings.enemyCapacityPerKind, gameSettings.enemyPathCornerCapacity);
             world.enemySpawnTemplates = enemySpawnTemplates;
-            world.bosses = new BossStorage(BOSS_CAPACITY);
-            // 피격 대상은 세 저장소의 칸 수를 넘지 않고, 공격하는 쪽 하나는 근접 판정을 동시에 하나만 가지므로 근접 판정도 이 수로 넘치지 않는다
-            int combatantCapacity = world.players.entities.Length + world.enemies.entities.Length + world.bosses.entities.Length;
+            // 피격 대상은 플레이어·적·보스의 칸 수를 넘지 않고, 공격하는 쪽 하나는 근접 판정을 동시에 하나만 가지므로 근접 판정도 이 수로 넘치지 않는다
+            int combatantCapacity = world.players.entities.Length + world.enemies.entities.Length + BOSS_CAPACITY;
             world.hitTargets = new HitTargetComponent[combatantCapacity];
-            world.entities = new EntityStorage(gameSettings.projectileCapacity, combatantCapacity, combatantCapacity);
+            world.entities = new EntityStorage(gameSettings.projectileCapacity, combatantCapacity, combatantCapacity, BOSS_CAPACITY);
 
             world.progress = new GameProgressComponent
             {

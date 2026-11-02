@@ -24,6 +24,12 @@ namespace TopView.Systems
             entities.attackPayloads[index] = default;
             entities.melees[index] = default;
             entities.meleeHits[index] = default;
+            entities.healths[index] = default;
+            entities.combats[index] = default;
+            entities.enemyStats[index] = default;
+            entities.attackLists[index] = default;
+            entities.bossBehaviors[index] = default;
+            entities.bossActionStates[index] = default;
         }
 
         /// <summary>

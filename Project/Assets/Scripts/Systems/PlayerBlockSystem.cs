@@ -1,3 +1,4 @@
+using TopView.Components;
 using TopView.Entities;
 using UnityEngine;
 
@@ -14,8 +15,10 @@ namespace TopView.Systems
         /// </summary>
         /// <param name="players">플레이어 저장소</param>
         /// <param name="enemies">적 저장소. 플레이어를 막는다</param>
-        /// <param name="bosses">보스 저장소. 플레이어를 막는다</param>
-        public static void Tick(PlayerStorage players, EnemyStorage enemies, BossStorage bosses)
+        /// <param name="masks">공유 저장소의 칸별 컴포넌트 표시. 보스가 플레이어를 막는다</param>
+        /// <param name="positions">공유 저장소의 위치</param>
+        /// <param name="enemyStats">공유 저장소의 피격 반지름 값</param>
+        public static void Tick(PlayerStorage players, EnemyStorage enemies, ComponentMask[] masks, PositionComponent[] positions, EnemyStatsComponent[] enemyStats)
         {
             for (int playerIndex = 0; playerIndex < players.entities.Length; playerIndex++)
             {
@@ -25,11 +28,11 @@ namespace TopView.Systems
                     continue;
                 }
 
-                BlockByEnemies(ref player, enemies, bosses);
+                BlockByEnemies(ref player, enemies, masks, positions, enemyStats);
             }
         }
 
-        private static void BlockByEnemies(ref PlayerEntity player, EnemyStorage enemies, BossStorage bosses)
+        private static void BlockByEnemies(ref PlayerEntity player, EnemyStorage enemies, ComponentMask[] masks, PositionComponent[] positions, EnemyStatsComponent[] enemyStats)
         {
             for (int enemyIndex = 0; enemyIndex < enemies.entities.Length; enemyIndex++)
             {
@@ -40,12 +43,11 @@ namespace TopView.Systems
                 }
             }
 
-            for (int bossIndex = 0; bossIndex < bosses.entities.Length; bossIndex++)
+            for (int index = 0; index < masks.Length; index++)
             {
-                ref readonly BossEntity boss = ref bosses.entities[bossIndex];
-                if (boss.isAlive)
+                if ((masks[index] & ComponentMask.BossArchetype) == ComponentMask.BossArchetype)
                 {
-                    BlockByCircle(ref player, boss.position.current, player.movement.capsuleRadius + boss.stats.hitRadius);
+                    BlockByCircle(ref player, positions[index].current, player.movement.capsuleRadius + enemyStats[index].hitRadius);
                 }
             }
         }

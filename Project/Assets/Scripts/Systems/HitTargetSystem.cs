@@ -12,10 +12,14 @@ namespace TopView.Systems
         /// </summary>
         /// <param name="players">플레이어 저장소</param>
         /// <param name="enemies">적 저장소</param>
-        /// <param name="bosses">보스 저장소</param>
-        /// <param name="hitTargets">피격 대상 목록. 길이는 세 저장소 칸 수의 합이다</param>
+        /// <param name="masks">공유 저장소의 칸별 컴포넌트 표시</param>
+        /// <param name="generations">공유 저장소의 칸이 채워진 횟수</param>
+        /// <param name="positions">공유 저장소의 위치</param>
+        /// <param name="enemyStats">공유 저장소의 피격 반지름 값</param>
+        /// <param name="bossActionStates">보스 행동 상태</param>
+        /// <param name="hitTargets">피격 대상 목록. 길이는 플레이어·적·보스 칸 수의 합이다</param>
         /// <param name="hitTargetCount">목록에서 이번 틱에 채운 대상 수</param>
-        public static void Tick(PlayerStorage players, EnemyStorage enemies, BossStorage bosses, HitTargetComponent[] hitTargets, ref int hitTargetCount)
+        public static void Tick(PlayerStorage players, EnemyStorage enemies, ComponentMask[] masks, int[] generations, PositionComponent[] positions, EnemyStatsComponent[] enemyStats, BossActionStateComponent[] bossActionStates, HitTargetComponent[] hitTargets, ref int hitTargetCount)
         {
             hitTargetCount = 0;
 
@@ -40,12 +44,11 @@ namespace TopView.Systems
                 }
             }
 
-            for (int bossIndex = 0; bossIndex < bosses.entities.Length; bossIndex++)
+            for (int index = 0; index < masks.Length; index++)
             {
-                ref readonly BossEntity boss = ref bosses.entities[bossIndex];
-                if (boss.isAlive && boss.actionState.state != BossState.Die)
+                if ((masks[index] & ComponentMask.BossArchetype) == ComponentMask.BossArchetype && bossActionStates[index].state != BossState.Die)
                 {
-                    Add(hitTargets, ref hitTargetCount, EntityKind.Boss, bossIndex, boss.generation, Faction.Enemy, boss.position.current, boss.stats.hitRadius, float.NegativeInfinity, float.PositiveInfinity);
+                    Add(hitTargets, ref hitTargetCount, EntityKind.Boss, index, generations[index], Faction.Enemy, positions[index].current, enemyStats[index].hitRadius, float.NegativeInfinity, float.PositiveInfinity);
                 }
             }
         }

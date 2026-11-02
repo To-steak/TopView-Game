@@ -11,76 +11,87 @@ namespace TopView.Systems
     public static class BossBehaviorSystem
     {
         /// <summary>
-        /// 살아 있는 보스마다 체력이 0이면 사망 상태로 바꾸고, 상태 시간을 1틱 늘린 뒤 상태별로 도발·대기·공격·소멸을 처리한다. 사망 후 사라질 때 게임오버를 요청한다.
+        /// 보스마다 체력이 0이면 사망 상태로 바꾸고, 상태 시간을 1틱 늘린 뒤 상태별로 도발·대기·공격·소멸을 처리한다. 사망 후 사라질 때 게임오버를 요청한다.
         /// </summary>
-        /// <param name="bosses">보스 저장소</param>
+        /// <param name="masks">칸별 컴포넌트 표시</param>
+        /// <param name="generations">칸이 채워진 횟수</param>
+        /// <param name="healths">체력</param>
+        /// <param name="combats">레벨과 공격력</param>
+        /// <param name="positions">위치</param>
+        /// <param name="rotations">회전</param>
+        /// <param name="attackLists">공격 목록</param>
+        /// <param name="behaviors">보스 행동 값</param>
+        /// <param name="actionStates">보스 행동 상태와 공격 진행</param>
+        /// <param name="freeBossIndices">보스 구간의 빈 칸 번호 목록</param>
         /// <param name="players">플레이어 저장소. 바라보고 공격할 대상이다</param>
         /// <param name="random">World의 난수 생성기</param>
         /// <param name="stateRecords">보스 상태 변경 기록</param>
         /// <param name="projectileSpawnRequests">투사체 생성 요청 큐</param>
         /// <param name="meleeSpawnRequests">근접 판정 생성 요청 큐</param>
         /// <param name="gameOverRequests">게임오버 요청 큐</param>
-        public static void Tick(BossStorage bosses, PlayerStorage players, System.Random random, List<BossStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, Queue<GameOverRequest> gameOverRequests)
+        public static void Tick(ComponentMask[] masks, int[] generations, HealthComponent[] healths, CombatComponent[] combats, PositionComponent[] positions, RotationComponent[] rotations, AttackListComponent[] attackLists, BossBehaviorComponent[] behaviors, BossActionStateComponent[] actionStates, List<int> freeBossIndices, PlayerStorage players, System.Random random, List<BossStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, Queue<GameOverRequest> gameOverRequests)
         {
             bool hasPlayer = TargetingSystem.TryGetPlayerTarget(players, out Vector3 playerPosition, out float _);
             float deltaTime = Time.fixedDeltaTime;
 
-            for (int bossIndex = 0; bossIndex < bosses.entities.Length; bossIndex++)
+            for (int index = 0; index < masks.Length; index++)
             {
-                ref BossEntity boss = ref bosses.entities[bossIndex];
-                if (!boss.isAlive)
+                if ((masks[index] & ComponentMask.BossArchetype) != ComponentMask.BossArchetype)
                 {
                     continue;
                 }
 
-                EntityIdentifier identifier = new EntityIdentifier { index = bossIndex, generation = boss.generation };
-                if (boss.health.current <= 0f && boss.actionState.state != BossState.Die)
+                ref BossActionStateComponent actionState = ref actionStates[index];
+                ref readonly BossBehaviorComponent behavior = ref behaviors[index];
+                EnemyAttackComponent[] attacks = attackLists[index].attacks;
+
+                EntityIdentifier identifier = new EntityIdentifier { index = index, generation = generations[index] };
+                if (healths[index].current <= 0f && actionState.state != BossState.Die)
                 {
-                    ChangeState(ref boss, in identifier, BossState.Die, stateRecords);
+                    ChangeState(ref actionState, attacks, in identifier, BossState.Die, stateRecords);
                 }
 
-                boss.actionState.elapsedTicks++;
+                actionState.elapsedTicks++;
 
-                switch (boss.actionState.state)
+                switch (actionState.state)
                 {
                     case BossState.Taunt:
-                        if (boss.actionState.elapsedTicks >= boss.behavior.tauntTicks)
+                        if (actionState.elapsedTicks >= behavior.tauntTicks)
                         {
-                            ChangeState(ref boss, in identifier, BossState.Idle, stateRecords);
+                            ChangeState(ref actionState, attacks, in identifier, BossState.Idle, stateRecords);
                         }
                         break;
 
                     case BossState.Idle:
-                        if (boss.actionState.elapsedTicks >= boss.behavior.attackEntryTicks)
+                        if (actionState.elapsedTicks >= behavior.attackEntryTicks)
                         {
-                            BeginAttack(ref boss, in identifier, random, stateRecords);
+                            BeginAttack(ref actionState, attacks, in identifier, random, stateRecords);
                             break;
                         }
                         if (hasPlayer)
                         {
-                            TargetingSystem.TurnToward(ref boss.rotation.current, boss.position.current, playerPosition, deltaTime * boss.behavior.rotationSpeed);
+                            TargetingSystem.TurnToward(ref rotations[index].current, positions[index].current, playerPosition, deltaTime * behavior.rotationSpeed);
                         }
                         break;
 
                     case BossState.Attack:
-                        ref readonly EnemyAttackComponent attack = ref boss.attacks[boss.actionState.attackIndex];
-                        if (!boss.actionState.isAttackCommitted && boss.actionState.elapsedTicks >= attack.startTicks)
+                        ref readonly EnemyAttackComponent attack = ref attacks[actionState.attackIndex];
+                        if (!actionState.isAttackCommitted && actionState.elapsedTicks >= attack.startTicks)
                         {
-                            boss.actionState.isAttackCommitted = true;
+                            actionState.isAttackCommitted = true;
                             EntityReference owner = new EntityReference { kind = EntityKind.Boss, identifier = identifier };
-                            EnemyAttackSystem.CommitAttack(in attack, boss.position.current, boss.rotation.current, boss.combat.attackDamage, ref boss.actionState.missileShotCount, in owner, projectileSpawnRequests, meleeSpawnRequests);
+                            EnemyAttackSystem.CommitAttack(in attack, positions[index].current, rotations[index].current, combats[index].attackDamage, ref actionState.missileShotCount, in owner, projectileSpawnRequests, meleeSpawnRequests);
                         }
-                        if (EnemyAttackSystem.IsAttackFinished(in attack, boss.actionState.elapsedTicks, boss.actionState.isAttackCommitted))
+                        if (EnemyAttackSystem.IsAttackFinished(in attack, actionState.elapsedTicks, actionState.isAttackCommitted))
                         {
-                            ChangeState(ref boss, in identifier, BossState.Idle, stateRecords);
+                            ChangeState(ref actionState, attacks, in identifier, BossState.Idle, stateRecords);
                         }
                         break;
 
                     case BossState.Die:
-                        if (boss.actionState.elapsedTicks >= boss.behavior.dieTicks)
+                        if (actionState.elapsedTicks >= behavior.dieTicks)
                         {
-                            boss.isAlive = false;
-                            bosses.freeIndices.Add(bossIndex);
+                            SpawnSystem.ReleaseSlot(masks, freeBossIndices, index);
                             gameOverRequests.Enqueue(new GameOverRequest());
                         }
                         break;
@@ -89,9 +100,9 @@ namespace TopView.Systems
         }
 
         // 새 상태에 들어간다. Die 상태에서는 바꾸지 않는다. Attack 상태는 공격 번호를 정한 뒤 들어간다.
-        private static void ChangeState(ref BossEntity boss, in EntityIdentifier identifier, BossState newState, List<BossStateChangedRecord> stateRecords)
+        private static void ChangeState(ref BossActionStateComponent actionState, EnemyAttackComponent[] attacks, in EntityIdentifier identifier, BossState newState, List<BossStateChangedRecord> stateRecords)
         {
-            if (boss.actionState.state == BossState.Die)
+            if (actionState.state == BossState.Die)
             {
                 return;
             }
@@ -99,28 +110,28 @@ namespace TopView.Systems
             stateRecords.Add(new BossStateChangedRecord
             {
                 boss = identifier,
-                previousState = boss.actionState.state,
+                previousState = actionState.state,
                 state = newState,
-                attackKind = newState == BossState.Attack ? boss.attacks[boss.actionState.attackIndex].kind : default
+                attackKind = newState == BossState.Attack ? attacks[actionState.attackIndex].kind : default
             });
 
-            boss.actionState.state = newState;
-            boss.actionState.elapsedTicks = 0;
+            actionState.state = newState;
+            actionState.elapsedTicks = 0;
         }
 
         // 공격을 무작위로 하나 골라 공격 상태에 들어간다. 공격이 없으면 대기 시간을 처음부터 다시 센다.
-        private static void BeginAttack(ref BossEntity boss, in EntityIdentifier identifier, System.Random random, List<BossStateChangedRecord> stateRecords)
+        private static void BeginAttack(ref BossActionStateComponent actionState, EnemyAttackComponent[] attacks, in EntityIdentifier identifier, System.Random random, List<BossStateChangedRecord> stateRecords)
         {
-            if (boss.attacks.Length == 0)
+            if (attacks.Length == 0)
             {
                 Debug.LogWarning("BossBehaviorSystem >> 보스에 공격이 없어 공격하지 않았다.");
-                boss.actionState.elapsedTicks = 0;
+                actionState.elapsedTicks = 0;
                 return;
             }
 
-            boss.actionState.attackIndex = random.Next(0, boss.attacks.Length);
-            boss.actionState.isAttackCommitted = false;
-            ChangeState(ref boss, in identifier, BossState.Attack, stateRecords);
+            actionState.attackIndex = random.Next(0, attacks.Length);
+            actionState.isAttackCommitted = false;
+            ChangeState(ref actionState, attacks, in identifier, BossState.Attack, stateRecords);
         }
     }
 }

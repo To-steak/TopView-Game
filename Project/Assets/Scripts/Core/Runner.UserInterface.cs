@@ -196,14 +196,13 @@ namespace TopView.Core
         {
             if (_bossHealthPresenter != null)
             {
-                BossEntity[] bosses = _world.bosses.entities;
+                EntityStorage entities = _world.entities;
                 bool hasBoss = false;
-                for (int bossIndex = 0; bossIndex < bosses.Length; bossIndex++)
+                for (int index = 0; index < entities.masks.Length; index++)
                 {
-                    ref readonly BossEntity boss = ref bosses[bossIndex];
-                    if (boss.isAlive)
+                    if ((entities.masks[index] & ComponentMask.BossArchetype) == ComponentMask.BossArchetype)
                     {
-                        _bossHealthPresenter.Present(true, boss.health.current, boss.health.max);
+                        _bossHealthPresenter.Present(true, entities.healths[index].current, entities.healths[index].max);
                         hasBoss = true;
                         break;
                     }
