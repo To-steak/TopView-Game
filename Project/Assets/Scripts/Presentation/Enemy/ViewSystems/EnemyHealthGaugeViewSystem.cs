@@ -57,7 +57,7 @@ namespace TopView.Presentation.Enemy.ViewSystems
                     if (isAcquired || gaugeFrontTransform.anchorMax.x != healthRatio)
                     {
                         gaugeFrontTransform.anchorMax = new Vector2(healthRatio, 1f);
-                        gauge.healthText.text = $"{enemy.health} / {enemy.maxHealth}";
+                        gauge.healthText.text = $"{enemy.health:F0} / {enemy.maxHealth:F0}";
                     }
                 }
             }

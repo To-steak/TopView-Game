@@ -17,7 +17,7 @@ namespace TopView.UserInterface.PlayerHealth
         /// <param name="max">최대 체력</param>
         public void SetHealth(float current, float max)
         {
-            _healthText.text = $"{current} / {max}";
+            _healthText.text = $"{current:F0} / {max:F0}";
             _healthGauge.rectTransform.anchorMax = new Vector2(current / max, 1f);
         }
     }
