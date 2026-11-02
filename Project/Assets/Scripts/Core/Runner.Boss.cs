@@ -22,8 +22,8 @@ namespace TopView.Core
                 if (boss.isAlive)
                 {
                     Gizmos.color = Color.cyan;
-                    DrawCircleGizmo(boss.currentPosition, boss.stats.hitRadius);
-                    DrawBodyAttackGizmos(boss.attacks, boss.currentPosition, boss.currentRotation);
+                    DrawCircleGizmo(boss.position.current, boss.stats.hitRadius);
+                    DrawBodyAttackGizmos(boss.attacks, boss.position.current, boss.rotation.current);
                 }
             }
         }

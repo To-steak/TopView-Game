@@ -18,14 +18,10 @@ namespace TopView.Entities
         // 행동 상태의 길이. 생성 때 Definition에서 복사한다
         public PlayerActionComponent action;
 
-        // 직전 틱의 위치(월드). View가 보간에 쓴다
-        public Vector3 previousPosition;
-        // 이번 틱의 위치(월드)
-        public Vector3 currentPosition;
-        // 직전 틱의 회전(월드). View가 보간에 쓴다
-        public Quaternion previousRotation;
-        // 이번 틱의 회전(월드)
-        public Quaternion currentRotation;
+        // 위치
+        public PositionComponent position;
+        // 회전
+        public RotationComponent rotation;
 
         // 행동 상태
         public PlayerState state;
@@ -50,14 +46,18 @@ namespace TopView.Entities
         public bool isRunning;
 
         // 체력
-        public float health;
+        public HealthComponent health;
         // 마나
         public float mana;
         // 마지막으로 마나를 쓴 뒤 지난 시간(틱). 회복 지연 시간에 닿으면 더 늘리지 않는다
         public int manaRecoveryElapsedTicks;
 
-        // 무기 목록. 생성 때 Definition에서 복사하며, 탄약이 바뀐다
+        // 무기 목록. 생성 때 Definition에서 복사한다
         public WeaponComponent[] weapons;
+        // 무기별 장전된 탄약 수. 재사용하는 배열이며 번호는 weapons와 같다
+        public int[] weaponCurrentAmmo;
+        // 무기별 예비 탄약 수. 재사용하는 배열이며 번호는 weapons와 같다
+        public int[] weaponReserveAmmo;
         // 들고 있는 무기 번호
         public int currentWeaponIndex;
         // 교체 상태에서 swapStartTicks에 바꿀 무기 번호

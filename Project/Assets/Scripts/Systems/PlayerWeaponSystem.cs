@@ -17,30 +17,31 @@ namespace TopView.Systems
         /// <param name="weapon">들고 있는 무기</param>
         /// <param name="projectileSpawnRequests">투사체 생성 요청 큐</param>
         /// <param name="meleeSpawnRequests">근접 판정 생성 요청 큐</param>
-        public static void CommitAttack(ref PlayerEntity player, in EntityIdentifier identifier, ref WeaponComponent weapon, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
+        public static void CommitAttack(ref PlayerEntity player, in EntityIdentifier identifier, in WeaponComponent weapon, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
         {
             player.isAttackCommitted = true;
+            int weaponIndex = player.currentWeaponIndex;
 
             switch (weapon.kind)
             {
                 case WeaponKind.Ranged:
-                    if (weapon.currentAmmo <= 0)
+                    if (player.weaponCurrentAmmo[weaponIndex] <= 0)
                     {
-                        Debug.LogWarning($"PlayerWeaponSystem >> 탄창 탄약이 {weapon.currentAmmo}이라 원거리 공격을 내보내지 않았다.");
+                        Debug.LogWarning($"PlayerWeaponSystem >> 탄창 탄약이 {player.weaponCurrentAmmo[weaponIndex]}이라 원거리 공격을 내보내지 않았다.");
                         return;
                     }
-                    weapon.currentAmmo--;
-                    RequestProjectile(in player, in weapon, player.currentRotation * Vector3.forward, projectileSpawnRequests);
+                    player.weaponCurrentAmmo[weaponIndex]--;
+                    RequestProjectile(in player, in weapon, player.rotation.current * Vector3.forward, projectileSpawnRequests);
                     break;
 
                 case WeaponKind.Throw:
-                    if (weapon.reserveAmmo <= 0)
+                    if (player.weaponReserveAmmo[weaponIndex] <= 0)
                     {
-                        Debug.LogWarning($"PlayerWeaponSystem >> 남은 탄약이 {weapon.reserveAmmo}이라 투척 공격을 내보내지 않았다.");
+                        Debug.LogWarning($"PlayerWeaponSystem >> 남은 탄약이 {player.weaponReserveAmmo[weaponIndex]}이라 투척 공격을 내보내지 않았다.");
                         return;
                     }
-                    weapon.reserveAmmo--;
-                    Vector3 throwDirection = (player.currentRotation * Vector3.forward + Vector3.up * weapon.projectile.upwardRatio).normalized;
+                    player.weaponReserveAmmo[weaponIndex]--;
+                    Vector3 throwDirection = (player.rotation.current * Vector3.forward + Vector3.up * weapon.projectile.upwardRatio).normalized;
                     RequestProjectile(in player, in weapon, throwDirection, projectileSpawnRequests);
                     break;
 
@@ -49,7 +50,7 @@ namespace TopView.Systems
                     {
                         owner = new EntityReference { kind = EntityKind.Player, identifier = identifier },
                         faction = Faction.Player,
-                        center = player.currentPosition + player.currentRotation * Vector3.forward * weapon.meleeOffset,
+                        center = player.position.current + player.rotation.current * Vector3.forward * weapon.meleeOffset,
                         radius = weapon.meleeRadius,
                         damage = weapon.damage,
                         durationTicks = weapon.attackEndTicks - weapon.attackStartTicks
@@ -97,11 +98,11 @@ namespace TopView.Systems
 
                 case WeaponKind.Ranged:
                     attackState = PlayerState.Shot;
-                    return weapon.currentAmmo > 0;
+                    return player.weaponCurrentAmmo[player.currentWeaponIndex] > 0;
 
                 case WeaponKind.Throw:
                     attackState = PlayerState.Throw;
-                    return weapon.reserveAmmo > 0;
+                    return player.weaponReserveAmmo[player.currentWeaponIndex] > 0;
             }
 
             return false;
@@ -143,8 +144,9 @@ namespace TopView.Systems
                 return false;
             }
 
-            ref readonly WeaponComponent weapon = ref player.weapons[player.currentWeaponIndex];
-            return weapon.kind == WeaponKind.Ranged && weapon.currentAmmo < weapon.maxAmmo && weapon.reserveAmmo > 0;
+            int weaponIndex = player.currentWeaponIndex;
+            ref readonly WeaponComponent weapon = ref player.weapons[weaponIndex];
+            return weapon.kind == WeaponKind.Ranged && player.weaponCurrentAmmo[weaponIndex] < weapon.maxAmmo && player.weaponReserveAmmo[weaponIndex] > 0;
         }
 
         /// <summary>
@@ -153,10 +155,10 @@ namespace TopView.Systems
         /// <param name="player">플레이어</param>
         public static void Reload(ref PlayerEntity player)
         {
-            ref WeaponComponent weapon = ref player.weapons[player.currentWeaponIndex];
-            int loadAmmo = Mathf.Min(weapon.maxAmmo - weapon.currentAmmo, weapon.reserveAmmo);
-            weapon.currentAmmo += loadAmmo;
-            weapon.reserveAmmo -= loadAmmo;
+            int weaponIndex = player.currentWeaponIndex;
+            int loadAmmo = Mathf.Min(player.weapons[weaponIndex].maxAmmo - player.weaponCurrentAmmo[weaponIndex], player.weaponReserveAmmo[weaponIndex]);
+            player.weaponCurrentAmmo[weaponIndex] += loadAmmo;
+            player.weaponReserveAmmo[weaponIndex] -= loadAmmo;
         }
 
         // 총구 위치에서 플레이어 회전으로 투사체를 내보낸다.
@@ -167,8 +169,8 @@ namespace TopView.Systems
                 projectile = weapon.projectile,
                 faction = Faction.Player,
                 damage = weapon.damage,
-                position = player.currentPosition + player.currentRotation * player.movement.muzzleOffset,
-                rotation = player.currentRotation,
+                position = player.position.current + player.rotation.current * player.movement.muzzleOffset,
+                rotation = player.rotation.current,
                 velocity = direction * weapon.projectile.speed
             });
         }

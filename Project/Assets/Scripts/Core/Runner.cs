@@ -62,7 +62,7 @@ namespace TopView.Core
             if (isPlaying)
             {
                 PlayerStateSystem.Tick(_world.players, in _world.commandBuffer.playerCommand, _world.playerStateChangedRecords, _world.projectileSpawnRequests, _world.meleeSpawnRequests, _world.melees, _world.gameOverRequests);
-                // 막기는 이동이 남긴 이번 틱의 previousPosition을 읽고, 조준은 막힌 뒤의 위치를 읽으므로 이 순서를 지킨다
+                // 막기는 이동이 남긴 이번 틱의 직전 위치를 읽고, 조준은 막힌 뒤의 위치를 읽으므로 이 순서를 지킨다
                 PlayerMovementSystem.Tick(_world.players);
                 PlayerBlockSystem.Tick(_world.players, _world.enemies, _world.bosses);
                 PlayerAimSystem.Tick(_world.players, in _world.commandBuffer.playerCommand);

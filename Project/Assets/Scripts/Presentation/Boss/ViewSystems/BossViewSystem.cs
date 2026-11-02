@@ -56,8 +56,8 @@ namespace TopView.Presentation.Boss.ViewSystems
 
             float alpha = Mathf.Clamp01((Time.time - Time.fixedTime) / Time.fixedDeltaTime);
             context.view.transform.SetPositionAndRotation(
-                Vector3.Lerp(boss.previousPosition, boss.currentPosition, alpha),
-                Quaternion.Slerp(boss.previousRotation, boss.currentRotation, alpha));
+                Vector3.Lerp(boss.position.previous, boss.position.current, alpha),
+                Quaternion.Slerp(boss.rotation.previous, boss.rotation.current, alpha));
         }
 
         private static bool TryFindAliveBoss(BossStorage bosses, out int bossIndex)
@@ -79,7 +79,7 @@ namespace TopView.Presentation.Boss.ViewSystems
         {
             if (context.view == null)
             {
-                context.view = Object.Instantiate(viewPrefab, boss.currentPosition, boss.currentRotation).GetComponent<BossView>();
+                context.view = Object.Instantiate(viewPrefab, boss.position.current, boss.rotation.current).GetComponent<BossView>();
                 context.triggerHashes = CollectTriggerHashes(context.view.animator);
             }
             else

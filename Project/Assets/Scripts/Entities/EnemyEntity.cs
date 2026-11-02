@@ -22,23 +22,17 @@ namespace TopView.Entities
 
         // 레벨
         public int level;
-        // 최대 체력
-        public float maxHealth;
         // 체력
-        public float health;
+        public HealthComponent health;
         // 공격력. 공격마다 배율을 곱한다
         public float attackDamage;
         // 최고 이동 속도(유닛/초)
         public float maxSpeed;
 
-        // 직전 틱의 위치(월드, NavMesh 표면). View가 보간에 쓴다
-        public Vector3 previousPosition;
-        // 이번 틱의 위치(월드, NavMesh 표면)
-        public Vector3 currentPosition;
-        // 직전 틱의 회전(월드). View가 보간에 쓴다
-        public Quaternion previousRotation;
-        // 이번 틱의 회전(월드)
-        public Quaternion currentRotation;
+        // 위치(NavMesh 표면)
+        public PositionComponent position;
+        // 회전
+        public RotationComponent rotation;
 
         // 행동 상태
         public EnemyState state;

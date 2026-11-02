@@ -1,5 +1,4 @@
 using TopView.Components;
-using UnityEngine;
 
 namespace TopView.Entities
 {
@@ -20,21 +19,15 @@ namespace TopView.Entities
 
         // 레벨
         public int level;
-        // 최대 체력
-        public float maxHealth;
         // 체력
-        public float health;
+        public HealthComponent health;
         // 공격력. 공격마다 배율을 곱한다
         public float attackDamage;
 
-        // 직전 틱의 위치(월드). View가 보간에 쓴다
-        public Vector3 previousPosition;
-        // 이번 틱의 위치(월드)
-        public Vector3 currentPosition;
-        // 직전 틱의 회전(월드). View가 보간에 쓴다
-        public Quaternion previousRotation;
-        // 이번 틱의 회전(월드)
-        public Quaternion currentRotation;
+        // 위치
+        public PositionComponent position;
+        // 회전
+        public RotationComponent rotation;
 
         // 행동 상태
         public BossState state;

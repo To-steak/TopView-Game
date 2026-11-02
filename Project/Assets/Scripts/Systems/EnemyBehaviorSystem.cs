@@ -37,14 +37,14 @@ namespace TopView.Systems
                 }
 
                 EntityIdentifier identifier = new EntityIdentifier { index = enemyIndex, generation = enemy.generation };
-                if (enemy.health <= 0f && enemy.state != EnemyState.Die)
+                if (enemy.health.current <= 0f && enemy.state != EnemyState.Die)
                 {
                     ChangeState(ref enemy, in identifier, EnemyState.Die, stateRecords);
                 }
 
                 enemy.stateElapsedTicks++;
                 DecreaseAttackCooldowns(ref enemy);
-                bool isPlayerDetected = hasPlayer && TargetingSystem.IsWithin(enemy.currentPosition, playerPosition, enemy.behavior.detectionRadius + playerRadius);
+                bool isPlayerDetected = hasPlayer && TargetingSystem.IsWithin(enemy.position.current, playerPosition, enemy.behavior.detectionRadius + playerRadius);
 
                 switch (enemy.state)
                 {
@@ -144,9 +144,9 @@ namespace TopView.Systems
                     return true;
                 }
 
-                if (TargetingSystem.IsWithin(enemy.currentPosition, playerPosition, enemy.behavior.stopDistance))
+                if (TargetingSystem.IsWithin(enemy.position.current, playerPosition, enemy.behavior.stopDistance))
                 {
-                    TargetingSystem.RotateToward(ref enemy.currentRotation, enemy.currentPosition, playerPosition, enemy.behavior.angularSpeed * deltaTime);
+                    TargetingSystem.RotateToward(ref enemy.rotation.current, enemy.position.current, playerPosition, enemy.behavior.angularSpeed * deltaTime);
                 }
                 else
                 {
@@ -178,7 +178,7 @@ namespace TopView.Systems
             // 공격이 나가기 전까지 플레이어 쪽으로 돈다
             if (!enemy.isAttackCommitted && hasPlayer)
             {
-                TargetingSystem.RotateToward(ref enemy.currentRotation, enemy.currentPosition, playerPosition, enemy.behavior.angularSpeed * deltaTime);
+                TargetingSystem.RotateToward(ref enemy.rotation.current, enemy.position.current, playerPosition, enemy.behavior.angularSpeed * deltaTime);
             }
 
             ref readonly EnemyAttackComponent attack = ref enemy.attacks[enemy.attackIndex];
@@ -187,7 +187,7 @@ namespace TopView.Systems
                 enemy.isAttackCommitted = true;
                 int missileShotCount = 0;
                 EntityReference owner = new EntityReference { kind = EntityKind.Enemy, identifier = identifier };
-                EnemyAttackSystem.CommitAttack(in attack, enemy.currentPosition, enemy.currentRotation, enemy.attackDamage, ref missileShotCount, in owner, projectileSpawnRequests, meleeSpawnRequests);
+                EnemyAttackSystem.CommitAttack(in attack, enemy.position.current, enemy.rotation.current, enemy.attackDamage, ref missileShotCount, in owner, projectileSpawnRequests, meleeSpawnRequests);
             }
 
             if (EnemyAttackSystem.IsAttackFinished(in attack, enemy.stateElapsedTicks, enemy.isAttackCommitted))
@@ -249,13 +249,13 @@ namespace TopView.Systems
         private static bool IsAttackAvailable(in EnemyEntity enemy, int attackIndex, Vector3 playerPosition, float playerRadius)
         {
             return enemy.attackCooldownRemainingTicks[attackIndex] <= 0
-                && TargetingSystem.IsWithin(enemy.currentPosition, playerPosition, enemy.attacks[attackIndex].attackRange + playerRadius);
+                && TargetingSystem.IsWithin(enemy.position.current, playerPosition, enemy.attacks[attackIndex].attackRange + playerRadius);
         }
 
         // 지금 위치를 중심으로 감지 반지름 안의 무작위 점을 골라, 가장 가까운 NavMesh 위의 점을 돌려준다.
         private static bool TryGetWanderPoint(in EnemyEntity enemy, System.Random random, out Vector3 wanderPoint)
         {
-            Vector3 point = enemy.currentPosition + RandomInsideUnitSphere(random) * enemy.behavior.detectionRadius;
+            Vector3 point = enemy.position.current + RandomInsideUnitSphere(random) * enemy.behavior.detectionRadius;
             if (NavMesh.SamplePosition(point, out NavMeshHit hit, enemy.behavior.detectionRadius, NavMesh.AllAreas))
             {
                 wanderPoint = hit.position;

@@ -33,8 +33,8 @@ namespace TopView.Systems
                     continue;
                 }
 
-                enemy.previousPosition = enemy.currentPosition;
-                enemy.previousRotation = enemy.currentRotation;
+                enemy.position.previous = enemy.position.current;
+                enemy.rotation.previous = enemy.rotation.current;
 
                 if (enemy.hasDestination && enemy.isPathDirty && !TryRecalculatePath(ref enemy, path, navMeshSampleDistance))
                 {
@@ -54,9 +54,9 @@ namespace TopView.Systems
             for (int enemyIndex = 0; enemyIndex < enemies.entities.Length; enemyIndex++)
             {
                 ref EnemyEntity enemy = ref enemies.entities[enemyIndex];
-                if (enemy.isAlive && enemy.hasDestination && NavMesh.Raycast(enemy.previousPosition, enemy.currentPosition, out NavMeshHit hit, NavMesh.AllAreas))
+                if (enemy.isAlive && enemy.hasDestination && NavMesh.Raycast(enemy.position.previous, enemy.position.current, out NavMeshHit hit, NavMesh.AllAreas))
                 {
-                    enemy.currentPosition = hit.position;
+                    enemy.position.current = hit.position;
                 }
             }
         }
@@ -103,7 +103,7 @@ namespace TopView.Systems
                 destination = destinationHit.position;
             }
 
-            if (!NavMesh.CalculatePath(enemy.currentPosition, destination, NavMesh.AllAreas, path) || path.status == NavMeshPathStatus.PathInvalid)
+            if (!NavMesh.CalculatePath(enemy.position.current, destination, NavMesh.AllAreas, path) || path.status == NavMeshPathStatus.PathInvalid)
             {
                 return false;
             }
@@ -133,20 +133,20 @@ namespace TopView.Systems
 
             float brakingSpeed = Mathf.Sqrt(2f * enemy.behavior.acceleration * (remainingDistance - enemy.stoppingDistance));
             float desiredSpeed = Mathf.Min(enemy.maxSpeed, brakingSpeed);
-            Vector3 toCorner = enemy.pathCorners[enemy.pathCornerIndex] - enemy.currentPosition;
+            Vector3 toCorner = enemy.pathCorners[enemy.pathCornerIndex] - enemy.position.current;
             Vector3 desiredVelocity = toCorner.normalized * desiredSpeed;
             enemy.velocity = Vector3.MoveTowards(enemy.velocity, desiredVelocity, enemy.behavior.acceleration * deltaTime);
 
             Vector3 step = enemy.velocity * deltaTime;
             if (step.sqrMagnitude >= toCorner.sqrMagnitude)
             {
-                enemy.currentPosition = enemy.pathCorners[enemy.pathCornerIndex];
+                enemy.position.current = enemy.pathCorners[enemy.pathCornerIndex];
                 enemy.pathCornerIndex++;
             }
             else
             {
-                enemy.currentPosition += step;
-                if ((enemy.pathCorners[enemy.pathCornerIndex] - enemy.currentPosition).sqrMagnitude <= CORNER_REACH_DISTANCE * CORNER_REACH_DISTANCE)
+                enemy.position.current += step;
+                if ((enemy.pathCorners[enemy.pathCornerIndex] - enemy.position.current).sqrMagnitude <= CORNER_REACH_DISTANCE * CORNER_REACH_DISTANCE)
                 {
                     enemy.pathCornerIndex++;
                 }
@@ -156,7 +156,7 @@ namespace TopView.Systems
             flatVelocity.y = 0f;
             if (flatVelocity.sqrMagnitude > MIN_TURN_SPEED_SQUARED)
             {
-                enemy.currentRotation = Quaternion.RotateTowards(enemy.currentRotation, Quaternion.LookRotation(flatVelocity), enemy.behavior.angularSpeed * deltaTime);
+                enemy.rotation.current = Quaternion.RotateTowards(enemy.rotation.current, Quaternion.LookRotation(flatVelocity), enemy.behavior.angularSpeed * deltaTime);
             }
         }
 
@@ -167,7 +167,7 @@ namespace TopView.Systems
                 return 0f;
             }
 
-            float distance = Vector3.Distance(enemy.currentPosition, enemy.pathCorners[enemy.pathCornerIndex]);
+            float distance = Vector3.Distance(enemy.position.current, enemy.pathCorners[enemy.pathCornerIndex]);
             for (int cornerIndex = enemy.pathCornerIndex + 1; cornerIndex < enemy.pathCornerCount; cornerIndex++)
             {
                 distance += Vector3.Distance(enemy.pathCorners[cornerIndex - 1], enemy.pathCorners[cornerIndex]);
@@ -196,7 +196,7 @@ namespace TopView.Systems
                         continue;
                     }
 
-                    Vector3 delta = second.currentPosition - first.currentPosition;
+                    Vector3 delta = second.position.current - first.position.current;
                     delta.y = 0f;
                     float distance = delta.magnitude;
                     float minimumDistance = first.stats.hitRadius + second.stats.hitRadius;
@@ -208,16 +208,16 @@ namespace TopView.Systems
                     Vector3 push = delta / distance * (minimumDistance - distance);
                     if (first.hasDestination && second.hasDestination)
                     {
-                        first.currentPosition -= push * 0.5f;
-                        second.currentPosition += push * 0.5f;
+                        first.position.current -= push * 0.5f;
+                        second.position.current += push * 0.5f;
                     }
                     else if (first.hasDestination)
                     {
-                        first.currentPosition -= push;
+                        first.position.current -= push;
                     }
                     else
                     {
-                        second.currentPosition += push;
+                        second.position.current += push;
                     }
                 }
             }

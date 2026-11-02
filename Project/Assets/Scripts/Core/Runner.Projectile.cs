@@ -84,7 +84,7 @@ namespace TopView.Core
                 ref readonly ProjectileEntity projectile = ref projectiles[projectileIndex];
                 if (projectile.isAlive)
                 {
-                    Gizmos.DrawWireSphere(projectile.currentPosition, projectile.projectile.radius);
+                    Gizmos.DrawWireSphere(projectile.position.current, projectile.projectile.radius);
                 }
             }
         }
