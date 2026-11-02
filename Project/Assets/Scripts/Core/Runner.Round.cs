@@ -94,6 +94,7 @@ namespace TopView.Core
                 phase = GamePhase.Playing,
                 remainingTicks = world.rule.timeLimitTicks,
                 score = 0,
+                gold = 0,
                 isWaveStarted = new bool[world.waves.Length],
                 isEnemyKindSpawning = new bool[enemyKindCount],
                 enemyKindSpawnRemainingTicks = new int[enemyKindCount]
@@ -126,6 +127,7 @@ namespace TopView.Core
             _gameOverPresenter = null;
             _remainingTimePresenter = null;
             _scorePresenter = null;
+            _goldPresenter = null;
             _playerHealthPresenter = null;
             _ammoPresenter = null;
             _playerManaPresenter = null;

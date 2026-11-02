@@ -9,6 +9,8 @@ namespace TopView.Components
         public int remainingTicks;
         // 점수
         public int score;
+        // 이번 판에 번 골드
+        public int gold;
         // 웨이브별 시작 여부. 길이는 웨이브 수
         public bool[] isWaveStarted;
         // 적 종류별 스폰 여부. 길이는 적 종류 수

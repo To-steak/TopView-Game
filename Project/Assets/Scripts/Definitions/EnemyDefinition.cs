@@ -7,7 +7,7 @@ namespace TopView.Definitions
     [CreateAssetMenu(fileName = "Enemy Definition", menuName = "Definitions/Enemy Definition")]
     public class EnemyDefinition : ScriptableObject
     {
-        // 체력·공격력·점수 값
+        // 체력·공격력·점수·골드 값
         public EnemyStatsComponent stats;
         // 행동 값
         public EnemyBehaviorComponent behavior;

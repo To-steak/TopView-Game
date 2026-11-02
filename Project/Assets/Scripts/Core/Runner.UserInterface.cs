@@ -3,6 +3,7 @@ using TopView.Entities;
 using TopView.UserInterface.Ammo;
 using TopView.UserInterface.BossHealth;
 using TopView.UserInterface.GameOver;
+using TopView.UserInterface.Gold;
 using TopView.UserInterface.PlayerHealth;
 using TopView.UserInterface.PlayerMana;
 using TopView.UserInterface.RemainingTime;
@@ -17,6 +18,7 @@ namespace TopView.Core
         private GameOverPresenter _gameOverPresenter;
         private RemainingTimePresenter _remainingTimePresenter;
         private ScorePresenter _scorePresenter;
+        private GoldPresenter _goldPresenter;
         private PlayerHealthPresenter _playerHealthPresenter;
         private AmmoPresenter _ammoPresenter;
         private PlayerManaPresenter _playerManaPresenter;
@@ -52,6 +54,16 @@ namespace TopView.Core
             else
             {
                 _scorePresenter.Initialize();
+            }
+
+            _goldPresenter = FindAnyObjectByType<GoldPresenter>();
+            if (_goldPresenter == null)
+            {
+                Debug.LogError("Runner >> 씬에 GoldPresenter가 없다.");
+            }
+            else
+            {
+                _goldPresenter.Initialize();
             }
 
             _playerHealthPresenter = FindAnyObjectByType<PlayerHealthPresenter>();
@@ -109,6 +121,10 @@ namespace TopView.Core
             if (_scorePresenter != null)
             {
                 _scorePresenter.Present(_world.progress.score);
+            }
+            if (_goldPresenter != null)
+            {
+                _goldPresenter.Present(_world.progress.gold);
             }
 
             if (!TryFindAlivePlayer(out int playerIndex))
