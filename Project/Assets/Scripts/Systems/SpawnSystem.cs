@@ -19,9 +19,6 @@ namespace TopView.Systems
             entities.masks[index] = mask;
             entities.positions[index] = default;
             entities.rotations[index] = default;
-            entities.projectiles[index] = default;
-            entities.projectileMotions[index] = default;
-            entities.attackPayloads[index] = default;
             entities.healths[index] = default;
             entities.combats[index] = default;
             entities.enemyStats[index] = default;

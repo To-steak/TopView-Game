@@ -12,7 +12,8 @@ namespace TopView.Systems
         /// <param name="masks">칸별 컴포넌트 표시</param>
         /// <param name="positions">위치</param>
         /// <param name="rotations">회전</param>
-        public static void Tick(ComponentMask[] masks, PositionComponent[] positions, RotationComponent[] rotations)
+        /// <param name="projectiles">투사체 저장소</param>
+        public static void Tick(ComponentMask[] masks, PositionComponent[] positions, RotationComponent[] rotations, ProjectileStorage projectiles)
         {
             for (int index = 0; index < masks.Length; index++)
             {
@@ -23,6 +24,16 @@ namespace TopView.Systems
                 if ((masks[index] & ComponentMask.Rotation) != 0)
                 {
                     Snapshot(ref rotations[index]);
+                }
+            }
+
+            for (int index = 0; index < projectiles.entities.Length; index++)
+            {
+                ref ProjectileEntity entity = ref projectiles.entities[index];
+                if (entity.isAlive)
+                {
+                    Snapshot(ref entity.position);
+                    Snapshot(ref entity.rotation);
                 }
             }
         }

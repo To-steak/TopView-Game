@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using TopView.Components;
 using TopView.Entities;
 using TopView.Presentation.Projectile.Views;
 using UnityEngine;
@@ -10,43 +9,39 @@ namespace TopView.Presentation.Projectile.ViewSystems
     public static class ProjectileViewSystem
     {
         /// <summary>
-        /// 공유 저장소의 칸마다 살아 있는 투사체와 View를 맞춘다.
+        /// 저장소의 칸마다 살아 있는 투사체와 View를 맞춘다.
         /// </summary>
-        /// <param name="masks">칸별 컴포넌트 표시</param>
-        /// <param name="generations">칸이 채워진 횟수</param>
-        /// <param name="projectiles">투사체 값</param>
-        /// <param name="positions">위치</param>
-        /// <param name="rotations">회전</param>
+        /// <param name="entities">투사체 엔티티 배열</param>
         /// <param name="projectilePrefabs">투사체 View 표. 번호별 ProjectileView 프리팹</param>
         /// <param name="context">투사체 View 실행 상태</param>
-        public static void Present(ComponentMask[] masks, int[] generations, ProjectileComponent[] projectiles, PositionComponent[] positions, RotationComponent[] rotations, GameObject[] projectilePrefabs, ProjectileViewContext context)
+        public static void Present(ProjectileEntity[] entities, GameObject[] projectilePrefabs, ProjectileViewContext context)
         {
             float alpha = Mathf.Clamp01((Time.time - Time.fixedTime) / Time.fixedDeltaTime);
 
-            for (int index = 0; index < masks.Length; index++)
+            for (int index = 0; index < entities.Length; index++)
             {
-                bool isProjectile = (masks[index] & ComponentMask.ProjectileArchetype) == ComponentMask.ProjectileArchetype;
+                ref readonly ProjectileEntity entity = ref entities[index];
                 ProjectileView view = context.views[index];
 
-                if (view != null && (!isProjectile || context.viewGenerations[index] != generations[index]))
+                if (view != null && (!entity.isAlive || context.viewGenerations[index] != entity.generation))
                 {
                     Release(context, index);
                     view = null;
                 }
 
-                if (!isProjectile || projectiles[index].viewIndex < 0)
+                if (!entity.isAlive || entity.projectile.viewIndex < 0)
                 {
                     continue;
                 }
 
-                Vector3 position = Vector3.Lerp(positions[index].previous, positions[index].current, alpha);
+                Vector3 position = Vector3.Lerp(entity.position.previous, entity.position.current, alpha);
                 if (view == null)
                 {
-                    view = Acquire(context, index, generations[index], projectiles[index].viewIndex, projectilePrefabs, position, rotations[index].current);
+                    view = Acquire(context, index, entity.generation, entity.projectile.viewIndex, projectilePrefabs, position, entity.rotation.current);
                 }
                 else
                 {
-                    view.transform.SetPositionAndRotation(position, rotations[index].current);
+                    view.transform.SetPositionAndRotation(position, entity.rotation.current);
                 }
 
                 if (view.pitchSpeed != 0f && view.pitchPivot != null)

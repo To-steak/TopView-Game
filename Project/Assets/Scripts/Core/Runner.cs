@@ -61,7 +61,7 @@ namespace TopView.Core
             DamageSystem.Tick(ref _world.progress, _world.entities.masks, _world.entities.generations, _world.entities.healths, _world.entities.combats, _world.entities.enemyStats, _world.damageRequests);
             if (isPlaying)
             {
-                TransformSnapshotSystem.Tick(_world.entities.masks, _world.entities.positions, _world.entities.rotations);
+                TransformSnapshotSystem.Tick(_world.entities.masks, _world.entities.positions, _world.entities.rotations, _world.projectiles);
                 PlayerDeathSystem.Tick(_world.entities.masks, _world.entities.generations, _world.entities.healths, _world.entities.playerActionStates, _world.entities.playerMotions, _world.melees, _world.playerStateChangedRecords);
                 PlayerStateTimerSystem.Tick(_world.entities.masks, _world.entities.playerActionStates);
                 // 누름 입력으로 정해진 상태를 뒤의 셋이 함께 읽는다. 이동 입력과 공격을 반영한 뒤에 상태를 넘기므로 이 순서를 지킨다
@@ -82,9 +82,9 @@ namespace TopView.Core
                 EnemyDespawnSystem.Tick(_world.entities.masks, _world.entities.enemyKinds, _world.entities.enemyBehaviors, _world.entities.enemyActionStates, _world.entities.freeEnemyIndicesByKind);
                 BossBehaviorSystem.Tick(_world.entities.masks, _world.entities.generations, _world.entities.healths, _world.entities.combats, _world.entities.positions, _world.entities.rotations, _world.entities.attackLists, _world.entities.bossBehaviors, _world.entities.bossActionStates, _world.entities.freeBossIndices, _world.entities.playerMovements, _world.random, _world.bossStateChangedRecords, _world.projectileSpawnRequests, _world.meleeSpawnRequests, _world.gameOverRequests);
                 EnemyNavigationSystem.Tick(_world.entities.masks, _world.entities.positions, _world.entities.rotations, _world.entities.navigationAgents, _world.entities.enemyBehaviors, _world.entities.enemyStats, _world.navigationPath, _world.rule.navMeshSampleDistance);
-                ProjectileSystem.Tick(_world.entities.masks, _world.entities.projectiles, _world.entities.projectileMotions, _world.entities.positions, _world.entities.freeProjectileIndices);
+                ProjectileSystem.Tick(_world.projectiles);
                 HitTargetSystem.Tick(_world.entities.masks, _world.entities.generations, _world.entities.positions, _world.entities.rotations, _world.entities.healths, _world.entities.factions, _world.entities.playerMovements, _world.entities.enemyStats, _world.hitTargets, ref _world.hitTargetCount);
-                ProjectileHitSystem.Tick(_world.entities.masks, _world.entities.projectiles, _world.entities.projectileMotions, _world.entities.positions, _world.entities.attackPayloads, _world.entities.freeProjectileIndices, _world.hitTargets, _world.hitTargetCount, _world.damageRequests, _world.projectileHitRecords);
+                ProjectileHitSystem.Tick(_world.projectiles, _world.hitTargets, _world.hitTargetCount, _world.damageRequests, _world.projectileHitRecords);
                 MeleeHitSystem.Tick(_world.melees, _world.hitTargets, _world.hitTargetCount, _world.damageRequests);
             }
 
@@ -95,7 +95,7 @@ namespace TopView.Core
                 PlayerSpawnSystem.Tick(_world.entities, _world.playerSpawnRequests);
                 EnemySpawnSystem.Tick(_world.entities, _world.enemySpawnRequests, _world.rule.navMeshSampleDistance);
                 BossSpawnSystem.Tick(_world.entities, _world.bossSpawnRequests);
-                ProjectileSpawnSystem.Tick(_world.entities, _world.projectileSpawnRequests);
+                ProjectileSpawnSystem.Tick(_world.projectiles, _world.projectileSpawnRequests);
                 MeleeSpawnSystem.Tick(_world.melees, _world.meleeSpawnRequests);
             }
 
@@ -131,7 +131,7 @@ namespace TopView.Core
             EnemyViewSystem.Present(_world.entities.masks, _world.entities.generations, _world.entities.enemyKinds, _world.entities.positions, _world.entities.rotations, _world.enemyStateChangedRecords, _enemyViewPrefabs, _viewContext.enemy);
             EnemyHealthGaugeViewSystem.Present(_world.entities.enemyKinds, _world.entities.healths, _enemyHealthGaugePrefabs, _viewContext.camera.mainCamera, _viewContext.enemy);
             BossViewSystem.Present(_world.entities.masks, _world.entities.generations, _world.entities.positions, _world.entities.rotations, _world.entities.attackLists, _world.entities.bossActionStates, _world.bossStateChangedRecords, _bossViewPrefab, _viewContext.boss);
-            ProjectileViewSystem.Present(_world.entities.masks, _world.entities.generations, _world.entities.projectiles, _world.entities.positions, _world.entities.rotations, _projectilePrefabs, _viewContext.projectile);
+            ProjectileViewSystem.Present(_world.projectiles.entities, _projectilePrefabs, _viewContext.projectile);
             HitEffectViewSystem.Present(_world.projectileHitRecords, _hitEffectPrefabs, _viewContext.hitEffect);
             CameraViewSystem.Present(_viewContext.camera, _viewContext.player.view, _playerCameraPriority);
 
