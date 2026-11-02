@@ -15,7 +15,7 @@ namespace TopView.Systems
         private const float MIN_SEPARATION_DISTANCE = 0.00001f;
 
         /// <summary>
-        /// 직전 위치와 회전을 남기고, 목적지가 바뀐 적은 경로를 다시 구한 뒤 경로를 따라 옮긴다. 마지막에 걷는 적끼리 겹친 만큼 밀어내고 NavMesh 안으로 되돌린다.
+        /// 목적지가 바뀐 적은 경로를 다시 구한 뒤 경로를 따라 옮긴다. 마지막에 걷는 적끼리 겹친 만큼 밀어내고 NavMesh 안으로 되돌린다.
         /// </summary>
         /// <param name="enemies">적 저장소</param>
         /// <param name="path">경로 계산에 다시 쓰는 NavMeshPath</param>
@@ -32,9 +32,6 @@ namespace TopView.Systems
                 {
                     continue;
                 }
-
-                enemy.position.previous = enemy.position.current;
-                enemy.rotation.previous = enemy.rotation.current;
 
                 if (enemy.hasDestination && enemy.isPathDirty && !TryRecalculatePath(ref enemy, path, navMeshSampleDistance))
                 {

@@ -8,7 +8,7 @@ namespace TopView.Systems
     public static class ProjectileSystem
     {
         /// <summary>
-        /// 살아 있는 투사체마다 직전 위치를 남기고 시간을 1틱 늘린 뒤 움직인다.
+        /// 살아 있는 투사체마다 시간을 1틱 늘린 뒤 움직인다.
         /// </summary>
         /// <param name="projectiles">투사체 저장소</param>
         public static void Tick(ProjectileStorage projectiles)
@@ -23,7 +23,6 @@ namespace TopView.Systems
                     continue;
                 }
 
-                projectile.position.previous = projectile.position.current;
                 projectile.elapsedTicks++;
 
                 if (projectile.projectile.kind == ProjectileKind.Straight)
