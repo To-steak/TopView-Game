@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace TopView.Systems
 {
-    // 플레이어가 적·보스의 피격 원 쪽으로 파고들지 않게 막는다.
+    // 플레이어가 적의 피격 원 쪽으로 파고들지 않게 막는다.
     public static class PlayerBlockSystem
     {
         // 플레이어와 적의 중심이 이보다 가까우면 밀어낼 방향을 정할 수 없어 건너뛴다(유닛)
@@ -15,7 +15,7 @@ namespace TopView.Systems
         private const ComponentMask BLOCKER_QUERY = ComponentMask.Position | ComponentMask.EnemyStats;
 
         /// <summary>
-        /// 이번 틱에 적·보스의 피격 원 쪽으로 가까워졌다면 원 밖(XZ)으로 되돌린다. 적이 다가와 겹친 경우는 밀어내지 않는다.
+        /// 이번 틱에 적의 피격 원 쪽으로 가까워졌다면 원 밖(XZ)으로 되돌린다. 적이 다가와 겹친 경우는 밀어내지 않는다.
         /// </summary>
         /// <param name="masks">칸별 컴포넌트 표시</param>
         /// <param name="positions">위치</param>

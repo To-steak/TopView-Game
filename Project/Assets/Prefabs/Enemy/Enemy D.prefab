@@ -9,9 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4677088424083482870}
-  - component: {fileID: 1984828585624256674}
+  - component: {fileID: 4972151900226264020}
   m_Layer: 7
-  m_Name: Enemy Boss
+  m_Name: Enemy D
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -33,7 +33,7 @@ Transform:
   - {fileID: 3740201972448505795}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1984828585624256674
+--- !u!114 &4972151900226264020
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -42,10 +42,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 2811978939204380695}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ad0d7fae8ccd1ed4fb234cf7b39a5fd9, type: 3}
+  m_Script: {fileID: 11500000, guid: c53aa8a3d25e75b44b1180ba7b21a515, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: TopView.Presentation::TopView.Presentation.Boss.Views.BossView
+  m_EditorClassIdentifier: TopView.Presentation::TopView.Presentation.Enemy.Views.EnemyView
   animator: {fileID: 7834020961119801843}
+  healthGaugeAnchor: {fileID: 0}
 --- !u!1001 &3777786291576326184
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -20,5 +20,9 @@ namespace TopView.Components
         public float angularSpeed;
         // 사망 상태에 들어간 뒤 사라지기까지의 시간(틱)
         public int dieTicks;
+        // 사망 상태가 끝나 사라질 때 게임을 끝내는지. 보스에 켠다
+        public bool endsGameOnDeath;
+        // 화면의 오버레이 체력 바에 체력을 보여 주는지. 보스에 켠다. 켜면 체력 게이지 프리팹이 없어도 경고하지 않는다
+        public bool showsOverlayHealthBar;
     }
 }

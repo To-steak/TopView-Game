@@ -71,12 +71,12 @@ namespace TopView.Core
             world.random = new System.Random(world.rule.randomSeed);
             world.playerSpawnRequests.Enqueue(playerSpawnRequest);
             world.enemySpawnTemplates = enemySpawnTemplates;
-            int enemyCapacity = enemyKindCount * gameSettings.enemyCapacityPerKind + BOSS_CAPACITY;
+            int enemyCapacity = enemyKindCount * gameSettings.enemyCapacityPerKind;
             world.playerHitTargets = new HitTargetComponent[PLAYER_CAPACITY];
             world.enemyHitTargets = new HitTargetComponent[enemyCapacity];
-            // 공격하는 쪽 하나는 근접 판정을 동시에 하나만 가지고, 한 판정이 맞힐 대상도 플레이어·적·보스의 칸 수를 넘지 않는다
+            // 공격하는 쪽 하나는 근접 판정을 동시에 하나만 가지고, 한 판정이 맞힐 대상도 플레이어와 적의 칸 수를 넘지 않는다
             int combatantCapacity = PLAYER_CAPACITY + enemyCapacity;
-            world.entities = new EntityStorage(enemyKindCount, gameSettings.enemyCapacityPerKind, gameSettings.enemyPathCornerCapacity, BOSS_CAPACITY, PLAYER_CAPACITY);
+            world.entities = new EntityStorage(enemyKindCount, gameSettings.enemyCapacityPerKind, gameSettings.enemyPathCornerCapacity, PLAYER_CAPACITY);
             world.melees = new MeleeStorage(combatantCapacity, combatantCapacity);
             world.projectiles = new ProjectileStorage(gameSettings.projectileCapacity);
 
@@ -140,7 +140,6 @@ namespace TopView.Core
                     healthGaugeViews = new EnemyHealthGaugeView[_world.entities.masks.Length],
                     healthGaugePools = new Stack<EnemyHealthGaugeView>[enemyKindCount]
                 },
-                boss = new BossViewContext(),
                 projectile = new ProjectileViewContext
                 {
                     views = new ProjectileView[_world.projectiles.entities.Length],

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace TopView.Components
 {
-    // 이번 틱에 공격을 맞을 수 있는 대상 하나. 판정 직전에 HitTargetSystem이 플레이어와 적·보스를 방향별 피격 대상 목록에 채운다.
+    // 이번 틱에 공격을 맞을 수 있는 대상 하나. 판정 직전에 HitTargetSystem이 플레이어와 적을 방향별 피격 대상 목록에 채운다.
     public struct HitTargetComponent
     {
         // 맞을 엔티티

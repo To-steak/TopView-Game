@@ -9,8 +9,6 @@ namespace TopView.Presentation
         public PlayerViewContext player;
         // 적 View와 체력 게이지 실행 상태
         public EnemyViewContext enemy;
-        // 보스 View 실행 상태
-        public BossViewContext boss;
         // 투사체 View 실행 상태
         public ProjectileViewContext projectile;
         // 피격 이펙트 실행 상태
