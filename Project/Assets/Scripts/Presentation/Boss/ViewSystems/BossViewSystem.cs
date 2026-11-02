@@ -89,8 +89,8 @@ namespace TopView.Presentation.Boss.ViewSystems
 
             context.viewEntity = identifier;
 
-            EnemyAttackKind attackKind = boss.state == BossState.Attack ? boss.attacks[boss.attackIndex].kind : default;
-            ApplyState(boss.state, attackKind, context.view.animator, context.triggerHashes);
+            EnemyAttackKind attackKind = boss.actionState.state == BossState.Attack ? boss.attacks[boss.actionState.attackIndex].kind : default;
+            ApplyState(boss.actionState.state, attackKind, context.view.animator, context.triggerHashes);
         }
 
         private static void ApplyState(BossState state, EnemyAttackKind attackKind, Animator animator, int[] triggerHashes)

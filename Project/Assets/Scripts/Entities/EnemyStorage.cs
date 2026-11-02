@@ -25,7 +25,7 @@ namespace TopView.Entities
             entities = new EnemyEntity[kindCount * capacityPerKind];
             for (int index = 0; index < entities.Length; index++)
             {
-                entities[index].pathCorners = new Vector3[pathCornerCapacity];
+                entities[index].agent.pathCorners = new Vector3[pathCornerCapacity];
             }
             freeIndicesByKind = new List<int>[kindCount];
             for (int kind = 0; kind < kindCount; kind++)

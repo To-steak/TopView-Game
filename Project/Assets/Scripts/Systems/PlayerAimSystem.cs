@@ -25,7 +25,7 @@ namespace TopView.Systems
                     continue;
                 }
 
-                if (!player.isRotationLocked && command.hasAimPoint)
+                if (!player.motion.isRotationLocked && command.hasAimPoint)
                 {
                     Vector3 aimDirection = command.aimPoint - player.position.current;
                     aimDirection.y = 0f;

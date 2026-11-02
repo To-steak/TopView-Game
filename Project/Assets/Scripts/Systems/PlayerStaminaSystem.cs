@@ -20,14 +20,14 @@ namespace TopView.Systems
                     continue;
                 }
 
-                if (player.manaRecoveryElapsedTicks < player.vitals.manaRecoveryDelayTicks)
+                if (player.mana.recoveryElapsedTicks < player.vitals.manaRecoveryDelayTicks)
                 {
-                    player.manaRecoveryElapsedTicks++;
+                    player.mana.recoveryElapsedTicks++;
                 }
 
-                if (player.mana < player.vitals.maxMana && player.manaRecoveryElapsedTicks >= player.vitals.manaRecoveryDelayTicks)
+                if (player.mana.current < player.vitals.maxMana && player.mana.recoveryElapsedTicks >= player.vitals.manaRecoveryDelayTicks)
                 {
-                    player.mana = Mathf.Min(player.mana + player.vitals.manaRecoveryPerTick, player.vitals.maxMana);
+                    player.mana.current = Mathf.Min(player.mana.current + player.vitals.manaRecoveryPerTick, player.vitals.maxMana);
                 }
             }
         }
@@ -40,7 +40,7 @@ namespace TopView.Systems
         /// <returns>마나가 amount 이상이면 true</returns>
         public static bool HasEnoughMana(in PlayerEntity player, float amount)
         {
-            return player.mana >= amount;
+            return player.mana.current >= amount;
         }
 
         /// <summary>
@@ -50,8 +50,8 @@ namespace TopView.Systems
         /// <param name="amount">쓸 마나</param>
         public static void UseMana(ref PlayerEntity player, float amount)
         {
-            player.mana = Mathf.Max(player.mana - amount, 0f);
-            player.manaRecoveryElapsedTicks = 0;
+            player.mana.current = Mathf.Max(player.mana.current - amount, 0f);
+            player.mana.recoveryElapsedTicks = 0;
         }
     }
 }

@@ -182,16 +182,16 @@ namespace TopView.Presentation.Player.ViewSystems
         // 움직일 수 있는 상태(Move, Land, 공격, Swap, Reload)에서만 이동 입력과 달리기 여부로 MovementSpeed를 정한다. 다른 상태에서는 그대로 둔다.
         private static void ApplyMovementAnimation(in PlayerEntity player, Animator animator)
         {
-            bool canMove = player.state == PlayerState.Move || player.state == PlayerState.Land || player.state == PlayerState.Shot || player.state == PlayerState.Swing || player.state == PlayerState.Throw || player.state == PlayerState.Swap || player.state == PlayerState.Reload;
+            bool canMove = player.actionState.state == PlayerState.Move || player.actionState.state == PlayerState.Land || player.actionState.state == PlayerState.Shot || player.actionState.state == PlayerState.Swing || player.actionState.state == PlayerState.Throw || player.actionState.state == PlayerState.Swap || player.actionState.state == PlayerState.Reload;
             if (!canMove)
             {
                 return;
             }
 
             float speed = IDLE_SPEED;
-            if (player.moveDirection != Vector3.zero)
+            if (player.motion.moveDirection != Vector3.zero)
             {
-                speed = player.isRunning ? RUN_SPEED : WALK_SPEED;
+                speed = player.motion.isRunning ? RUN_SPEED : WALK_SPEED;
             }
             animator.SetFloat(MOVEMENT_SPEED_HASH, speed);
         }
@@ -204,8 +204,8 @@ namespace TopView.Presentation.Player.ViewSystems
                 return;
             }
 
-            bool isNotAimingState = player.state == PlayerState.Dodge || player.state == PlayerState.Jump || player.state == PlayerState.Land || player.state == PlayerState.Swap || player.state == PlayerState.Die;
-            bool isHoldingRanged = player.currentWeaponIndex < player.weapons.Length && player.weapons[player.currentWeaponIndex].kind == WeaponKind.Ranged;
+            bool isNotAimingState = player.actionState.state == PlayerState.Dodge || player.actionState.state == PlayerState.Jump || player.actionState.state == PlayerState.Land || player.actionState.state == PlayerState.Swap || player.actionState.state == PlayerState.Die;
+            bool isHoldingRanged = player.weaponSlots.currentIndex < player.weapons.Length && player.weapons[player.weaponSlots.currentIndex].kind == WeaponKind.Ranged;
             if (isNotAimingState || !isHoldingRanged)
             {
                 animator.SetLayerWeight(rangedLayerIndex, LAYER_OFF_WEIGHT);
@@ -230,7 +230,7 @@ namespace TopView.Presentation.Player.ViewSystems
                 return;
             }
 
-            bool isActionState = player.state == PlayerState.Swing || player.state == PlayerState.Throw || player.state == PlayerState.Swap;
+            bool isActionState = player.actionState.state == PlayerState.Swing || player.actionState.state == PlayerState.Throw || player.actionState.state == PlayerState.Swap;
             animator.SetLayerWeight(actionLayerIndex, isActionState ? LAYER_ON_WEIGHT : LAYER_OFF_WEIGHT);
         }
 
@@ -244,7 +244,7 @@ namespace TopView.Presentation.Player.ViewSystems
                     continue;
                 }
 
-                bool isCurrent = weaponIndex == player.currentWeaponIndex;
+                bool isCurrent = weaponIndex == player.weaponSlots.currentIndex;
                 if (model.activeSelf != isCurrent)
                 {
                     model.SetActive(isCurrent);

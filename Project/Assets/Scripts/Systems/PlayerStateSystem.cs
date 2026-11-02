@@ -32,16 +32,16 @@ namespace TopView.Systems
                 }
 
                 EntityIdentifier identifier = new EntityIdentifier { index = playerIndex, generation = player.generation };
-                if (player.health.current <= 0f && player.state != PlayerState.Die)
+                if (player.health.current <= 0f && player.actionState.state != PlayerState.Die)
                 {
                     ChangeState(ref player, in identifier, PlayerState.Die, Vector3.zero, stateRecords);
                     MeleeHitSystem.DespawnOwnedBy(melees, new EntityReference { kind = EntityKind.Player, identifier = identifier });
                 }
 
-                player.stateElapsedTicks++;
-                if (player.attackCooldownTicks > 0)
+                player.actionState.elapsedTicks++;
+                if (player.actionState.attackCooldownTicks > 0)
                 {
-                    player.attackCooldownTicks--;
+                    player.actionState.attackCooldownTicks--;
                 }
 
                 HandlePresses(ref player, in identifier, in command, stateRecords);
@@ -52,7 +52,7 @@ namespace TopView.Systems
         // 지금 상태에서 나가고 새 상태에 들어간다. Die 상태에서는 바꾸지 않는다. moveInput은 회피 방향에 쓴다.
         private static void ChangeState(ref PlayerEntity player, in EntityIdentifier identifier, PlayerState newState, Vector3 moveInput, List<PlayerStateChangedRecord> stateRecords)
         {
-            if (player.state == PlayerState.Die)
+            if (player.actionState.state == PlayerState.Die)
             {
                 return;
             }
@@ -62,45 +62,45 @@ namespace TopView.Systems
             stateRecords.Add(new PlayerStateChangedRecord
             {
                 player = identifier,
-                previousState = player.state,
+                previousState = player.actionState.state,
                 state = newState
             });
 
-            player.state = newState;
-            player.stateElapsedTicks = 0;
-            player.isAttackCommitted = false;
+            player.actionState.state = newState;
+            player.actionState.elapsedTicks = 0;
+            player.actionState.isAttackCommitted = false;
 
             EnterState(ref player, moveInput);
         }
 
         private static void HandlePresses(ref PlayerEntity player, in EntityIdentifier identifier, in PlayerCommand command, List<PlayerStateChangedRecord> stateRecords)
         {
-            if (command.isJumpPressed && IsIdleOrMove(player.state))
+            if (command.isJumpPressed && IsIdleOrMove(player.actionState.state))
             {
-                if (player.isGrounded && PlayerStaminaSystem.HasEnoughMana(in player, player.vitals.jumpManaCost))
+                if (player.motion.isGrounded && PlayerStaminaSystem.HasEnoughMana(in player, player.vitals.jumpManaCost))
                 {
                     ChangeState(ref player, in identifier, PlayerState.Jump, command.moveDirection, stateRecords);
                 }
             }
 
-            if (command.isDodgePressed && IsIdleOrMove(player.state))
+            if (command.isDodgePressed && IsIdleOrMove(player.actionState.state))
             {
-                if (player.isGrounded && PlayerStaminaSystem.HasEnoughMana(in player, player.vitals.dodgeManaCost))
+                if (player.motion.isGrounded && PlayerStaminaSystem.HasEnoughMana(in player, player.vitals.dodgeManaCost))
                 {
                     ChangeState(ref player, in identifier, PlayerState.Dodge, command.moveDirection, stateRecords);
                 }
             }
 
-            if (command.swapWeaponIndex >= 0 && IsIdleOrMove(player.state))
+            if (command.swapWeaponIndex >= 0 && IsIdleOrMove(player.actionState.state))
             {
                 if (PlayerWeaponSystem.CanSwap(in player, command.swapWeaponIndex))
                 {
-                    player.pendingWeaponIndex = command.swapWeaponIndex;
+                    player.weaponSlots.pendingIndex = command.swapWeaponIndex;
                     ChangeState(ref player, in identifier, PlayerState.Swap, command.moveDirection, stateRecords);
                 }
             }
 
-            if (command.isReloadPressed && IsIdleOrMove(player.state))
+            if (command.isReloadPressed && IsIdleOrMove(player.actionState.state))
             {
                 if (PlayerWeaponSystem.CanReload(in player))
                 {
@@ -109,7 +109,7 @@ namespace TopView.Systems
             }
 
             // 공격 키를 누르고 있어도 다른 입력이 사라지지 않도록 공격을 마지막에 본다
-            if ((command.isAttackPressed || command.isAttackHeld) && IsIdleOrMove(player.state) && player.isGrounded && player.attackCooldownTicks == 0)
+            if ((command.isAttackPressed || command.isAttackHeld) && IsIdleOrMove(player.actionState.state) && player.motion.isGrounded && player.actionState.attackCooldownTicks == 0)
             {
                 // Throw는 누르고 있을 때 탄약을 다 쓰지 않도록 누른 입력으로만 나간다
                 if (PlayerWeaponSystem.TryGetAttackState(in player, out PlayerState attackState) &&(command.isAttackPressed || attackState != PlayerState.Throw))
@@ -121,7 +121,7 @@ namespace TopView.Systems
 
         private static void UpdateState(ref PlayerEntity player, in EntityIdentifier identifier, in PlayerCommand command, List<PlayerStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, Queue<GameOverRequest> gameOverRequests)
         {
-            switch (player.state)
+            switch (player.actionState.state)
             {
                 case PlayerState.Idle:
                     if (!IsZero(command.moveDirection))
@@ -135,23 +135,23 @@ namespace TopView.Systems
                     break;
 
                 case PlayerState.Jump:
-                    player.moveDirection = command.moveDirection;
-                    if (player.verticalVelocity <= 0f && player.isGrounded)
+                    player.motion.moveDirection = command.moveDirection;
+                    if (player.motion.verticalVelocity <= 0f && player.motion.isGrounded)
                     {
                         ChangeState(ref player, in identifier, PlayerState.Land, command.moveDirection, stateRecords);
                     }
                     break;
 
                 case PlayerState.Land:
-                    player.moveDirection = command.moveDirection;
-                    if (player.stateElapsedTicks >= player.action.landTicks)
+                    player.motion.moveDirection = command.moveDirection;
+                    if (player.actionState.elapsedTicks >= player.action.landTicks)
                     {
                         FinishAction(ref player, in identifier, command.moveDirection, stateRecords);
                     }
                     break;
 
                 case PlayerState.Dodge:
-                    if (player.stateElapsedTicks >= player.action.dodgeTicks)
+                    if (player.actionState.elapsedTicks >= player.action.dodgeTicks)
                     {
                         FinishAction(ref player, in identifier, command.moveDirection, stateRecords);
                     }
@@ -167,7 +167,7 @@ namespace TopView.Systems
                 case PlayerState.Swap:
                     ApplyMoveInput(ref player, in command);
                     PlayerWeaponSystem.CommitSwap(ref player);
-                    if (player.stateElapsedTicks >= player.action.swapTicks)
+                    if (player.actionState.elapsedTicks >= player.action.swapTicks)
                     {
                         FinishAction(ref player, in identifier, command.moveDirection, stateRecords);
                     }
@@ -175,7 +175,7 @@ namespace TopView.Systems
 
                 case PlayerState.Reload:
                     ApplyMoveInput(ref player, in command);
-                    if (player.stateElapsedTicks >= player.action.reloadTicks)
+                    if (player.actionState.elapsedTicks >= player.action.reloadTicks)
                     {
                         PlayerWeaponSystem.Reload(ref player);
                         FinishAction(ref player, in identifier, command.moveDirection, stateRecords);
@@ -183,7 +183,7 @@ namespace TopView.Systems
                     break;
 
                 case PlayerState.Die:
-                    if (player.stateElapsedTicks == player.action.dieTicks)
+                    if (player.actionState.elapsedTicks == player.action.dieTicks)
                     {
                         gameOverRequests.Enqueue(new GameOverRequest());
                     }
@@ -207,7 +207,7 @@ namespace TopView.Systems
         {
             if (IsZero(command.moveDirection))
             {
-                player.moveDirection = Vector3.zero;
+                player.motion.moveDirection = Vector3.zero;
                 return;
             }
 
@@ -225,16 +225,16 @@ namespace TopView.Systems
                 }
             }
 
-            player.moveDirection = command.moveDirection;
-            player.currentSpeed = isRunning ? player.movement.runSpeed : player.movement.walkSpeed;
-            player.isRunning = isRunning;
+            player.motion.moveDirection = command.moveDirection;
+            player.motion.currentSpeed = isRunning ? player.movement.runSpeed : player.movement.walkSpeed;
+            player.motion.isRunning = isRunning;
         }
 
         private static void UpdateAttack(ref PlayerEntity player, in EntityIdentifier identifier, Vector3 moveInput, List<PlayerStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
         {
-            ref readonly WeaponComponent weapon = ref player.weapons[player.currentWeaponIndex];
+            ref readonly WeaponComponent weapon = ref player.weapons[player.weaponSlots.currentIndex];
 
-            if (!player.isAttackCommitted && player.stateElapsedTicks >= weapon.attackStartTicks)
+            if (!player.actionState.isAttackCommitted && player.actionState.elapsedTicks >= weapon.attackStartTicks)
             {
                 PlayerWeaponSystem.CommitAttack(ref player, in identifier, in weapon, projectileSpawnRequests, meleeSpawnRequests);
             }
@@ -254,20 +254,20 @@ namespace TopView.Systems
 
         private static void EnterState(ref PlayerEntity player, Vector3 moveInput)
         {
-            switch (player.state)
+            switch (player.actionState.state)
             {
                 case PlayerState.Idle:
-                    player.moveDirection = Vector3.zero;
+                    player.motion.moveDirection = Vector3.zero;
                     break;
 
                 case PlayerState.Jump:
-                    player.verticalVelocity = player.movement.jumpPower;
+                    player.motion.verticalVelocity = player.movement.jumpPower;
                     PlayerStaminaSystem.UseMana(ref player, player.vitals.jumpManaCost);
-                    player.currentSpeed = player.movement.inAirSpeed;
+                    player.motion.currentSpeed = player.movement.inAirSpeed;
                     break;
 
                 case PlayerState.Dodge:
-                    player.isRotationLocked = true;
+                    player.motion.isRotationLocked = true;
                     // 이동 입력이 있으면 그쪽으로, 서 있으면 바라보는 쪽(XZ)으로 회피한다
                     Vector3 dodgeDirection = moveInput;
                     if (IsZero(dodgeDirection))
@@ -276,50 +276,50 @@ namespace TopView.Systems
                         dodgeDirection.y = 0f;
                         dodgeDirection.Normalize();
                     }
-                    player.moveDirection = dodgeDirection;
-                    player.currentSpeed = player.movement.dodgeSpeed;
-                    if (IsZero(player.moveDirection))
+                    player.motion.moveDirection = dodgeDirection;
+                    player.motion.currentSpeed = player.movement.dodgeSpeed;
+                    if (IsZero(player.motion.moveDirection))
                     {
                         Debug.LogWarning("PlayerStateSystem >> 회피 방향을 정하지 못해 회피 방향으로 돌지 않았다.");
                     }
                     else
                     {
-                        player.rotation.current = Quaternion.LookRotation(player.moveDirection);
+                        player.rotation.current = Quaternion.LookRotation(player.motion.moveDirection);
                     }
                     PlayerStaminaSystem.UseMana(ref player, player.vitals.dodgeManaCost);
                     break;
 
                 case PlayerState.Shot:
-                    player.attackCooldownTicks = player.weapons[player.currentWeaponIndex].attackIntervalTicks;
+                    player.actionState.attackCooldownTicks = player.weapons[player.weaponSlots.currentIndex].attackIntervalTicks;
                     break;
 
                 case PlayerState.Swing:
-                    player.isRotationLocked = true;
-                    player.attackCooldownTicks = player.weapons[player.currentWeaponIndex].attackIntervalTicks;
+                    player.motion.isRotationLocked = true;
+                    player.actionState.attackCooldownTicks = player.weapons[player.weaponSlots.currentIndex].attackIntervalTicks;
                     break;
 
                 case PlayerState.Throw:
-                    player.isRotationLocked = true;
+                    player.motion.isRotationLocked = true;
                     break;
 
                 case PlayerState.Die:
-                    player.moveDirection = Vector3.zero;
-                    player.isRotationLocked = true;
+                    player.motion.moveDirection = Vector3.zero;
+                    player.motion.isRotationLocked = true;
                     break;
             }
         }
 
         private static void ExitState(ref PlayerEntity player)
         {
-            switch (player.state)
+            switch (player.actionState.state)
             {
                 case PlayerState.Dodge:
-                    player.isRotationLocked = false;
+                    player.motion.isRotationLocked = false;
                     break;
 
                 case PlayerState.Swing:
                 case PlayerState.Throw:
-                    player.isRotationLocked = false;
+                    player.motion.isRotationLocked = false;
                     break;
             }
         }

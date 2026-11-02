@@ -38,8 +38,8 @@ namespace TopView.Systems
         private static void Spawn(ref PlayerEntity slot, in PlayerSpawnRequest request)
         {
             WeaponComponent[] weapons = SpawnSystem.ReuseArray(slot.weapons, request.weapons);
-            int[] weaponCurrentAmmo = ReuseAmmoArray(slot.weaponCurrentAmmo, weapons.Length);
-            int[] weaponReserveAmmo = ReuseAmmoArray(slot.weaponReserveAmmo, weapons.Length);
+            int[] weaponCurrentAmmo = ReuseAmmoArray(slot.weaponSlots.currentAmmo, weapons.Length);
+            int[] weaponReserveAmmo = ReuseAmmoArray(slot.weaponSlots.reserveAmmo, weapons.Length);
             for (int weaponIndex = 0; weaponIndex < weapons.Length; weaponIndex++)
             {
                 weaponCurrentAmmo[weaponIndex] = weapons[weaponIndex].startingCurrentAmmo;
@@ -55,16 +55,18 @@ namespace TopView.Systems
                 action = request.action,
                 position = new PositionComponent { previous = request.position, current = request.position },
                 rotation = new RotationComponent { previous = request.rotation, current = request.rotation },
-                state = PlayerState.Idle,
-                currentSpeed = request.movement.walkSpeed,
+                actionState = new PlayerActionStateComponent { state = PlayerState.Idle },
+                motion = new PlayerMotionComponent { currentSpeed = request.movement.walkSpeed },
                 health = new HealthComponent { current = request.vitals.maxHealth, max = request.vitals.maxHealth },
-                mana = request.vitals.maxMana,
-                manaRecoveryElapsedTicks = request.vitals.manaRecoveryDelayTicks,
+                mana = new ManaComponent { current = request.vitals.maxMana, recoveryElapsedTicks = request.vitals.manaRecoveryDelayTicks },
                 weapons = weapons,
-                weaponCurrentAmmo = weaponCurrentAmmo,
-                weaponReserveAmmo = weaponReserveAmmo,
-                currentWeaponIndex = 0,
-                pendingWeaponIndex = 0
+                weaponSlots = new PlayerWeaponSlotsComponent
+                {
+                    currentAmmo = weaponCurrentAmmo,
+                    reserveAmmo = weaponReserveAmmo,
+                    currentIndex = 0,
+                    pendingIndex = 0
+                }
             };
         }
 

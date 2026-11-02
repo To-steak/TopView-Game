@@ -53,9 +53,9 @@ namespace TopView.Systems
         private static bool Spawn(ref EnemyEntity slot, in EnemySpawnRequest request, float navMeshSampleDistance)
         {
             EnemyAttackComponent[] attacks = SpawnSystem.ReuseArray(slot.attacks, request.attacks);
-            Vector3[] pathCorners = slot.pathCorners;
+            Vector3[] pathCorners = slot.agent.pathCorners;
             Array.Clear(pathCorners, 0, pathCorners.Length);
-            int[] attackCooldownRemainingTicks = slot.attackCooldownRemainingTicks;
+            int[] attackCooldownRemainingTicks = slot.actionState.attackCooldownRemainingTicks;
             if (attackCooldownRemainingTicks == null || attackCooldownRemainingTicks.Length != attacks.Length)
             {
                 attackCooldownRemainingTicks = new int[attacks.Length];
@@ -78,15 +78,24 @@ namespace TopView.Systems
                 stats = request.stats,
                 behavior = request.behavior,
                 attacks = attacks,
-                attackCooldownRemainingTicks = attackCooldownRemainingTicks,
-                level = request.level,
+                combat = new CombatComponent
+                {
+                    level = request.level,
+                    attackDamage = request.stats.baseAttackDamage + request.level * request.stats.attackDamageIncrement
+                },
                 health = new HealthComponent { current = maxHealth, max = maxHealth },
-                attackDamage = request.stats.baseAttackDamage + request.level * request.stats.attackDamageIncrement,
-                maxSpeed = request.stats.baseSpeed + request.level * request.stats.speedIncrement,
                 position = new PositionComponent { previous = position, current = position },
                 rotation = new RotationComponent { previous = request.rotation, current = request.rotation },
-                state = EnemyState.Idle,
-                pathCorners = pathCorners
+                actionState = new EnemyActionStateComponent
+                {
+                    state = EnemyState.Idle,
+                    attackCooldownRemainingTicks = attackCooldownRemainingTicks
+                },
+                agent = new NavigationAgentComponent
+                {
+                    maxSpeed = request.stats.baseSpeed + request.level * request.stats.speedIncrement,
+                    pathCorners = pathCorners
+                }
             };
             return hasNavMesh;
         }
