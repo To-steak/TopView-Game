@@ -15,8 +15,6 @@ namespace TopView.Entities
 
         // 투사체 구간의 빈 칸 번호 목록. ProjectileSpawnSystem이 끝에서부터 꺼낸다
         public List<int> freeProjectileIndices;
-        // 근접 판정 구간의 빈 칸 번호 목록. MeleeSpawnSystem이 끝에서부터 꺼낸다
-        public List<int> freeMeleeIndices;
         // 적 종류별 구간의 빈 칸 번호 목록. EnemySpawnSystem이 끝에서부터 꺼낸다
         public List<int>[] freeEnemyIndicesByKind;
         // 보스 구간의 빈 칸 번호 목록. BossSpawnSystem이 끝에서부터 꺼낸다
@@ -34,10 +32,6 @@ namespace TopView.Entities
         public ProjectileMotionComponent[] projectileMotions;
         // 공격의 진영과 피해량
         public AttackPayloadComponent[] attackPayloads;
-        // 근접 판정 값과 진행 시간
-        public MeleeComponent[] melees;
-        // 근접 판정이 이미 맞힌 대상
-        public MeleeHitsComponent[] meleeHits;
         // 체력
         public HealthComponent[] healths;
         // 레벨과 공격력
@@ -78,20 +72,17 @@ namespace TopView.Entities
         public PlayerWeaponSlotsComponent[] weaponSlots;
 
         /// <summary>
-        /// 모든 칸이 빈 저장소를 만들고, 근접 판정 구간의 칸마다 이미 맞힌 대상을 기록할 배열을, 적 구간의 칸마다 경로 배열을 할당한다.
+        /// 모든 칸이 빈 저장소를 만들고, 적 구간의 칸마다 경로 배열을 할당한다.
         /// </summary>
         /// <param name="projectileCapacity">투사체 칸 수</param>
-        /// <param name="meleeCapacity">근접 판정 칸 수</param>
-        /// <param name="meleeHitCapacity">근접 판정 하나가 기록할 수 있는 이미 맞힌 대상 수</param>
         /// <param name="enemyKindCount">적 종류 수</param>
         /// <param name="enemyCapacityPerKind">적 종류별 칸 수</param>
         /// <param name="pathCornerCapacity">적 칸마다 미리 만들어 둘 경로 배열의 크기</param>
         /// <param name="bossCapacity">보스 칸 수</param>
         /// <param name="playerCapacity">플레이어 칸 수</param>
-        public EntityStorage(int projectileCapacity, int meleeCapacity, int meleeHitCapacity, int enemyKindCount, int enemyCapacityPerKind, int pathCornerCapacity, int bossCapacity, int playerCapacity)
+        public EntityStorage(int projectileCapacity, int enemyKindCount, int enemyCapacityPerKind, int pathCornerCapacity, int bossCapacity, int playerCapacity)
         {
-            int meleeEnd = projectileCapacity + meleeCapacity;
-            int enemyEnd = meleeEnd + enemyKindCount * enemyCapacityPerKind;
+            int enemyEnd = projectileCapacity + enemyKindCount * enemyCapacityPerKind;
             int bossEnd = enemyEnd + bossCapacity;
             int capacity = bossEnd + playerCapacity;
             masks = new ComponentMask[capacity];
@@ -101,8 +92,6 @@ namespace TopView.Entities
             projectiles = new ProjectileComponent[capacity];
             projectileMotions = new ProjectileMotionComponent[capacity];
             attackPayloads = new AttackPayloadComponent[capacity];
-            melees = new MeleeComponent[capacity];
-            meleeHits = new MeleeHitsComponent[capacity];
             healths = new HealthComponent[capacity];
             combats = new CombatComponent[capacity];
             enemyStats = new EnemyStatsComponent[capacity];
@@ -129,18 +118,11 @@ namespace TopView.Entities
                 freeProjectileIndices.Add(index);
             }
 
-            freeMeleeIndices = new List<int>(meleeCapacity);
-            for (int index = meleeEnd - 1; index >= projectileCapacity; index--)
-            {
-                meleeHits[index].targets = new EntityIdentifier[meleeHitCapacity];
-                freeMeleeIndices.Add(index);
-            }
-
             freeEnemyIndicesByKind = new List<int>[enemyKindCount];
             for (int kind = 0; kind < enemyKindCount; kind++)
             {
                 freeEnemyIndicesByKind[kind] = new List<int>(enemyCapacityPerKind);
-                int kindStart = meleeEnd + kind * enemyCapacityPerKind;
+                int kindStart = projectileCapacity + kind * enemyCapacityPerKind;
                 for (int index = kindStart + enemyCapacityPerKind - 1; index >= kindStart; index--)
                 {
                     navigationAgents[index].pathCorners = new Vector3[pathCornerCapacity];

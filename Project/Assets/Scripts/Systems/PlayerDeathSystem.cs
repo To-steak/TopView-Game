@@ -17,10 +17,9 @@ namespace TopView.Systems
         /// <param name="healths">체력</param>
         /// <param name="actionStates">플레이어 행동 상태와 공격 진행</param>
         /// <param name="motions">플레이어 이동 상태</param>
-        /// <param name="melees">근접 판정 값과 진행 시간</param>
-        /// <param name="freeMeleeIndices">근접 판정 구간의 빈 칸 번호 목록</param>
+        /// <param name="melees">근접 판정 저장소</param>
         /// <param name="stateRecords">상태 변경 기록</param>
-        public static void Tick(ComponentMask[] masks, int[] generations, HealthComponent[] healths, PlayerActionStateComponent[] actionStates, PlayerMotionComponent[] motions, MeleeComponent[] melees, List<int> freeMeleeIndices, List<PlayerStateChangedRecord> stateRecords)
+        public static void Tick(ComponentMask[] masks, int[] generations, HealthComponent[] healths, PlayerActionStateComponent[] actionStates, PlayerMotionComponent[] motions, MeleeStorage melees, List<PlayerStateChangedRecord> stateRecords)
         {
             for (int index = 0; index < masks.Length; index++)
             {
@@ -50,7 +49,7 @@ namespace TopView.Systems
                 motions[index].moveDirection = Vector3.zero;
                 motions[index].isRotationLocked = true;
 
-                MeleeHitSystem.DespawnOwnedBy(masks, melees, freeMeleeIndices, in identifier);
+                MeleeHitSystem.DespawnOwnedBy(melees, in identifier, Faction.Player);
             }
         }
     }
