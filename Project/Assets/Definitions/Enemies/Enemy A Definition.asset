@@ -17,6 +17,7 @@ MonoBehaviour:
     basicAttackDamage: 10
     levelIncrement: 10
     score: 350
+    baseGold: 10
     hitRadius: 0.75
   behavior:
     detectionRadius: 10
