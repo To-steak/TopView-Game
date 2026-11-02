@@ -1,0 +1,13 @@
+namespace TopView.Editor
+{
+    /// <summary>
+    /// 레벨 칠하기 창에서 Scene 뷰 클릭이 하는 일.
+    /// </summary>
+    public enum LevelPaintMode
+    {
+        // 격자 칸에 타일 칠하기·지우기
+        Tile,
+        // 격자와 상관없이 소품 놓기·지우기
+        Prop,
+    }
+}
