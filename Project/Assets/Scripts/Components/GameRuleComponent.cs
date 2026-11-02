@@ -16,5 +16,7 @@ namespace TopView.Components
         public int bossLevel;
         // World의 난수 생성기 시드
         public int randomSeed;
+        // 적의 목적지와 생성 위치를 NavMesh 위로 맞출 때 찾는 최대 거리(유닛)
+        public float navMeshSampleDistance;
     }
 }

@@ -16,7 +16,8 @@ namespace TopView.Systems
         /// </summary>
         /// <param name="enemies">적 저장소</param>
         /// <param name="enemySpawnRequests">적 생성 요청 큐</param>
-        public static void Tick(EnemyStorage enemies, Queue<EnemySpawnRequest> enemySpawnRequests)
+        /// <param name="navMeshSampleDistance">생성 위치를 NavMesh 위로 맞출 때 찾는 최대 거리(유닛)</param>
+        public static void Tick(EnemyStorage enemies, Queue<EnemySpawnRequest> enemySpawnRequests, float navMeshSampleDistance)
         {
             int droppedCount = 0;
             int missingNavMeshCount = 0;
@@ -31,7 +32,7 @@ namespace TopView.Systems
                     continue;
                 }
 
-                if (!Spawn(ref enemies.entities[index], in request))
+                if (!Spawn(ref enemies.entities[index], in request, navMeshSampleDistance))
                 {
                     missingNavMeshCount++;
                     missingNavMeshPosition = request.position;
@@ -49,24 +50,20 @@ namespace TopView.Systems
         }
 
         // 생성 위치 근처에 NavMesh가 없으면 그 위치에 그대로 만들고 false를 돌려준다.
-        private static bool Spawn(ref EnemyEntity slot, in EnemySpawnRequest request)
+        private static bool Spawn(ref EnemyEntity slot, in EnemySpawnRequest request, float navMeshSampleDistance)
         {
             EnemyAttackComponent[] attacks = SpawnSystem.ReuseArray(slot.attacks, request.attacks);
             Vector3[] pathCorners = slot.pathCorners;
-            if (pathCorners == null || pathCorners.Length != request.navigation.maxPathCorners)
-            {
-                pathCorners = new Vector3[request.navigation.maxPathCorners];
-            }
             Array.Clear(pathCorners, 0, pathCorners.Length);
 
             Vector3 position = request.position;
-            bool hasNavMesh = NavMesh.SamplePosition(position, out NavMeshHit hit, request.navigation.navMeshSampleDistance, NavMesh.AllAreas);
+            bool hasNavMesh = NavMesh.SamplePosition(position, out NavMeshHit hit, navMeshSampleDistance, NavMesh.AllAreas);
             if (hasNavMesh)
             {
                 position = hit.position;
             }
 
-            float maxHealth = request.stats.basicMaxHealth + request.level * request.stats.levelIncrement;
+            float maxHealth = request.stats.baseMaxHealth + request.level * request.stats.maxHealthIncrement;
             slot = new EnemyEntity
             {
                 isAlive = true,
@@ -74,12 +71,12 @@ namespace TopView.Systems
                 kind = request.enemyKindIndex,
                 stats = request.stats,
                 behavior = request.behavior,
-                navigation = request.navigation,
                 attacks = attacks,
                 level = request.level,
                 maxHealth = maxHealth,
                 health = maxHealth,
-                attackDamage = request.stats.basicAttackDamage + request.level * request.stats.levelIncrement,
+                attackDamage = request.stats.baseAttackDamage + request.level * request.stats.attackDamageIncrement,
+                maxSpeed = request.stats.baseSpeed + request.level * request.stats.speedIncrement,
                 previousPosition = position,
                 currentPosition = position,
                 previousRotation = request.rotation,

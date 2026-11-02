@@ -17,7 +17,7 @@ namespace TopView.Core
         private const int BOSS_CAPACITY = 1;
 
         // 씬의 Boss Spawner Authoring이 가리키는 Boss Definition을 읽어 보스 생성 템플릿을 만든다. 스포너가 하나가 아니거나 값이 빠져 있으면 false
-        private static bool TryReadBoss(List<GameObject> projectilePrefabs, List<float> projectilePitchSpeeds, List<GameObject> hitEffectPrefabs, out BossDefinition bossDefinition, out BossSpawnRequest spawnTemplate)
+        private static bool TryReadBoss(List<GameObject> projectilePrefabs, List<GameObject> hitEffectPrefabs, out BossDefinition bossDefinition, out BossSpawnRequest spawnTemplate)
         {
             bossDefinition = null;
             spawnTemplate = default;
@@ -37,8 +37,7 @@ namespace TopView.Core
                 return false;
             }
 
-            EnemyAttackComponent[] attacks = (EnemyAttackComponent[])bossDefinition.attacks.Clone();
-            AssignAttackViews(bossDefinition.name, attacks, bossDefinition.attackProjectilePrefabs, bossDefinition.attackHitEffectPrefabs, bossDefinition.attackProjectilePitchSpeeds, projectilePrefabs, projectilePitchSpeeds, hitEffectPrefabs);
+            EnemyAttackComponent[] attacks = ReadAttacks(bossDefinition.name, bossDefinition.attacks, projectilePrefabs, hitEffectPrefabs);
 
             spawnTemplate = new BossSpawnRequest
             {
@@ -51,7 +50,7 @@ namespace TopView.Core
         }
 
 #if UNITY_EDITOR
-        // 살아 있는 보스의 Body 공격 판정 원을 Logic 위치에 그린다.
+        // 살아 있는 보스의 피격 판정 원(청록)과 Body 공격 판정 원(빨강)을 Logic 위치에 그린다.
         private void DrawBossGizmos()
         {
             BossEntity[] bosses = _world.bosses.entities;
@@ -60,6 +59,8 @@ namespace TopView.Core
                 ref readonly BossEntity boss = ref bosses[bossIndex];
                 if (boss.isAlive)
                 {
+                    Gizmos.color = Color.cyan;
+                    DrawCircleGizmo(boss.currentPosition, boss.stats.hitRadius);
                     DrawBodyAttackGizmos(boss.attacks, boss.currentPosition, boss.currentRotation);
                 }
             }

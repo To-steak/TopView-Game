@@ -41,17 +41,22 @@ namespace TopView.Core
             }
 
             List<GameObject> projectilePrefabs = new List<GameObject>();
-            List<float> projectilePitchSpeeds = new List<float>();
             List<GameObject> hitEffectPrefabs = new List<GameObject>();
 
-            if (!TryReadPlayer(playerSpawner, projectilePrefabs, projectilePitchSpeeds, hitEffectPrefabs, out PlayerDefinition playerDefinition, out PlayerSpawnRequest playerSpawnRequest, out GameObject[] weaponModelPrefabs))
+            if (!TryReadPlayer(playerSpawner, projectilePrefabs, hitEffectPrefabs, out PlayerDefinition playerDefinition, out PlayerSpawnRequest playerSpawnRequest, out GameObject[] weaponModelPrefabs))
             {
                 return;
             }
 
-            if (gameSettings.enemyCapacityPerKind <= 0 || gameSettings.projectileCapacity <= 0)
+            if (gameSettings.enemyCapacityPerKind <= 0 || gameSettings.enemyPathCornerCapacity <= 0 || gameSettings.projectileCapacity <= 0)
             {
-                Debug.LogError("Runner >> Game Settings Definition의 Enemy Capacity Per Kind나 Projectile Capacity가 0 이하라 판을 시작할 수 없다.");
+                Debug.LogError("Runner >> Game Settings Definition의 Enemy Capacity Per Kind, Enemy Path Corner Capacity, Projectile Capacity 중 0 이하인 값이 있어 판을 시작할 수 없다.");
+                return;
+            }
+
+            if (gameSettings.rule.navMeshSampleDistance <= 0f)
+            {
+                Debug.LogError("Runner >> Game Settings Definition의 Nav Mesh Sample Distance가 0 이하라 판을 시작할 수 없다.");
                 return;
             }
 
@@ -62,12 +67,9 @@ namespace TopView.Core
             }
 
             int enemyKindCount = enemyDefinitions.Length;
-            if (!TryReadEnemies(enemyDefinitions, projectilePrefabs, projectilePitchSpeeds, hitEffectPrefabs, out EnemySpawnRequest[] enemySpawnTemplates, out GameObject[] enemyViewPrefabs, out GameObject[] enemyHealthGaugePrefabs, out Vector3[] enemyHealthGaugeOffsets, out Color[] enemyHealthGaugeColors))
-            {
-                return;
-            }
+            ReadEnemies(enemyDefinitions, projectilePrefabs, hitEffectPrefabs, out EnemySpawnRequest[] enemySpawnTemplates, out GameObject[] enemyViewPrefabs, out GameObject[] enemyHealthGaugePrefabs);
 
-            if (!TryReadBoss(projectilePrefabs, projectilePitchSpeeds, hitEffectPrefabs, out BossDefinition bossDefinition, out BossSpawnRequest bossSpawnTemplate))
+            if (!TryReadBoss(projectilePrefabs, hitEffectPrefabs, out BossDefinition bossDefinition, out BossSpawnRequest bossSpawnTemplate))
             {
                 return;
             }
@@ -79,7 +81,7 @@ namespace TopView.Core
             world.random = new System.Random(world.rule.randomSeed);
             world.players = new PlayerStorage(PLAYER_CAPACITY);
             world.playerSpawnRequests.Enqueue(playerSpawnRequest);
-            world.enemies = new EnemyStorage(enemyKindCount, gameSettings.enemyCapacityPerKind);
+            world.enemies = new EnemyStorage(enemyKindCount, gameSettings.enemyCapacityPerKind, gameSettings.enemyPathCornerCapacity);
             world.enemySpawnTemplates = enemySpawnTemplates;
             world.bosses = new BossStorage(BOSS_CAPACITY);
             world.bossSpawnTemplate = bossSpawnTemplate;
@@ -108,11 +110,8 @@ namespace TopView.Core
             _playerWeaponModelPrefabs = weaponModelPrefabs;
             _enemyViewPrefabs = enemyViewPrefabs;
             _enemyHealthGaugePrefabs = enemyHealthGaugePrefabs;
-            _enemyHealthGaugeOffsets = enemyHealthGaugeOffsets;
-            _enemyHealthGaugeColors = enemyHealthGaugeColors;
             _bossViewPrefab = bossDefinition.viewPrefab;
             _projectilePrefabs = projectilePrefabs.ToArray();
-            _projectilePitchSpeeds = projectilePitchSpeeds.ToArray();
             _hitEffectPrefabs = hitEffectPrefabs.ToArray();
             _viewContext = CreateViewContext(enemyKindCount);
 

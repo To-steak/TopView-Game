@@ -18,8 +18,6 @@ namespace TopView.Requests
         public EnemyStatsComponent stats;
         // 행동 값
         public EnemyBehaviorComponent behavior;
-        // 길찾기 이동 값
-        public EnemyNavigationComponent navigation;
         // 공격 목록. EnemySpawnSystem이 엔티티의 배열로 복사한다
         public EnemyAttackComponent[] attacks;
     }

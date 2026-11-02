@@ -19,7 +19,8 @@ namespace TopView.Systems
         /// </summary>
         /// <param name="enemies">적 저장소</param>
         /// <param name="path">경로 계산에 다시 쓰는 NavMeshPath</param>
-        public static void Tick(EnemyStorage enemies, NavMeshPath path)
+        /// <param name="navMeshSampleDistance">목적지를 NavMesh 위로 맞출 때 찾는 최대 거리(유닛)</param>
+        public static void Tick(EnemyStorage enemies, NavMeshPath path, float navMeshSampleDistance)
         {
             float deltaTime = Time.fixedDeltaTime;
             int failedPathCount = 0;
@@ -35,7 +36,7 @@ namespace TopView.Systems
                 enemy.previousPosition = enemy.currentPosition;
                 enemy.previousRotation = enemy.currentRotation;
 
-                if (enemy.hasDestination && enemy.isPathDirty && !TryRecalculatePath(ref enemy, path))
+                if (enemy.hasDestination && enemy.isPathDirty && !TryRecalculatePath(ref enemy, path, navMeshSampleDistance))
                 {
                     failedPathCount++;
                 }
@@ -90,14 +91,14 @@ namespace TopView.Systems
         }
 
         // 목적지까지의 경로를 다시 구한다. 구하지 못하면 꺾이는 점이 없는 채로 false를 돌려주고, Move가 도착한 것으로 본다.
-        private static bool TryRecalculatePath(ref EnemyEntity enemy, NavMeshPath path)
+        private static bool TryRecalculatePath(ref EnemyEntity enemy, NavMeshPath path, float navMeshSampleDistance)
         {
             enemy.isPathDirty = false;
             enemy.pathCornerCount = 0;
             enemy.pathCornerIndex = 0;
 
             Vector3 destination = enemy.destination;
-            if (NavMesh.SamplePosition(destination, out NavMeshHit destinationHit, enemy.navigation.navMeshSampleDistance, NavMesh.AllAreas))
+            if (NavMesh.SamplePosition(destination, out NavMeshHit destinationHit, navMeshSampleDistance, NavMesh.AllAreas))
             {
                 destination = destinationHit.position;
             }
@@ -130,11 +131,11 @@ namespace TopView.Systems
 
             enemy.hasReachedDestination = false;
 
-            float brakingSpeed = Mathf.Sqrt(2f * enemy.navigation.acceleration * (remainingDistance - enemy.stoppingDistance));
-            float desiredSpeed = Mathf.Min(enemy.navigation.speed, brakingSpeed);
+            float brakingSpeed = Mathf.Sqrt(2f * enemy.behavior.acceleration * (remainingDistance - enemy.stoppingDistance));
+            float desiredSpeed = Mathf.Min(enemy.maxSpeed, brakingSpeed);
             Vector3 toCorner = enemy.pathCorners[enemy.pathCornerIndex] - enemy.currentPosition;
             Vector3 desiredVelocity = toCorner.normalized * desiredSpeed;
-            enemy.velocity = Vector3.MoveTowards(enemy.velocity, desiredVelocity, enemy.navigation.acceleration * deltaTime);
+            enemy.velocity = Vector3.MoveTowards(enemy.velocity, desiredVelocity, enemy.behavior.acceleration * deltaTime);
 
             Vector3 step = enemy.velocity * deltaTime;
             if (step.sqrMagnitude >= toCorner.sqrMagnitude)
@@ -155,7 +156,7 @@ namespace TopView.Systems
             flatVelocity.y = 0f;
             if (flatVelocity.sqrMagnitude > MIN_TURN_SPEED_SQUARED)
             {
-                enemy.currentRotation = Quaternion.RotateTowards(enemy.currentRotation, Quaternion.LookRotation(flatVelocity), enemy.navigation.angularSpeed * deltaTime);
+                enemy.currentRotation = Quaternion.RotateTowards(enemy.currentRotation, Quaternion.LookRotation(flatVelocity), enemy.behavior.angularSpeed * deltaTime);
             }
         }
 
@@ -198,7 +199,7 @@ namespace TopView.Systems
                     Vector3 delta = second.currentPosition - first.currentPosition;
                     delta.y = 0f;
                     float distance = delta.magnitude;
-                    float minimumDistance = first.navigation.radius + second.navigation.radius;
+                    float minimumDistance = first.stats.hitRadius + second.stats.hitRadius;
                     if (distance >= minimumDistance || distance < MIN_SEPARATION_DISTANCE)
                     {
                         continue;

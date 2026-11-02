@@ -69,7 +69,7 @@ namespace TopView.Core
                 PlayerStaminaSystem.Tick(_world.players);
                 EnemyBehaviorSystem.Tick(_world.enemies, _world.players, _world.random, _world.enemyStateChangedRecords, _world.projectileSpawnRequests, _world.meleeSpawnRequests);
                 BossBehaviorSystem.Tick(_world.bosses, _world.players, _world.random, _world.bossStateChangedRecords, _world.projectileSpawnRequests, _world.meleeSpawnRequests, _world.gameOverRequests);
-                EnemyNavigationSystem.Tick(_world.enemies, _world.navigationPath);
+                EnemyNavigationSystem.Tick(_world.enemies, _world.navigationPath, _world.rule.navMeshSampleDistance);
                 ProjectileSystem.Tick(_world.projectiles);
                 HitTargetSystem.Tick(_world.players, _world.enemies, _world.bosses, _world.hitTargets, ref _world.hitTargetCount);
                 ProjectileHitSystem.Tick(_world.projectiles, _world.hitTargets, _world.hitTargetCount, _world.damageRequests, _world.projectileHitRecords);
@@ -81,7 +81,7 @@ namespace TopView.Core
             {
                 WaveSystem.Tick(in _world.rule, _world.waves, _world.enemySpawnPointsByKind, _world.enemySpawnTemplates, in _world.bossSpawnTemplate, ref _world.progress, _world.random, _world.enemySpawnRequests, _world.bossSpawnRequests);
                 PlayerSpawnSystem.Tick(_world.players, _world.playerSpawnRequests);
-                EnemySpawnSystem.Tick(_world.enemies, _world.enemySpawnRequests);
+                EnemySpawnSystem.Tick(_world.enemies, _world.enemySpawnRequests, _world.rule.navMeshSampleDistance);
                 BossSpawnSystem.Tick(_world.bosses, _world.bossSpawnRequests, _world.players);
                 ProjectileSpawnSystem.Tick(_world.projectiles, _world.projectileSpawnRequests);
                 MeleeSpawnSystem.Tick(_world.melees, _world.meleeSpawnRequests);
@@ -117,9 +117,9 @@ namespace TopView.Core
 
             PlayerViewSystem.Present(_world.players, _world.playerStateChangedRecords, _playerViewPrefab, _playerWeaponModelPrefabs, _playerRangedLayerBlendInTicks, _viewContext.player);
             EnemyViewSystem.Present(_world.enemies, _world.enemyStateChangedRecords, _enemyViewPrefabs, _viewContext.enemy);
-            EnemyHealthGaugeViewSystem.Present(_world.enemies, _enemyHealthGaugePrefabs, _enemyHealthGaugeOffsets, _enemyHealthGaugeColors, _viewContext.camera.mainCamera, _viewContext.enemy);
+            EnemyHealthGaugeViewSystem.Present(_world.enemies, _enemyHealthGaugePrefabs, _viewContext.camera.mainCamera, _viewContext.enemy);
             BossViewSystem.Present(_world.bosses, _world.bossStateChangedRecords, _bossViewPrefab, _viewContext.boss);
-            ProjectileViewSystem.Present(_world.projectiles, _projectilePrefabs, _projectilePitchSpeeds, _viewContext.projectile);
+            ProjectileViewSystem.Present(_world.projectiles, _projectilePrefabs, _viewContext.projectile);
             HitEffectViewSystem.Present(_world.projectileHitRecords, _hitEffectPrefabs, _viewContext.hitEffect);
             CameraViewSystem.Present(_viewContext.camera, _viewContext.player.view, _playerCameraPriority);
 

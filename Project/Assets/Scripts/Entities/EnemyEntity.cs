@@ -13,12 +13,10 @@ namespace TopView.Entities
         // 적 종류 번호
         public int kind;
 
-        // 체력·공격력·점수 값. 생성 때 Definition에서 복사한다
+        // 체력·공격력·이동 속도·점수·골드 값. 생성 때 Definition에서 복사한다
         public EnemyStatsComponent stats;
         // 행동 값. 생성 때 Definition에서 복사한다
         public EnemyBehaviorComponent behavior;
-        // 길찾기 이동 값. 생성 때 Definition에서 복사한다
-        public EnemyNavigationComponent navigation;
         // 공격 목록. 생성 때 Definition에서 복사한다
         public EnemyAttackComponent[] attacks;
 
@@ -30,6 +28,8 @@ namespace TopView.Entities
         public float health;
         // 공격력. 공격마다 배율을 곱한다
         public float attackDamage;
+        // 최고 이동 속도(유닛/초)
+        public float maxSpeed;
 
         // 직전 틱의 위치(월드, NavMesh 표면). View가 보간에 쓴다
         public Vector3 previousPosition;

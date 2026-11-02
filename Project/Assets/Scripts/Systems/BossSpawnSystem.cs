@@ -50,7 +50,7 @@ namespace TopView.Systems
                 rotation = Quaternion.LookRotation(toPlayer);
             }
 
-            float maxHealth = request.stats.basicMaxHealth + request.level * request.stats.levelIncrement;
+            float maxHealth = request.stats.baseMaxHealth + request.level * request.stats.maxHealthIncrement;
             slot = new BossEntity
             {
                 isAlive = true,
@@ -61,7 +61,7 @@ namespace TopView.Systems
                 level = request.level,
                 maxHealth = maxHealth,
                 health = maxHealth,
-                attackDamage = request.stats.basicAttackDamage + request.level * request.stats.levelIncrement,
+                attackDamage = request.stats.baseAttackDamage + request.level * request.stats.attackDamageIncrement,
                 previousPosition = request.position,
                 currentPosition = request.position,
                 previousRotation = rotation,

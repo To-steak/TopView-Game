@@ -13,9 +13,8 @@ namespace TopView.Presentation.Projectile.ViewSystems
         /// </summary>
         /// <param name="projectiles">투사체 저장소</param>
         /// <param name="projectilePrefabs">투사체 View 표. 번호별 ProjectileView 프리팹</param>
-        /// <param name="pitchSpeeds">투사체 View 표 번호별로 모델이 앞으로 구르는 각속도(도/초)</param>
         /// <param name="context">투사체 View 실행 상태</param>
-        public static void Present(ProjectileStorage projectiles, GameObject[] projectilePrefabs, float[] pitchSpeeds, ProjectileViewContext context)
+        public static void Present(ProjectileStorage projectiles, GameObject[] projectilePrefabs, ProjectileViewContext context)
         {
             float alpha = Mathf.Clamp01((Time.time - Time.fixedTime) / Time.fixedDeltaTime);
 
@@ -45,10 +44,9 @@ namespace TopView.Presentation.Projectile.ViewSystems
                     view.transform.SetPositionAndRotation(position, projectile.rotation);
                 }
 
-                float pitchSpeed = pitchSpeeds[projectile.projectile.viewIndex];
-                if (pitchSpeed != 0f && view.pitchPivot != null)
+                if (view.pitchSpeed != 0f && view.pitchPivot != null)
                 {
-                    view.pitchPivot.Rotate(Vector3.right * pitchSpeed * Time.deltaTime, Space.Self);
+                    view.pitchPivot.Rotate(Vector3.right * view.pitchSpeed * Time.deltaTime, Space.Self);
                 }
             }
         }
