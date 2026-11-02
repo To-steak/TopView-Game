@@ -7,7 +7,7 @@ paths:
 
 # 아키텍처 규칙
 
-ECS 패키지(DOTS)는 쓰지 않는다. "System은 함수, 상태는 데이터"라는 철학만 순수 C#으로 따른다.
+ECS 구조를 순수 C#으로 따른다. 패키지(DOTS)는 쓰지 않는다. 엔티티는 칸 번호이고, 데이터는 컴포넌트 배열에 있으며, System은 그 배열을 읽고 쓰는 함수다.
 
 규칙마다 `이유:` 줄은 그 규칙이 없으면 무엇이 깨지는지를 적는다. 이유가 성립하지 않는 상황이면 규칙을 어기기 전에 먼저 묻는다.
 
@@ -34,7 +34,7 @@ ECS 패키지(DOTS)는 쓰지 않는다. "System은 함수, 상태는 데이터"
   - 이유: 물리 시뮬레이션은 Tick 밖의 시점에 위치를 바꾸고, 충돌 콜백은 이벤트처럼 호출 순서가 숨는다.
 
 ## World / Runner
-- **World**는 한 판의 데이터(엔티티 저장소, 기록 목록, 요청 큐, 명령 버퍼, 난수 생성기)를 모아 두는 컨테이너다. Core에 있고 Runner만 쓴다. 판마다 `new World()`로 새로 만든다.
+- **World**는 한 판의 데이터(공유 저장소 `EntityStorage`, 기록 목록, 요청 큐, 명령 버퍼, 난수 생성기)를 모아 두는 컨테이너다. Core에 있고 Runner만 쓴다. 판마다 `new World()`로 새로 만든다.
   - 이유: 한 판의 상태가 객체 하나에 있으면 새 판을 시작할 때 이전 판의 값이 남지 않는다.
 - **Runner가 World에서 필요한 데이터를 꺼내 System, ViewSystem, Presenter에 넘긴다.** 이들은 World를 받지 않는다.
   - 이유: World를 통째로 받으면 시그니처만 보고 무엇을 읽고 쓰는지 알 수 없다.
@@ -46,29 +46,35 @@ ECS 패키지(DOTS)는 쓰지 않는다. "System은 함수, 상태는 데이터"
 ## System
 - 로직은 `~System` 이름의 **static 클래스**로 만든다. **static 필드에 상태를 두지 않는다.**
   - 이유: 상태가 모두 World에 있어야 판을 다시 시작하거나 같은 입력으로 다시 돌릴 때 숨은 값이 없다.
-- **`Tick`은 그 System이 읽고 쓰는 데이터만 인자로 받는다.** 시그니처가 곧 그 System의 영향 범위다. 읽기만 하는 struct는 `in`, 수정하는 struct는 `ref`로 받는다.
+- **`Tick`은 그 System이 읽고 쓰는 데이터만 인자로 받는다.** 시그니처가 곧 그 System의 영향 범위다. 컴포넌트는 `EntityStorage`를 통째로 받지 않고 쓰는 배열만 받는다. 읽기만 하는 struct는 `in`, 수정하는 struct는 `ref`로 받는다.
   - 이유: 함수 본문을 읽지 않고도 무엇을 바꾸는지 알 수 있다. `in`/`ref`로 수정 여부가 호출부에서 보인다.
 
 ```csharp
 // Runner
-MoveSystem.Tick(_world.enemies, _world.enemyMovedRecords);
+ProjectileSystem.Tick(_world.entities.masks, _world.entities.projectiles, _world.entities.projectileMotions, _world.entities.positions, _world.entities.freeProjectileIndices);
 ```
 
-- **엔티티는 모두 `~Storage`에 담고, 생성은 엔티티 종류별 `~SpawnSystem`(예: `EnemySpawnSystem`, 틱 마지막)에서만 한다.** 하나뿐인 엔티티(플레이어)도 예외가 없다. 다른 System과 Core는 생성 요청 큐(`Queue<~SpawnRequest>`)에 넣기만 한다.
-  - 이유: 순회 도중 Storage가 바뀌지 않고, 새 엔티티는 항상 다음 틱부터 동작한다. 슬롯 할당이 한 곳에 모인다.
-- **`~SpawnSystem`은 슬롯을 채울 때 필드를 하나씩 대입하지 않고 `new ~Entity { … }`로 struct 전체를 대입한다.** 이전 값에서는 `generation`만 이어받는다. 할당을 피하려고 재사용하는 배열 필드는 대입 전에 꺼내 두었다가 새 struct에 다시 넣고 내용을 비운다.
-  - 이유: 엔티티에 필드를 추가하고 대입을 빠뜨리면 그 칸을 쓰던 이전 엔티티의 값이 남는다. 전체를 대입하면 빠뜨린 필드는 기본값이 된다.
-- 소멸은 즉시 한다(`isAlive = false`, 슬롯 반납). 이후 System은 `isAlive`로 건너뛴다.
-  - 이유: 고정 배열이라 플래그만 바꾸면 되고, 같은 틱의 뒤 System이 이미 죽은 엔티티를 처리하지 않는다.
-- 엔티티는 객체 참조 대신 `EntityIdentifier { index, generation }`로 가리킨다. 엔티티 저장소(`~Storage`)는 종류별 배열과 빈 슬롯 목록으로 보관하고, 슬롯을 재사용할 때 generation을 올린다.
+- **System은 엔티티 종류가 아니라 필요한 컴포넌트 조합으로 대상을 찾는다.** 칸의 `ComponentMask`를 System의 `private const ComponentMask ~_QUERY`와 비교한다. 여러 종류가 함께 쓰는 System(피해, 피격, 스냅샷 등)은 종류를 묻지 않는다. 한 종류의 행동만 다루는 System과 View는 `ComponentMask`의 `~Archetype`으로 찾아도 된다.
+  - 이유: 종류를 물으면 종류마다 반복문과 분기가 생긴다. 조합으로 찾으면 같은 컴포넌트를 가진 새 엔티티에도 그대로 동작한다.
+- **엔티티는 모두 `EntityStorage`의 칸에 담고, 생성은 엔티티 종류별 `~SpawnSystem`(예: `EnemySpawnSystem`, 틱 마지막)에서만 한다.** 하나뿐인 엔티티(플레이어)도 예외가 없다. 다른 System과 Core는 생성 요청 큐(`Queue<~SpawnRequest>`)에 넣기만 한다.
+  - 이유: 순회 도중 칸이 채워지지 않고, 새 엔티티는 항상 다음 틱부터 동작한다. 칸 할당이 한 곳에 모인다.
+- **`~SpawnSystem`은 `SpawnSystem.ClaimSlot`으로 칸을 받은 뒤 그 종류의 컴포넌트를 채운다.** `ClaimSlot`이 세대를 올리고 모든 컴포넌트를 비운다. 할당을 피하려고 재사용하는 배열은 `ClaimSlot` 전에 꺼내 두었다가 새 컴포넌트에 다시 넣고 내용을 비운다. `~SpawnSystem`만 칸 전체를 다루므로 `EntityStorage`를 통째로 받는다.
+  - 이유: 컴포넌트를 추가하고 대입을 빠뜨려도 그 칸을 쓰던 이전 엔티티의 값이 남지 않고 기본값이 된다.
+- 컴포넌트를 추가할 때는 `EntityStorage`의 배열, `ComponentMask`의 표시, `SpawnSystem.ClaimSlot`의 비우기를 함께 고치고, 그 컴포넌트를 갖는 `~Archetype`에 넣는다.
+  - 이유: 넷 중 하나를 빠뜨리면 컴파일은 되지만 이전 값이 남거나 조회에 잡히지 않는다.
+- 소멸은 즉시 한다(`SpawnSystem.ReleaseSlot`: 표시를 `None`으로 바꾸고 칸 반납). 이후 System은 표시로 건너뛴다.
+  - 이유: 고정 배열이라 표시만 바꾸면 되고, 같은 틱의 뒤 System이 이미 죽은 엔티티를 처리하지 않는다.
+- 엔티티는 객체 참조 대신 `EntityIdentifier { index, generation }`로 가리킨다. 칸을 재사용할 때 generation을 올린다.
   - 이유: 칸이 재사용되어도 이미 사라진 엔티티를 가리키는지 generation으로 가린다. 값이라서 Record에 담을 수 있다.
+- `EntityStorage`의 칸은 엔티티 종류별 구간으로 나누고, 구간마다 빈 칸 목록을 둔다.
+  - 이유: 칸 수가 종류별로 정해져 있어 한 종류가 많이 생겨도 다른 종류의 칸을 차지하지 않는다.
 - System 간 호출은 직접 호출한다.
   - 이유: 공용 판정을 중복 없이 쓰고, 호출 관계가 코드에 그대로 보인다.
 - 서비스 클래스, ServiceLocator를 만들지 않는다.
   - 이유: 인자로 받지 않은 의존이 생기면 시그니처가 영향 범위를 보여 주지 못한다.
 
 ## 실패 처리
-- **조용히 실패하지 않는다.** 요청을 버리거나, 찾는 대상이 없거나, 예상 밖의 값을 만나 건너뛸 때(`continue`, 이른 `return`)는 `Debug.LogWarning` 또는 `Debug.LogError`로 남긴다. 정상 흐름의 건너뛰기(`isAlive`가 false인 칸, 이미 죽은 대상에 대한 피해·상태 변경 등)는 해당하지 않는다.
+- **조용히 실패하지 않는다.** 요청을 버리거나, 찾는 대상이 없거나, 예상 밖의 값을 만나 건너뛸 때(`continue`, 이른 `return`)는 `Debug.LogWarning` 또는 `Debug.LogError`로 남긴다. 정상 흐름의 건너뛰기(조회에 맞지 않는 칸, 이미 죽은 대상에 대한 피해·상태 변경 등)는 해당하지 않는다.
   - 이유: 조용히 넘기면 증상만 보이고 단서가 없다. 조용히 틀릴 수 있는 곳이 줄수록 사람이 검토할 범위가 좁아진다.
 - 매 틱 반복될 수 있는 실패는 틱당 종류별로 한 번만, 개수를 모아 남긴다.
   - 이유: 실패마다 남기면 초당 수십 줄이 쌓여 오히려 원인을 찾기 어렵다.
@@ -76,16 +82,18 @@ MoveSystem.Tick(_world.enemies, _world.enemyMovedRecords);
 ## 데이터와 로딩
 - 수치는 하드코딩하지 않고 `~Definition`(ScriptableObject)에 둔다.
   - 이유: 수치를 코드 수정 없이 에디터에서 조정한다.
-- **데이터는 struct로 품는다.** Logic이 쓰는 값은 `Components/`의 `[Serializable]` struct(`~Component`)로 정의하고, `~Definition`과 `~Authoring`은 그 struct를 필드로 가진다. 같은 필드를 두 곳에 정의하지 않는다. 프리팹 등 View용 참조는 struct 밖에 둔다.
-  - 이유: 같은 값을 여러 곳에 정의하면 어긋난다. struct라서 복사 한 번으로 엔티티에 담긴다.
+- **데이터는 모두 `Components/`의 struct(`~Component`)로 품는다.** 에디터에서 정하는 설정값은 `[Serializable]`을 붙이고 `~Definition`과 `~Authoring`이 그 struct를 필드로 가진다. 게임 중 바뀌는 런타임 값은 `[Serializable]`을 붙이지 않고 주석에 런타임 값임을 밝힌다. 같은 필드를 두 곳에 정의하지 않는다. 프리팹 등 View용 참조는 struct 밖에 둔다.
+  - 이유: 같은 값을 여러 곳에 정의하면 어긋난다. struct라서 복사 한 번으로 칸에 담긴다.
+- 설정값 컴포넌트는 생성 때 복사한 뒤 게임 중에 바꾸지 않는다. 시작값이 필요한 런타임 값은 설정값 컴포넌트에 `starting~` 필드로 두고, 생성 때 런타임 컴포넌트로 옮긴다.
+  - 이유: 값이 바뀌는 곳이 런타임 컴포넌트뿐이어야 타입만 보고 설정값인지 상태인지 안다.
 - **로딩:** Core가 `~Definition`의 struct를 World에 대입한다. 판 시작 시 Core는 `~Authoring`마다 Transform 위치 등 씬 값을 채운 생성 요청을 큐에 넣고, 엔티티는 첫 틱의 `~SpawnSystem`이 만든다. Core는 World에 엔티티를 직접 넣지 않는다. System은 Definition과 Authoring을 참조하지 않는다.
   - 이유: 씬에 놓인 엔티티와 게임 중 생긴 엔티티가 같은 경로로 만들어진다. Logic이 에셋에 묶이지 않는다.
 - 씬에 배치한 엔티티의 종류는 `~Authoring`이 `~Definition`을 필드로 가리켜 정한다. Authoring은 Definition을 가리키기만 하고, 판 시작 시 Core가 그 Definition의 struct를 읽어 생성 요청에 담는다.
   - 이유: 같은 종류를 씬에 여러 개 놓아도 수치는 Definition 한 곳에서 고친다.
 - Authoring이 가리키지 않는 Definition은 `Resources/` 아래의 Definition Catalog 에셋 하나에 모은다(경로는 `CLAUDE.md`의 프로젝트 값). Runner가 시작할 때 `Resources.Load`로 이 Catalog만 읽는다. 다른 곳에서 `Resources.Load`를 쓰지 않는다.
   - 이유: 로드 경로가 한 곳이라 에셋 누락이 Runner 시작 시점에 바로 드러난다.
-- 테이블은 생성 시점에만 조회하고 필요한 값은 엔티티에 복사한다. 매 틱 로직은 엔티티 자신의 값만 쓴다.
-  - 이유: 엔티티 값만 보면 동작을 알 수 있고, 진행 중에 에셋을 바꿔도 판이 흔들리지 않는다.
+- 테이블은 생성 시점에만 조회하고 필요한 값은 칸의 컴포넌트로 복사한다. 매 틱 로직은 칸의 컴포넌트만 쓴다.
+  - 이유: 컴포넌트 값만 보면 동작을 알 수 있고, 진행 중에 에셋을 바꿔도 판이 흔들리지 않는다.
 
 ## 이벤트 금지
 - C# `event`, delegate 구독, 이벤트 버스, 이벤트 큐를 만들지 않는다.
@@ -122,7 +130,7 @@ Presentation/
   - 이유: 연출의 순서와 읽는 데이터도 Logic처럼 한 곳에서 보인다. `ViewContext`를 통째로 받으면 시그니처가 영향 범위를 보여 주지 못한다.
 - View 쪽 실행 상태(EntityIdentifier → View 매핑, 풀, 카메라 참조)는 영역별 **`~ViewContext` 인스턴스**에 두고, `ViewContext`가 이들을 모은다. ViewSystem도 static 필드에 상태를 두지 않는다.
   - 이유: 판을 다시 시작해도 이전 판의 View 매핑이 남지 않는다.
-- 지속 상태는 매 프레임 엔티티 저장소를 읽고, 그 순간의 일은 프레임 기록을 읽는다. 프레임 기록은 struct이며 객체 참조를 담지 않는다. 기록 목록은 Runner가 LateUpdate 마지막에 비운다.
+- 지속 상태는 매 프레임 컴포넌트 배열을 읽고, 그 순간의 일은 프레임 기록을 읽는다. 프레임 기록은 struct이며 객체 참조를 담지 않는다. 기록 목록은 Runner가 LateUpdate 마지막에 비운다.
   - 이유: 지속 상태는 놓친 프레임이 있어도 따라잡고, 사건은 한 번만 재생된다. 객체 참조가 없으니 이미 사라진 객체를 가리키지 않는다.
 - View 오브젝트는 살아 있는 엔티티와 비교해 생성·반납한다. 게임 루프에서 `Instantiate` / `Destroy`를 반복하지 않고 풀을 쓴다.
   - 이유: 게임 중 할당과 GC 스파이크를 막는다.
@@ -165,7 +173,7 @@ Presentation/
 
 | 폴더 | 내용 | 어셈블리 | 참조 가능 |
 |---|---|---|---|
-| `Entities/` | `~Entity` struct, `EntityIdentifier`, `~Storage` | `<접두사>.Entity` (`.asmdef`) | 없음 |
+| `Entities/` | `EntityStorage`, `EntityIdentifier`, `ComponentMask`, 행동 상태 enum(`~State`) | `<접두사>.Entity` (`.asmdef`) | 없음 |
 | `Components/` | `~Component` struct | `<접두사>.Entity` (`.asmref`) | 〃 |
 | `Records/` | `~Record` struct | `<접두사>.Entity` (`.asmref`) | 〃 |
 | `Requests/` | `~Request` struct | `<접두사>.Entity` (`.asmref`) | 〃 |
