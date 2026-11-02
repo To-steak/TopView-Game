@@ -51,8 +51,8 @@ namespace TopView.Presentation.Enemy.ViewSystems
                     view = Acquire(context, enemyIndex, in enemy, viewPrefabsByKind);
                 }
 
-                Vector3 position = Vector3.Lerp(enemy.previousPosition, enemy.currentPosition, alpha);
-                view.transform.SetPositionAndRotation(position, Quaternion.Slerp(enemy.previousRotation, enemy.currentRotation, alpha));
+                Vector3 position = Vector3.Lerp(enemy.position.previous, enemy.position.current, alpha);
+                view.transform.SetPositionAndRotation(position, Quaternion.Slerp(enemy.rotation.previous, enemy.rotation.current, alpha));
             }
 
             for (int recordIndex = 0; recordIndex < stateRecords.Count; recordIndex++)

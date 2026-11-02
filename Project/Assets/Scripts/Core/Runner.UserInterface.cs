@@ -170,7 +170,7 @@ namespace TopView.Core
 
             if (_playerHealthPresenter != null)
             {
-                _playerHealthPresenter.Present(true, player.health, player.vitals.maxHealth);
+                _playerHealthPresenter.Present(true, player.health.current, player.health.max);
             }
 
             if (_ammoPresenter != null)
@@ -178,8 +178,7 @@ namespace TopView.Core
                 int weaponIndex = player.currentWeaponIndex;
                 if (weaponIndex >= 0 && weaponIndex < player.weapons.Length)
                 {
-                    ref readonly WeaponComponent weapon = ref player.weapons[weaponIndex];
-                    _ammoPresenter.Present(true, true, weapon.kind, weapon.currentAmmo, weapon.reserveAmmo);
+                    _ammoPresenter.Present(true, true, player.weapons[weaponIndex].kind, player.weaponCurrentAmmo[weaponIndex], player.weaponReserveAmmo[weaponIndex]);
                 }
                 else
                 {
@@ -204,7 +203,7 @@ namespace TopView.Core
                     ref readonly BossEntity boss = ref bosses[bossIndex];
                     if (boss.isAlive)
                     {
-                        _bossHealthPresenter.Present(true, boss.health, boss.maxHealth);
+                        _bossHealthPresenter.Present(true, boss.health.current, boss.health.max);
                         hasBoss = true;
                         break;
                     }

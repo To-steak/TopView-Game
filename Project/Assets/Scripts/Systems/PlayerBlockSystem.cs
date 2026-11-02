@@ -36,7 +36,7 @@ namespace TopView.Systems
                 ref readonly EnemyEntity enemy = ref enemies.entities[enemyIndex];
                 if (enemy.isAlive)
                 {
-                    BlockByCircle(ref player, enemy.currentPosition, player.movement.capsuleRadius + enemy.stats.hitRadius);
+                    BlockByCircle(ref player, enemy.position.current, player.movement.capsuleRadius + enemy.stats.hitRadius);
                 }
             }
 
@@ -45,14 +45,14 @@ namespace TopView.Systems
                 ref readonly BossEntity boss = ref bosses.entities[bossIndex];
                 if (boss.isAlive)
                 {
-                    BlockByCircle(ref player, boss.currentPosition, player.movement.capsuleRadius + boss.stats.hitRadius);
+                    BlockByCircle(ref player, boss.position.current, player.movement.capsuleRadius + boss.stats.hitRadius);
                 }
             }
         }
 
         private static void BlockByCircle(ref PlayerEntity player, Vector3 center, float minimumDistance)
         {
-            Vector3 offset = player.currentPosition - center;
+            Vector3 offset = player.position.current - center;
             offset.y = 0f;
             float distance = offset.magnitude;
             if (distance >= minimumDistance || distance < MIN_BLOCK_DISTANCE)
@@ -60,7 +60,7 @@ namespace TopView.Systems
                 return;
             }
 
-            Vector3 previousOffset = player.previousPosition - center;
+            Vector3 previousOffset = player.position.previous - center;
             previousOffset.y = 0f;
             if (distance * distance >= previousOffset.sqrMagnitude)
             {
@@ -68,7 +68,7 @@ namespace TopView.Systems
             }
 
             Vector3 blockedOffset = offset / distance * minimumDistance;
-            player.currentPosition = new Vector3(center.x + blockedOffset.x, player.currentPosition.y, center.z + blockedOffset.z);
+            player.position.current = new Vector3(center.x + blockedOffset.x, player.position.current.y, center.z + blockedOffset.z);
         }
     }
 }

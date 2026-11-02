@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TopView.Components;
 using TopView.Entities;
 using TopView.Requests;
 using UnityEngine;
@@ -33,8 +34,7 @@ namespace TopView.Systems
                     projectile = request.projectile,
                     faction = request.faction,
                     damage = request.damage,
-                    previousPosition = request.position,
-                    currentPosition = request.position,
+                    position = new PositionComponent { previous = request.position, current = request.position },
                     rotation = request.rotation,
                     velocity = request.velocity
                 };

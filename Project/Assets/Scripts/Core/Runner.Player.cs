@@ -119,7 +119,7 @@ namespace TopView.Core
                     continue;
                 }
 
-                PlayerMovementSystem.GetCapsulePoints(in player, player.currentPosition, out Vector3 top, out Vector3 bottom);
+                PlayerMovementSystem.GetCapsulePoints(in player, player.position.current, out Vector3 top, out Vector3 bottom);
                 float radius = player.movement.capsuleRadius;
                 Gizmos.color = player.isGrounded ? Color.green : Color.yellow;
                 Gizmos.DrawWireSphere(top, radius);

@@ -18,10 +18,8 @@ namespace TopView.Entities
         // 맞을 때의 피해량
         public float damage;
 
-        // 직전 틱의 위치(월드). 판정 선분의 시작이자 View 보간에 쓴다
-        public Vector3 previousPosition;
-        // 이번 틱의 위치(월드)
-        public Vector3 currentPosition;
+        // 위치. 직전 위치는 판정 선분의 시작이기도 하다
+        public PositionComponent position;
         // 회전(월드). 날아가는 동안 바뀌지 않는다
         public Quaternion rotation;
         // 속도(월드, 유닛/초)

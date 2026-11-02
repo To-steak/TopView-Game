@@ -26,7 +26,7 @@ namespace TopView.Systems
                     continue;
                 }
 
-                playerPosition = player.currentPosition;
+                playerPosition = player.position.current;
                 playerRadius = player.movement.capsuleRadius;
                 return true;
             }

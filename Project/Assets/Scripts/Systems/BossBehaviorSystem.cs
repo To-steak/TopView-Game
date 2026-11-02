@@ -34,7 +34,7 @@ namespace TopView.Systems
                 }
 
                 EntityIdentifier identifier = new EntityIdentifier { index = bossIndex, generation = boss.generation };
-                if (boss.health <= 0f && boss.state != BossState.Die)
+                if (boss.health.current <= 0f && boss.state != BossState.Die)
                 {
                     ChangeState(ref boss, in identifier, BossState.Die, stateRecords);
                 }
@@ -58,7 +58,7 @@ namespace TopView.Systems
                         }
                         if (hasPlayer)
                         {
-                            TargetingSystem.TurnToward(ref boss.currentRotation, boss.currentPosition, playerPosition, deltaTime * boss.behavior.rotationSpeed);
+                            TargetingSystem.TurnToward(ref boss.rotation.current, boss.position.current, playerPosition, deltaTime * boss.behavior.rotationSpeed);
                         }
                         break;
 
@@ -68,7 +68,7 @@ namespace TopView.Systems
                         {
                             boss.isAttackCommitted = true;
                             EntityReference owner = new EntityReference { kind = EntityKind.Boss, identifier = identifier };
-                            EnemyAttackSystem.CommitAttack(in attack, boss.currentPosition, boss.currentRotation, boss.attackDamage, ref boss.missileShotCount, in owner, projectileSpawnRequests, meleeSpawnRequests);
+                            EnemyAttackSystem.CommitAttack(in attack, boss.position.current, boss.rotation.current, boss.attackDamage, ref boss.missileShotCount, in owner, projectileSpawnRequests, meleeSpawnRequests);
                         }
                         if (EnemyAttackSystem.IsAttackFinished(in attack, boss.stateElapsedTicks, boss.isAttackCommitted))
                         {

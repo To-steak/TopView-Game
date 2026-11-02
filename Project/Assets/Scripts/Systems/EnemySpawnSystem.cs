@@ -80,14 +80,11 @@ namespace TopView.Systems
                 attacks = attacks,
                 attackCooldownRemainingTicks = attackCooldownRemainingTicks,
                 level = request.level,
-                maxHealth = maxHealth,
-                health = maxHealth,
+                health = new HealthComponent { current = maxHealth, max = maxHealth },
                 attackDamage = request.stats.baseAttackDamage + request.level * request.stats.attackDamageIncrement,
                 maxSpeed = request.stats.baseSpeed + request.level * request.stats.speedIncrement,
-                previousPosition = position,
-                currentPosition = position,
-                previousRotation = request.rotation,
-                currentRotation = request.rotation,
+                position = new PositionComponent { previous = position, current = position },
+                rotation = new RotationComponent { previous = request.rotation, current = request.rotation },
                 state = EnemyState.Idle,
                 pathCorners = pathCorners
             };

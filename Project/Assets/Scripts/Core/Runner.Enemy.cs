@@ -156,12 +156,12 @@ namespace TopView.Core
                 }
 
                 Gizmos.color = Color.yellow;
-                DrawCircleGizmo(enemy.currentPosition, enemy.behavior.detectionRadius);
+                DrawCircleGizmo(enemy.position.current, enemy.behavior.detectionRadius);
                 Gizmos.color = new Color(1f, 0.5f, 0f);
-                DrawCircleGizmo(enemy.currentPosition, enemy.behavior.stopDistance);
+                DrawCircleGizmo(enemy.position.current, enemy.behavior.stopDistance);
                 Gizmos.color = Color.cyan;
-                DrawCircleGizmo(enemy.currentPosition, enemy.stats.hitRadius);
-                DrawBodyAttackGizmos(enemy.attacks, enemy.currentPosition, enemy.currentRotation);
+                DrawCircleGizmo(enemy.position.current, enemy.stats.hitRadius);
+                DrawBodyAttackGizmos(enemy.attacks, enemy.position.current, enemy.rotation.current);
             }
         }
 

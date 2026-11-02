@@ -55,7 +55,7 @@ namespace TopView.Systems
             {
                 ref readonly HitTargetComponent hitTarget = ref hitTargets[targetIndex];
                 if (hitTarget.faction != projectile.faction
-                    && TryHitSegment(projectile.previousPosition, projectile.currentPosition, hitTarget.position, projectile.projectile.radius + hitTarget.radius, out float hitFraction)
+                    && TryHitSegment(projectile.position.previous, projectile.position.current, hitTarget.position, projectile.projectile.radius + hitTarget.radius, out float hitFraction)
                     && IsWithinHeight(in projectile, in hitTarget, hitFraction)
                     && hitFraction < nearestFraction)
                 {
@@ -72,7 +72,7 @@ namespace TopView.Systems
             damageRequests.Enqueue(new DamageRequest { target = hitTargets[nearestTargetIndex].target, amount = projectile.damage });
             hitRecords.Add(new ProjectileHitRecord
             {
-                position = Vector3.Lerp(projectile.previousPosition, projectile.currentPosition, nearestFraction),
+                position = Vector3.Lerp(projectile.position.previous, projectile.position.current, nearestFraction),
                 hitEffectIndex = projectile.projectile.hitEffectIndex
             });
             return true;
@@ -84,19 +84,19 @@ namespace TopView.Systems
             {
                 ref readonly HitTargetComponent hitTarget = ref hitTargets[targetIndex];
                 if (hitTarget.faction != projectile.faction
-                    && TargetingSystem.IsWithin(projectile.currentPosition, hitTarget.position, projectile.projectile.explosionRadius + hitTarget.radius))
+                    && TargetingSystem.IsWithin(projectile.position.current, hitTarget.position, projectile.projectile.explosionRadius + hitTarget.radius))
                 {
                     damageRequests.Enqueue(new DamageRequest { target = hitTarget.target, amount = projectile.damage });
                 }
             }
 
-            hitRecords.Add(new ProjectileHitRecord { position = projectile.currentPosition, hitEffectIndex = projectile.projectile.hitEffectIndex });
+            hitRecords.Add(new ProjectileHitRecord { position = projectile.position.current, hitEffectIndex = projectile.projectile.hitEffectIndex });
         }
 
         // 이동 선분에서 hitFraction 지점의 투사체 구가 대상의 높이 범위에 닿는지.
         private static bool IsWithinHeight(in ProjectileEntity projectile, in HitTargetComponent hitTarget, float hitFraction)
         {
-            float height = Mathf.Lerp(projectile.previousPosition.y, projectile.currentPosition.y, hitFraction);
+            float height = Mathf.Lerp(projectile.position.previous.y, projectile.position.current.y, hitFraction);
             return height + projectile.projectile.radius >= hitTarget.bottomHeight
                 && height - projectile.projectile.radius <= hitTarget.topHeight;
         }

@@ -34,7 +34,7 @@ namespace TopView.Presentation.Projectile.ViewSystems
                     continue;
                 }
 
-                Vector3 position = Vector3.Lerp(projectile.previousPosition, projectile.currentPosition, alpha);
+                Vector3 position = Vector3.Lerp(projectile.position.previous, projectile.position.current, alpha);
                 if (view == null)
                 {
                     view = Acquire(context, projectileIndex, in projectile, projectilePrefabs, position);

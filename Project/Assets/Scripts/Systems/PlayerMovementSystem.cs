@@ -27,10 +27,10 @@ namespace TopView.Systems
                     continue;
                 }
 
-                player.previousPosition = player.currentPosition;
-                player.previousRotation = player.currentRotation;
+                player.position.previous = player.position.current;
+                player.rotation.previous = player.rotation.current;
 
-                player.isGrounded = Physics.CheckSphere(player.currentPosition + player.movement.groundCheckOffset, player.movement.groundCheckRadius, player.movement.groundLayer);
+                player.isGrounded = Physics.CheckSphere(player.position.current + player.movement.groundCheckOffset, player.movement.groundCheckRadius, player.movement.groundLayer);
                 if (player.isGrounded && player.verticalVelocity < 0f)
                 {
                     player.verticalVelocity = player.movement.groundPressure;
@@ -39,7 +39,7 @@ namespace TopView.Systems
 
                 Vector3 displacement = player.moveDirection * player.currentSpeed * deltaTime;
                 displacement.y = player.verticalVelocity * deltaTime;
-                player.currentPosition = Slide(in player, player.currentPosition, displacement);
+                player.position.current = Slide(in player, player.position.current, displacement);
             }
         }
 
@@ -52,7 +52,7 @@ namespace TopView.Systems
         /// <param name="bottom">아래쪽 구의 중심</param>
         public static void GetCapsulePoints(in PlayerEntity player, Vector3 position, out Vector3 top, out Vector3 bottom)
         {
-            Vector3 center = position + player.currentRotation * player.movement.capsuleCenter;
+            Vector3 center = position + player.rotation.current * player.movement.capsuleCenter;
             float halfLine = Mathf.Max(player.movement.capsuleHeight * 0.5f - player.movement.capsuleRadius, 0f);
             top = center + Vector3.up * halfLine;
             bottom = center - Vector3.up * halfLine;

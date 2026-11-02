@@ -22,7 +22,7 @@ ECS 패키지(DOTS)는 쓰지 않는다. "System은 함수, 상태는 데이터"
   - 이유: View 없이도 Logic이 돈다. 사건을 데이터로 남기면 누가 언제 읽을지가 Runner의 호출 순서에 고정된다.
 - View는 게임 상태를 읽기만 한다. 입력은 명령 버퍼(`~Command`)를 거친다.
   - 이유: 상태를 바꾸는 곳이 System뿐이라, 상태가 틀렸을 때 System만 보면 된다.
-- **Transform은 View만 쓴다.** Logic은 위치를 데이터(`previousPosition`, `currentPosition`)로 소유하고, View가 보간해 반영한다. Runner가 명령을 만들 때 View의 Transform을 읽는 것(카메라 방향, 총구 위치 등)은 허용한다.
+- **Transform은 View만 쓴다.** Logic은 위치를 데이터(`PositionComponent`의 `previous`, `current`)로 소유하고, View가 보간해 반영한다. Runner가 명령을 만들 때 View의 Transform을 읽는 것(카메라 방향, 총구 위치 등)은 허용한다.
   - 이유: 위치의 정본이 둘이면 판정 위치와 보이는 위치가 어긋난다.
 - 판정 시점은 Logic의 타이머가 정한다. 애니메이션 이벤트로 게임 상태를 바꾸지 않는다.
   - 이유: 애니메이션 이벤트는 블렌딩, 컬링, 프레임레이트에 따라 늦거나 빠지거나 두 번 불린다.

@@ -32,7 +32,7 @@ namespace TopView.Systems
                 }
 
                 EntityIdentifier identifier = new EntityIdentifier { index = playerIndex, generation = player.generation };
-                if (player.health <= 0f && player.state != PlayerState.Die)
+                if (player.health.current <= 0f && player.state != PlayerState.Die)
                 {
                     ChangeState(ref player, in identifier, PlayerState.Die, Vector3.zero, stateRecords);
                     MeleeHitSystem.DespawnOwnedBy(melees, new EntityReference { kind = EntityKind.Player, identifier = identifier });
@@ -232,11 +232,11 @@ namespace TopView.Systems
 
         private static void UpdateAttack(ref PlayerEntity player, in EntityIdentifier identifier, Vector3 moveInput, List<PlayerStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
         {
-            ref WeaponComponent weapon = ref player.weapons[player.currentWeaponIndex];
+            ref readonly WeaponComponent weapon = ref player.weapons[player.currentWeaponIndex];
 
             if (!player.isAttackCommitted && player.stateElapsedTicks >= weapon.attackStartTicks)
             {
-                PlayerWeaponSystem.CommitAttack(ref player, in identifier, ref weapon, projectileSpawnRequests, meleeSpawnRequests);
+                PlayerWeaponSystem.CommitAttack(ref player, in identifier, in weapon, projectileSpawnRequests, meleeSpawnRequests);
             }
 
             if (PlayerWeaponSystem.IsAttackFinished(in player, in weapon))
@@ -272,7 +272,7 @@ namespace TopView.Systems
                     Vector3 dodgeDirection = moveInput;
                     if (IsZero(dodgeDirection))
                     {
-                        dodgeDirection = player.currentRotation * Vector3.forward;
+                        dodgeDirection = player.rotation.current * Vector3.forward;
                         dodgeDirection.y = 0f;
                         dodgeDirection.Normalize();
                     }
@@ -284,7 +284,7 @@ namespace TopView.Systems
                     }
                     else
                     {
-                        player.currentRotation = Quaternion.LookRotation(player.moveDirection);
+                        player.rotation.current = Quaternion.LookRotation(player.moveDirection);
                     }
                     PlayerStaminaSystem.UseMana(ref player, player.vitals.dodgeManaCost);
                     break;

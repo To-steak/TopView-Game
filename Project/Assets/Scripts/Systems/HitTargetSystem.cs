@@ -25,9 +25,9 @@ namespace TopView.Systems
                 if (player.isAlive && player.state != PlayerState.Die)
                 {
                     // 점프로 적 투사체를 피할 수 있도록 플레이어만 캡슐 높이로 맞는다
-                    PlayerMovementSystem.GetCapsulePoints(in player, player.currentPosition, out Vector3 top, out Vector3 bottom);
+                    PlayerMovementSystem.GetCapsulePoints(in player, player.position.current, out Vector3 top, out Vector3 bottom);
                     float radius = player.movement.capsuleRadius;
-                    Add(hitTargets, ref hitTargetCount, EntityKind.Player, playerIndex, player.generation, Faction.Player, player.currentPosition, radius, bottom.y - radius, top.y + radius);
+                    Add(hitTargets, ref hitTargetCount, EntityKind.Player, playerIndex, player.generation, Faction.Player, player.position.current, radius, bottom.y - radius, top.y + radius);
                 }
             }
 
@@ -36,7 +36,7 @@ namespace TopView.Systems
                 ref readonly EnemyEntity enemy = ref enemies.entities[enemyIndex];
                 if (enemy.isAlive && enemy.state != EnemyState.Die)
                 {
-                    Add(hitTargets, ref hitTargetCount, EntityKind.Enemy, enemyIndex, enemy.generation, Faction.Enemy, enemy.currentPosition, enemy.stats.hitRadius, float.NegativeInfinity, float.PositiveInfinity);
+                    Add(hitTargets, ref hitTargetCount, EntityKind.Enemy, enemyIndex, enemy.generation, Faction.Enemy, enemy.position.current, enemy.stats.hitRadius, float.NegativeInfinity, float.PositiveInfinity);
                 }
             }
 
@@ -45,7 +45,7 @@ namespace TopView.Systems
                 ref readonly BossEntity boss = ref bosses.entities[bossIndex];
                 if (boss.isAlive && boss.state != BossState.Die)
                 {
-                    Add(hitTargets, ref hitTargetCount, EntityKind.Boss, bossIndex, boss.generation, Faction.Enemy, boss.currentPosition, boss.stats.hitRadius, float.NegativeInfinity, float.PositiveInfinity);
+                    Add(hitTargets, ref hitTargetCount, EntityKind.Boss, bossIndex, boss.generation, Faction.Enemy, boss.position.current, boss.stats.hitRadius, float.NegativeInfinity, float.PositiveInfinity);
                 }
             }
         }

@@ -59,13 +59,10 @@ namespace TopView.Systems
                 behavior = request.behavior,
                 attacks = attacks,
                 level = request.level,
-                maxHealth = maxHealth,
-                health = maxHealth,
+                health = new HealthComponent { current = maxHealth, max = maxHealth },
                 attackDamage = request.stats.baseAttackDamage + request.level * request.stats.attackDamageIncrement,
-                previousPosition = request.position,
-                currentPosition = request.position,
-                previousRotation = rotation,
-                currentRotation = rotation,
+                position = new PositionComponent { previous = request.position, current = request.position },
+                rotation = new RotationComponent { previous = rotation, current = rotation },
                 state = BossState.Taunt
             };
         }

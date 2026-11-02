@@ -27,11 +27,11 @@ namespace TopView.Systems
 
                 if (!player.isRotationLocked && command.hasAimPoint)
                 {
-                    Vector3 aimDirection = command.aimPoint - player.currentPosition;
+                    Vector3 aimDirection = command.aimPoint - player.position.current;
                     aimDirection.y = 0f;
                     if (aimDirection.sqrMagnitude > MIN_AIM_DISTANCE_SQUARED)
                     {
-                        player.currentRotation = Quaternion.LookRotation(aimDirection);
+                        player.rotation.current = Quaternion.LookRotation(aimDirection);
                     }
                 }
             }

@@ -48,14 +48,14 @@ namespace TopView.Presentation.Enemy.ViewSystems
                 gauge.transform.SetPositionAndRotation(position, rotation);
 
                 ref readonly EnemyEntity enemy = ref enemies.entities[enemyIndex];
-                if (enemy.maxHealth > 0f)
+                if (enemy.health.max > 0f)
                 {
-                    float healthRatio = enemy.health / enemy.maxHealth;
+                    float healthRatio = enemy.health.current / enemy.health.max;
                     RectTransform gaugeFrontTransform = gauge.gaugeFront.rectTransform;
                     if (isAcquired || gaugeFrontTransform.anchorMax.x != healthRatio)
                     {
                         gaugeFrontTransform.anchorMax = new Vector2(healthRatio, 1f);
-                        gauge.healthText.text = $"{enemy.health:F0} / {enemy.maxHealth:F0}";
+                        gauge.healthText.text = $"{enemy.health.current:F0} / {enemy.health.max:F0}";
                     }
                 }
             }

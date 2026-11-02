@@ -41,12 +41,12 @@ namespace TopView.Editor
             if (kind == WeaponKind.Ranged)
             {
                 DrawRelative(weapon, nameof(WeaponComponent.maxAmmo));
-                DrawRelative(weapon, nameof(WeaponComponent.currentAmmo));
+                DrawRelative(weapon, nameof(WeaponComponent.startingCurrentAmmo));
             }
 
             if (usesProjectile)
             {
-                DrawRelative(weapon, nameof(WeaponComponent.reserveAmmo));
+                DrawRelative(weapon, nameof(WeaponComponent.startingReserveAmmo));
                 DrawRelative(weapon, nameof(WeaponComponent.projectile));
             }
             else

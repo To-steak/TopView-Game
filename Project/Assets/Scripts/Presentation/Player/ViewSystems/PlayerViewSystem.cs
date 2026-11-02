@@ -88,7 +88,7 @@ namespace TopView.Presentation.Player.ViewSystems
 
         private static void CreateView(in PlayerEntity player, GameObject viewPrefab, GameObject[] weaponModelPrefabs, PlayerViewContext context)
         {
-            GameObject viewObject = Object.Instantiate(viewPrefab, player.currentPosition, player.currentRotation);
+            GameObject viewObject = Object.Instantiate(viewPrefab, player.position.current, player.rotation.current);
             context.view = viewObject.GetComponent<PlayerView>();
             context.rangedLayerIndex = FindLayerIndex(context.view.animator, RANGED_LAYER_NAME);
             context.actionLayerIndex = FindLayerIndex(context.view.animator, ACTION_LAYER_NAME);
@@ -257,8 +257,8 @@ namespace TopView.Presentation.Player.ViewSystems
         {
             float alpha = Mathf.Clamp01((Time.time - Time.fixedTime) / Time.fixedDeltaTime);
             viewTransform.SetPositionAndRotation(
-                Vector3.Lerp(player.previousPosition, player.currentPosition, alpha),
-                Quaternion.Slerp(player.previousRotation, player.currentRotation, alpha));
+                Vector3.Lerp(player.position.previous, player.position.current, alpha),
+                Quaternion.Slerp(player.rotation.previous, player.rotation.current, alpha));
         }
     }
 }

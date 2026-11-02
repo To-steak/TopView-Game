@@ -23,12 +23,12 @@ namespace TopView.Systems
                     continue;
                 }
 
-                projectile.previousPosition = projectile.currentPosition;
+                projectile.position.previous = projectile.position.current;
                 projectile.elapsedTicks++;
 
                 if (projectile.projectile.kind == ProjectileKind.Straight)
                 {
-                    projectile.currentPosition += projectile.velocity * deltaTime;
+                    projectile.position.current += projectile.velocity * deltaTime;
                     if (projectile.elapsedTicks >= projectile.projectile.lifetimeTicks)
                     {
                         Despawn(projectiles, projectileIndex);
@@ -66,15 +66,15 @@ namespace TopView.Systems
             }
 
             Vector3 direction = displacement / distance;
-            if (Physics.SphereCast(projectile.currentPosition, projectile.projectile.radius, direction, out RaycastHit hit, distance, projectile.projectile.collisionLayer, QueryTriggerInteraction.Ignore))
+            if (Physics.SphereCast(projectile.position.current, projectile.projectile.radius, direction, out RaycastHit hit, distance, projectile.projectile.collisionLayer, QueryTriggerInteraction.Ignore))
             {
-                projectile.currentPosition += direction * hit.distance;
+                projectile.position.current += direction * hit.distance;
                 projectile.velocity = Vector3.zero;
                 projectile.isResting = true;
                 return;
             }
 
-            projectile.currentPosition += displacement;
+            projectile.position.current += displacement;
         }
     }
 }

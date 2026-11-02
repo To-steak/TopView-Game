@@ -38,6 +38,13 @@ namespace TopView.Systems
         private static void Spawn(ref PlayerEntity slot, in PlayerSpawnRequest request)
         {
             WeaponComponent[] weapons = SpawnSystem.ReuseArray(slot.weapons, request.weapons);
+            int[] weaponCurrentAmmo = ReuseAmmoArray(slot.weaponCurrentAmmo, weapons.Length);
+            int[] weaponReserveAmmo = ReuseAmmoArray(slot.weaponReserveAmmo, weapons.Length);
+            for (int weaponIndex = 0; weaponIndex < weapons.Length; weaponIndex++)
+            {
+                weaponCurrentAmmo[weaponIndex] = weapons[weaponIndex].startingCurrentAmmo;
+                weaponReserveAmmo[weaponIndex] = weapons[weaponIndex].startingReserveAmmo;
+            }
 
             slot = new PlayerEntity
             {
@@ -46,19 +53,25 @@ namespace TopView.Systems
                 movement = request.movement,
                 vitals = request.vitals,
                 action = request.action,
-                previousPosition = request.position,
-                currentPosition = request.position,
-                previousRotation = request.rotation,
-                currentRotation = request.rotation,
+                position = new PositionComponent { previous = request.position, current = request.position },
+                rotation = new RotationComponent { previous = request.rotation, current = request.rotation },
                 state = PlayerState.Idle,
                 currentSpeed = request.movement.walkSpeed,
-                health = request.vitals.maxHealth,
+                health = new HealthComponent { current = request.vitals.maxHealth, max = request.vitals.maxHealth },
                 mana = request.vitals.maxMana,
                 manaRecoveryElapsedTicks = request.vitals.manaRecoveryDelayTicks,
                 weapons = weapons,
+                weaponCurrentAmmo = weaponCurrentAmmo,
+                weaponReserveAmmo = weaponReserveAmmo,
                 currentWeaponIndex = 0,
                 pendingWeaponIndex = 0
             };
+        }
+
+        // 칸이 쓰던 탄약 배열을 길이가 같으면 다시 쓴다. 내용은 부르는 쪽이 모두 채운다.
+        private static int[] ReuseAmmoArray(int[] slotArray, int length)
+        {
+            return slotArray != null && slotArray.Length == length ? slotArray : new int[length];
         }
     }
 }
