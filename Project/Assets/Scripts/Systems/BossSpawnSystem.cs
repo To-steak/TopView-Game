@@ -52,7 +52,6 @@ namespace TopView.Systems
             float maxHealth = request.stats.baseMaxHealth + request.level * request.stats.maxHealthIncrement;
 
             SpawnSystem.ClaimSlot(entities, index, ComponentMask.BossArchetype);
-            entities.factions[index] = new FactionComponent { faction = Faction.Enemy };
             entities.enemyStats[index] = request.stats;
             entities.bossBehaviors[index] = request.behavior;
             entities.attackLists[index] = new AttackListComponent { attacks = attacks };

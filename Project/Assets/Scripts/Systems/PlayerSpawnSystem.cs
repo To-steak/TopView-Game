@@ -50,7 +50,6 @@ namespace TopView.Systems
             entities.playerMovements[index] = request.movement;
             entities.playerVitals[index] = request.vitals;
             entities.playerActions[index] = request.action;
-            entities.factions[index] = new FactionComponent { faction = Faction.Player };
             entities.positions[index] = new PositionComponent { previous = request.position, current = request.position };
             entities.rotations[index] = new RotationComponent { previous = request.rotation, current = request.rotation };
             entities.playerActionStates[index] = new PlayerActionStateComponent { state = PlayerState.Idle };

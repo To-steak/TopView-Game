@@ -30,10 +30,14 @@ namespace TopView.Core
         public MeleeStorage melees;
         // 투사체 저장소
         public ProjectileStorage projectiles;
-        // 이번 틱의 피격 대상 목록. 판 시작 때 플레이어·적·보스 칸 수의 합으로 만들고, 매 틱 HitTargetSystem이 다시 채운다
-        public HitTargetComponent[] hitTargets;
-        // 피격 대상 목록에서 이번 틱에 채운 대상 수
-        public int hitTargetCount;
+        // 이번 틱의 플레이어 피격 대상 목록. 적의 공격이 읽는다. 판 시작 때 플레이어 칸 수로 만들고, 매 틱 HitTargetSystem이 다시 채운다
+        public HitTargetComponent[] playerHitTargets;
+        // 플레이어 피격 대상 목록에서 이번 틱에 채운 대상 수
+        public int playerHitTargetCount;
+        // 이번 틱의 적 피격 대상 목록. 플레이어의 공격이 읽는다. 판 시작 때 적·보스 칸 수의 합으로 만들고, 매 틱 HitTargetSystem이 다시 채운다
+        public HitTargetComponent[] enemyHitTargets;
+        // 적 피격 대상 목록에서 이번 틱에 채운 대상 수
+        public int enemyHitTargetCount;
 
         // 판을 준비할 때 종류별로 Definition 값을 채워 둔 적 생성 요청. 번호가 적 종류 번호다
         public EnemySpawnRequest[] enemySpawnTemplates;
@@ -48,8 +52,10 @@ namespace TopView.Core
         public Queue<ProjectileSpawnRequest> projectileSpawnRequests = new Queue<ProjectileSpawnRequest>();
         // 근접 판정 생성 요청 큐
         public Queue<MeleeSpawnRequest> meleeSpawnRequests = new Queue<MeleeSpawnRequest>();
-        // 피해 요청 큐
-        public Queue<DamageRequest> damageRequests = new Queue<DamageRequest>();
+        // 플레이어 피해 요청 큐. 적의 공격이 넣는다
+        public Queue<DamageRequest> playerDamageRequests = new Queue<DamageRequest>();
+        // 적 피해 요청 큐. 플레이어의 공격이 넣는다
+        public Queue<DamageRequest> enemyDamageRequests = new Queue<DamageRequest>();
         // 게임오버 요청 큐
         public Queue<GameOverRequest> gameOverRequests = new Queue<GameOverRequest>();
 
