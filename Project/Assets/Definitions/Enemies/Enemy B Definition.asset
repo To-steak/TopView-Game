@@ -31,6 +31,8 @@ MonoBehaviour:
     acceleration: 6
     angularSpeed: 360
     dieTicks: 36
+    endsGameOnDeath: 0
+    showsOverlayHealthBar: 0
   attacks:
   - attack:
       kind: 0
@@ -59,4 +61,4 @@ MonoBehaviour:
     projectilePrefab: {fileID: 0}
     hitEffectPrefab: {fileID: 0}
   viewPrefab: {fileID: 7807188980422851779, guid: 18e5d55b96933154baff3d6e8926d048, type: 3}
-  healthGaugePrefab: {fileID: 7240100042028206097, guid: 61bf5277b80621842967d75ffba1dcbe, type: 3}
+  healthGaugePrefab: {fileID: 7240100042028206097, guid: bf39a87b00bea9b45875c9f2d4077307, type: 3}
