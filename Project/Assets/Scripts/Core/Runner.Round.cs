@@ -74,11 +74,10 @@ namespace TopView.Core
             world.enemies = new EnemyStorage(enemyKindCount, gameSettings.enemyCapacityPerKind, gameSettings.enemyPathCornerCapacity);
             world.enemySpawnTemplates = enemySpawnTemplates;
             world.bosses = new BossStorage(BOSS_CAPACITY);
-            world.projectiles = new ProjectileStorage(gameSettings.projectileCapacity);
             // 피격 대상은 세 저장소의 칸 수를 넘지 않고, 공격하는 쪽 하나는 근접 판정을 동시에 하나만 가지므로 근접 판정도 이 수로 넘치지 않는다
             int combatantCapacity = world.players.entities.Length + world.enemies.entities.Length + world.bosses.entities.Length;
             world.hitTargets = new HitTargetComponent[combatantCapacity];
-            world.melees = new MeleeStorage(combatantCapacity, combatantCapacity);
+            world.entities = new EntityStorage(gameSettings.projectileCapacity, combatantCapacity, combatantCapacity);
 
             world.progress = new GameProgressComponent
             {
@@ -143,9 +142,9 @@ namespace TopView.Core
                 boss = new BossViewContext(),
                 projectile = new ProjectileViewContext
                 {
-                    views = new ProjectileView[_world.projectiles.entities.Length],
-                    viewGenerations = new int[_world.projectiles.entities.Length],
-                    viewIndices = new int[_world.projectiles.entities.Length],
+                    views = new ProjectileView[_world.entities.masks.Length],
+                    viewGenerations = new int[_world.entities.masks.Length],
+                    viewIndices = new int[_world.entities.masks.Length],
                     viewPools = new Stack<ProjectileView>[_projectilePrefabs.Length]
                 },
                 hitEffect = new HitEffectViewContext

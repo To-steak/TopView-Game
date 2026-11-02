@@ -1,46 +1,45 @@
 using System;
 using System.Collections.Generic;
+using TopView.Components;
 using TopView.Entities;
 using TopView.Requests;
 using UnityEngine;
 
 namespace TopView.Systems
 {
-    // 근접 판정 생성 요청을 받아 MeleeStorage의 빈 칸에 엔티티를 채운다. 틱 마지막에 부른다.
+    // 근접 판정 생성 요청을 받아 공유 저장소의 근접 판정 구간 빈 칸에 컴포넌트를 채운다. 틱 마지막에 부른다.
     public static class MeleeSpawnSystem
     {
         /// <summary>
         /// 근접 판정 생성 요청을 모두 처리한다. 빈 칸이 없으면 요청을 버린다.
         /// </summary>
-        /// <param name="melees">근접 판정 저장소</param>
+        /// <param name="entities">공유 저장소</param>
         /// <param name="meleeSpawnRequests">근접 판정 생성 요청 큐</param>
-        public static void Tick(MeleeStorage melees, Queue<MeleeSpawnRequest> meleeSpawnRequests)
+        public static void Tick(EntityStorage entities, Queue<MeleeSpawnRequest> meleeSpawnRequests)
         {
             int droppedCount = 0;
             while (meleeSpawnRequests.Count > 0)
             {
                 MeleeSpawnRequest request = meleeSpawnRequests.Dequeue();
-                if (!SpawnSystem.TryTakeFreeIndex(melees.freeIndices, out int index))
+                if (!SpawnSystem.TryTakeFreeIndex(entities.freeMeleeIndices, out int index))
                 {
                     droppedCount++;
                     continue;
                 }
 
-                ref MeleeEntity slot = ref melees.entities[index];
-                EntityReference[] hitTargets = slot.hitTargets;
+                EntityReference[] hitTargets = entities.meleeHits[index].targets;
                 Array.Clear(hitTargets, 0, hitTargets.Length);
-                slot = new MeleeEntity
+
+                SpawnSystem.ClaimSlot(entities, index, ComponentMask.MeleeArchetype);
+                entities.attackPayloads[index] = new AttackPayloadComponent { faction = request.faction, damage = request.damage };
+                entities.positions[index] = new PositionComponent { previous = request.center, current = request.center };
+                entities.melees[index] = new MeleeComponent
                 {
-                    isAlive = true,
-                    generation = slot.generation + 1,
                     owner = request.owner,
-                    faction = request.faction,
-                    center = request.center,
                     radius = request.radius,
-                    damage = request.damage,
-                    durationTicks = request.durationTicks,
-                    hitTargets = hitTargets
+                    durationTicks = request.durationTicks
                 };
+                entities.meleeHits[index] = new MeleeHitsComponent { targets = hitTargets };
             }
 
             if (droppedCount > 0)

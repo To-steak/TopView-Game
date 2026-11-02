@@ -19,9 +19,11 @@ namespace TopView.Systems
         /// <param name="stateRecords">상태 변경 기록</param>
         /// <param name="projectileSpawnRequests">투사체 생성 요청 큐</param>
         /// <param name="meleeSpawnRequests">근접 판정 생성 요청 큐</param>
-        /// <param name="melees">근접 판정 저장소. 사망할 때 자기 근접 판정을 없앤다</param>
+        /// <param name="masks">공유 저장소의 칸별 컴포넌트 표시. 사망할 때 자기 근접 판정을 없앤다</param>
+        /// <param name="melees">근접 판정 값과 진행 시간</param>
+        /// <param name="freeMeleeIndices">근접 판정 구간의 빈 칸 번호 목록</param>
         /// <param name="gameOverRequests">게임오버 요청 큐</param>
-        public static void Tick(PlayerStorage players, in PlayerCommand command, List<PlayerStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, MeleeStorage melees, Queue<GameOverRequest> gameOverRequests)
+        public static void Tick(PlayerStorage players, in PlayerCommand command, List<PlayerStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, ComponentMask[] masks, MeleeComponent[] melees, List<int> freeMeleeIndices, Queue<GameOverRequest> gameOverRequests)
         {
             for (int playerIndex = 0; playerIndex < players.entities.Length; playerIndex++)
             {
@@ -35,7 +37,7 @@ namespace TopView.Systems
                 if (player.health.current <= 0f && player.actionState.state != PlayerState.Die)
                 {
                     ChangeState(ref player, in identifier, PlayerState.Die, Vector3.zero, stateRecords);
-                    MeleeHitSystem.DespawnOwnedBy(melees, new EntityReference { kind = EntityKind.Player, identifier = identifier });
+                    MeleeHitSystem.DespawnOwnedBy(masks, melees, freeMeleeIndices, new EntityReference { kind = EntityKind.Player, identifier = identifier });
                 }
 
                 player.actionState.elapsedTicks++;

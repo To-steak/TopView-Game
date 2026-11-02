@@ -77,14 +77,13 @@ namespace TopView.Core
         // 살아 있는 투사체마다 판정 구를 Logic 위치에 흰색으로 그린다.
         private void DrawProjectileGizmos()
         {
-            ProjectileEntity[] projectiles = _world.projectiles.entities;
+            EntityStorage entities = _world.entities;
             Gizmos.color = Color.white;
-            for (int projectileIndex = 0; projectileIndex < projectiles.Length; projectileIndex++)
+            for (int index = 0; index < entities.masks.Length; index++)
             {
-                ref readonly ProjectileEntity projectile = ref projectiles[projectileIndex];
-                if (projectile.isAlive)
+                if ((entities.masks[index] & ComponentMask.ProjectileArchetype) == ComponentMask.ProjectileArchetype)
                 {
-                    Gizmos.DrawWireSphere(projectile.position.current, projectile.projectile.radius);
+                    Gizmos.DrawWireSphere(entities.positions[index].current, entities.projectiles[index].radius);
                 }
             }
         }
