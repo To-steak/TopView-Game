@@ -9,7 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7791370170484523043}
-  - component: {fileID: 5812104633406329658}
   m_Layer: 5
   m_Name: Gauge
   m_TagString: Untagged
@@ -37,19 +36,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &5812104633406329658
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2183606422612694050}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1f87b3c920b8e0f4a92db7a9dbd82937, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GaugeWorldView
-  gaugeFront: {fileID: 5060229499925707407}
 --- !u!1 &3276316041769417628
 GameObject:
   m_ObjectHideFlags: 0

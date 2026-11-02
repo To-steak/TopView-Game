@@ -17,8 +17,8 @@ namespace TopView.UserInterface.PlayerMana
         /// <param name="max">최대 마나</param>
         public void SetMana(float current, float max)
         {
-            _manaText.text = $"{current} / {max}";
-            _manaGauge.fillAmount = current / max;
+            _manaText.text = $"{current:F0} / {max:F0}";
+            _manaGauge.rectTransform.anchorMax = new Vector2(current / max, 1f);
         }
     }
 }

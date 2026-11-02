@@ -18,7 +18,7 @@ namespace TopView.UserInterface.PlayerHealth
         public void SetHealth(float current, float max)
         {
             _healthText.text = $"{current} / {max}";
-            _healthGauge.fillAmount = current / max;
+            _healthGauge.rectTransform.anchorMax = new Vector2(current / max, 1f);
         }
     }
 }
