@@ -30,7 +30,7 @@ paths:
 
 - 이유: 이름만 보고 필드인지, 지역 변수인지, 상수인지 구분한다. bool은 조건문이 문장처럼 읽힌다.
 
-접미사: `~System`, `~ViewSystem`, `~Record`, `~Request`, `~Command`, `~Component`, `~Definition`, `~Authoring`, `~View`, `~Presenter`, 시간 값은 `~Ticks`.
+접미사: `~Entity`, `~Storage`, `~System`, `~ViewSystem`, `~Record`, `~Request`, `~Command`, `~Component`, `~Definition`, `~Authoring`, `~View`, `~Presenter`, 시간 값은 `~Ticks`.
 - 이유: 이름만 보고 그 타입의 역할과 따르는 규칙을 안다. `~Ticks`는 단위가 초가 아니라 틱임을 드러낸다.
 
 ## 스타일
@@ -46,7 +46,7 @@ paths:
   - 이유: 형식이 하나여야 diff가 형식 차이로 흐려지지 않는다.
 - 멤버 순서: public 필드 → `[SerializeField] private` 필드 → private 필드 → const → public 메서드 → private 메서드.
   - 이유: 어느 파일이든 같은 종류의 멤버를 같은 위치에서 찾는다.
-- 컴포넌트는 struct + public 필드. 배열 원소 struct는 **반드시 `ref`로 접근**한다 (`ref PositionComponent position = ref positions[index];`, 읽기만 하면 `ref readonly`). 매개변수는 수정하면 `ref`, 읽기만 하면 `in`.
+- 컴포넌트와 엔티티는 struct + public 필드. 배열 원소 struct는 **반드시 `ref`로 접근**한다 (`ref EnemyEntity entity = ref enemies.entities[index];`, 읽기만 하면 `ref readonly`). 매개변수는 수정하면 `ref`, 읽기만 하면 `in`.
   - 이유: 배열 원소를 값으로 꺼내면 복사본을 고쳐서 원본이 바뀌지 않는 버그가 생긴다. `in`/`ref`로 수정 여부가 시그니처에 드러난다.
 
 ## Unity
