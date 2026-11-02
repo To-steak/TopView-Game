@@ -79,7 +79,7 @@ namespace TopView.Systems
                         if (!actionState.isAttackCommitted && actionState.elapsedTicks >= attack.startTicks)
                         {
                             actionState.isAttackCommitted = true;
-                            EntityReference owner = new EntityReference { kind = EntityKind.Boss, identifier = identifier };
+                            EntityReference owner = new EntityReference { kind = EntityKind.Shared, identifier = identifier };
                             EnemyAttackSystem.CommitAttack(in attack, positions[index].current, rotations[index].current, combats[index].attackDamage, ref actionState.missileShotCount, in owner, projectileSpawnRequests, meleeSpawnRequests);
                         }
                         if (EnemyAttackSystem.IsAttackFinished(in attack, actionState.elapsedTicks, actionState.isAttackCommitted))

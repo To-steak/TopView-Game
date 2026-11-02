@@ -146,22 +146,22 @@ namespace TopView.Core
         // 감지와 공격 판정은 여기에 플레이어 반지름을 더해 비교하므로, 원은 플레이어 중심이 아니라 가장자리가 닿는 기준이다
         private void DrawEnemyGizmos()
         {
-            EnemyEntity[] enemies = _world.enemies.entities;
-            for (int enemyIndex = 0; enemyIndex < enemies.Length; enemyIndex++)
+            EntityStorage entities = _world.entities;
+            for (int index = 0; index < entities.masks.Length; index++)
             {
-                ref readonly EnemyEntity enemy = ref enemies[enemyIndex];
-                if (!enemy.isAlive)
+                if ((entities.masks[index] & ComponentMask.EnemyArchetype) != ComponentMask.EnemyArchetype)
                 {
                     continue;
                 }
 
+                Vector3 position = entities.positions[index].current;
                 Gizmos.color = Color.yellow;
-                DrawCircleGizmo(enemy.position.current, enemy.behavior.detectionRadius);
+                DrawCircleGizmo(position, entities.enemyBehaviors[index].detectionRadius);
                 Gizmos.color = new Color(1f, 0.5f, 0f);
-                DrawCircleGizmo(enemy.position.current, enemy.behavior.stopDistance);
+                DrawCircleGizmo(position, entities.enemyBehaviors[index].stopDistance);
                 Gizmos.color = Color.cyan;
-                DrawCircleGizmo(enemy.position.current, enemy.stats.hitRadius);
-                DrawBodyAttackGizmos(enemy.attacks, enemy.position.current, enemy.rotation.current);
+                DrawCircleGizmo(position, entities.enemyStats[index].hitRadius);
+                DrawBodyAttackGizmos(entities.attackLists[index].attacks, position, entities.rotations[index].current);
             }
         }
 

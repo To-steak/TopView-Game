@@ -19,40 +19,45 @@ namespace TopView.Presentation.Enemy.ViewSystems
         private const int BASE_LAYER_INDEX = 0;
 
         /// <summary>
-        /// 적 저장소의 칸마다 살아 있는 엔티티와 View를 맞추고, 이번 프레임의 상태 변경 기록을 Animator에 반영한다.
+        /// 공유 저장소의 칸마다 살아 있는 적과 View를 맞추고, 이번 프레임의 상태 변경 기록을 Animator에 반영한다.
         /// </summary>
-        /// <param name="enemies">적 저장소</param>
+        /// <param name="masks">칸별 컴포넌트 표시</param>
+        /// <param name="generations">칸이 채워진 횟수</param>
+        /// <param name="kinds">적 종류 번호</param>
+        /// <param name="positions">위치</param>
+        /// <param name="rotations">회전</param>
         /// <param name="stateRecords">이번 프레임의 적 상태 변경 기록</param>
         /// <param name="viewPrefabsByKind">적 종류별 EnemyView 프리팹</param>
         /// <param name="context">적 View 실행 상태</param>
-        public static void Present(EnemyStorage enemies, List<EnemyStateChangedRecord> stateRecords, GameObject[] viewPrefabsByKind, EnemyViewContext context)
+        public static void Present(ComponentMask[] masks, int[] generations, EnemyKindComponent[] kinds, PositionComponent[] positions, RotationComponent[] rotations, List<EnemyStateChangedRecord> stateRecords, GameObject[] viewPrefabsByKind, EnemyViewContext context)
         {
             float alpha = Mathf.Clamp01((Time.time - Time.fixedTime) / Time.fixedDeltaTime);
 
-            for (int enemyIndex = 0; enemyIndex < enemies.entities.Length; enemyIndex++)
+            for (int index = 0; index < masks.Length; index++)
             {
-                ref readonly EnemyEntity enemy = ref enemies.entities[enemyIndex];
-                EnemyView view = context.views[enemyIndex];
+                bool isEnemy = (masks[index] & ComponentMask.EnemyArchetype) == ComponentMask.EnemyArchetype;
+                EnemyView view = context.views[index];
 
-                if (view != null && (!enemy.isAlive || context.viewGenerations[enemyIndex] != enemy.generation))
+                if (view != null && (!isEnemy || context.viewGenerations[index] != generations[index]))
                 {
-                    Release(context, enemyIndex, enemyIndex / enemies.capacityPerKind);
+                    // 칸은 종류별 구간으로 나뉘어 있어 칸을 다시 채워도 종류 번호는 그대로다
+                    Release(context, index, kinds[index].kind);
                     view = null;
                 }
 
                 // View 프리팹이 없는 종류는 판을 준비할 때 경고를 남겼으므로 여기서는 건너뛴다
-                if (!enemy.isAlive || viewPrefabsByKind[enemy.kind] == null)
+                if (!isEnemy || viewPrefabsByKind[kinds[index].kind] == null)
                 {
                     continue;
                 }
 
                 if (view == null)
                 {
-                    view = Acquire(context, enemyIndex, in enemy, viewPrefabsByKind);
+                    view = Acquire(context, index, kinds[index].kind, generations[index], viewPrefabsByKind);
                 }
 
-                Vector3 position = Vector3.Lerp(enemy.position.previous, enemy.position.current, alpha);
-                view.transform.SetPositionAndRotation(position, Quaternion.Slerp(enemy.rotation.previous, enemy.rotation.current, alpha));
+                Vector3 position = Vector3.Lerp(positions[index].previous, positions[index].current, alpha);
+                view.transform.SetPositionAndRotation(position, Quaternion.Slerp(rotations[index].previous, rotations[index].current, alpha));
             }
 
             for (int recordIndex = 0; recordIndex < stateRecords.Count; recordIndex++)
@@ -64,34 +69,33 @@ namespace TopView.Presentation.Enemy.ViewSystems
                     continue;
                 }
 
-                int kind = enemies.entities[record.enemy.index].kind;
-                ApplyStateRecord(in record, view.animator, context.triggerHashesByKind[kind]);
+                ApplyStateRecord(in record, view.animator, context.triggerHashesByKind[kinds[record.enemy.index].kind]);
             }
         }
 
-        private static EnemyView Acquire(EnemyViewContext context, int enemyIndex, in EnemyEntity enemy, GameObject[] viewPrefabsByKind)
+        private static EnemyView Acquire(EnemyViewContext context, int index, int kind, int generation, GameObject[] viewPrefabsByKind)
         {
-            Stack<EnemyView> pool = context.viewPools[enemy.kind];
-            EnemyView view = pool.Count > 0 ? pool.Pop() : Object.Instantiate(viewPrefabsByKind[enemy.kind]).GetComponent<EnemyView>();
+            Stack<EnemyView> pool = context.viewPools[kind];
+            EnemyView view = pool.Count > 0 ? pool.Pop() : Object.Instantiate(viewPrefabsByKind[kind]).GetComponent<EnemyView>();
             view.gameObject.SetActive(true);
 
-            if (context.triggerHashesByKind[enemy.kind] == null)
+            if (context.triggerHashesByKind[kind] == null)
             {
-                context.triggerHashesByKind[enemy.kind] = CollectTriggerHashes(view.animator);
+                context.triggerHashesByKind[kind] = CollectTriggerHashes(view.animator);
             }
 
-            context.views[enemyIndex] = view;
-            context.viewGenerations[enemyIndex] = enemy.generation;
+            context.views[index] = view;
+            context.viewGenerations[index] = generation;
 
-            PlayIdle(view.animator, context.triggerHashesByKind[enemy.kind]);
+            PlayIdle(view.animator, context.triggerHashesByKind[kind]);
             return view;
         }
 
-        // 칸의 View를 떼어 그 종류의 풀에 돌려놓는다. 적 저장소는 종류별 구간으로 나뉘어 있어 칸 번호로 종류를 안다.
-        private static void Release(EnemyViewContext context, int enemyIndex, int kind)
+        // 칸의 View를 떼어 그 종류의 풀에 돌려놓는다.
+        private static void Release(EnemyViewContext context, int index, int kind)
         {
-            EnemyView view = context.views[enemyIndex];
-            context.views[enemyIndex] = null;
+            EnemyView view = context.views[index];
+            context.views[index] = null;
             view.gameObject.SetActive(false);
             context.viewPools[kind].Push(view);
         }

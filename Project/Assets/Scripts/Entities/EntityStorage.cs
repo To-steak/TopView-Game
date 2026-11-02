@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using TopView.Components;
+using UnityEngine;
 
 namespace TopView.Entities
 {
-    // 공유 저장소. 엔티티는 칸 번호이고, 컴포넌트마다 같은 번호로 읽는 배열을 둔다. 지금은 투사체, 근접 판정, 보스를 담는다.
+    // 공유 저장소. 엔티티는 칸 번호이고, 컴포넌트마다 같은 번호로 읽는 배열을 둔다. 지금은 플레이어를 뺀 모든 엔티티를 담는다.
     // 칸은 엔티티 종류별 구간으로 나눈다. 구간마다 칸 수가 정해져 있어 한 종류가 다른 종류의 칸을 차지하지 않는다.
     public class EntityStorage
     {
@@ -16,6 +17,8 @@ namespace TopView.Entities
         public List<int> freeProjectileIndices;
         // 근접 판정 구간의 빈 칸 번호 목록. MeleeSpawnSystem이 끝에서부터 꺼낸다
         public List<int> freeMeleeIndices;
+        // 적 종류별 구간의 빈 칸 번호 목록. EnemySpawnSystem이 끝에서부터 꺼낸다
+        public List<int>[] freeEnemyIndicesByKind;
         // 보스 구간의 빈 칸 번호 목록. BossSpawnSystem이 끝에서부터 꺼낸다
         public List<int> freeBossIndices;
 
@@ -45,18 +48,30 @@ namespace TopView.Entities
         public BossBehaviorComponent[] bossBehaviors;
         // 보스 행동 상태와 공격 진행
         public BossActionStateComponent[] bossActionStates;
+        // 적 종류 번호
+        public EnemyKindComponent[] enemyKinds;
+        // 적 행동 값. 생성 때 Definition에서 복사한다
+        public EnemyBehaviorComponent[] enemyBehaviors;
+        // 적 행동 상태와 공격 진행
+        public EnemyActionStateComponent[] enemyActionStates;
+        // 목적지와 경로
+        public NavigationAgentComponent[] navigationAgents;
 
         /// <summary>
-        /// 모든 칸이 빈 저장소를 만들고, 근접 판정 구간의 칸마다 이미 맞힌 대상을 기록할 배열을 할당한다.
+        /// 모든 칸이 빈 저장소를 만들고, 근접 판정 구간의 칸마다 이미 맞힌 대상을 기록할 배열을, 적 구간의 칸마다 경로 배열을 할당한다.
         /// </summary>
         /// <param name="projectileCapacity">투사체 칸 수</param>
         /// <param name="meleeCapacity">근접 판정 칸 수</param>
         /// <param name="meleeHitCapacity">근접 판정 하나가 기록할 수 있는 이미 맞힌 대상 수</param>
+        /// <param name="enemyKindCount">적 종류 수</param>
+        /// <param name="enemyCapacityPerKind">적 종류별 칸 수</param>
+        /// <param name="pathCornerCapacity">적 칸마다 미리 만들어 둘 경로 배열의 크기</param>
         /// <param name="bossCapacity">보스 칸 수</param>
-        public EntityStorage(int projectileCapacity, int meleeCapacity, int meleeHitCapacity, int bossCapacity)
+        public EntityStorage(int projectileCapacity, int meleeCapacity, int meleeHitCapacity, int enemyKindCount, int enemyCapacityPerKind, int pathCornerCapacity, int bossCapacity)
         {
             int meleeEnd = projectileCapacity + meleeCapacity;
-            int capacity = meleeEnd + bossCapacity;
+            int enemyEnd = meleeEnd + enemyKindCount * enemyCapacityPerKind;
+            int capacity = enemyEnd + bossCapacity;
             masks = new ComponentMask[capacity];
             generations = new int[capacity];
             positions = new PositionComponent[capacity];
@@ -72,6 +87,10 @@ namespace TopView.Entities
             attackLists = new AttackListComponent[capacity];
             bossBehaviors = new BossBehaviorComponent[capacity];
             bossActionStates = new BossActionStateComponent[capacity];
+            enemyKinds = new EnemyKindComponent[capacity];
+            enemyBehaviors = new EnemyBehaviorComponent[capacity];
+            enemyActionStates = new EnemyActionStateComponent[capacity];
+            navigationAgents = new NavigationAgentComponent[capacity];
 
             freeProjectileIndices = new List<int>(projectileCapacity);
             for (int index = projectileCapacity - 1; index >= 0; index--)
@@ -86,8 +105,20 @@ namespace TopView.Entities
                 freeMeleeIndices.Add(index);
             }
 
+            freeEnemyIndicesByKind = new List<int>[enemyKindCount];
+            for (int kind = 0; kind < enemyKindCount; kind++)
+            {
+                freeEnemyIndicesByKind[kind] = new List<int>(enemyCapacityPerKind);
+                int kindStart = meleeEnd + kind * enemyCapacityPerKind;
+                for (int index = kindStart + enemyCapacityPerKind - 1; index >= kindStart; index--)
+                {
+                    navigationAgents[index].pathCorners = new Vector3[pathCornerCapacity];
+                    freeEnemyIndicesByKind[kind].Add(index);
+                }
+            }
+
             freeBossIndices = new List<int>(bossCapacity);
-            for (int index = capacity - 1; index >= meleeEnd; index--)
+            for (int index = capacity - 1; index >= enemyEnd; index--)
             {
                 freeBossIndices.Add(index);
             }

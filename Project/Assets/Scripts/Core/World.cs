@@ -26,9 +26,7 @@ namespace TopView.Core
 
         // 플레이어 저장소
         public PlayerStorage players;
-        // 적 저장소
-        public EnemyStorage enemies;
-        // 공유 저장소. 지금은 투사체, 근접 판정, 보스를 담는다
+        // 공유 저장소. 지금은 플레이어를 뺀 모든 엔티티를 담는다
         public EntityStorage entities;
         // 이번 틱의 피격 대상 목록. 판 시작 때 플레이어·적·보스 저장소 칸 수의 합으로 만들고, 매 틱 HitTargetSystem이 다시 채운다
         public HitTargetComponent[] hitTargets;
