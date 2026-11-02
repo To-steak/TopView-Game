@@ -6,17 +6,20 @@ using UnityEngine;
 
 namespace TopView.Systems
 {
-    // 근접 판정을 XZ 평면의 원으로 판정해 피해 요청을 넣고, 수명이 다한 판정을 없앤다. 공격한 쪽과 진영이 다른 피격 대상만 맞는다.
+    // 근접 판정을 XZ 평면의 원으로 판정해 피해 요청을 넣고, 수명이 다한 판정을 없앤다. 공격의 진영이 맞힐 쪽의 목록과 피해 요청 큐를 정한다.
     public static class MeleeHitSystem
     {
         /// <summary>
         /// 근접 판정마다 원 안에서 아직 맞지 않은 대상 모두에게 피해 요청을 넣고, 판정 시간을 1틱 늘려 다 되면 없앤다.
         /// </summary>
         /// <param name="melees">근접 판정 저장소</param>
-        /// <param name="hitTargets">피격 대상 목록</param>
-        /// <param name="hitTargetCount">피격 대상 목록에서 이번 틱에 채운 대상 수</param>
-        /// <param name="damageRequests">피해 요청 큐</param>
-        public static void Tick(MeleeStorage melees, HitTargetComponent[] hitTargets, int hitTargetCount, Queue<DamageRequest> damageRequests)
+        /// <param name="playerHitTargets">플레이어 피격 대상 목록</param>
+        /// <param name="playerHitTargetCount">플레이어 피격 대상 목록에서 이번 틱에 채운 대상 수</param>
+        /// <param name="enemyHitTargets">적 피격 대상 목록</param>
+        /// <param name="enemyHitTargetCount">적 피격 대상 목록에서 이번 틱에 채운 대상 수</param>
+        /// <param name="playerDamageRequests">플레이어 피해 요청 큐</param>
+        /// <param name="enemyDamageRequests">적 피해 요청 큐</param>
+        public static void Tick(MeleeStorage melees, HitTargetComponent[] playerHitTargets, int playerHitTargetCount, HitTargetComponent[] enemyHitTargets, int enemyHitTargetCount, Queue<DamageRequest> playerDamageRequests, Queue<DamageRequest> enemyDamageRequests)
         {
             int droppedHitCount = 0;
             for (int index = 0; index < melees.entities.Length; index++)
@@ -27,7 +30,14 @@ namespace TopView.Systems
                     continue;
                 }
 
-                droppedHitCount += Hit(in entity.melee, ref entity.hits, entity.position.current, in entity.payload, hitTargets, hitTargetCount, damageRequests);
+                if (entity.payload.faction == Faction.Player)
+                {
+                    droppedHitCount += Hit(in entity.melee, ref entity.hits, entity.position.current, in entity.payload, enemyHitTargets, enemyHitTargetCount, enemyDamageRequests);
+                }
+                else
+                {
+                    droppedHitCount += Hit(in entity.melee, ref entity.hits, entity.position.current, in entity.payload, playerHitTargets, playerHitTargetCount, playerDamageRequests);
+                }
 
                 entity.melee.elapsedTicks++;
                 if (entity.melee.elapsedTicks >= entity.melee.durationTicks)
@@ -75,8 +85,7 @@ namespace TopView.Systems
             for (int targetIndex = 0; targetIndex < hitTargetCount; targetIndex++)
             {
                 ref readonly HitTargetComponent hitTarget = ref hitTargets[targetIndex];
-                if (hitTarget.faction == payload.faction
-                    || !TargetingSystem.IsWithin(center, hitTarget.position, melee.radius + hitTarget.radius)
+                if (!TargetingSystem.IsWithin(center, hitTarget.position, melee.radius + hitTarget.radius)
                     || IsAlreadyHit(in hits, in hitTarget.target))
                 {
                     continue;

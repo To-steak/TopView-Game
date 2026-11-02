@@ -7,18 +7,21 @@ using UnityEngine;
 
 namespace TopView.Systems
 {
-    // 투사체 명중과 수류탄 폭발을 XZ 평면의 원으로 판정해 피해 요청을 넣는다. Straight 투사체는 대상의 높이 범위도 본다. 쏜 쪽과 진영이 다른 피격 대상만 맞는다.
+    // 투사체 명중과 수류탄 폭발을 XZ 평면의 원으로 판정해 피해 요청을 넣는다. Straight 투사체는 대상의 높이 범위도 본다. 공격의 진영이 맞힐 쪽의 목록과 피해 요청 큐를 정한다.
     public static class ProjectileHitSystem
     {
         /// <summary>
         /// Straight 투사체는 이번 틱의 이동 선분에서 가장 먼저 닿은 대상 하나에, 시간이 된 Grenade는 폭발 반경 안의 대상 모두에게 피해 요청을 넣고 사라진다.
         /// </summary>
         /// <param name="projectiles">투사체 저장소</param>
-        /// <param name="hitTargets">피격 대상 목록</param>
-        /// <param name="hitTargetCount">피격 대상 목록에서 이번 틱에 채운 대상 수</param>
-        /// <param name="damageRequests">피해 요청 큐</param>
+        /// <param name="playerHitTargets">플레이어 피격 대상 목록</param>
+        /// <param name="playerHitTargetCount">플레이어 피격 대상 목록에서 이번 틱에 채운 대상 수</param>
+        /// <param name="enemyHitTargets">적 피격 대상 목록</param>
+        /// <param name="enemyHitTargetCount">적 피격 대상 목록에서 이번 틱에 채운 대상 수</param>
+        /// <param name="playerDamageRequests">플레이어 피해 요청 큐</param>
+        /// <param name="enemyDamageRequests">적 피해 요청 큐</param>
         /// <param name="hitRecords">명중·폭발 기록</param>
-        public static void Tick(ProjectileStorage projectiles, HitTargetComponent[] hitTargets, int hitTargetCount, Queue<DamageRequest> damageRequests, List<ProjectileHitRecord> hitRecords)
+        public static void Tick(ProjectileStorage projectiles, HitTargetComponent[] playerHitTargets, int playerHitTargetCount, HitTargetComponent[] enemyHitTargets, int enemyHitTargetCount, Queue<DamageRequest> playerDamageRequests, Queue<DamageRequest> enemyDamageRequests, List<ProjectileHitRecord> hitRecords)
         {
             for (int index = 0; index < projectiles.entities.Length; index++)
             {
@@ -27,6 +30,11 @@ namespace TopView.Systems
                 {
                     continue;
                 }
+
+                bool isPlayerAttack = entity.payload.faction == Faction.Player;
+                HitTargetComponent[] hitTargets = isPlayerAttack ? enemyHitTargets : playerHitTargets;
+                int hitTargetCount = isPlayerAttack ? enemyHitTargetCount : playerHitTargetCount;
+                Queue<DamageRequest> damageRequests = isPlayerAttack ? enemyDamageRequests : playerDamageRequests;
 
                 if (entity.projectile.kind == ProjectileKind.Grenade)
                 {
@@ -54,8 +62,7 @@ namespace TopView.Systems
             for (int targetIndex = 0; targetIndex < hitTargetCount; targetIndex++)
             {
                 ref readonly HitTargetComponent hitTarget = ref hitTargets[targetIndex];
-                if (hitTarget.faction != payload.faction
-                    && TryHitSegment(position.previous, position.current, hitTarget.position, projectile.radius + hitTarget.radius, out float hitFraction)
+                if (TryHitSegment(position.previous, position.current, hitTarget.position, projectile.radius + hitTarget.radius, out float hitFraction)
                     && IsWithinHeight(in projectile, in position, in hitTarget, hitFraction)
                     && hitFraction < nearestFraction)
                 {
@@ -83,8 +90,7 @@ namespace TopView.Systems
             for (int targetIndex = 0; targetIndex < hitTargetCount; targetIndex++)
             {
                 ref readonly HitTargetComponent hitTarget = ref hitTargets[targetIndex];
-                if (hitTarget.faction != payload.faction
-                    && TargetingSystem.IsWithin(position.current, hitTarget.position, projectile.explosionRadius + hitTarget.radius))
+                if (TargetingSystem.IsWithin(position.current, hitTarget.position, projectile.explosionRadius + hitTarget.radius))
                 {
                     damageRequests.Enqueue(new DamageRequest { target = hitTarget.target, amount = payload.damage });
                 }

@@ -44,8 +44,6 @@ namespace TopView.Entities
         public EnemyActionStateComponent[] enemyActionStates;
         // 목적지와 경로
         public NavigationAgentComponent[] navigationAgents;
-        // 공격을 맞는 진영
-        public FactionComponent[] factions;
         // 마나
         public ManaComponent[] manas;
         // 플레이어 이동 값. 생성 때 Definition에서 복사한다
@@ -90,7 +88,6 @@ namespace TopView.Entities
             enemyBehaviors = new EnemyBehaviorComponent[capacity];
             enemyActionStates = new EnemyActionStateComponent[capacity];
             navigationAgents = new NavigationAgentComponent[capacity];
-            factions = new FactionComponent[capacity];
             manas = new ManaComponent[capacity];
             playerMovements = new PlayerMovementComponent[capacity];
             playerVitals = new PlayerVitalsComponent[capacity];

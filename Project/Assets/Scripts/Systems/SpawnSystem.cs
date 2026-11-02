@@ -29,7 +29,6 @@ namespace TopView.Systems
             entities.enemyBehaviors[index] = default;
             entities.enemyActionStates[index] = default;
             entities.navigationAgents[index] = default;
-            entities.factions[index] = default;
             entities.manas[index] = default;
             entities.playerMovements[index] = default;
             entities.playerVitals[index] = default;

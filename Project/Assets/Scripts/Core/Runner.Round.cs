@@ -71,9 +71,11 @@ namespace TopView.Core
             world.random = new System.Random(world.rule.randomSeed);
             world.playerSpawnRequests.Enqueue(playerSpawnRequest);
             world.enemySpawnTemplates = enemySpawnTemplates;
-            // 피격 대상은 플레이어·적·보스의 칸 수를 넘지 않고, 공격하는 쪽 하나는 근접 판정을 동시에 하나만 가지므로 근접 판정도 이 수로 넘치지 않는다
-            int combatantCapacity = PLAYER_CAPACITY + enemyKindCount * gameSettings.enemyCapacityPerKind + BOSS_CAPACITY;
-            world.hitTargets = new HitTargetComponent[combatantCapacity];
+            int enemyCapacity = enemyKindCount * gameSettings.enemyCapacityPerKind + BOSS_CAPACITY;
+            world.playerHitTargets = new HitTargetComponent[PLAYER_CAPACITY];
+            world.enemyHitTargets = new HitTargetComponent[enemyCapacity];
+            // 공격하는 쪽 하나는 근접 판정을 동시에 하나만 가지고, 한 판정이 맞힐 대상도 플레이어·적·보스의 칸 수를 넘지 않는다
+            int combatantCapacity = PLAYER_CAPACITY + enemyCapacity;
             world.entities = new EntityStorage(enemyKindCount, gameSettings.enemyCapacityPerKind, gameSettings.enemyPathCornerCapacity, BOSS_CAPACITY, PLAYER_CAPACITY);
             world.melees = new MeleeStorage(combatantCapacity, combatantCapacity);
             world.projectiles = new ProjectileStorage(gameSettings.projectileCapacity);

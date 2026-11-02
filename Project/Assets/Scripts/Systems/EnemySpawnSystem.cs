@@ -73,7 +73,6 @@ namespace TopView.Systems
 
             SpawnSystem.ClaimSlot(entities, index, ComponentMask.EnemyArchetype);
             entities.enemyKinds[index] = new EnemyKindComponent { kind = request.enemyKindIndex };
-            entities.factions[index] = new FactionComponent { faction = Faction.Enemy };
             entities.enemyStats[index] = request.stats;
             entities.enemyBehaviors[index] = request.behavior;
             entities.attackLists[index] = new AttackListComponent { attacks = attacks };

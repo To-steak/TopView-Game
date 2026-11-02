@@ -58,7 +58,7 @@ namespace TopView.Core
             }
 
             bool isPlaying = _world.progress.phase == GamePhase.Playing;
-            DamageSystem.Tick(ref _world.progress, _world.entities.masks, _world.entities.generations, _world.entities.healths, _world.entities.combats, _world.entities.enemyStats, _world.damageRequests);
+            DamageSystem.Tick(ref _world.progress, _world.entities.masks, _world.entities.generations, _world.entities.healths, _world.entities.combats, _world.entities.enemyStats, _world.playerDamageRequests, _world.enemyDamageRequests);
             if (isPlaying)
             {
                 TransformSnapshotSystem.Tick(_world.entities.masks, _world.entities.positions, _world.entities.rotations, _world.projectiles);
@@ -83,9 +83,9 @@ namespace TopView.Core
                 BossBehaviorSystem.Tick(_world.entities.masks, _world.entities.generations, _world.entities.healths, _world.entities.combats, _world.entities.positions, _world.entities.rotations, _world.entities.attackLists, _world.entities.bossBehaviors, _world.entities.bossActionStates, _world.entities.freeBossIndices, _world.entities.playerMovements, _world.random, _world.bossStateChangedRecords, _world.projectileSpawnRequests, _world.meleeSpawnRequests, _world.gameOverRequests);
                 EnemyNavigationSystem.Tick(_world.entities.masks, _world.entities.positions, _world.entities.rotations, _world.entities.navigationAgents, _world.entities.enemyBehaviors, _world.entities.enemyStats, _world.navigationPath, _world.rule.navMeshSampleDistance);
                 ProjectileSystem.Tick(_world.projectiles);
-                HitTargetSystem.Tick(_world.entities.masks, _world.entities.generations, _world.entities.positions, _world.entities.rotations, _world.entities.healths, _world.entities.factions, _world.entities.playerMovements, _world.entities.enemyStats, _world.hitTargets, ref _world.hitTargetCount);
-                ProjectileHitSystem.Tick(_world.projectiles, _world.hitTargets, _world.hitTargetCount, _world.damageRequests, _world.projectileHitRecords);
-                MeleeHitSystem.Tick(_world.melees, _world.hitTargets, _world.hitTargetCount, _world.damageRequests);
+                HitTargetSystem.Tick(_world.entities.masks, _world.entities.generations, _world.entities.positions, _world.entities.rotations, _world.entities.healths, _world.entities.playerMovements, _world.entities.enemyStats, _world.playerHitTargets, ref _world.playerHitTargetCount, _world.enemyHitTargets, ref _world.enemyHitTargetCount);
+                ProjectileHitSystem.Tick(_world.projectiles, _world.playerHitTargets, _world.playerHitTargetCount, _world.enemyHitTargets, _world.enemyHitTargetCount, _world.playerDamageRequests, _world.enemyDamageRequests, _world.projectileHitRecords);
+                MeleeHitSystem.Tick(_world.melees, _world.playerHitTargets, _world.playerHitTargetCount, _world.enemyHitTargets, _world.enemyHitTargetCount, _world.playerDamageRequests, _world.enemyDamageRequests);
             }
 
             GameRuleSystem.Tick(ref _world.progress, _world.gameOverRequests);
