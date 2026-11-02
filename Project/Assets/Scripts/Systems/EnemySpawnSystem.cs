@@ -55,6 +55,12 @@ namespace TopView.Systems
             EnemyAttackComponent[] attacks = SpawnSystem.ReuseArray(slot.attacks, request.attacks);
             Vector3[] pathCorners = slot.pathCorners;
             Array.Clear(pathCorners, 0, pathCorners.Length);
+            int[] attackCooldownRemainingTicks = slot.attackCooldownRemainingTicks;
+            if (attackCooldownRemainingTicks == null || attackCooldownRemainingTicks.Length != attacks.Length)
+            {
+                attackCooldownRemainingTicks = new int[attacks.Length];
+            }
+            Array.Clear(attackCooldownRemainingTicks, 0, attackCooldownRemainingTicks.Length);
 
             Vector3 position = request.position;
             bool hasNavMesh = NavMesh.SamplePosition(position, out NavMeshHit hit, navMeshSampleDistance, NavMesh.AllAreas);
@@ -72,6 +78,7 @@ namespace TopView.Systems
                 stats = request.stats,
                 behavior = request.behavior,
                 attacks = attacks,
+                attackCooldownRemainingTicks = attackCooldownRemainingTicks,
                 level = request.level,
                 maxHealth = maxHealth,
                 health = maxHealth,

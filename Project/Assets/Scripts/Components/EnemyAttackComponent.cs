@@ -12,12 +12,14 @@ namespace TopView.Components
         public EnemyAttackKind kind;
         // 이 공격을 시작할 수 있는 플레이어까지의 거리(유닛, XZ). 플레이어 반지름을 더해 비교한다. 적만 쓰고 보스는 쓰지 않는다
         public float attackRange;
-        // 공격 상태에 들어간 뒤 공격이 나가기까지의 시간(틱). Body는 판정이 시작되고, 투사체 공격은 투사체를 내보낸 뒤 공격 상태가 끝난다
+        // 공격 상태가 끝난 뒤 이 공격을 다시 고를 수 있을 때까지의 시간(틱). 0이면 바로 고를 수 있다. 적만 쓰고 보스는 쓰지 않는다
+        public int cooldownTicks;
+        // 공격 상태에 들어간 뒤 공격이 나가기까지의 시간(틱). Body는 판정이 시작되고, 투사체 공격은 투사체를 내보낸다
         [FormerlySerializedAs("commitTicks")]
         public int startTicks;
         // 공격 상태에 들어간 뒤 Body 판정이 끝나기까지의 시간(틱). startTicks보다 커야 한다. Body만 쓴다
         public int endTicks;
-        // 공격 상태에 들어간 뒤 공격 상태가 끝나기까지의 시간(틱). endTicks 이후는 판정 없는 후딜레이다. Body만 쓴다
+        // 공격 상태에 들어간 뒤 공격 상태가 끝나기까지의 시간(틱). 공격이 나가기 전에는 끝나지 않는다. Body는 endTicks 이후가 판정 없는 후딜레이다
         public int durationTicks;
         // 공격력에 곱하는 배율
         public float damageMultiplier;

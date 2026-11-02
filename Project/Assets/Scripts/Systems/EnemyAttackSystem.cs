@@ -57,7 +57,7 @@ namespace TopView.Systems
         }
 
         /// <summary>
-        /// 공격 상태가 끝났는지 돌려준다. Body는 후딜레이까지 기다리고, 투사체 공격은 투사체를 내보내면 바로 끝난다.
+        /// 공격 상태가 끝났는지 돌려준다. 공격을 내보낸 뒤 durationTicks까지 기다린다.
         /// </summary>
         /// <param name="attack">공격 값</param>
         /// <param name="stateElapsedTicks">공격 상태에 들어간 뒤 지난 시간(틱)</param>
@@ -65,9 +65,7 @@ namespace TopView.Systems
         /// <returns>공격 상태가 끝났으면 true</returns>
         public static bool IsAttackFinished(in EnemyAttackComponent attack, int stateElapsedTicks, bool isAttackCommitted)
         {
-            return attack.kind == EnemyAttackKind.Body
-                ? stateElapsedTicks >= attack.durationTicks
-                : isAttackCommitted;
+            return isAttackCommitted && stateElapsedTicks >= attack.durationTicks;
         }
     }
 }

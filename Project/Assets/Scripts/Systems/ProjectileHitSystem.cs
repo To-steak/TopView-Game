@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace TopView.Systems
 {
-    // 투사체 명중과 수류탄 폭발을 XZ 평면의 원으로 판정해 피해 요청을 넣는다. 쏜 쪽과 진영이 다른 피격 대상만 맞는다.
+    // 투사체 명중과 수류탄 폭발을 XZ 평면의 원으로 판정해 피해 요청을 넣는다. Straight 투사체는 대상의 높이 범위도 본다. 쏜 쪽과 진영이 다른 피격 대상만 맞는다.
     public static class ProjectileHitSystem
     {
         /// <summary>
@@ -56,6 +56,7 @@ namespace TopView.Systems
                 ref readonly HitTargetComponent hitTarget = ref hitTargets[targetIndex];
                 if (hitTarget.faction != projectile.faction
                     && TryHitSegment(projectile.previousPosition, projectile.currentPosition, hitTarget.position, projectile.projectile.radius + hitTarget.radius, out float hitFraction)
+                    && IsWithinHeight(in projectile, in hitTarget, hitFraction)
                     && hitFraction < nearestFraction)
                 {
                     nearestFraction = hitFraction;
@@ -90,6 +91,14 @@ namespace TopView.Systems
             }
 
             hitRecords.Add(new ProjectileHitRecord { position = projectile.currentPosition, hitEffectIndex = projectile.projectile.hitEffectIndex });
+        }
+
+        // 이동 선분에서 hitFraction 지점의 투사체 구가 대상의 높이 범위에 닿는지.
+        private static bool IsWithinHeight(in ProjectileEntity projectile, in HitTargetComponent hitTarget, float hitFraction)
+        {
+            float height = Mathf.Lerp(projectile.previousPosition.y, projectile.currentPosition.y, hitFraction);
+            return height + projectile.projectile.radius >= hitTarget.bottomHeight
+                && height - projectile.projectile.radius <= hitTarget.topHeight;
         }
 
         // 선분 from→to(XZ)가 center를 중심으로 한 반지름 radius의 원에 닿는지. 닿으면 선분에서 가장 가까운 점의 비율(0~1)을 돌려준다.

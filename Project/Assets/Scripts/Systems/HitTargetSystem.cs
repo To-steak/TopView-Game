@@ -24,7 +24,10 @@ namespace TopView.Systems
                 ref readonly PlayerEntity player = ref players.entities[playerIndex];
                 if (player.isAlive && player.state != PlayerState.Die)
                 {
-                    Add(hitTargets, ref hitTargetCount, EntityKind.Player, playerIndex, player.generation, Faction.Player, player.currentPosition, player.movement.capsuleRadius);
+                    // 점프로 적 투사체를 피할 수 있도록 플레이어만 캡슐 높이로 맞는다
+                    PlayerMovementSystem.GetCapsulePoints(in player, player.currentPosition, out Vector3 top, out Vector3 bottom);
+                    float radius = player.movement.capsuleRadius;
+                    Add(hitTargets, ref hitTargetCount, EntityKind.Player, playerIndex, player.generation, Faction.Player, player.currentPosition, radius, bottom.y - radius, top.y + radius);
                 }
             }
 
@@ -33,7 +36,7 @@ namespace TopView.Systems
                 ref readonly EnemyEntity enemy = ref enemies.entities[enemyIndex];
                 if (enemy.isAlive && enemy.state != EnemyState.Die)
                 {
-                    Add(hitTargets, ref hitTargetCount, EntityKind.Enemy, enemyIndex, enemy.generation, Faction.Enemy, enemy.currentPosition, enemy.stats.hitRadius);
+                    Add(hitTargets, ref hitTargetCount, EntityKind.Enemy, enemyIndex, enemy.generation, Faction.Enemy, enemy.currentPosition, enemy.stats.hitRadius, float.NegativeInfinity, float.PositiveInfinity);
                 }
             }
 
@@ -42,12 +45,12 @@ namespace TopView.Systems
                 ref readonly BossEntity boss = ref bosses.entities[bossIndex];
                 if (boss.isAlive && boss.state != BossState.Die)
                 {
-                    Add(hitTargets, ref hitTargetCount, EntityKind.Boss, bossIndex, boss.generation, Faction.Enemy, boss.currentPosition, boss.stats.hitRadius);
+                    Add(hitTargets, ref hitTargetCount, EntityKind.Boss, bossIndex, boss.generation, Faction.Enemy, boss.currentPosition, boss.stats.hitRadius, float.NegativeInfinity, float.PositiveInfinity);
                 }
             }
         }
 
-        private static void Add(HitTargetComponent[] hitTargets, ref int hitTargetCount, EntityKind kind, int index, int generation, Faction faction, Vector3 position, float radius)
+        private static void Add(HitTargetComponent[] hitTargets, ref int hitTargetCount, EntityKind kind, int index, int generation, Faction faction, Vector3 position, float radius, float bottomHeight, float topHeight)
         {
             hitTargets[hitTargetCount] = new HitTargetComponent
             {
@@ -58,7 +61,9 @@ namespace TopView.Systems
                 },
                 faction = faction,
                 position = position,
-                radius = radius
+                radius = radius,
+                bottomHeight = bottomHeight,
+                topHeight = topHeight
             };
             hitTargetCount++;
         }
