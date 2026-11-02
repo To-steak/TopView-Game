@@ -6,27 +6,27 @@ using UnityEngine;
 
 namespace TopView.Systems
 {
-    // 플레이어 생성 요청을 받아 공유 저장소의 플레이어 구간 빈 칸에 컴포넌트를 채운다. 틱 마지막에 부른다.
+    // 플레이어 생성 요청을 받아 저장소의 빈 칸을 채운다. 틱 마지막에 부른다.
     public static class PlayerSpawnSystem
     {
         /// <summary>
         /// 플레이어 생성 요청을 모두 처리한다. 빈 칸이 없으면 요청을 버린다.
         /// </summary>
-        /// <param name="entities">공유 저장소</param>
+        /// <param name="players">플레이어 저장소</param>
         /// <param name="playerSpawnRequests">플레이어 생성 요청 큐</param>
-        public static void Tick(EntityStorage entities, Queue<PlayerSpawnRequest> playerSpawnRequests)
+        public static void Tick(PlayerStorage players, Queue<PlayerSpawnRequest> playerSpawnRequests)
         {
             int droppedCount = 0;
             while (playerSpawnRequests.Count > 0)
             {
                 PlayerSpawnRequest request = playerSpawnRequests.Dequeue();
-                if (!SpawnSystem.TryTakeFreeIndex(entities.freePlayerIndices, out int index))
+                if (!SpawnSystem.TryTakeFreeIndex(players.freeIndices, out int index))
                 {
                     droppedCount++;
                     continue;
                 }
 
-                Spawn(entities, index, in request);
+                Spawn(ref players.entities[index], in request);
             }
 
             if (droppedCount > 0)
@@ -35,34 +35,40 @@ namespace TopView.Systems
             }
         }
 
-        private static void Spawn(EntityStorage entities, int index, in PlayerSpawnRequest request)
+        // 칸 전체를 새 값으로 바꿔 이전 값이 남지 않게 한다. 무기 목록과 탄약 배열만 다시 쓴다.
+        private static void Spawn(ref PlayerEntity entity, in PlayerSpawnRequest request)
         {
-            WeaponComponent[] weapons = SpawnSystem.ReuseArray(entities.weaponLists[index].weapons, request.weapons);
-            int[] currentAmmo = ReuseAmmoArray(entities.weaponSlots[index].currentAmmo, weapons.Length);
-            int[] reserveAmmo = ReuseAmmoArray(entities.weaponSlots[index].reserveAmmo, weapons.Length);
+            int generation = entity.generation + 1;
+            WeaponComponent[] weapons = SpawnSystem.ReuseArray(entity.weaponList.weapons, request.weapons);
+            int[] currentAmmo = ReuseAmmoArray(entity.weaponSlots.currentAmmo, weapons.Length);
+            int[] reserveAmmo = ReuseAmmoArray(entity.weaponSlots.reserveAmmo, weapons.Length);
             for (int weaponIndex = 0; weaponIndex < weapons.Length; weaponIndex++)
             {
                 currentAmmo[weaponIndex] = weapons[weaponIndex].startingCurrentAmmo;
                 reserveAmmo[weaponIndex] = weapons[weaponIndex].startingReserveAmmo;
             }
 
-            SpawnSystem.ClaimSlot(entities, index, ComponentMask.PlayerArchetype);
-            entities.playerMovements[index] = request.movement;
-            entities.playerVitals[index] = request.vitals;
-            entities.playerActions[index] = request.action;
-            entities.positions[index] = new PositionComponent { previous = request.position, current = request.position };
-            entities.rotations[index] = new RotationComponent { previous = request.rotation, current = request.rotation };
-            entities.playerActionStates[index] = new PlayerActionStateComponent { state = PlayerState.Idle };
-            entities.playerMotions[index] = new PlayerMotionComponent { currentSpeed = request.movement.walkSpeed };
-            entities.healths[index] = new HealthComponent { current = request.vitals.maxHealth, max = request.vitals.maxHealth };
-            entities.manas[index] = new ManaComponent { current = request.vitals.maxMana, recoveryElapsedTicks = request.vitals.manaRecoveryDelayTicks };
-            entities.weaponLists[index] = new WeaponListComponent { weapons = weapons };
-            entities.weaponSlots[index] = new PlayerWeaponSlotsComponent
+            entity = new PlayerEntity
             {
-                currentAmmo = currentAmmo,
-                reserveAmmo = reserveAmmo,
-                currentIndex = 0,
-                pendingIndex = 0
+                isAlive = true,
+                generation = generation,
+                movement = request.movement,
+                vitals = request.vitals,
+                action = request.action,
+                position = new PositionComponent { previous = request.position, current = request.position },
+                rotation = new RotationComponent { previous = request.rotation, current = request.rotation },
+                actionState = new PlayerActionStateComponent { state = PlayerState.Idle },
+                motion = new PlayerMotionComponent { currentSpeed = request.movement.walkSpeed },
+                health = new HealthComponent { current = request.vitals.maxHealth, max = request.vitals.maxHealth },
+                mana = new ManaComponent { current = request.vitals.maxMana, recoveryElapsedTicks = request.vitals.manaRecoveryDelayTicks },
+                weaponList = new WeaponListComponent { weapons = weapons },
+                weaponSlots = new PlayerWeaponSlotsComponent
+                {
+                    currentAmmo = currentAmmo,
+                    reserveAmmo = reserveAmmo,
+                    currentIndex = 0,
+                    pendingIndex = 0
+                }
             };
         }
 

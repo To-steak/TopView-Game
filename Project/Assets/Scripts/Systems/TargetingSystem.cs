@@ -1,4 +1,3 @@
-using TopView.Components;
 using TopView.Entities;
 using UnityEngine;
 
@@ -13,23 +12,22 @@ namespace TopView.Systems
         /// <summary>
         /// 살아 있는 플레이어의 위치와 피격 반지름을 돌려준다.
         /// </summary>
-        /// <param name="masks">칸별 컴포넌트 표시</param>
-        /// <param name="positions">위치</param>
-        /// <param name="movements">플레이어 이동 값</param>
+        /// <param name="players">플레이어 저장소</param>
         /// <param name="playerPosition">플레이어 위치(월드)</param>
         /// <param name="playerRadius">플레이어 이동 충돌 캡슐의 반지름. 감지와 공격 범위에 더한다</param>
         /// <returns>살아 있는 플레이어가 있으면 true</returns>
-        public static bool TryGetPlayerTarget(ComponentMask[] masks, PositionComponent[] positions, PlayerMovementComponent[] movements, out Vector3 playerPosition, out float playerRadius)
+        public static bool TryGetPlayerTarget(PlayerStorage players, out Vector3 playerPosition, out float playerRadius)
         {
-            for (int index = 0; index < masks.Length; index++)
+            for (int index = 0; index < players.entities.Length; index++)
             {
-                if ((masks[index] & ComponentMask.PlayerArchetype) != ComponentMask.PlayerArchetype)
+                ref readonly PlayerEntity entity = ref players.entities[index];
+                if (!entity.isAlive)
                 {
                     continue;
                 }
 
-                playerPosition = positions[index].current;
-                playerRadius = movements[index].capsuleRadius;
+                playerPosition = entity.position.current;
+                playerRadius = entity.movement.capsuleRadius;
                 return true;
             }
 

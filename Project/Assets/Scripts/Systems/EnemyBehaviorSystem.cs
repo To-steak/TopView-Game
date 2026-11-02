@@ -14,14 +14,12 @@ namespace TopView.Systems
         /// Idle과 Walk 상태의 적마다 플레이어를 감지해 배회, 추적, 공격 시작을 정한다.
         /// </summary>
         /// <param name="enemies">적 저장소</param>
-        /// <param name="masks">플레이어 칸별 컴포넌트 표시. 플레이어를 찾는 데 쓴다</param>
-        /// <param name="positions">플레이어 위치</param>
-        /// <param name="playerMovements">플레이어 이동 값. 감지와 공격 대상의 반지름을 읽는다</param>
+        /// <param name="players">플레이어 저장소. 감지와 공격 대상의 위치와 반지름을 읽는다</param>
         /// <param name="random">World의 난수 생성기</param>
         /// <param name="stateRecords">적 상태 변경 기록</param>
-        public static void Tick(EnemyStorage enemies, ComponentMask[] masks, PositionComponent[] positions, PlayerMovementComponent[] playerMovements, System.Random random, List<EnemyStateChangedRecord> stateRecords)
+        public static void Tick(EnemyStorage enemies, PlayerStorage players, System.Random random, List<EnemyStateChangedRecord> stateRecords)
         {
-            bool hasPlayer = TargetingSystem.TryGetPlayerTarget(masks, positions, playerMovements, out Vector3 playerPosition, out float playerRadius);
+            bool hasPlayer = TargetingSystem.TryGetPlayerTarget(players, out Vector3 playerPosition, out float playerRadius);
             float deltaTime = Time.fixedDeltaTime;
             int failedWanderCount = 0;
             int missingAttackCount = 0;

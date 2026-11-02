@@ -14,15 +14,13 @@ namespace TopView.Systems
         /// 공격 상태의 적을 처리한다. 이번 틱에 막 공격 상태에 들어온 적은 다음 틱부터 처리한다. EnemyBehaviorSystem 다음에 부른다.
         /// </summary>
         /// <param name="enemies">적 저장소</param>
-        /// <param name="masks">플레이어 칸별 컴포넌트 표시. 플레이어를 찾는 데 쓴다</param>
-        /// <param name="positions">플레이어 위치</param>
-        /// <param name="playerMovements">플레이어 이동 값. 플레이어를 찾는 데 쓴다</param>
+        /// <param name="players">플레이어 저장소. 바라볼 위치를 읽는다</param>
         /// <param name="stateRecords">적 상태 변경 기록</param>
         /// <param name="projectileSpawnRequests">투사체 생성 요청 큐</param>
         /// <param name="meleeSpawnRequests">근접 판정 생성 요청 큐</param>
-        public static void Tick(EnemyStorage enemies, ComponentMask[] masks, PositionComponent[] positions, PlayerMovementComponent[] playerMovements, List<EnemyStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
+        public static void Tick(EnemyStorage enemies, PlayerStorage players, List<EnemyStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
         {
-            bool hasPlayer = TargetingSystem.TryGetPlayerTarget(masks, positions, playerMovements, out Vector3 playerPosition, out float _);
+            bool hasPlayer = TargetingSystem.TryGetPlayerTarget(players, out Vector3 playerPosition, out float _);
             float deltaTime = Time.fixedDeltaTime;
 
             for (int index = 0; index < enemies.entities.Length; index++)

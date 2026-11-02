@@ -9,23 +9,25 @@ namespace TopView.Systems
         /// <summary>
         /// 상태 시간을 1틱 늘리고 공격 대기 시간을 1틱 줄인다.
         /// </summary>
-        /// <param name="masks">칸별 컴포넌트 표시</param>
-        /// <param name="actionStates">플레이어 행동 상태와 공격 진행</param>
-        public static void Tick(ComponentMask[] masks, PlayerActionStateComponent[] actionStates)
+        /// <param name="players">플레이어 저장소</param>
+        public static void Tick(PlayerStorage players)
         {
-            for (int index = 0; index < masks.Length; index++)
+            for (int index = 0; index < players.entities.Length; index++)
             {
-                if ((masks[index] & ComponentMask.PlayerArchetype) != ComponentMask.PlayerArchetype)
+                ref PlayerEntity entity = ref players.entities[index];
+                if (entity.isAlive)
                 {
-                    continue;
+                    Advance(ref entity.actionState);
                 }
+            }
+        }
 
-                ref PlayerActionStateComponent actionState = ref actionStates[index];
-                actionState.elapsedTicks++;
-                if (actionState.attackCooldownTicks > 0)
-                {
-                    actionState.attackCooldownTicks--;
-                }
+        private static void Advance(ref PlayerActionStateComponent actionState)
+        {
+            actionState.elapsedTicks++;
+            if (actionState.attackCooldownTicks > 0)
+            {
+                actionState.attackCooldownTicks--;
             }
         }
     }

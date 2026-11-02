@@ -11,23 +11,19 @@ namespace TopView.Systems
         /// <summary>
         /// Move, 공격, 교체, 재장전 상태는 방향과 속도를 정하고 달리기 마나를 쓴다. Jump와 Land 상태는 방향만 정한다. PlayerPressSystem 다음에 부른다.
         /// </summary>
-        /// <param name="masks">칸별 컴포넌트 표시</param>
-        /// <param name="actionStates">플레이어 행동 상태</param>
-        /// <param name="motions">플레이어 이동 상태</param>
-        /// <param name="manas">마나</param>
-        /// <param name="movements">플레이어 이동 값</param>
-        /// <param name="vitals">플레이어 체력과 마나 값</param>
+        /// <param name="players">플레이어 저장소</param>
         /// <param name="command">플레이어 입력</param>
-        public static void Tick(ComponentMask[] masks, PlayerActionStateComponent[] actionStates, PlayerMotionComponent[] motions, ManaComponent[] manas, PlayerMovementComponent[] movements, PlayerVitalsComponent[] vitals, in PlayerCommand command)
+        public static void Tick(PlayerStorage players, in PlayerCommand command)
         {
-            for (int index = 0; index < masks.Length; index++)
+            for (int index = 0; index < players.entities.Length; index++)
             {
-                if ((masks[index] & ComponentMask.PlayerArchetype) != ComponentMask.PlayerArchetype)
+                ref PlayerEntity entity = ref players.entities[index];
+                if (!entity.isAlive)
                 {
                     continue;
                 }
 
-                switch (actionStates[index].state)
+                switch (entity.actionState.state)
                 {
                     case PlayerState.Move:
                     case PlayerState.Shot:
@@ -35,12 +31,12 @@ namespace TopView.Systems
                     case PlayerState.Throw:
                     case PlayerState.Swap:
                     case PlayerState.Reload:
-                        ApplyMoveInput(ref motions[index], ref manas[index], in movements[index], in vitals[index], in command);
+                        ApplyMoveInput(ref entity.motion, ref entity.mana, in entity.movement, in entity.vitals, in command);
                         break;
 
                     case PlayerState.Jump:
                     case PlayerState.Land:
-                        motions[index].moveDirection = command.moveDirection;
+                        entity.motion.moveDirection = command.moveDirection;
                         break;
                 }
             }
