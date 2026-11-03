@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using TopView.Authoring;
 using TopView.Components;
 using TopView.Definitions;
-using TopView.Entities;
 using TopView.Presentation.Views;
 using TopView.Requests;
 using UnityEngine;
@@ -150,45 +149,5 @@ namespace TopView.Core
                 spawners[insertIndex] = current;
             }
         }
-
-#if UNITY_EDITOR
-        // 살아 있는 적마다 감지 반경(노랑), 멈추는 거리(주황), 피격 판정 원(청록), Body 공격 판정 원(빨강)을 Logic 위치에 XZ 원으로 그린다.
-        // 감지와 공격 판정은 여기에 플레이어 반지름을 더해 비교하므로, 원은 플레이어 중심이 아니라 가장자리가 닿는 기준이다
-        private void DrawEnemyGizmos()
-        {
-            EnemyEntity[] entities = _world.enemies.entities;
-            for (int index = 0; index < entities.Length; index++)
-            {
-                ref readonly EnemyEntity entity = ref entities[index];
-                if (!entity.isAlive)
-                {
-                    continue;
-                }
-
-                Vector3 position = entity.position.current;
-                Gizmos.color = Color.yellow;
-                DrawCircleGizmo(position, entity.behavior.detectionRadius);
-                Gizmos.color = new Color(1f, 0.5f, 0f);
-                DrawCircleGizmo(position, entity.behavior.stopDistance);
-                Gizmos.color = Color.cyan;
-                DrawCircleGizmo(position, entity.stats.hitRadius);
-                DrawBodyAttackGizmos(entity.attackList.attacks, position, entity.rotation.current);
-            }
-        }
-
-        // 공격 목록의 Body 공격마다 공격이 나갈 때의 판정 원을 빨강으로 그린다.
-        private static void DrawBodyAttackGizmos(EnemyAttackComponent[] attacks, Vector3 position, Quaternion rotation)
-        {
-            Gizmos.color = Color.red;
-            for (int attackIndex = 0; attackIndex < attacks.Length; attackIndex++)
-            {
-                ref readonly EnemyAttackComponent attack = ref attacks[attackIndex];
-                if (attack.kind == EnemyAttackKind.Body)
-                {
-                    DrawCircleGizmo(position + rotation * Vector3.forward * attack.bodyOffset, attack.bodyRadius);
-                }
-            }
-        }
-#endif
     }
 }

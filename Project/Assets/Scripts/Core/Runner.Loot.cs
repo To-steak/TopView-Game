@@ -1,6 +1,5 @@
 using TopView.Components;
 using TopView.Definitions;
-using TopView.Entities;
 using TopView.Presentation.Views;
 using UnityEngine;
 
@@ -68,21 +67,5 @@ namespace TopView.Core
 
             return loots;
         }
-
-#if UNITY_EDITOR
-        // 살아 있는 플레이어마다 전리품 획득 반경을 Logic 위치에 초록색 XZ 원으로 그린다.
-        private void DrawLootGizmos()
-        {
-            PlayerEntity[] players = _world.players.entities;
-            Gizmos.color = Color.green;
-            for (int playerIndex = 0; playerIndex < players.Length; playerIndex++)
-            {
-                if (players[playerIndex].isAlive)
-                {
-                    DrawCircleGizmo(players[playerIndex].position.current, _world.lootRule.pickupRadius);
-                }
-            }
-        }
-#endif
     }
 }
