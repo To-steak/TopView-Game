@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DG.Tweening;
 using TopView.Components;
 using TopView.Entities;
 using TopView.Presentation.Views;
@@ -7,7 +8,7 @@ using UnityEngine;
 
 namespace TopView.Presentation.ViewSystems
 {
-    // 적 View가 있는 칸마다 체력 게이지를 풀에서 꺼내 붙이고, 적 위에 띄워 카메라를 바라보게 하고 체력 비율만큼 너비를 맞추고 체력을 글자로 보여 준다.
+    // 적 View가 있는 칸마다 체력 게이지를 풀에서 꺼내 붙이고, 적 위에 띄워 카메라를 바라보게 하고 체력 비율까지 너비를 부드럽게 옮기고 체력을 글자로 보여 준다.
     public static class EnemyHealthGaugeViewSystem
     {
         /// <summary>
@@ -58,11 +59,23 @@ namespace TopView.Presentation.ViewSystems
                 if (health.max > 0f)
                 {
                     float healthRatio = health.current / health.max;
-                    RectTransform gaugeFrontTransform = gauge.gaugeFront.rectTransform;
-                    if (isAcquired || gaugeFrontTransform.anchorMax.x != healthRatio)
+                    if (isAcquired || context.healthGaugeRatios[index] != healthRatio)
                     {
-                        gaugeFrontTransform.anchorMax = new Vector2(healthRatio, 1f);
+                        context.healthGaugeRatios[index] = healthRatio;
                         gauge.healthText.text = $"{health.current:F0} / {health.max:F0}";
+
+                        RectTransform gaugeFrontTransform = gauge.gaugeFront.rectTransform;
+                        Vector2 anchorMax = new Vector2(healthRatio, 1f);
+                        // 막 꺼낸 게이지는 이전 적의 너비가 남아 있으므로 연출 없이 맞춘다
+                        if (isAcquired)
+                        {
+                            gaugeFrontTransform.anchorMax = anchorMax;
+                        }
+                        else
+                        {
+                            gaugeFrontTransform.DOKill();
+                            gaugeFrontTransform.DOAnchorMax(anchorMax, gauge.tweenTicks * Time.fixedDeltaTime).SetLink(gauge.gameObject);
+                        }
                     }
                 }
             }
@@ -81,6 +94,7 @@ namespace TopView.Presentation.ViewSystems
         {
             EnemyHealthGaugeView gauge = context.healthGaugeViews[enemyIndex];
             context.healthGaugeViews[enemyIndex] = null;
+            gauge.gaugeFront.rectTransform.DOKill();
             gauge.gameObject.SetActive(false);
             context.healthGaugePools[kind].Push(gauge);
         }

@@ -188,6 +188,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: TopView.Presentation::TopView.Presentation.DamageText.Views.DamageTextView
   amountText: {fileID: 4666122721640611969}
   canvasGroup: {fileID: 3841224848818902744}
+  lifetimeTicks: 50
+  riseDistance: 100
+  spreadRadius: 0.2
+  damageColor: {r: 1, g: 1, b: 1, a: 1}
+  lootHeightOffset: 1
+  goldColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  goldFormat: +{0} G
+  healthColor: {r: 0, g: 1, b: 0, a: 1}
+  healthFormat: +{0} HP
+  ammoColor: {r: 0, g: 1, b: 1, a: 1}
+  ammoFormat: +{0}
 --- !u!1 &4466689619639656825
 GameObject:
   m_ObjectHideFlags: 0

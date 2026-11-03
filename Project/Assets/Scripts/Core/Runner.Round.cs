@@ -115,7 +115,7 @@ namespace TopView.Core
             _projectilePrefabs = projectilePrefabs.ToArray();
             _hitEffectPrefabs = hitEffectPrefabs.ToArray();
             _lootPrefabs = ReadLootPrefabs(lootDefinition);
-            ReadWorldText(_catalog.worldText);
+            ReadWorldText(_catalog.worldTextPrefab);
             _viewContext = CreateViewContext(enemyKindCount);
 
             BindPresenters();
@@ -154,6 +154,7 @@ namespace TopView.Core
                     viewPools = new Stack<EnemyView>[enemyKindCount],
                     triggerHashesByKind = new int[enemyKindCount][],
                     healthGaugeViews = new EnemyHealthGaugeView[_world.enemies.entities.Length],
+                    healthGaugeRatios = new float[_world.enemies.entities.Length],
                     healthGaugePools = new Stack<EnemyHealthGaugeView>[enemyKindCount]
                 },
                 projectile = new ProjectileViewContext

@@ -1,5 +1,4 @@
 using DG.Tweening;
-using TopView.Components;
 using TopView.Presentation.ViewContexts;
 using TopView.Presentation.Views;
 using UnityEngine;
@@ -12,11 +11,10 @@ namespace TopView.Presentation.ViewSystems
         /// <summary>
         /// 끝난 글자를 풀에 돌려놓고 대기 목록의 글자를 띄운 뒤, 표시 중인 글자를 카메라로 돌린다. 대기 목록을 채우는 ViewSystem 다음에 부른다.
         /// </summary>
-        /// <param name="viewPrefab">WorldTextView가 붙은 프리팹. 없으면 글자를 띄우지 않는다</param>
-        /// <param name="rule">월드 글자의 표시 값</param>
+        /// <param name="viewPrefab">월드 글자 프리팹. 없으면 글자를 띄우지 않는다</param>
         /// <param name="mainCamera">글자가 바라볼 카메라. 없으면 null</param>
         /// <param name="context">월드 글자 실행 상태</param>
-        public static void Present(GameObject viewPrefab, in WorldTextRuleComponent rule, UnityEngine.Camera mainCamera, WorldTextViewContext context)
+        public static void Present(WorldTextView viewPrefab, UnityEngine.Camera mainCamera, WorldTextViewContext context)
         {
             ReturnFinishedTexts(context);
 
@@ -26,7 +24,7 @@ namespace TopView.Presentation.ViewSystems
                 for (int entryIndex = 0; entryIndex < context.pendingTexts.Count; entryIndex++)
                 {
                     WorldTextEntry entry = context.pendingTexts[entryIndex];
-                    ShowText(context, in entry, viewPrefab, rule.lifetimeTicks * Time.fixedDeltaTime, rule.riseDistance);
+                    ShowText(context, in entry, viewPrefab);
                 }
             }
             context.pendingTexts.Clear();
@@ -56,7 +54,7 @@ namespace TopView.Presentation.ViewSystems
             }
         }
 
-        private static void ShowText(WorldTextViewContext context, in WorldTextEntry entry, GameObject viewPrefab, float lifetimeSeconds, float riseDistance)
+        private static void ShowText(WorldTextViewContext context, in WorldTextEntry entry, WorldTextView viewPrefab)
         {
             WorldTextView view;
             Sequence sequence;
@@ -67,8 +65,8 @@ namespace TopView.Presentation.ViewSystems
             }
             else
             {
-                view = Object.Instantiate(viewPrefab, context.parent, false).GetComponent<WorldTextView>();
-                sequence = CreateSequence(view, lifetimeSeconds, riseDistance);
+                view = Object.Instantiate(viewPrefab, context.parent, false);
+                sequence = CreateSequence(view);
             }
 
             view.transform.position = entry.position;
@@ -84,11 +82,12 @@ namespace TopView.Presentation.ViewSystems
         }
 
         // 글자와 함께 다시 쓰는 연출을 만든다. 끝나도 지워지지 않고, 글자가 파괴될 때 함께 지워진다.
-        private static Sequence CreateSequence(WorldTextView view, float lifetimeSeconds, float riseDistance)
+        private static Sequence CreateSequence(WorldTextView view)
         {
+            float lifetimeSeconds = view.lifetimeTicks * Time.fixedDeltaTime;
             RectTransform textTransform = view.amountText.rectTransform;
             Sequence sequence = DOTween.Sequence();
-            sequence.Join(textTransform.DOAnchorPosY(textTransform.anchoredPosition.y + riseDistance, lifetimeSeconds));
+            sequence.Join(textTransform.DOAnchorPosY(textTransform.anchoredPosition.y + view.riseDistance, lifetimeSeconds));
             sequence.Join(view.canvasGroup.DOFade(0f, lifetimeSeconds));
             sequence.SetAutoKill(false);
             sequence.SetLink(view.gameObject);

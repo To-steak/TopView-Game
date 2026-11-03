@@ -17,6 +17,8 @@ namespace TopView.Presentation.ViewContexts
         public int[][] triggerHashesByKind;
         // 적 저장소 칸별 체력 게이지. 빈 칸은 null
         public EnemyHealthGaugeView[] healthGaugeViews;
+        // 적 저장소 칸별 체력 게이지가 마지막으로 맞춘 체력 비율. 연출 중에도 목표값을 가리킨다
+        public float[] healthGaugeRatios;
         // 적 종류별로 쉬고 있는 체력 게이지
         public Stack<EnemyHealthGaugeView>[] healthGaugePools;
         // 체력 게이지를 만들 때 부모로 쓸 월드 공간 Canvas. 씬에 없으면 null
