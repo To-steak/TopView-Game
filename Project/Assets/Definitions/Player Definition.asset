@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.PlayerDefinition
   movement:
     walkSpeed: 2
-    runSpeed: 5
+    runSpeed: 4
     jumpPower: 5
-    dodgeSpeed: 5
-    inAirSpeed: 1
+    dodgeSpeed: 6
+    inAirSpeed: 3
     gravity: -9.81
     groundPressure: -2
     groundCheckOffset: {x: 0, y: -0.51, z: 0}
