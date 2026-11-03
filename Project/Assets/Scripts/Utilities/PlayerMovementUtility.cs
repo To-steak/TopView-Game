@@ -1,7 +1,7 @@
 using TopView.Components;
 using UnityEngine;
 
-namespace TopView.Systems
+namespace TopView.Utilities
 {
     // 플레이어 이동 충돌 캡슐의 계산 도구.
     public static class PlayerMovementUtility

@@ -1,17 +1,20 @@
+using System.Collections.Generic;
 using TopView.Components;
 using TopView.Entities;
+using TopView.Requests;
 using UnityEngine;
 
 namespace TopView.Systems
 {
-    // 투사체를 움직인다. Straight는 수명이 다하면 사라지고, Grenade는 환경에 닿으면 멈춘다. 판정과 폭발은 ProjectileHitSystem이 한다.
+    // 투사체를 움직인다. Straight는 수명이 다하면 소멸을 요청하고, Grenade는 환경에 닿으면 멈춘다. 판정과 폭발은 ProjectileHitSystem이 한다.
     public static class ProjectileSystem
     {
         /// <summary>
         /// 투사체마다 시간을 1틱 늘린 뒤 움직인다.
         /// </summary>
         /// <param name="projectiles">투사체 저장소</param>
-        public static void Tick(ProjectileStorage projectiles)
+        /// <param name="despawnRequests">투사체 소멸 요청 큐</param>
+        public static void Tick(ProjectileStorage projectiles, Queue<ProjectileDespawnRequest> despawnRequests)
         {
             float deltaTime = Time.fixedDeltaTime;
 
@@ -20,20 +23,9 @@ namespace TopView.Systems
                 ref ProjectileEntity entity = ref projectiles.entities[index];
                 if (entity.isAlive && Move(in entity.projectile, ref entity.motion, ref entity.position, deltaTime))
                 {
-                    Despawn(projectiles, index);
+                    despawnRequests.Enqueue(new ProjectileDespawnRequest { target = new EntityIdentifier { index = index, generation = entity.generation } });
                 }
             }
-        }
-
-        /// <summary>
-        /// 투사체를 즉시 없애고 칸을 반납한다.
-        /// </summary>
-        /// <param name="projectiles">투사체 저장소</param>
-        /// <param name="index">없앨 칸 번호</param>
-        public static void Despawn(ProjectileStorage projectiles, int index)
-        {
-            projectiles.entities[index].isAlive = false;
-            projectiles.freeIndices.Add(index);
         }
 
         // 시간을 1틱 늘리고 움직인다. 수명이 다한 Straight 투사체면 true를 돌려준다.

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace TopView.Systems
+namespace TopView.Utilities
 {
     // 여러 System이 함께 쓰는 XZ 평면 거리·방향 도구.
     public static class TargetingUtility

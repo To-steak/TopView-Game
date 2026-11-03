@@ -1,7 +1,7 @@
 using TopView.Components;
 using UnityEngine;
 
-namespace TopView.Systems
+namespace TopView.Utilities
 {
     // 길찾기 목적지를 정하고 지우는 도구.
     public static class EnemyNavigationUtility

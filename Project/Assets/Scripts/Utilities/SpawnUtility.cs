@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace TopView.Systems
+namespace TopView.Utilities
 {
     // 엔티티 종류별 ~SpawnSystem이 함께 쓰는 칸 할당 도구.
     public static class SpawnUtility

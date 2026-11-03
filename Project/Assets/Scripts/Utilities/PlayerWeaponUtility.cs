@@ -2,7 +2,7 @@ using TopView.Components;
 using TopView.Entities;
 using UnityEngine;
 
-namespace TopView.Systems
+namespace TopView.Utilities
 {
     // 플레이어 무기의 조건 판정, 재장전, 교체 도구. 언제 부를지는 상태 쪽 System이 정한다.
     public static class PlayerWeaponUtility
