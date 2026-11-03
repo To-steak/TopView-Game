@@ -19,6 +19,7 @@ namespace TopView.Core
             command.isRunning = actions.Run.IsPressed();
             command.isAttackHeld = actions.Attack.IsPressed();
             command.hasAimPoint = TryGetAimPoint(out command.aimPoint);
+            command.cameraYawInput = actions.CameraYaw.ReadValue<float>();
 
             if (actions.Jump.WasPerformedThisFrame())
             {

@@ -15,6 +15,8 @@ namespace TopView.Commands
         public bool hasAimPoint;
         // 마우스가 가리키는 총구 높이 평면 위의 점(월드)
         public Vector3 aimPoint;
+        // 카메라 Yaw 회전 입력. 양수면 양의 회전, 음수면 음의 회전, 0이면 없음. Logic은 읽지 않고 CameraViewSystem만 쓴다
+        public float cameraYawInput;
         // 이번 틱 전에 점프 키를 눌렀는지
         public bool isJumpPressed;
         // 이번 틱 전에 회피 키를 눌렀는지

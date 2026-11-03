@@ -111,6 +111,7 @@ namespace TopView.Core
             _world = world;
             _playerViewPrefab = playerDefinition.viewPrefab;
             _playerCameraPriority = playerDefinition.cameraPriority;
+            _playerCameraYawDegreesPerSecond = playerDefinition.cameraYawDegreesPerSecond;
             _playerRangedLayerBlendInTicks = playerDefinition.rangedLayerBlendInTicks;
             _playerWeaponModelPrefabs = weaponModelPrefabs;
             _enemyViewPrefabs = enemyViewPrefabs;

@@ -147,7 +147,7 @@ namespace TopView.Core
             ProjectileViewSystem.Present(_world.projectiles.entities, _projectilePrefabs, _viewContext.projectile);
             LootViewSystem.Present(_world.loots.entities, _lootPrefabs, _viewContext.loot);
             HitEffectViewSystem.Present(_world.projectileHitRecords, _hitEffectPrefabs, _viewContext.hitEffect);
-            CameraViewSystem.Present(_viewContext.camera, _viewContext.player.view, _playerCameraPriority);
+            CameraViewSystem.Present(_viewContext.camera, _viewContext.player.view, _playerCameraPriority, _world.commandBuffer.playerCommand.cameraYawInput, _playerCameraYawDegreesPerSecond);
 
             PresentUserInterface();
 
