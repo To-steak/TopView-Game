@@ -163,6 +163,15 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""CameraYaw"",
+                    ""type"": ""Value"",
+                    ""id"": ""f56f6e43-400c-4ba3-bc4f-927d035a5db0"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -330,6 +339,39 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
                     ""action"": ""Reload"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""1D Axis"",
+                    ""id"": ""1b370f96-94b8-4cd1-85d8-5b3e5774e0ff"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CameraYaw"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""3b5d3be5-50ce-441a-a50d-30bb1991cf98"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CameraYaw"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""70cac877-a224-4ba0-8932-14130d914bcc"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""CameraYaw"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
                 }
             ]
         }
@@ -363,6 +405,7 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         m_Global_Look = m_Global.FindAction("Look", throwIfNotFound: true);
         m_Global_Swap = m_Global.FindAction("Swap", throwIfNotFound: true);
         m_Global_Reload = m_Global.FindAction("Reload", throwIfNotFound: true);
+        m_Global_CameraYaw = m_Global.FindAction("CameraYaw", throwIfNotFound: true);
     }
 
     ~@PlayerActions()
@@ -451,6 +494,7 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Global_Look;
     private readonly InputAction m_Global_Swap;
     private readonly InputAction m_Global_Reload;
+    private readonly InputAction m_Global_CameraYaw;
     /// <summary>
     /// Provides access to input actions defined in input action map "Global".
     /// </summary>
@@ -494,6 +538,10 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Global/Reload".
         /// </summary>
         public InputAction @Reload => m_Wrapper.m_Global_Reload;
+        /// <summary>
+        /// Provides access to the underlying input action "Global/CameraYaw".
+        /// </summary>
+        public InputAction @CameraYaw => m_Wrapper.m_Global_CameraYaw;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -544,6 +592,9 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
             @Reload.started += instance.OnReload;
             @Reload.performed += instance.OnReload;
             @Reload.canceled += instance.OnReload;
+            @CameraYaw.started += instance.OnCameraYaw;
+            @CameraYaw.performed += instance.OnCameraYaw;
+            @CameraYaw.canceled += instance.OnCameraYaw;
         }
 
         /// <summary>
@@ -579,6 +630,9 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
             @Reload.started -= instance.OnReload;
             @Reload.performed -= instance.OnReload;
             @Reload.canceled -= instance.OnReload;
+            @CameraYaw.started -= instance.OnCameraYaw;
+            @CameraYaw.performed -= instance.OnCameraYaw;
+            @CameraYaw.canceled -= instance.OnCameraYaw;
         }
 
         /// <summary>
@@ -688,5 +742,12 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnReload(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "CameraYaw" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnCameraYaw(InputAction.CallbackContext context);
     }
 }

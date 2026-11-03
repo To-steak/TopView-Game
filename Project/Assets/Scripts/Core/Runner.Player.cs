@@ -15,6 +15,7 @@ namespace TopView.Core
     {
         private GameObject _playerViewPrefab;
         private int _playerCameraPriority;
+        private float _playerCameraYawDegreesPerSecond;
         private int _playerRangedLayerBlendInTicks;
         private GameObject[] _playerWeaponModelPrefabs;
 
@@ -66,6 +67,11 @@ namespace TopView.Core
             if (playerDefinition.cameraPriority <= 0)
             {
                 Debug.LogWarning("Runner >> Player Definition의 Camera Priority가 0 이하라 플레이어 카메라로 바뀌지 않을 수 있다.");
+            }
+
+            if (playerDefinition.cameraYawDegreesPerSecond <= 0f)
+            {
+                Debug.LogWarning("Runner >> Player Definition의 Camera Yaw Degrees Per Second가 0 이하라 Q/E 회전이 없거나 반대로 돈다.");
             }
 
             spawnRequest = new PlayerSpawnRequest
