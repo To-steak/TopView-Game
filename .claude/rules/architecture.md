@@ -64,16 +64,18 @@ ProjectileHitSystem.Tick(_world.projectiles, _world.playerHitTargets, _world.pla
   - 이유: 순회 도중 칸이 채워지지 않고, 새 엔티티는 항상 다음 틱부터 동작한다.
 - **칸을 채울 때는 `new ~Entity { … }`로 칸 전체를 대입한다.** `generation`은 1 올린다. 할당을 피하려고 재사용하는 배열은 먼저 꺼내 비운 뒤 새 값에 넣는다.
   - 이유: 필드를 빠뜨려도 이전 엔티티의 값이 남지 않고 기본값이 된다.
-- 소멸은 즉시 한다(`isAlive`를 false로 바꾸고 칸 번호를 빈 칸 목록에 돌려준다). 이후 System은 `isAlive`로 건너뛴다.
-  - 이유: 같은 틱의 뒤 System이 이미 죽은 엔티티를 처리하지 않는다.
+- **소멸은 요청 큐(`Queue<~DespawnRequest>`)에 넣고, `~DespawnSystem`만 처리한다**(`isAlive`를 false로 바꾸고 칸 번호를 빈 칸 목록에 돌려준다). Runner는 요청을 넣는 System 바로 뒤에 `~DespawnSystem`을 호출한다. 이후 System은 `isAlive`로 건너뛴다.
+  - 이유: 칸을 비우는 코드가 한 곳에 모이고, 같은 틱의 뒤 System이 이미 소멸한 엔티티를 처리하지 않는다.
 - 엔티티는 객체 참조 대신 `EntityIdentifier { index, generation }`로 가리킨다. 칸을 재사용할 때 generation을 올린다. **번호는 저장소마다 따로라, 다른 저장소의 식별자와 비교할 때는 진영도 함께 본다.**
   - 이유: 칸이 재사용되어도 사라진 엔티티를 가려낸다. 플레이어와 적이 같은 번호를 가질 수 있어 식별자만 비교하면 다른 엔티티로 착각한다.
 - **진영(`Faction`)은 공격 쪽(`AttackPayloadComponent`)에만 둔다.** 어느 저장소를 맞힐지는 공격의 진영으로 정한다. 피격 대상 목록과 피해 요청은 방향별로 나누고, 체력을 깎는 함수는 공유한다. `EntityKind` 같은 종류 값이나 방향 bool을 만들지 않는다.
   - 이유: 대상 쪽에 진영이나 종류를 두면 값 하나를 고칠 때 비교하는 곳이 모두 따라와야 한다.
 - 적 종류별 칸은 저장소 안의 구간으로 나누고, 구간마다 빈 칸 목록을 둔다.
   - 이유: 한 종류가 많이 생겨도 다른 종류의 칸을 차지하지 않는다.
-- System 간 호출은 직접 호출한다.
-  - 이유: 공용 판정을 중복 없이 쓰고, 호출 관계가 코드에 그대로 보인다.
+- **System은 다른 System을 호출하지 않는다.** 저장소, 요청 큐, 기록 목록을 다루는 코드는 System에 두고, 값과 컴포넌트만 다루는 함수는 `~Utility`에 둔다.
+  - 이유: 호출 안에 다른 System의 변경이 숨으면 `Tick` 시그니처와 Runner의 호출 순서만 보고 언제 무엇이 바뀌는지 알 수 없다. 저장소와 큐를 받지 않는 함수는 시그니처만 보고 영향 범위를 안다.
+- `~Utility`는 **static 클래스**다. `Tick`을 두지 않고, static 필드에 상태를 두지 않으며, System을 호출하지 않는다.
+  - 이유: 틱 흐름은 System과 Runner만 정하고, Utility는 인자로 받은 값과 컴포넌트 밖에 영향을 주지 않는다.
 - 서비스 클래스, ServiceLocator를 만들지 않는다.
   - 이유: 인자로 받지 않은 의존이 생기면 시그니처가 영향 범위를 보여 주지 못한다.
 
@@ -182,7 +184,7 @@ Presentation/
 | `Records/` | `~Record` struct | `<접두사>.Entity` (`.asmref`) | 〃 |
 | `Requests/` | `~Request` struct | `<접두사>.Entity` (`.asmref`) | 〃 |
 | `Commands/` | `~Command` struct, `CommandBuffer` | `<접두사>.Entity` (`.asmref`) | 〃 |
-| `Systems/` | static 로직 | `<접두사>.Systems` | Entity |
+| `Systems/` | `~System`, `~Utility` (static 로직) | `<접두사>.Systems` | Entity |
 | `Definitions/` | `~Definition` (ScriptableObject 데이터) | `<접두사>.Definitions` | Entity |
 | `Authoring/` | `~Authoring` (씬 배치 MonoBehaviour) | `<접두사>.Authoring` | Entity, Definitions |
 | `Persistence/` (필요할 때만) | 설정·기록 저장과 불러오기 | `<접두사>.Persistence` | Entity |
