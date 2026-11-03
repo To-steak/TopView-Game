@@ -3,7 +3,7 @@ using TopView.Authoring;
 using TopView.Components;
 using TopView.Definitions;
 using TopView.Entities;
-using TopView.Presentation.Player.Views;
+using TopView.Presentation.Views;
 using TopView.Requests;
 using TopView.Utilities;
 using UnityEngine;
