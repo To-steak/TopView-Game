@@ -8,5 +8,7 @@ namespace TopView.Definitions
     {
         // 한 판의 규칙과 저장소 용량
         public GameSettingsDefinition gameSettings;
+        // 전리품의 규칙과 종류별 프리팹
+        public LootDefinition loot;
     }
 }

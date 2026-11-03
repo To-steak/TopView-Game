@@ -78,7 +78,8 @@ namespace TopView.Core
                     enemyKindIndex = kind,
                     stats = definition.stats,
                     behavior = definition.behavior,
-                    attacks = attacks
+                    attacks = attacks,
+                    loots = ReadLoots(definition.name, definition.loots)
                 };
                 // View는 표시용이라 빠져 있어도 판은 시작하고, 그 종류는 보이지 않게 둔다
                 EnemyView enemyView = definition.viewPrefab != null ? definition.viewPrefab.GetComponent<EnemyView>() : null;

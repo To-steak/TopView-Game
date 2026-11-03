@@ -6,6 +6,7 @@ using TopView.Entities;
 using TopView.Presentation;
 using TopView.Presentation.Camera.Views;
 using TopView.Presentation.Enemy.Views;
+using TopView.Presentation.Loot.Views;
 using TopView.Presentation.Projectile.Views;
 using TopView.Presentation.WorldCanvas.Views;
 using TopView.Requests;
@@ -40,6 +41,13 @@ namespace TopView.Core
                 return;
             }
 
+            LootDefinition lootDefinition = _catalog.loot;
+            if (lootDefinition == null)
+            {
+                Debug.LogError("Runner >> Definition Catalog에 Loot Definition이 연결되어 있지 않아 판을 시작할 수 없다.");
+                return;
+            }
+
             List<GameObject> projectilePrefabs = new List<GameObject>();
             List<GameObject> hitEffectPrefabs = new List<GameObject>();
 
@@ -48,9 +56,15 @@ namespace TopView.Core
                 return;
             }
 
-            if (gameSettings.enemyCapacityPerKind <= 0 || gameSettings.enemyPathCornerCapacity <= 0 || gameSettings.projectileCapacity <= 0)
+            if (gameSettings.enemyCapacityPerKind <= 0 || gameSettings.enemyPathCornerCapacity <= 0 || gameSettings.projectileCapacity <= 0 || gameSettings.lootCapacity <= 0)
             {
-                Debug.LogError("Runner >> Game Settings Definition의 Enemy Capacity Per Kind, Enemy Path Corner Capacity, Projectile Capacity 중 0 이하인 값이 있어 판을 시작할 수 없다.");
+                Debug.LogError("Runner >> Game Settings Definition의 Enemy Capacity Per Kind, Enemy Path Corner Capacity, Projectile Capacity, Loot Capacity 중 0 이하인 값이 있어 판을 시작할 수 없다.");
+                return;
+            }
+
+            if (lootDefinition.rule.pickupRadius <= 0f || lootDefinition.rule.lifetimeTicks <= 0)
+            {
+                Debug.LogError("Runner >> Loot Definition의 Pickup Radius나 Lifetime Ticks가 0 이하라 판을 시작할 수 없다.");
                 return;
             }
 
@@ -67,6 +81,7 @@ namespace TopView.Core
 
             World world = new World();
             world.rule = gameSettings.rule;
+            world.lootRule = lootDefinition.rule;
             world.enemySpawnPoints = enemySpawnPoints;
             world.random = new System.Random(world.rule.randomSeed);
             world.playerSpawnRequests.Enqueue(playerSpawnRequest);
@@ -80,6 +95,7 @@ namespace TopView.Core
             world.enemies = new EnemyStorage(enemyKindCount, gameSettings.enemyCapacityPerKind, gameSettings.enemyPathCornerCapacity);
             world.melees = new MeleeStorage(combatantCapacity, combatantCapacity);
             world.projectiles = new ProjectileStorage(gameSettings.projectileCapacity);
+            world.loots = new LootStorage(gameSettings.lootCapacity);
 
             world.progress = new GameProgressComponent
             {
@@ -101,6 +117,7 @@ namespace TopView.Core
             _enemyHealthGaugePrefabs = enemyHealthGaugePrefabs;
             _projectilePrefabs = projectilePrefabs.ToArray();
             _hitEffectPrefabs = hitEffectPrefabs.ToArray();
+            _lootPrefabs = ReadLootPrefabs(lootDefinition);
             _viewContext = CreateViewContext(enemyKindCount);
 
             BindPresenters();
@@ -151,6 +168,13 @@ namespace TopView.Core
                 hitEffect = new HitEffectViewContext
                 {
                     pools = new Stack<ParticleSystem>[_hitEffectPrefabs.Length]
+                },
+                loot = new LootViewContext
+                {
+                    views = new LootView[_world.loots.entities.Length],
+                    viewGenerations = new int[_world.loots.entities.Length],
+                    viewKinds = new int[_world.loots.entities.Length],
+                    viewPools = new Stack<LootView>[_lootPrefabs.Length]
                 }
             };
             for (int kind = 0; kind < enemyKindCount; kind++)
@@ -165,6 +189,10 @@ namespace TopView.Core
             for (int effectIndex = 0; effectIndex < _hitEffectPrefabs.Length; effectIndex++)
             {
                 viewContext.hitEffect.pools[effectIndex] = new Stack<ParticleSystem>();
+            }
+            for (int lootKind = 0; lootKind < _lootPrefabs.Length; lootKind++)
+            {
+                viewContext.loot.viewPools[lootKind] = new Stack<LootView>();
             }
             if (viewContext.camera.mainCamera == null)
             {
