@@ -1,25 +1,24 @@
 using System.Collections.Generic;
 using TopView.Components;
 using TopView.Entities;
-using TopView.Records;
 using TopView.Requests;
 using TopView.Utilities;
 using UnityEngine;
 
 namespace TopView.Systems
 {
-    // 공격 상태의 적을 플레이어 쪽으로 돌리고, 시간이 되면 공격을 내보내며, 공격이 끝나면 Idle로 돌려보낸다.
+    // 공격 상태의 적을 플레이어 쪽으로 돌리고, 시간이 되면 공격을 내보내며, 공격이 끝나면 Idle을 요청한다.
     public static class EnemyAttackStateSystem
     {
         /// <summary>
-        /// 공격 상태의 적을 처리한다. 이번 틱에 막 공격 상태에 들어온 적은 다음 틱부터 처리한다. EnemyBehaviorSystem 다음에 부른다.
+        /// 공격 상태의 적을 처리한다. 이번 틱에 막 공격 상태에 들어온 적은 다음 틱부터 처리한다. EnemyBehaviorSystem의 요청을 처리한 뒤, EnemyStateChangeSystem 앞에 부른다.
         /// </summary>
         /// <param name="enemies">적 저장소</param>
         /// <param name="playerLocation">바라볼 플레이어의 위치</param>
-        /// <param name="stateRecords">적 상태 변경 기록</param>
+        /// <param name="stateChangeRequests">적 상태 변경 요청 큐</param>
         /// <param name="projectileSpawnRequests">투사체 생성 요청 큐</param>
         /// <param name="meleeSpawnRequests">근접 판정 생성 요청 큐</param>
-        public static void Tick(EnemyStorage enemies, in PlayerLocationComponent playerLocation, List<EnemyStateChangedRecord> stateRecords, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
+        public static void Tick(EnemyStorage enemies, in PlayerLocationComponent playerLocation, Queue<EnemyStateChangeRequest> stateChangeRequests, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
         {
             bool hasPlayer = playerLocation.hasPlayer;
             Vector3 playerPosition = playerLocation.position;
@@ -61,7 +60,7 @@ namespace TopView.Systems
                 if (EnemyAttackUtility.IsAttackFinished(in attack, actionState.elapsedTicks, actionState.isAttackCommitted))
                 {
                     actionState.attackCooldownRemainingTicks[actionState.attackIndex] = attack.cooldownTicks;
-                    EnemyBehaviorSystem.ChangeState(ref actionState, ref entity.agent, attacks, in identifier, EnemyState.Idle, stateRecords);
+                    stateChangeRequests.Enqueue(new EnemyStateChangeRequest { target = identifier, state = EnemyState.Idle });
                 }
             }
         }

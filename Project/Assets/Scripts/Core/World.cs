@@ -54,6 +54,10 @@ namespace TopView.Core
         public Queue<ProjectileSpawnRequest> projectileSpawnRequests = new Queue<ProjectileSpawnRequest>();
         // 근접 판정 생성 요청 큐
         public Queue<MeleeSpawnRequest> meleeSpawnRequests = new Queue<MeleeSpawnRequest>();
+        // 플레이어 상태 변경 요청 큐
+        public Queue<PlayerStateChangeRequest> playerStateChangeRequests = new Queue<PlayerStateChangeRequest>();
+        // 적 상태 변경 요청 큐
+        public Queue<EnemyStateChangeRequest> enemyStateChangeRequests = new Queue<EnemyStateChangeRequest>();
         // 투사체 소멸 요청 큐
         public Queue<ProjectileDespawnRequest> projectileDespawnRequests = new Queue<ProjectileDespawnRequest>();
         // 근접 판정 소멸 요청 큐
