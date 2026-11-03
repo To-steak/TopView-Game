@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using TopView.Components;
 using TopView.Entities;
-using TopView.Records;
+using TopView.Requests;
 using TopView.Utilities;
 using UnityEngine;
 using UnityEngine.AI;
@@ -12,13 +12,13 @@ namespace TopView.Systems
     public static class EnemyBehaviorSystem
     {
         /// <summary>
-        /// Idle과 Walk 상태의 적마다 플레이어를 감지해 배회, 추적, 공격 시작을 정한다.
+        /// Idle과 Walk 상태의 적마다 플레이어를 감지해 배회, 추적, 공격 시작을 정한다. EnemyStateChangeSystem 앞에 부른다.
         /// </summary>
         /// <param name="enemies">적 저장소</param>
         /// <param name="playerLocation">감지와 공격 대상인 플레이어의 위치와 반지름</param>
         /// <param name="random">World의 난수 생성기</param>
-        /// <param name="stateRecords">적 상태 변경 기록</param>
-        public static void Tick(EnemyStorage enemies, in PlayerLocationComponent playerLocation, System.Random random, List<EnemyStateChangedRecord> stateRecords)
+        /// <param name="stateChangeRequests">적 상태 변경 요청 큐</param>
+        public static void Tick(EnemyStorage enemies, in PlayerLocationComponent playerLocation, System.Random random, Queue<EnemyStateChangeRequest> stateChangeRequests)
         {
             bool hasPlayer = playerLocation.hasPlayer;
             Vector3 playerPosition = playerLocation.position;
@@ -48,7 +48,7 @@ namespace TopView.Systems
                 switch (actionState.state)
                 {
                     case EnemyState.Idle:
-                        if (!UpdateIdle(ref actionState, ref agent, ref rotation, position, in behavior, attacks, in identifier, isPlayerDetected, playerPosition, playerRadius, deltaTime, random, stateRecords))
+                        if (!UpdateIdle(ref actionState, ref agent, ref rotation, position, in behavior, attacks, in identifier, isPlayerDetected, playerPosition, playerRadius, deltaTime, random, stateChangeRequests))
                         {
                             failedWanderCount++;
                         }
@@ -59,7 +59,7 @@ namespace TopView.Systems
                         bool hasReachedDestination = agent.hasReachedDestination;
                         if (isPlayerDetected)
                         {
-                            if (TryBeginAttackInRange(ref actionState, ref agent, position, attacks, in identifier, playerPosition, playerRadius, random, stateRecords))
+                            if (TryBeginAttackInRange(ref actionState, position, attacks, in identifier, playerPosition, playerRadius, random, stateChangeRequests))
                             {
                                 break;
                             }
@@ -72,7 +72,7 @@ namespace TopView.Systems
                                 missingAttackCount++;
                                 missingAttackKind = entity.kind.kind;
                             }
-                            ChangeState(ref actionState, ref agent, attacks, in identifier, EnemyState.Idle, stateRecords);
+                            stateChangeRequests.Enqueue(new EnemyStateChangeRequest { target = identifier, state = EnemyState.Idle });
                         }
                         break;
                 }
@@ -88,52 +88,13 @@ namespace TopView.Systems
             }
         }
 
-        /// <summary>
-        /// 지금 상태에서 나가고 새 상태에 들어가 상태 변경을 기록한다. Die 상태에서는 바꾸지 않는다. Attack 상태는 공격 번호를 정한 뒤 들어간다.
-        /// </summary>
-        /// <param name="actionState">적 행동 상태와 공격 진행</param>
-        /// <param name="agent">목적지와 경로</param>
-        /// <param name="attacks">공격 목록</param>
-        /// <param name="identifier">적을 가리키는 값</param>
-        /// <param name="newState">새 상태</param>
-        /// <param name="stateRecords">적 상태 변경 기록</param>
-        public static void ChangeState(ref EnemyActionStateComponent actionState, ref NavigationAgentComponent agent, EnemyAttackComponent[] attacks, in EntityIdentifier identifier, EnemyState newState, List<EnemyStateChangedRecord> stateRecords)
-        {
-            if (actionState.state == EnemyState.Die)
-            {
-                return;
-            }
-
-            stateRecords.Add(new EnemyStateChangedRecord
-            {
-                enemy = identifier,
-                previousState = actionState.state,
-                state = newState,
-                attackKind = newState == EnemyState.Attack ? attacks[actionState.attackIndex].kind : default
-            });
-
-            actionState.state = newState;
-            actionState.elapsedTicks = 0;
-
-            switch (newState)
-            {
-                case EnemyState.Idle:
-                    actionState.wanderElapsedTicks = 0;
-                    EnemyNavigationUtility.StopMove(ref agent);
-                    break;
-                case EnemyState.Attack:
-                    EnemyNavigationUtility.StopMove(ref agent);
-                    break;
-            }
-        }
-
         // 플레이어를 감지하면 고를 수 있는 공격을 하고, 없으면 멈추는 거리 밖일 때만 쫓는다. 멈추는 거리 안이면 플레이어 쪽으로 돌며 대기시간이 끝나기를 제자리에서 기다린다.
         // 감지하지 못했으면 배회 시간이 될 때마다 배회 지점으로 걷는다. 배회 지점을 고르지 못했으면 false를 돌려준다.
-        private static bool UpdateIdle(ref EnemyActionStateComponent actionState, ref NavigationAgentComponent agent, ref RotationComponent rotation, Vector3 position, in EnemyBehaviorComponent behavior, EnemyAttackComponent[] attacks, in EntityIdentifier identifier, bool isPlayerDetected, Vector3 playerPosition, float playerRadius, float deltaTime, System.Random random, List<EnemyStateChangedRecord> stateRecords)
+        private static bool UpdateIdle(ref EnemyActionStateComponent actionState, ref NavigationAgentComponent agent, ref RotationComponent rotation, Vector3 position, in EnemyBehaviorComponent behavior, EnemyAttackComponent[] attacks, in EntityIdentifier identifier, bool isPlayerDetected, Vector3 playerPosition, float playerRadius, float deltaTime, System.Random random, Queue<EnemyStateChangeRequest> stateChangeRequests)
         {
             if (isPlayerDetected)
             {
-                if (TryBeginAttackInRange(ref actionState, ref agent, position, attacks, in identifier, playerPosition, playerRadius, random, stateRecords))
+                if (TryBeginAttackInRange(ref actionState, position, attacks, in identifier, playerPosition, playerRadius, random, stateChangeRequests))
                 {
                     return true;
                 }
@@ -145,7 +106,7 @@ namespace TopView.Systems
                 else
                 {
                     EnemyNavigationUtility.SetDestination(ref agent, playerPosition, behavior.stopDistance);
-                    ChangeState(ref actionState, ref agent, attacks, in identifier, EnemyState.Walk, stateRecords);
+                    stateChangeRequests.Enqueue(new EnemyStateChangeRequest { target = identifier, state = EnemyState.Walk });
                 }
                 return true;
             }
@@ -163,12 +124,12 @@ namespace TopView.Systems
             }
 
             EnemyNavigationUtility.SetDestination(ref agent, wanderPoint, 0f);
-            ChangeState(ref actionState, ref agent, attacks, in identifier, EnemyState.Walk, stateRecords);
+            stateChangeRequests.Enqueue(new EnemyStateChangeRequest { target = identifier, state = EnemyState.Walk });
             return true;
         }
 
-        // 대기시간이 끝났고 사거리 안인 공격 중 무작위로 하나 골라 공격 상태에 들어간다. 그런 공격이 없으면 false를 돌려준다.
-        private static bool TryBeginAttackInRange(ref EnemyActionStateComponent actionState, ref NavigationAgentComponent agent, Vector3 position, EnemyAttackComponent[] attacks, in EntityIdentifier identifier, Vector3 playerPosition, float playerRadius, System.Random random, List<EnemyStateChangedRecord> stateRecords)
+        // 대기시간이 끝났고 사거리 안인 공격 중 무작위로 하나 골라 공격 상태를 요청한다. 그런 공격이 없으면 false를 돌려준다.
+        private static bool TryBeginAttackInRange(ref EnemyActionStateComponent actionState, Vector3 position, EnemyAttackComponent[] attacks, in EntityIdentifier identifier, Vector3 playerPosition, float playerRadius, System.Random random, Queue<EnemyStateChangeRequest> stateChangeRequests)
         {
             int inRangeCount = 0;
             for (int attackIndex = 0; attackIndex < attacks.Length; attackIndex++)
@@ -201,7 +162,7 @@ namespace TopView.Systems
             }
 
             actionState.isAttackCommitted = false;
-            ChangeState(ref actionState, ref agent, attacks, in identifier, EnemyState.Attack, stateRecords);
+            stateChangeRequests.Enqueue(new EnemyStateChangeRequest { target = identifier, state = EnemyState.Attack });
             return true;
         }
 

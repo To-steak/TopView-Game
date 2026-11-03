@@ -66,10 +66,12 @@ namespace TopView.Core
                 MeleeDespawnSystem.Tick(_world.melees, _world.meleeDespawnRequests);
                 PlayerStateTimerSystem.Tick(_world.players);
                 // 누름 입력으로 정해진 상태를 뒤의 셋이 함께 읽는다. 이동 입력과 공격을 반영한 뒤에 상태를 넘기므로 이 순서를 지킨다
-                PlayerPressSystem.Tick(_world.players, in _world.commandBuffer.playerCommand, _world.playerStateChangedRecords);
+                PlayerPressSystem.Tick(_world.players, in _world.commandBuffer.playerCommand, _world.playerStateChangeRequests);
+                PlayerStateChangeSystem.Tick(_world.players, _world.playerStateChangeRequests, _world.playerStateChangedRecords);
                 PlayerMoveInputSystem.Tick(_world.players, in _world.commandBuffer.playerCommand);
                 PlayerAttackSystem.Tick(_world.players, _world.projectileSpawnRequests, _world.meleeSpawnRequests);
-                PlayerStateSystem.Tick(_world.players, in _world.commandBuffer.playerCommand, _world.playerStateChangedRecords, _world.gameOverRequests);
+                PlayerStateSystem.Tick(_world.players, in _world.commandBuffer.playerCommand, _world.playerStateChangeRequests, _world.gameOverRequests);
+                PlayerStateChangeSystem.Tick(_world.players, _world.playerStateChangeRequests, _world.playerStateChangedRecords);
                 // 막기는 이동이 끝난 위치를 읽고, 조준은 막힌 뒤의 위치를 읽으므로 이 순서를 지킨다
                 PlayerMovementSystem.Tick(_world.players);
                 PlayerBlockSystem.Tick(_world.players, _world.enemies);
@@ -79,8 +81,10 @@ namespace TopView.Core
                 EnemyStateTimerSystem.Tick(_world.enemies);
                 PlayerLocationSystem.Tick(_world.players, ref _world.playerLocation);
                 // 공격 상태는 상태 시간이 0이면 건너뛰므로, 공격이 끝나 Idle이 된 적과 막 공격에 들어온 적 모두 다음 틱부터 움직이도록 이 순서를 지킨다
-                EnemyBehaviorSystem.Tick(_world.enemies, in _world.playerLocation, _world.random, _world.enemyStateChangedRecords);
-                EnemyAttackStateSystem.Tick(_world.enemies, in _world.playerLocation, _world.enemyStateChangedRecords, _world.projectileSpawnRequests, _world.meleeSpawnRequests);
+                EnemyBehaviorSystem.Tick(_world.enemies, in _world.playerLocation, _world.random, _world.enemyStateChangeRequests);
+                EnemyStateChangeSystem.Tick(_world.enemies, _world.enemyStateChangeRequests, _world.enemyStateChangedRecords);
+                EnemyAttackStateSystem.Tick(_world.enemies, in _world.playerLocation, _world.enemyStateChangeRequests, _world.projectileSpawnRequests, _world.meleeSpawnRequests);
+                EnemyStateChangeSystem.Tick(_world.enemies, _world.enemyStateChangeRequests, _world.enemyStateChangedRecords);
                 EnemyDespawnSystem.Tick(_world.enemies, _world.gameOverRequests);
                 EnemyNavigationSystem.Tick(_world.enemies, _world.navigationPath, _world.rule.navMeshSampleDistance);
                 ProjectileSystem.Tick(_world.projectiles, _world.projectileDespawnRequests);
