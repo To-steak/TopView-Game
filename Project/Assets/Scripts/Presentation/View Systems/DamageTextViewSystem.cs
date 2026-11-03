@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using TopView.Components;
 using TopView.Presentation.ViewContexts;
 using TopView.Presentation.Views;
 using TopView.Records;
@@ -16,19 +15,25 @@ namespace TopView.Presentation.ViewSystems
         /// <param name="damagedRecords">이번 프레임에 적이 피해를 받은 기록</param>
         /// <param name="enemyViews">적 저장소 칸별 View</param>
         /// <param name="enemyViewGenerations">적 저장소 칸별 View가 보여 주는 엔티티의 generation</param>
-        /// <param name="rule">월드 글자의 표시 값</param>
+        /// <param name="textViewPrefab">표시 값을 읽을 월드 글자 프리팹. 없으면 글자를 넣지 않는다</param>
         /// <param name="mainCamera">시작 위치를 어긋나게 할 기준 카메라. 없으면 null</param>
         /// <param name="pendingTexts">월드 글자 대기 목록</param>
-        public static void Present(List<EnemyDamagedRecord> damagedRecords, EnemyView[] enemyViews, int[] enemyViewGenerations, in WorldTextRuleComponent rule, UnityEngine.Camera mainCamera, List<WorldTextEntry> pendingTexts)
+        public static void Present(List<EnemyDamagedRecord> damagedRecords, EnemyView[] enemyViews, int[] enemyViewGenerations, WorldTextView textViewPrefab, UnityEngine.Camera mainCamera, List<WorldTextEntry> pendingTexts)
         {
+            // 프리팹이 없으면 판을 준비할 때 로그를 남겼으므로 여기서는 건너뛴다
+            if (textViewPrefab == null)
+            {
+                return;
+            }
+
             for (int recordIndex = 0; recordIndex < damagedRecords.Count; recordIndex++)
             {
                 EnemyDamagedRecord record = damagedRecords[recordIndex];
                 pendingTexts.Add(new WorldTextEntry
                 {
-                    position = GetStartPosition(in record, enemyViews, enemyViewGenerations, rule.spreadRadius, mainCamera),
+                    position = GetStartPosition(in record, enemyViews, enemyViewGenerations, textViewPrefab.spreadRadius, mainCamera),
                     text = record.amount.ToString("F0"),
-                    color = rule.damageColor
+                    color = textViewPrefab.damageColor
                 });
             }
         }

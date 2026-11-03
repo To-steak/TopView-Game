@@ -143,9 +143,9 @@ namespace TopView.Core
             ProjectileViewSystem.Present(_world.projectiles.entities, _projectilePrefabs, _viewContext.projectile);
             LootViewSystem.Present(_world.loots.entities, _lootPrefabs, _viewContext.loot);
             HitEffectViewSystem.Present(_world.projectileHitRecords, _hitEffectPrefabs, _viewContext.hitEffect);
-            DamageTextViewSystem.Present(_world.enemyDamagedRecords, _viewContext.enemy.views, _viewContext.enemy.viewGenerations, in _worldTextRule, _viewContext.camera.mainCamera, _viewContext.worldText.pendingTexts);
-            LootTextViewSystem.Present(_world.lootPickedUpRecords, in _worldTextRule, _viewContext.worldText.pendingTexts);
-            WorldTextViewSystem.Present(_worldTextPrefab, in _worldTextRule, _viewContext.camera.mainCamera, _viewContext.worldText);
+            DamageTextViewSystem.Present(_world.enemyDamagedRecords, _viewContext.enemy.views, _viewContext.enemy.viewGenerations, _worldTextViewPrefab, _viewContext.camera.mainCamera, _viewContext.worldText.pendingTexts);
+            LootTextViewSystem.Present(_world.lootPickedUpRecords, _worldTextViewPrefab, _viewContext.worldText.pendingTexts);
+            WorldTextViewSystem.Present(_worldTextViewPrefab, _viewContext.camera.mainCamera, _viewContext.worldText);
             CameraViewSystem.Present(_viewContext.camera, _viewContext.player.view, _playerCameraPriority, _world.commandBuffer.playerCommand.cameraYawInput, _playerCameraYawDegreesPerSecond);
 
             PresentUserInterface();

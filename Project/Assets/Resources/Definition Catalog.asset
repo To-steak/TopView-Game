@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.DefinitionCatalog
   gameSettings: {fileID: 11400000, guid: db90d6ae1cf94cc4a9f5125de6d5fb56, type: 2}
   loot: {fileID: 11400000, guid: 873a3ca0e8f87cb40b26097d1ee69536, type: 2}
-  damageText: {fileID: 11400000, guid: 12d6155294941c24b86f6731e5c6cc76, type: 2}
+  worldTextPrefab: {fileID: 3997208476704559197, guid: 1f089c5d0fabb624b8e6ed25014ba2a7, type: 3}
