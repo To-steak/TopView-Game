@@ -45,9 +45,10 @@ namespace TopView.Presentation.ViewSystems
                     view.transform.SetPositionAndRotation(position, entity.rotation.current);
                 }
 
-                if (view.pitchSpeed != 0f && view.pitchPivot != null)
+                Vector3 rotationSpeed = new Vector3(view.pitchSpeed, view.yawSpeed, view.rollSpeed);
+                if (rotationSpeed != Vector3.zero && view.rotationPivot != null)
                 {
-                    view.pitchPivot.Rotate(Vector3.right * view.pitchSpeed * Time.deltaTime, Space.Self);
+                    view.rotationPivot.Rotate(rotationSpeed * Time.deltaTime, Space.Self);
                 }
             }
         }
