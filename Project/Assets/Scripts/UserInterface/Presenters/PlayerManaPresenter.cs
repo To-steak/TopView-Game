@@ -50,7 +50,8 @@ namespace TopView.UserInterface.Presenters
 
             if (!_hasPresentedValues || mana != _presentedMana || maxMana != _presentedMaxMana)
             {
-                _view.SetMana(mana, maxMana);
+                // 판의 첫 표시는 이전 판의 너비에서 움직이지 않도록, 회복은 매 틱 트윈을 새로 만들지 않도록 바로 맞춘다
+                _view.SetMana(mana, maxMana, !_hasPresentedValues || mana > _presentedMana);
                 _presentedMana = mana;
                 _presentedMaxMana = maxMana;
                 _hasPresentedValues = true;
