@@ -11,6 +11,6 @@ namespace TopView.Definitions
         // 전리품의 규칙과 종류별 프리팹
         public LootDefinition loot;
         // 적이 받은 피해량 글자의 프리팹과 표시 값
-        public DamageTextDefinition damageText;
+        public WorldTextDefinition damageText;
     }
 }

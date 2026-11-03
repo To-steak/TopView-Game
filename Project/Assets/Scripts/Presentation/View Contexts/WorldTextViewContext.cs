@@ -6,7 +6,7 @@ using UnityEngine;
 namespace TopView.Presentation.ViewContexts
 {
     // 피해량 글자 실행 상태. 판마다 새로 만든다.
-    public class DamageTextViewContext
+    public class WorldTextViewContext
     {
         // 글자를 만들 때 부모로 쓸 월드 공간 Canvas. 씬에 없으면 null
         public Transform parent;

@@ -21,7 +21,7 @@ namespace TopView.Presentation.ViewSystems
         /// <param name="rule">피해량 글자의 표시 값</param>
         /// <param name="mainCamera">글자가 바라볼 카메라. 없으면 null</param>
         /// <param name="context">피해량 글자 실행 상태</param>
-        public static void Present(List<EnemyDamagedRecord> damagedRecords, EnemyView[] enemyViews, int[] enemyViewGenerations, GameObject viewPrefab, in DamageTextRuleComponent rule, UnityEngine.Camera mainCamera, DamageTextViewContext context)
+        public static void Present(List<EnemyDamagedRecord> damagedRecords, EnemyView[] enemyViews, int[] enemyViewGenerations, GameObject viewPrefab, in WorldTextRuleComponent rule, UnityEngine.Camera mainCamera, WorldTextViewContext context)
         {
             ReturnFinishedTexts(context);
 
@@ -42,7 +42,7 @@ namespace TopView.Presentation.ViewSystems
             }
         }
 
-        private static void ReturnFinishedTexts(DamageTextViewContext context)
+        private static void ReturnFinishedTexts(WorldTextViewContext context)
         {
             for (int playingIndex = context.playingViews.Count - 1; playingIndex >= 0; playingIndex--)
             {
@@ -75,7 +75,7 @@ namespace TopView.Presentation.ViewSystems
             return position + spreadRotation * spread;
         }
 
-        private static void ShowText(DamageTextViewContext context, Vector3 position, float amount, GameObject viewPrefab, float lifetimeSeconds, float riseDistance)
+        private static void ShowText(WorldTextViewContext context, Vector3 position, float amount, GameObject viewPrefab, float lifetimeSeconds, float riseDistance)
         {
             WorldTextView view;
             Sequence sequence;
@@ -114,7 +114,7 @@ namespace TopView.Presentation.ViewSystems
             return sequence;
         }
 
-        private static void FaceCamera(DamageTextViewContext context, UnityEngine.Camera mainCamera)
+        private static void FaceCamera(WorldTextViewContext context, UnityEngine.Camera mainCamera)
         {
             Vector3 cameraPosition = mainCamera.transform.position;
             for (int playingIndex = 0; playingIndex < context.playingViews.Count; playingIndex++)
