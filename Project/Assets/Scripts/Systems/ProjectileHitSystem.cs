@@ -3,6 +3,7 @@ using TopView.Components;
 using TopView.Entities;
 using TopView.Records;
 using TopView.Requests;
+using TopView.Utilities;
 using UnityEngine;
 
 namespace TopView.Systems
@@ -11,7 +12,7 @@ namespace TopView.Systems
     public static class ProjectileHitSystem
     {
         /// <summary>
-        /// Straight 투사체는 이번 틱의 이동 선분에서 가장 먼저 닿은 대상 하나에, 시간이 된 Grenade는 폭발 반경 안의 대상 모두에게 피해 요청을 넣고 사라진다.
+        /// Straight 투사체는 이번 틱의 이동 선분에서 가장 먼저 닿은 대상 하나에, 시간이 된 Grenade는 폭발 반경 안의 대상 모두에게 피해 요청을 넣고 소멸을 요청한다.
         /// </summary>
         /// <param name="projectiles">투사체 저장소</param>
         /// <param name="playerHitTargets">플레이어 피격 대상 목록</param>
@@ -21,7 +22,8 @@ namespace TopView.Systems
         /// <param name="playerDamageRequests">플레이어 피해 요청 큐</param>
         /// <param name="enemyDamageRequests">적 피해 요청 큐</param>
         /// <param name="hitRecords">명중·폭발 기록</param>
-        public static void Tick(ProjectileStorage projectiles, HitTargetComponent[] playerHitTargets, int playerHitTargetCount, HitTargetComponent[] enemyHitTargets, int enemyHitTargetCount, Queue<DamageRequest> playerDamageRequests, Queue<DamageRequest> enemyDamageRequests, List<ProjectileHitRecord> hitRecords)
+        /// <param name="despawnRequests">투사체 소멸 요청 큐</param>
+        public static void Tick(ProjectileStorage projectiles, HitTargetComponent[] playerHitTargets, int playerHitTargetCount, HitTargetComponent[] enemyHitTargets, int enemyHitTargetCount, Queue<DamageRequest> playerDamageRequests, Queue<DamageRequest> enemyDamageRequests, List<ProjectileHitRecord> hitRecords, Queue<ProjectileDespawnRequest> despawnRequests)
         {
             for (int index = 0; index < projectiles.entities.Length; index++)
             {
@@ -35,20 +37,21 @@ namespace TopView.Systems
                 HitTargetComponent[] hitTargets = isPlayerAttack ? enemyHitTargets : playerHitTargets;
                 int hitTargetCount = isPlayerAttack ? enemyHitTargetCount : playerHitTargetCount;
                 Queue<DamageRequest> damageRequests = isPlayerAttack ? enemyDamageRequests : playerDamageRequests;
+                EntityIdentifier identifier = new EntityIdentifier { index = index, generation = entity.generation };
 
                 if (entity.projectile.kind == ProjectileKind.Grenade)
                 {
                     if (entity.motion.elapsedTicks >= entity.projectile.fuseTicks)
                     {
                         Explode(in entity.projectile, in entity.position, in entity.payload, hitTargets, hitTargetCount, damageRequests, hitRecords);
-                        ProjectileSystem.Despawn(projectiles, index);
+                        despawnRequests.Enqueue(new ProjectileDespawnRequest { target = identifier });
                     }
                     continue;
                 }
 
                 if (HitNearest(in entity.projectile, in entity.position, in entity.payload, hitTargets, hitTargetCount, damageRequests, hitRecords))
                 {
-                    ProjectileSystem.Despawn(projectiles, index);
+                    despawnRequests.Enqueue(new ProjectileDespawnRequest { target = identifier });
                 }
             }
         }

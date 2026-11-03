@@ -1,6 +1,6 @@
 using TopView.Components;
 
-namespace TopView.Systems
+namespace TopView.Utilities
 {
     // 적 공격의 판정 도구.
     public static class EnemyAttackUtility

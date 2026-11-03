@@ -51,7 +51,7 @@ paths:
 
 ```csharp
 // Runner
-ProjectileHitSystem.Tick(_world.projectiles, _world.playerHitTargets, _world.playerHitTargetCount, _world.enemyHitTargets, _world.enemyHitTargetCount, _world.playerDamageRequests, _world.enemyDamageRequests, _world.projectileHitRecords);
+ProjectileHitSystem.Tick(_world.projectiles, _world.playerHitTargets, _world.playerHitTargetCount, _world.enemyHitTargets, _world.enemyHitTargetCount, _world.playerDamageRequests, _world.enemyDamageRequests, _world.projectileHitRecords, _world.projectileDespawnRequests);
 ```
 
 - **실제 로직은 가능한 한 컴포넌트와 Request만 받는 함수에 둔다.** `Tick`은 대상을 찾아 그 함수를 부르는 얇은 반복문으로 둔다. 예: `Apply(ref HealthComponent health, in DamageRequest request)`
@@ -184,7 +184,8 @@ Presentation/
 | `Records/` | `~Record` struct | `<접두사>.Entity` (`.asmref`) | 〃 |
 | `Requests/` | `~Request` struct | `<접두사>.Entity` (`.asmref`) | 〃 |
 | `Commands/` | `~Command` struct, `CommandBuffer` | `<접두사>.Entity` (`.asmref`) | 〃 |
-| `Systems/` | `~System`, `~Utility` (static 로직) | `<접두사>.Systems` | Entity |
+| `Systems/` | `~System` (static 로직) | `<접두사>.Systems` | Entity |
+| `Utilities/` | `~Utility` (static 도구) | `<접두사>.Systems` (`.asmref`) | 〃 |
 | `Definitions/` | `~Definition` (ScriptableObject 데이터) | `<접두사>.Definitions` | Entity |
 | `Authoring/` | `~Authoring` (씬 배치 MonoBehaviour) | `<접두사>.Authoring` | Entity, Definitions |
 | `Persistence/` (필요할 때만) | 설정·기록 저장과 불러오기 | `<접두사>.Persistence` | Entity |

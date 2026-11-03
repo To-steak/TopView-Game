@@ -1,7 +1,7 @@
 using TopView.Components;
 using UnityEngine;
 
-namespace TopView.Systems
+namespace TopView.Utilities
 {
     // 플레이어 마나의 확인과 소모 도구.
     public static class PlayerStaminaUtility

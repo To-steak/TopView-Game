@@ -2,15 +2,16 @@ using System.Collections.Generic;
 using TopView.Components;
 using TopView.Entities;
 using TopView.Requests;
+using TopView.Utilities;
 using UnityEngine;
 
 namespace TopView.Systems
 {
-    // 근접 판정을 XZ 평면의 원으로 판정해 피해 요청을 넣고, 수명이 다한 판정을 없앤다. 공격의 진영이 맞힐 쪽의 목록과 피해 요청 큐를 정한다.
+    // 근접 판정을 XZ 평면의 원으로 판정해 피해 요청을 넣고, 수명이 다한 판정의 소멸을 요청한다. 공격의 진영이 맞힐 쪽의 목록과 피해 요청 큐를 정한다.
     public static class MeleeHitSystem
     {
         /// <summary>
-        /// 근접 판정마다 원 안에서 아직 맞지 않은 대상 모두에게 피해 요청을 넣고, 판정 시간을 1틱 늘려 다 되면 없앤다.
+        /// 근접 판정마다 원 안에서 아직 맞지 않은 대상 모두에게 피해 요청을 넣고, 판정 시간을 1틱 늘려 다 되면 소멸을 요청한다.
         /// </summary>
         /// <param name="melees">근접 판정 저장소</param>
         /// <param name="playerHitTargets">플레이어 피격 대상 목록</param>
@@ -19,7 +20,8 @@ namespace TopView.Systems
         /// <param name="enemyHitTargetCount">적 피격 대상 목록에서 이번 틱에 채운 대상 수</param>
         /// <param name="playerDamageRequests">플레이어 피해 요청 큐</param>
         /// <param name="enemyDamageRequests">적 피해 요청 큐</param>
-        public static void Tick(MeleeStorage melees, HitTargetComponent[] playerHitTargets, int playerHitTargetCount, HitTargetComponent[] enemyHitTargets, int enemyHitTargetCount, Queue<DamageRequest> playerDamageRequests, Queue<DamageRequest> enemyDamageRequests)
+        /// <param name="despawnRequests">근접 판정 소멸 요청 큐</param>
+        public static void Tick(MeleeStorage melees, HitTargetComponent[] playerHitTargets, int playerHitTargetCount, HitTargetComponent[] enemyHitTargets, int enemyHitTargetCount, Queue<DamageRequest> playerDamageRequests, Queue<DamageRequest> enemyDamageRequests, Queue<MeleeDespawnRequest> despawnRequests)
         {
             int droppedHitCount = 0;
             for (int index = 0; index < melees.entities.Length; index++)
@@ -42,7 +44,7 @@ namespace TopView.Systems
                 entity.melee.elapsedTicks++;
                 if (entity.melee.elapsedTicks >= entity.melee.durationTicks)
                 {
-                    Despawn(melees, index);
+                    despawnRequests.Enqueue(new MeleeDespawnRequest { target = new EntityIdentifier { index = index, generation = entity.generation } });
                 }
             }
 
@@ -50,32 +52,6 @@ namespace TopView.Systems
             {
                 Debug.LogWarning($"MeleeHitSystem >> 근접 판정에 맞은 대상을 기록할 칸이 모자라 대상 {droppedHitCount}개를 맞히지 않았다.");
             }
-        }
-
-        /// <summary>
-        /// 공격한 엔티티가 owner인 근접 판정을 모두 없앤다. 공격한 쪽이 사망할 때 부른다.
-        /// 저장소마다 칸 번호를 따로 쓰므로 EntityIdentifier만으로는 다른 진영의 엔티티와 겹칠 수 있어 진영도 함께 비교한다.
-        /// </summary>
-        /// <param name="melees">근접 판정 저장소</param>
-        /// <param name="owner">공격한 엔티티</param>
-        /// <param name="ownerFaction">공격한 엔티티의 진영</param>
-        public static void DespawnOwnedBy(MeleeStorage melees, in EntityIdentifier owner, Faction ownerFaction)
-        {
-            for (int index = 0; index < melees.entities.Length; index++)
-            {
-                ref readonly MeleeEntity entity = ref melees.entities[index];
-                if (entity.isAlive && entity.payload.faction == ownerFaction && IsSame(in entity.melee.owner, in owner))
-                {
-                    Despawn(melees, index);
-                }
-            }
-        }
-
-        // 엔티티를 즉시 없애고 칸을 반납한다.
-        private static void Despawn(MeleeStorage melees, int index)
-        {
-            melees.entities[index].isAlive = false;
-            melees.freeIndices.Add(index);
         }
 
         // 원 안에서 아직 맞지 않은 대상을 맞힌다. 기록할 칸이 모자라 건너뛴 수를 돌려준다.

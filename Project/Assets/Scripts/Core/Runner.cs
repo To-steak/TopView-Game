@@ -61,7 +61,9 @@ namespace TopView.Core
             if (isPlaying)
             {
                 TransformSnapshotSystem.Tick(_world.players, _world.enemies, _world.projectiles);
-                PlayerDeathSystem.Tick(_world.players, _world.melees, _world.playerStateChangedRecords);
+                PlayerDeathSystem.Tick(_world.players, _world.playerStateChangedRecords);
+                MeleeOwnerDeathSystem.Tick(_world.melees, _world.players, _world.meleeDespawnRequests);
+                MeleeDespawnSystem.Tick(_world.melees, _world.meleeDespawnRequests);
                 PlayerStateTimerSystem.Tick(_world.players);
                 // 누름 입력으로 정해진 상태를 뒤의 셋이 함께 읽는다. 이동 입력과 공격을 반영한 뒤에 상태를 넘기므로 이 순서를 지킨다
                 PlayerPressSystem.Tick(_world.players, in _world.commandBuffer.playerCommand, _world.playerStateChangedRecords);
@@ -81,10 +83,13 @@ namespace TopView.Core
                 EnemyAttackStateSystem.Tick(_world.enemies, in _world.playerLocation, _world.enemyStateChangedRecords, _world.projectileSpawnRequests, _world.meleeSpawnRequests);
                 EnemyDespawnSystem.Tick(_world.enemies, _world.gameOverRequests);
                 EnemyNavigationSystem.Tick(_world.enemies, _world.navigationPath, _world.rule.navMeshSampleDistance);
-                ProjectileSystem.Tick(_world.projectiles);
+                ProjectileSystem.Tick(_world.projectiles, _world.projectileDespawnRequests);
+                ProjectileDespawnSystem.Tick(_world.projectiles, _world.projectileDespawnRequests);
                 HitTargetSystem.Tick(_world.players, _world.enemies, _world.playerHitTargets, ref _world.playerHitTargetCount, _world.enemyHitTargets, ref _world.enemyHitTargetCount);
-                ProjectileHitSystem.Tick(_world.projectiles, _world.playerHitTargets, _world.playerHitTargetCount, _world.enemyHitTargets, _world.enemyHitTargetCount, _world.playerDamageRequests, _world.enemyDamageRequests, _world.projectileHitRecords);
-                MeleeHitSystem.Tick(_world.melees, _world.playerHitTargets, _world.playerHitTargetCount, _world.enemyHitTargets, _world.enemyHitTargetCount, _world.playerDamageRequests, _world.enemyDamageRequests);
+                ProjectileHitSystem.Tick(_world.projectiles, _world.playerHitTargets, _world.playerHitTargetCount, _world.enemyHitTargets, _world.enemyHitTargetCount, _world.playerDamageRequests, _world.enemyDamageRequests, _world.projectileHitRecords, _world.projectileDespawnRequests);
+                ProjectileDespawnSystem.Tick(_world.projectiles, _world.projectileDespawnRequests);
+                MeleeHitSystem.Tick(_world.melees, _world.playerHitTargets, _world.playerHitTargetCount, _world.enemyHitTargets, _world.enemyHitTargetCount, _world.playerDamageRequests, _world.enemyDamageRequests, _world.meleeDespawnRequests);
+                MeleeDespawnSystem.Tick(_world.melees, _world.meleeDespawnRequests);
             }
 
             GameRuleSystem.Tick(ref _world.progress, _world.gameOverRequests);
