@@ -167,7 +167,7 @@ namespace TopView.Core
                 {
                     pools = new Stack<ParticleSystem>[_hitEffectPrefabs.Length]
                 },
-                damageText = new DamageTextViewContext(),
+                damageText = new WorldTextViewContext(),
                 loot = new LootViewContext
                 {
                     views = new LootView[_world.loots.entities.Length],

@@ -11,10 +11,10 @@ namespace TopView.Core
         // DamageTextView가 붙은 프리팹. 없으면 글자를 띄우지 않는다
         private GameObject _damageTextPrefab;
         // 피해량 글자의 표시 값
-        private DamageTextRuleComponent _damageTextRule;
+        private WorldTextRuleComponent _damageTextRule;
 
         // 피해량 글자는 표시용이라 값이 빠져 있어도 판은 시작하고, 글자 없이 둔다.
-        private void ReadDamageText(DamageTextDefinition definition)
+        private void ReadDamageText(WorldTextDefinition definition)
         {
             _damageTextPrefab = null;
 

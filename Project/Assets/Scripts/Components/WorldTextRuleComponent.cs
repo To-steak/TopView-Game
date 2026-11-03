@@ -4,7 +4,7 @@ namespace TopView.Components
 {
     // 피해량 글자의 표시 값. 판 시작 때 Definition에서 복사한다.
     [Serializable]
-    public struct DamageTextRuleComponent
+    public struct WorldTextRuleComponent
     {
         // 글자가 나타나서 사라질 때까지의 시간(틱)
         public int lifetimeTicks;
