@@ -85,5 +85,7 @@ namespace TopView.Core
         public List<ProjectileHitRecord> projectileHitRecords = new List<ProjectileHitRecord>();
         // 이번 프레임에 적이 피해를 받은 기록. LateUpdate 마지막에 비운다
         public List<EnemyDamagedRecord> enemyDamagedRecords = new List<EnemyDamagedRecord>();
+        // 이번 프레임에 전리품을 획득한 기록. LateUpdate 마지막에 비운다
+        public List<LootPickedUpRecord> lootPickedUpRecords = new List<LootPickedUpRecord>();
     }
 }

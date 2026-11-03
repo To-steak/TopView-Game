@@ -13,8 +13,8 @@ namespace TopView.Presentation.ViewContexts
         public ProjectileViewContext projectile;
         // 피격 이펙트 실행 상태
         public HitEffectViewContext hitEffect;
-        // 피해량 글자 실행 상태
-        public WorldTextViewContext damageText;
+        // 월드 글자 실행 상태
+        public WorldTextViewContext worldText;
         // 전리품 View 실행 상태
         public LootViewContext loot;
     }

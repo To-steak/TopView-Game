@@ -5,11 +5,13 @@ using UnityEngine;
 
 namespace TopView.Presentation.ViewContexts
 {
-    // 피해량 글자 실행 상태. 판마다 새로 만든다.
+    // 월드 글자 실행 상태. 판마다 새로 만든다.
     public class WorldTextViewContext
     {
         // 글자를 만들 때 부모로 쓸 월드 공간 Canvas. 씬에 없으면 null
         public Transform parent;
+        // 이번 프레임에 띄울 글자. WorldTextViewSystem이 처리하고 비운다
+        public List<WorldTextEntry> pendingTexts = new List<WorldTextEntry>();
         // 쉬고 있는 글자
         public Stack<WorldTextView> pool = new Stack<WorldTextView>();
         // pool과 같은 순서로, 각 글자의 다시 쓰는 연출
