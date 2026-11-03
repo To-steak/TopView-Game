@@ -1,13 +1,6 @@
 using TopView.Components;
 using TopView.Entities;
-using TopView.UserInterface.Ammo;
-using TopView.UserInterface.BossHealth;
-using TopView.UserInterface.GameOver;
-using TopView.UserInterface.Gold;
-using TopView.UserInterface.PlayerHealth;
-using TopView.UserInterface.PlayerMana;
-using TopView.UserInterface.RemainingTime;
-using TopView.UserInterface.Score;
+using TopView.UserInterface.Presenters;
 using UnityEngine;
 
 namespace TopView.Core

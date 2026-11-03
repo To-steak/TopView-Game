@@ -3,12 +3,8 @@ using TopView.Authoring;
 using TopView.Components;
 using TopView.Definitions;
 using TopView.Entities;
-using TopView.Presentation;
-using TopView.Presentation.Camera.Views;
-using TopView.Presentation.Enemy.Views;
-using TopView.Presentation.Loot.Views;
-using TopView.Presentation.Projectile.Views;
-using TopView.Presentation.WorldCanvas.Views;
+using TopView.Presentation.Views;
+using TopView.Presentation.ViewContexts;
 using TopView.Requests;
 using UnityEngine;
 

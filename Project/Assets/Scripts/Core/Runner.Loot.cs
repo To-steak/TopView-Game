@@ -1,7 +1,7 @@
 using TopView.Components;
 using TopView.Definitions;
 using TopView.Entities;
-using TopView.Presentation.Loot.Views;
+using TopView.Presentation.Views;
 using UnityEngine;
 
 namespace TopView.Core

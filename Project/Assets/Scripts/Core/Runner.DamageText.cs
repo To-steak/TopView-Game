@@ -1,6 +1,6 @@
 using TopView.Components;
 using TopView.Definitions;
-using TopView.Presentation.DamageText.Views;
+using TopView.Presentation.Views;
 using UnityEngine;
 
 namespace TopView.Core
@@ -24,7 +24,7 @@ namespace TopView.Core
                 return;
             }
 
-            if (definition.viewPrefab == null || definition.viewPrefab.GetComponent<DamageTextView>() == null)
+            if (definition.viewPrefab == null || definition.viewPrefab.GetComponent<WorldTextView>() == null)
             {
                 Debug.LogWarning("Runner >> Damage Text Definition의 View Prefab이 없거나 DamageTextView가 붙어 있지 않아 피해량 글자 없이 진행한다.");
                 return;

@@ -1,12 +1,7 @@
 using TopView.Components;
 using TopView.Definitions;
-using TopView.Presentation;
-using TopView.Presentation.Camera.ViewSystems;
-using TopView.Presentation.DamageText.ViewSystems;
-using TopView.Presentation.Enemy.ViewSystems;
-using TopView.Presentation.Loot.ViewSystems;
-using TopView.Presentation.Player.ViewSystems;
-using TopView.Presentation.Projectile.ViewSystems;
+using TopView.Presentation.ViewContexts;
+using TopView.Presentation.ViewSystems;
 using TopView.Systems;
 using UnityEngine;
 using UnityEngine.SceneManagement;

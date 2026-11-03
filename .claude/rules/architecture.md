@@ -197,14 +197,14 @@ ProjectileHitSystem.Tick(_world.projectiles, _world.playerHitTargets, _world.pla
   - 이유: 규칙을 잊어도 컴파일 오류로 잡힌다.
 - Presentation은 게임 결과를 바꾸지 않으므로 읽을 대상(Definition의 프리팹·연출 값, 저장된 설정)을 넓게 허용한다. 단 Systems는 참조하지 않는다.
   - 이유: Systems를 참조하면 View가 `Tick`을 부를 수 있게 되어 상태를 바꾸는 길이 생긴다.
-- `Presentation/`은 타입 역할별 하위 폴더로 나눈다. `View/`(`~View` MonoBehaviour), `View System/`(`~ViewSystem`), `View Context/`(`ViewContext`, `~ViewContext`)에 둔다. 여러 영역이 함께 쓰는 도구는 역할 이름의 하위 폴더에 둔다.
+- `Presentation/`은 타입 역할별 하위 폴더로 나눈다. `Views/`(`~View` MonoBehaviour), `View Systems/`(`~ViewSystem`), `View Contexts/`(`ViewContext`, `~ViewContext`)에 둔다. 여러 영역이 함께 쓰는 도구는 역할 이름의 하위 폴더에 둔다.
   - 이유: 타입의 접미사만 알면 그 파일의 위치를 안다.
 
 ```
 Presentation/
-├── View/               PlayerView, EnemyView
-├── View System/        PlayerViewSystem, EnemyViewSystem
-├── View Context/       ViewContext, PlayerViewContext
+├── Views/              PlayerView, EnemyView
+├── View Systems/       PlayerViewSystem, EnemyViewSystem
+├── View Contexts/      ViewContext, PlayerViewContext
 ├── Audio/              오디오 재생
 └── Pooling/            오브젝트 풀
 ```
@@ -227,7 +227,7 @@ Presentation/
 ### UserInterface/
 화면 UI를 MVP 구조로 표시하고 입력을 명령으로 전달한다.
 
-- UI는 MVP 구조다. `UserInterface/`은 타입 역할별 하위 폴더로 나눈다. `View/`에 `~View`를, `Presenter/`에 `~Presenter`를 둔다.
+- UI는 MVP 구조다. `UserInterface/`은 타입 역할별 하위 폴더로 나눈다. `Views/`에 `~View`를, `Presenters/`에 `~Presenter`를 둔다.
   - 이유: 타입의 접미사만 알면 그 파일의 위치를 안다.
 - UI View는 버튼 입력을 이벤트로 발행하고 표시 메서드(`SetHealth` 등)를 가진다. Presenter는 MonoBehaviour이며, View의 이벤트를 구독해 명령 버퍼에 넣고, Runner에게 필요한 데이터만 받아 View의 표시 메서드를 부른다. Model 변경 알림은 없고 Runner가 매 프레임 데이터를 넘긴다.
   - 이유: 게임 데이터를 아는 쪽은 Presenter뿐이라 화면을 바꿔도 로직이 안전하다. 매 프레임 넘기므로 변경 알림 이벤트가 필요 없다.

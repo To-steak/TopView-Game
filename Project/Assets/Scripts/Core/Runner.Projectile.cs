@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using TopView.Components;
 using TopView.Definitions;
 using TopView.Entities;
-using TopView.Presentation.Projectile.Views;
+using TopView.Presentation.Views;
 using UnityEngine;
 
 namespace TopView.Core
