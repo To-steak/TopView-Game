@@ -83,5 +83,7 @@ namespace TopView.Core
         public List<EnemyStateChangedRecord> enemyStateChangedRecords = new List<EnemyStateChangedRecord>();
         // 이번 프레임의 투사체 명중·폭발 기록. LateUpdate 마지막에 비운다
         public List<ProjectileHitRecord> projectileHitRecords = new List<ProjectileHitRecord>();
+        // 이번 프레임에 적이 피해를 받은 기록. LateUpdate 마지막에 비운다
+        public List<EnemyDamagedRecord> enemyDamagedRecords = new List<EnemyDamagedRecord>();
     }
 }

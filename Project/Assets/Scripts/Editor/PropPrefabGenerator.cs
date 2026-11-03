@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace TopView.Editor
 {
-    // 소품 FBX마다 Prefab Variant를 만든다. 막는 소품은 Ground 레이어로, 통과하는 소품은 Collider 없이 저장한다. FBX 머티리얼은 이름별 공용 머티리얼로 바꾼다.
+    // 소품 FBX마다 Prefab Variant를 만든다. 막는 소품은 Prop 레이어로, 통과하는 소품은 Collider 없이 저장한다. FBX 머티리얼은 이름별 공용 머티리얼로 바꾼다.
     public static class PropPrefabGenerator
     {
         // 지나갈 수 있는 소품의 FBX 이름. Collider를 빼고 레이어를 바꾸지 않는다
@@ -25,10 +25,10 @@ namespace TopView.Editor
         };
 
         private const string MODEL_FOLDER = "Assets/Local Assets/Ultimate Nature Pack by Quaternius/FBX";
-        private const string PREFAB_FOLDER = "Assets/Prefabs/Props";
+        private const string PREFAB_FOLDER = "Assets/Prefabs/Prop";
         private const string MATERIAL_FOLDER = "Assets/Materials/Prop";
         private const string MATERIAL_NAME_PREFIX = "Prop_";
-        private const string BLOCKING_LAYER_NAME = "Ground";
+        private const string BLOCKING_LAYER_NAME = "Prop";
 
         /// <summary>
         /// 소품 FBX 폴더의 모델마다 프리팹 폴더에 Prefab Variant를 만든다. 같은 이름의 프리팹은 GUID를 유지한 채 덮어쓴다.

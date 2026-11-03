@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TopView.Components;
 using TopView.Entities;
+using TopView.Records;
 using TopView.Requests;
 using UnityEngine;
 
@@ -17,7 +18,8 @@ namespace TopView.Systems
         /// <param name="enemies">적 저장소</param>
         /// <param name="playerDamageRequests">플레이어 피해 요청 큐</param>
         /// <param name="enemyDamageRequests">적 피해 요청 큐</param>
-        public static void Tick(ref GameProgressComponent progress, PlayerStorage players, EnemyStorage enemies, Queue<DamageRequest> playerDamageRequests, Queue<DamageRequest> enemyDamageRequests)
+        /// <param name="enemyDamagedRecords">적이 피해를 받은 기록 목록</param>
+        public static void Tick(ref GameProgressComponent progress, PlayerStorage players, EnemyStorage enemies, Queue<DamageRequest> playerDamageRequests, Queue<DamageRequest> enemyDamageRequests, List<EnemyDamagedRecord> enemyDamagedRecords)
         {
             if (progress.phase != GamePhase.Playing)
             {
@@ -55,6 +57,12 @@ namespace TopView.Systems
                 }
 
                 ref EnemyEntity enemy = ref enemies.entities[request.target.index];
+                // 체력이 이미 0인 대상은 피해를 받지 않으므로 기록하지 않는다
+                if (enemy.health.current > 0f)
+                {
+                    enemyDamagedRecords.Add(new EnemyDamagedRecord { enemy = request.target, position = enemy.position.current, amount = request.amount });
+                }
+
                 if (Apply(ref enemy.health, in request))
                 {
                     AddKillScore(ref progress, in enemy.stats, enemy.combat.level);

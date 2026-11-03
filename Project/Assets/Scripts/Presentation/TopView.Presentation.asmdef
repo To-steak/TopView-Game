@@ -6,7 +6,8 @@
         "TopView.Definitions",
         "Unity.Cinemachine",
         "UnityEngine.UI",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "DOTween.Modules"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

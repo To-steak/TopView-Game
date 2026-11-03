@@ -19,6 +19,7 @@ namespace TopView.Core
             DrawEnemyGizmos();
             DrawMeleeGizmos();
             DrawProjectileGizmos();
+            DrawLootGizmos();
         }
 
         // center 높이의 XZ 평면에 반지름 radius의 원을 지금 Gizmos 색으로 그린다.

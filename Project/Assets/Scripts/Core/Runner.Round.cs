@@ -119,6 +119,7 @@ namespace TopView.Core
             _projectilePrefabs = projectilePrefabs.ToArray();
             _hitEffectPrefabs = hitEffectPrefabs.ToArray();
             _lootPrefabs = ReadLootPrefabs(lootDefinition);
+            ReadDamageText(_catalog.damageText);
             _viewContext = CreateViewContext(enemyKindCount);
 
             BindPresenters();
@@ -170,6 +171,7 @@ namespace TopView.Core
                 {
                     pools = new Stack<ParticleSystem>[_hitEffectPrefabs.Length]
                 },
+                damageText = new DamageTextViewContext(),
                 loot = new LootViewContext
                 {
                     views = new LootView[_world.loots.entities.Length],
@@ -206,11 +208,12 @@ namespace TopView.Core
             WorldCanvasView worldCanvasView = FindAnyObjectByType<WorldCanvasView>();
             if (worldCanvasView == null)
             {
-                Debug.LogError("Runner >> 씬에 WorldCanvasView가 없어 적 체력 게이지가 보이지 않는다.");
+                Debug.LogError("Runner >> 씬에 WorldCanvasView가 없어 적 체력 게이지와 피해량 글자가 보이지 않는다.");
             }
             else
             {
                 viewContext.enemy.healthGaugeParent = worldCanvasView.transform;
+                viewContext.damageText.parent = worldCanvasView.transform;
             }
 
             return viewContext;
