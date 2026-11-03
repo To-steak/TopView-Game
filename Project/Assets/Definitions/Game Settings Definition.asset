@@ -22,3 +22,4 @@ MonoBehaviour:
   enemyCapacityPerKind: 1024
   enemyPathCornerCapacity: 8
   projectileCapacity: 2048
+  lootCapacity: 1024

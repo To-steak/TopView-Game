@@ -17,5 +17,7 @@ namespace TopView.Definitions
         public int enemyPathCornerCapacity;
         // 동시에 있을 수 있는 투사체 최대 수. 판을 준비할 때 투사체 구간 칸 수로 쓴다
         public int projectileCapacity;
+        // 동시에 있을 수 있는 전리품 최대 수. 판을 준비할 때 전리품 저장소 칸 수로 쓴다
+        public int lootCapacity;
     }
 }

@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87014dfd89768a647ab3568dd82d72cf, type: 3}
+  m_Name: Loot Definition
+  m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.LootDefinition
+  rule:
+    pickupRadius: 0.5
+    lifetimeTicks: 500
+  goldViewPrefab: {fileID: 1683778930073365211, guid: 2fedd60ce483ab642bb05ab69f0921ee, type: 3}
+  healthViewPrefab: {fileID: 2052901862786956559, guid: 2588f57643b85ff479b5f76c212afce4, type: 3}
+  ammoViewPrefab: {fileID: 704432037672015330, guid: 94fd69fa06d9a024ba769dc70e228863, type: 3}

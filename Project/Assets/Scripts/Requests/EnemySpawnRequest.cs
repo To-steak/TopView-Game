@@ -20,5 +20,7 @@ namespace TopView.Requests
         public EnemyBehaviorComponent behavior;
         // 공격 목록. EnemySpawnSystem이 엔티티의 배열로 복사한다
         public EnemyAttackComponent[] attacks;
+        // 드롭 표. EnemySpawnSystem이 엔티티의 배열로 복사한다
+        public EnemyLootComponent[] loots;
     }
 }

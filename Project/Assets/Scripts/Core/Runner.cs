@@ -3,6 +3,7 @@ using TopView.Definitions;
 using TopView.Presentation;
 using TopView.Presentation.Camera.ViewSystems;
 using TopView.Presentation.Enemy.ViewSystems;
+using TopView.Presentation.Loot.ViewSystems;
 using TopView.Presentation.Player.ViewSystems;
 using TopView.Presentation.Projectile.ViewSystems;
 using TopView.Systems;
@@ -77,6 +78,11 @@ namespace TopView.Core
                 PlayerBlockSystem.Tick(_world.players, _world.enemies);
                 PlayerAimSystem.Tick(_world.players, in _world.commandBuffer.playerCommand);
                 PlayerStaminaSystem.Tick(_world.players);
+                // 획득은 이동이 끝난 위치를 읽고, 이번 틱 피해가 반영된 체력을 보므로 이 자리에 둔다
+                LootPickupSystem.Tick(_world.loots, _world.players, ref _world.progress, _world.lootRule.pickupRadius, _world.lootDespawnRequests);
+                LootDespawnSystem.Tick(_world.loots, _world.lootDespawnRequests);
+                LootLifetimeSystem.Tick(_world.loots, _world.lootDespawnRequests);
+                LootDespawnSystem.Tick(_world.loots, _world.lootDespawnRequests);
                 EnemyDeathSystem.Tick(_world.enemies, _world.enemyStateChangedRecords);
                 EnemyStateTimerSystem.Tick(_world.enemies);
                 PlayerLocationSystem.Tick(_world.players, ref _world.playerLocation);
@@ -85,7 +91,7 @@ namespace TopView.Core
                 EnemyStateChangeSystem.Tick(_world.enemies, _world.enemyStateChangeRequests, _world.enemyStateChangedRecords);
                 EnemyAttackStateSystem.Tick(_world.enemies, in _world.playerLocation, _world.enemyStateChangeRequests, _world.projectileSpawnRequests, _world.meleeSpawnRequests);
                 EnemyStateChangeSystem.Tick(_world.enemies, _world.enemyStateChangeRequests, _world.enemyStateChangedRecords);
-                EnemyDespawnSystem.Tick(_world.enemies, _world.gameOverRequests);
+                EnemyDespawnSystem.Tick(_world.enemies, _world.gameOverRequests, _world.random, _world.lootSpawnRequests);
                 EnemyNavigationSystem.Tick(_world.enemies, _world.navigationPath, _world.rule.navMeshSampleDistance);
                 ProjectileSystem.Tick(_world.projectiles, _world.projectileDespawnRequests);
                 ProjectileDespawnSystem.Tick(_world.projectiles, _world.projectileDespawnRequests);
@@ -104,6 +110,7 @@ namespace TopView.Core
                 EnemySpawnSystem.Tick(_world.enemies, _world.enemySpawnRequests, _world.rule.navMeshSampleDistance);
                 ProjectileSpawnSystem.Tick(_world.projectiles, _world.projectileSpawnRequests);
                 MeleeSpawnSystem.Tick(_world.melees, _world.meleeSpawnRequests);
+                LootSpawnSystem.Tick(_world.loots, _world.lootSpawnRequests, _world.lootRule.lifetimeTicks);
             }
 
             CommandSystem.ClearPlayerPresses(ref _world.commandBuffer.playerCommand);
@@ -138,6 +145,7 @@ namespace TopView.Core
             EnemyViewSystem.Present(_world.enemies.entities, _world.enemyStateChangedRecords, _enemyViewPrefabs, _viewContext.enemy);
             EnemyHealthGaugeViewSystem.Present(_world.enemies.entities, _enemyHealthGaugePrefabs, _viewContext.camera.mainCamera, _viewContext.enemy);
             ProjectileViewSystem.Present(_world.projectiles.entities, _projectilePrefabs, _viewContext.projectile);
+            LootViewSystem.Present(_world.loots.entities, _lootPrefabs, _viewContext.loot);
             HitEffectViewSystem.Present(_world.projectileHitRecords, _hitEffectPrefabs, _viewContext.hitEffect);
             CameraViewSystem.Present(_viewContext.camera, _viewContext.player.view, _playerCameraPriority);
 

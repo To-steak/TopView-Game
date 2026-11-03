@@ -13,9 +13,4 @@ MonoBehaviour:
   m_Name: Definition Catalog
   m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.DefinitionCatalog
   gameSettings: {fileID: 11400000, guid: db90d6ae1cf94cc4a9f5125de6d5fb56, type: 2}
-  player: {fileID: 11400000, guid: e0e28ed7c0b71c74aa51351f59d97237, type: 2}
-  enemies:
-  - {fileID: 11400000, guid: 7e27ad8917b2b2344a07a7ef6f3f8468, type: 2}
-  - {fileID: 11400000, guid: 5bc1f2883afbca94a96dc37769c8c69a, type: 2}
-  - {fileID: 11400000, guid: 5c5cbd46eaead144ca431125be8ed13c, type: 2}
-  boss: {fileID: 11400000, guid: 94a38ac2f0451fc4bbf460f2656cf52a, type: 2}
+  loot: {fileID: 11400000, guid: 873a3ca0e8f87cb40b26097d1ee69536, type: 2}
