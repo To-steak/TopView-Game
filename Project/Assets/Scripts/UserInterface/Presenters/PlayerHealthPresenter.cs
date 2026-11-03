@@ -50,7 +50,8 @@ namespace TopView.UserInterface.Presenters
 
             if (!_hasPresentedValues || health != _presentedHealth || maxHealth != _presentedMaxHealth)
             {
-                _view.SetHealth(health, maxHealth);
+                // 판의 첫 표시는 이전 판의 너비에서 움직이지 않도록 바로 맞춘다
+                _view.SetHealth(health, maxHealth, !_hasPresentedValues);
                 _presentedHealth = health;
                 _presentedMaxHealth = maxHealth;
                 _hasPresentedValues = true;
