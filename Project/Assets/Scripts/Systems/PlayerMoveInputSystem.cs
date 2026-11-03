@@ -55,9 +55,9 @@ namespace TopView.Systems
             if (isRunning)
             {
                 float requiredMana = vital.runManaCostPerTick;
-                if (PlayerStaminaSystem.HasEnoughMana(in mana, requiredMana))
+                if (PlayerStaminaUtility.HasEnoughMana(in mana, requiredMana))
                 {
-                    PlayerStaminaSystem.UseMana(ref mana, requiredMana);
+                    PlayerStaminaUtility.UseMana(ref mana, requiredMana);
                 }
                 else
                 {

@@ -85,7 +85,7 @@ namespace TopView.Systems
             for (int targetIndex = 0; targetIndex < hitTargetCount; targetIndex++)
             {
                 ref readonly HitTargetComponent hitTarget = ref hitTargets[targetIndex];
-                if (!TargetingSystem.IsWithin(center, hitTarget.position, melee.radius + hitTarget.radius)
+                if (!TargetingUtility.IsWithin(center, hitTarget.position, melee.radius + hitTarget.radius)
                     || IsAlreadyHit(in hits, in hitTarget.target))
                 {
                     continue;

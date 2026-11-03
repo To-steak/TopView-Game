@@ -28,7 +28,7 @@ namespace TopView.Systems
                 if (player.isAlive && player.health.current > 0f)
                 {
                     // 점프로 적 투사체를 피할 수 있도록 플레이어만 캡슐 높이로 맞는다
-                    PlayerMovementSystem.GetCapsulePoints(in player.movement, player.rotation.current, player.position.current, out Vector3 top, out Vector3 bottom);
+                    PlayerMovementUtility.GetCapsulePoints(in player.movement, player.rotation.current, player.position.current, out Vector3 top, out Vector3 bottom);
                     float radius = player.movement.capsuleRadius;
                     Add(playerHitTargets, ref playerHitTargetCount, index, player.generation, player.position.current, radius, bottom.y - radius, top.y + radius);
                 }

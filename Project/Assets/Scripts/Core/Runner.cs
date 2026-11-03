@@ -75,9 +75,10 @@ namespace TopView.Core
                 PlayerStaminaSystem.Tick(_world.players);
                 EnemyDeathSystem.Tick(_world.enemies, _world.enemyStateChangedRecords);
                 EnemyStateTimerSystem.Tick(_world.enemies);
+                PlayerLocationSystem.Tick(_world.players, ref _world.playerLocation);
                 // 공격 상태는 상태 시간이 0이면 건너뛰므로, 공격이 끝나 Idle이 된 적과 막 공격에 들어온 적 모두 다음 틱부터 움직이도록 이 순서를 지킨다
-                EnemyBehaviorSystem.Tick(_world.enemies, _world.players, _world.random, _world.enemyStateChangedRecords);
-                EnemyAttackStateSystem.Tick(_world.enemies, _world.players, _world.enemyStateChangedRecords, _world.projectileSpawnRequests, _world.meleeSpawnRequests);
+                EnemyBehaviorSystem.Tick(_world.enemies, in _world.playerLocation, _world.random, _world.enemyStateChangedRecords);
+                EnemyAttackStateSystem.Tick(_world.enemies, in _world.playerLocation, _world.enemyStateChangedRecords, _world.projectileSpawnRequests, _world.meleeSpawnRequests);
                 EnemyDespawnSystem.Tick(_world.enemies, _world.gameOverRequests);
                 EnemyNavigationSystem.Tick(_world.enemies, _world.navigationPath, _world.rule.navMeshSampleDistance);
                 ProjectileSystem.Tick(_world.projectiles);

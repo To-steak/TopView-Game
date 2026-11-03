@@ -38,7 +38,7 @@ namespace TopView.Systems
         {
             actionState.state = EnemyState.Die;
             actionState.elapsedTicks = 0;
-            EnemyNavigationSystem.StopMove(ref agent);
+            EnemyNavigationUtility.StopMove(ref agent);
         }
     }
 }

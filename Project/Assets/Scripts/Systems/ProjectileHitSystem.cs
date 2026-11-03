@@ -90,7 +90,7 @@ namespace TopView.Systems
             for (int targetIndex = 0; targetIndex < hitTargetCount; targetIndex++)
             {
                 ref readonly HitTargetComponent hitTarget = ref hitTargets[targetIndex];
-                if (TargetingSystem.IsWithin(position.current, hitTarget.position, projectile.explosionRadius + hitTarget.radius))
+                if (TargetingUtility.IsWithin(position.current, hitTarget.position, projectile.explosionRadius + hitTarget.radius))
                 {
                     damageRequests.Enqueue(new DamageRequest { target = hitTarget.target, amount = payload.damage });
                 }

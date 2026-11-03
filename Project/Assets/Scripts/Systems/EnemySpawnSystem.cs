@@ -26,7 +26,7 @@ namespace TopView.Systems
             {
                 EnemySpawnRequest request = enemySpawnRequests.Dequeue();
                 if (request.enemyKindIndex < 0 || request.enemyKindIndex >= enemies.freeIndicesByKind.Length
-                    || !SpawnSystem.TryTakeFreeIndex(enemies.freeIndicesByKind[request.enemyKindIndex], out int index))
+                    || !SpawnUtility.TryTakeFreeIndex(enemies.freeIndicesByKind[request.enemyKindIndex], out int index))
                 {
                     droppedCount++;
                     continue;
@@ -54,7 +54,7 @@ namespace TopView.Systems
         private static bool Spawn(ref EnemyEntity entity, in EnemySpawnRequest request, float navMeshSampleDistance)
         {
             int generation = entity.generation + 1;
-            EnemyAttackComponent[] attacks = SpawnSystem.ReuseArray(entity.attackList.attacks, request.attacks);
+            EnemyAttackComponent[] attacks = SpawnUtility.ReuseArray(entity.attackList.attacks, request.attacks);
             Vector3[] pathCorners = entity.agent.pathCorners;
             Array.Clear(pathCorners, 0, pathCorners.Length);
             int[] attackCooldownRemainingTicks = entity.actionState.attackCooldownRemainingTicks;

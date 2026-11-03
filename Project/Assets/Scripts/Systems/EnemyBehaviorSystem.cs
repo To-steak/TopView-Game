@@ -14,12 +14,14 @@ namespace TopView.Systems
         /// Idle과 Walk 상태의 적마다 플레이어를 감지해 배회, 추적, 공격 시작을 정한다.
         /// </summary>
         /// <param name="enemies">적 저장소</param>
-        /// <param name="players">플레이어 저장소. 감지와 공격 대상의 위치와 반지름을 읽는다</param>
+        /// <param name="playerLocation">감지와 공격 대상인 플레이어의 위치와 반지름</param>
         /// <param name="random">World의 난수 생성기</param>
         /// <param name="stateRecords">적 상태 변경 기록</param>
-        public static void Tick(EnemyStorage enemies, PlayerStorage players, System.Random random, List<EnemyStateChangedRecord> stateRecords)
+        public static void Tick(EnemyStorage enemies, in PlayerLocationComponent playerLocation, System.Random random, List<EnemyStateChangedRecord> stateRecords)
         {
-            bool hasPlayer = TargetingSystem.TryGetPlayerTarget(players, out Vector3 playerPosition, out float playerRadius);
+            bool hasPlayer = playerLocation.hasPlayer;
+            Vector3 playerPosition = playerLocation.position;
+            float playerRadius = playerLocation.radius;
             float deltaTime = Time.fixedDeltaTime;
             int failedWanderCount = 0;
             int missingAttackCount = 0;
@@ -40,7 +42,7 @@ namespace TopView.Systems
                 EnemyAttackComponent[] attacks = entity.attackList.attacks;
                 Vector3 position = entity.position.current;
                 EntityIdentifier identifier = new EntityIdentifier { index = index, generation = entity.generation };
-                bool isPlayerDetected = hasPlayer && TargetingSystem.IsWithin(position, playerPosition, behavior.detectionRadius + playerRadius);
+                bool isPlayerDetected = hasPlayer && TargetingUtility.IsWithin(position, playerPosition, behavior.detectionRadius + playerRadius);
 
                 switch (actionState.state)
                 {
@@ -60,7 +62,7 @@ namespace TopView.Systems
                             {
                                 break;
                             }
-                            EnemyNavigationSystem.SetDestination(ref agent, playerPosition, behavior.stopDistance);
+                            EnemyNavigationUtility.SetDestination(ref agent, playerPosition, behavior.stopDistance);
                         }
                         if (hasReachedDestination)
                         {
@@ -116,10 +118,10 @@ namespace TopView.Systems
             {
                 case EnemyState.Idle:
                     actionState.wanderElapsedTicks = 0;
-                    EnemyNavigationSystem.StopMove(ref agent);
+                    EnemyNavigationUtility.StopMove(ref agent);
                     break;
                 case EnemyState.Attack:
-                    EnemyNavigationSystem.StopMove(ref agent);
+                    EnemyNavigationUtility.StopMove(ref agent);
                     break;
             }
         }
@@ -135,13 +137,13 @@ namespace TopView.Systems
                     return true;
                 }
 
-                if (TargetingSystem.IsWithin(position, playerPosition, behavior.stopDistance))
+                if (TargetingUtility.IsWithin(position, playerPosition, behavior.stopDistance))
                 {
-                    TargetingSystem.RotateToward(ref rotation.current, position, playerPosition, behavior.angularSpeed * deltaTime);
+                    TargetingUtility.RotateToward(ref rotation.current, position, playerPosition, behavior.angularSpeed * deltaTime);
                 }
                 else
                 {
-                    EnemyNavigationSystem.SetDestination(ref agent, playerPosition, behavior.stopDistance);
+                    EnemyNavigationUtility.SetDestination(ref agent, playerPosition, behavior.stopDistance);
                     ChangeState(ref actionState, ref agent, attacks, in identifier, EnemyState.Walk, stateRecords);
                 }
                 return true;
@@ -159,7 +161,7 @@ namespace TopView.Systems
                 return false;
             }
 
-            EnemyNavigationSystem.SetDestination(ref agent, wanderPoint, 0f);
+            EnemyNavigationUtility.SetDestination(ref agent, wanderPoint, 0f);
             ChangeState(ref actionState, ref agent, attacks, in identifier, EnemyState.Walk, stateRecords);
             return true;
         }
@@ -205,7 +207,7 @@ namespace TopView.Systems
         private static bool IsAttackAvailable(in EnemyActionStateComponent actionState, EnemyAttackComponent[] attacks, int attackIndex, Vector3 position, Vector3 playerPosition, float playerRadius)
         {
             return actionState.attackCooldownRemainingTicks[attackIndex] <= 0
-                && TargetingSystem.IsWithin(position, playerPosition, attacks[attackIndex].attackRange + playerRadius);
+                && TargetingUtility.IsWithin(position, playerPosition, attacks[attackIndex].attackRange + playerRadius);
         }
 
         // 지금 위치를 중심으로 감지 반지름 안의 무작위 점을 골라, 가장 가까운 NavMesh 위의 점을 돌려준다.

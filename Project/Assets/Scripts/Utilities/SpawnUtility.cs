@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace TopView.Systems
 {
     // 엔티티 종류별 ~SpawnSystem이 함께 쓰는 칸 할당 도구.
-    public static class SpawnSystem
+    public static class SpawnUtility
     {
         /// <summary>
         /// 빈 칸 번호 목록의 끝에서 하나를 꺼낸다.
