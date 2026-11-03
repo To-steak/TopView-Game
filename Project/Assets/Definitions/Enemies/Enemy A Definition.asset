@@ -59,7 +59,7 @@ MonoBehaviour:
     projectilePrefab: {fileID: 0}
     hitEffectPrefab: {fileID: 0}
   loots:
-  - kind: 1
+  - kind: 3
     weight: 100
     baseAmount: 10
     amountIncrement: 10

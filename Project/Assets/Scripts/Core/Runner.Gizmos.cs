@@ -10,6 +10,7 @@ namespace TopView.Core
     public partial class Runner
     {
         private const int CIRCLE_GIZMO_SEGMENTS = 32;
+        private const float DROPPED_LOOT_GIZMO_RADIUS = 0.3f;
 
         private void OnDrawGizmos()
         {
@@ -23,6 +24,7 @@ namespace TopView.Core
             DrawMeleeGizmos();
             DrawProjectileGizmos();
             DrawLootGizmos();
+            DrawDroppedLootGizmos();
         }
 
         // 플레이어 이동 충돌에 쓰는 캡슐을 Logic 위치에 그린다. 착지 중이면 초록, 공중이면 노랑
@@ -125,6 +127,20 @@ namespace TopView.Core
                 if (players[playerIndex].isAlive)
                 {
                     DrawCircleGizmo(players[playerIndex].position.current, _world.lootRule.pickupRadius);
+                }
+            }
+        }
+
+        // 떨어져 있는 전리품마다 Logic 위치를 파란색 XZ 원으로 그린다.
+        private void DrawDroppedLootGizmos()
+        {
+            LootEntity[] entities = _world.loots.entities;
+            Gizmos.color = Color.blue;
+            for (int index = 0; index < entities.Length; index++)
+            {
+                if (entities[index].isAlive)
+                {
+                    DrawCircleGizmo(entities[index].position.current, DROPPED_LOOT_GIZMO_RADIUS);
                 }
             }
         }

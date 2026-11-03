@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace TopView.Presentation.ViewSystems
 {
-    // 살아 있는 전리품마다 View를 풀에서 꺼내 그 위치에 둔다. 전리품은 움직이지 않으므로 꺼낼 때 한 번만 옮긴다.
+    // 살아 있는 전리품마다 View를 풀에서 꺼내 그 위치에 두고 모델을 회전시킨다. 전리품은 움직이지 않으므로 꺼낼 때 한 번만 옮긴다.
     public static class LootViewSystem
     {
         /// <summary>
@@ -28,20 +28,31 @@ namespace TopView.Presentation.ViewSystems
                     view = null;
                 }
 
-                if (!entity.isAlive || view != null)
+                if (!entity.isAlive)
                 {
                     continue;
                 }
 
-                int kind = (int)entity.loot.kind;
-                if (lootPrefabs[kind] != null)
+                if (view == null)
                 {
-                    Acquire(context, index, entity.generation, kind, lootPrefabs, entity.position.current);
+                    int kind = (int)entity.loot.kind;
+                    if (lootPrefabs[kind] == null)
+                    {
+                        continue;
+                    }
+
+                    view = Acquire(context, index, entity.generation, kind, lootPrefabs, entity.position.current);
+                }
+
+                Vector3 rotationSpeed = new Vector3(view.pitchSpeed, view.yawSpeed, view.rollSpeed);
+                if (rotationSpeed != Vector3.zero && view.rotationPivot != null)
+                {
+                    view.rotationPivot.Rotate(rotationSpeed * Time.deltaTime, Space.Self);
                 }
             }
         }
 
-        private static void Acquire(LootViewContext context, int index, int generation, int kind, GameObject[] lootPrefabs, Vector3 position)
+        private static LootView Acquire(LootViewContext context, int index, int generation, int kind, GameObject[] lootPrefabs, Vector3 position)
         {
             Stack<LootView> pool = context.viewPools[kind];
             LootView view = pool.Count > 0 ? pool.Pop() : Object.Instantiate(lootPrefabs[kind]).GetComponent<LootView>();
@@ -52,6 +63,7 @@ namespace TopView.Presentation.ViewSystems
             context.views[index] = view;
             context.viewGenerations[index] = generation;
             context.viewKinds[index] = kind;
+            return view;
         }
 
         private static void Release(LootViewContext context, int index)
