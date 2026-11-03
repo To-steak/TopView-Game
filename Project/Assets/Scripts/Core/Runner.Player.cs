@@ -2,15 +2,13 @@ using System.Collections.Generic;
 using TopView.Authoring;
 using TopView.Components;
 using TopView.Definitions;
-using TopView.Entities;
 using TopView.Presentation.Views;
 using TopView.Requests;
-using TopView.Utilities;
 using UnityEngine;
 
 namespace TopView.Core
 {
-    // 플레이어: 스포너와 Definition 읽기, 디버그 표시
+    // 플레이어: 스포너와 Definition 읽기
     public partial class Runner
     {
         private GameObject _playerViewPrefab;
@@ -111,31 +109,5 @@ namespace TopView.Core
 
             return true;
         }
-
-#if UNITY_EDITOR
-        // 플레이어 이동 충돌에 쓰는 캡슐을 Logic 위치에 그린다. 착지 중이면 초록, 공중이면 노랑
-        private void DrawPlayerGizmos()
-        {
-            PlayerEntity[] entities = _world.players.entities;
-            for (int index = 0; index < entities.Length; index++)
-            {
-                ref readonly PlayerEntity entity = ref entities[index];
-                if (!entity.isAlive)
-                {
-                    continue;
-                }
-
-                PlayerMovementUtility.GetCapsulePoints(in entity.movement, entity.rotation.current, entity.position.current, out Vector3 top, out Vector3 bottom);
-                float radius = entity.movement.capsuleRadius;
-                Gizmos.color = entity.motion.isGrounded ? Color.green : Color.yellow;
-                Gizmos.DrawWireSphere(top, radius);
-                Gizmos.DrawWireSphere(bottom, radius);
-                Gizmos.DrawLine(top + Vector3.forward * radius, bottom + Vector3.forward * radius);
-                Gizmos.DrawLine(top + Vector3.back * radius, bottom + Vector3.back * radius);
-                Gizmos.DrawLine(top + Vector3.right * radius, bottom + Vector3.right * radius);
-                Gizmos.DrawLine(top + Vector3.left * radius, bottom + Vector3.left * radius);
-            }
-        }
-#endif
     }
 }

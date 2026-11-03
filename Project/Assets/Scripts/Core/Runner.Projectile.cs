@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using TopView.Components;
 using TopView.Definitions;
-using TopView.Entities;
 using TopView.Presentation.Views;
 using UnityEngine;
 
@@ -72,21 +71,5 @@ namespace TopView.Core
                 hitEffectPrefabs.Add(hitEffectPrefab);
             }
         }
-
-#if UNITY_EDITOR
-        // 살아 있는 투사체마다 판정 구를 Logic 위치에 흰색으로 그린다.
-        private void DrawProjectileGizmos()
-        {
-            ProjectileEntity[] entities = _world.projectiles.entities;
-            Gizmos.color = Color.white;
-            for (int index = 0; index < entities.Length; index++)
-            {
-                if (entities[index].isAlive)
-                {
-                    Gizmos.DrawWireSphere(entities[index].position.current, entities[index].projectile.radius);
-                }
-            }
-        }
-#endif
     }
 }
