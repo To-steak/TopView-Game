@@ -75,7 +75,7 @@ namespace TopView.Core
                 PlayerAimSystem.Tick(_world.players, in _world.commandBuffer.playerCommand);
                 PlayerStaminaSystem.Tick(_world.players);
                 // 획득은 이동이 끝난 위치를 읽고, 이번 틱 피해가 반영된 체력을 보므로 이 자리에 둔다
-                LootPickupSystem.Tick(_world.loots, _world.players, ref _world.progress, _world.lootRule.pickupRadius, _world.lootDespawnRequests);
+                LootPickupSystem.Tick(_world.loots, _world.players, ref _world.progress, _world.lootRule.pickupRadius, _world.lootDespawnRequests, _world.lootPickedUpRecords);
                 LootDespawnSystem.Tick(_world.loots, _world.lootDespawnRequests);
                 LootLifetimeSystem.Tick(_world.loots, _world.lootDespawnRequests);
                 LootDespawnSystem.Tick(_world.loots, _world.lootDespawnRequests);
@@ -143,7 +143,9 @@ namespace TopView.Core
             ProjectileViewSystem.Present(_world.projectiles.entities, _projectilePrefabs, _viewContext.projectile);
             LootViewSystem.Present(_world.loots.entities, _lootPrefabs, _viewContext.loot);
             HitEffectViewSystem.Present(_world.projectileHitRecords, _hitEffectPrefabs, _viewContext.hitEffect);
-            DamageTextViewSystem.Present(_world.enemyDamagedRecords, _viewContext.enemy.views, _viewContext.enemy.viewGenerations, _damageTextPrefab, in _damageTextRule, _viewContext.camera.mainCamera, _viewContext.damageText);
+            DamageTextViewSystem.Present(_world.enemyDamagedRecords, _viewContext.enemy.views, _viewContext.enemy.viewGenerations, in _worldTextRule, _viewContext.camera.mainCamera, _viewContext.worldText.pendingTexts);
+            LootTextViewSystem.Present(_world.lootPickedUpRecords, in _worldTextRule, _viewContext.worldText.pendingTexts);
+            WorldTextViewSystem.Present(_worldTextPrefab, in _worldTextRule, _viewContext.camera.mainCamera, _viewContext.worldText);
             CameraViewSystem.Present(_viewContext.camera, _viewContext.player.view, _playerCameraPriority, _world.commandBuffer.playerCommand.cameraYawInput, _playerCameraYawDegreesPerSecond);
 
             PresentUserInterface();
@@ -152,6 +154,7 @@ namespace TopView.Core
             _world.enemyStateChangedRecords.Clear();
             _world.projectileHitRecords.Clear();
             _world.enemyDamagedRecords.Clear();
+            _world.lootPickedUpRecords.Clear();
         }
     }
 }

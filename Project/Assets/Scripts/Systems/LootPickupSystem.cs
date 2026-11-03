@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TopView.Components;
 using TopView.Entities;
+using TopView.Records;
 using TopView.Requests;
 using UnityEngine;
 
@@ -17,7 +18,8 @@ namespace TopView.Systems
         /// <param name="progress">한 판의 진행 상태. 골드를 더한다</param>
         /// <param name="pickupRadius">플레이어 중심에서 전리품을 획득하는 반경(유닛, XZ)</param>
         /// <param name="despawnRequests">전리품 소멸 요청 큐</param>
-        public static void Tick(LootStorage loots, PlayerStorage players, ref GameProgressComponent progress, float pickupRadius, Queue<LootDespawnRequest> despawnRequests)
+        /// <param name="pickedUpRecords">전리품을 획득한 기록 목록</param>
+        public static void Tick(LootStorage loots, PlayerStorage players, ref GameProgressComponent progress, float pickupRadius, Queue<LootDespawnRequest> despawnRequests, List<LootPickedUpRecord> pickedUpRecords)
         {
             float sqrPickupRadius = pickupRadius * pickupRadius;
             for (int playerIndex = 0; playerIndex < players.entities.Length; playerIndex++)
@@ -50,6 +52,7 @@ namespace TopView.Systems
                         {
                             target = new EntityIdentifier { index = lootIndex, generation = entity.generation }
                         });
+                        pickedUpRecords.Add(new LootPickedUpRecord { kind = entity.loot.kind, amount = entity.loot.amount, position = entity.position.current });
                     }
                 }
             }
