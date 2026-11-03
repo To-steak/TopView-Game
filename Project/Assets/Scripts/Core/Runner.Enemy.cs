@@ -90,6 +90,10 @@ namespace TopView.Core
                 else
                 {
                     viewPrefabs[kind] = definition.viewPrefab;
+                    if (enemyView.damageAnchor == null)
+                    {
+                        Debug.LogWarning($"Runner >> {definition.name}의 View Prefab에 Damage Anchor가 연결되어 있지 않아 이 적 종류의 피해량 글자는 적의 발밑에 뜬다.");
+                    }
                 }
                 // 오버레이 체력 바로 체력을 보여 주는 종류는 게이지를 두지 않아도 된다
                 if (definition.healthGaugePrefab == null && definition.behavior.showsOverlayHealthBar)

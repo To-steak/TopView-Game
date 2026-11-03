@@ -2,6 +2,7 @@ using TopView.Components;
 using TopView.Definitions;
 using TopView.Presentation;
 using TopView.Presentation.Camera.ViewSystems;
+using TopView.Presentation.DamageText.ViewSystems;
 using TopView.Presentation.Enemy.ViewSystems;
 using TopView.Presentation.Loot.ViewSystems;
 using TopView.Presentation.Player.ViewSystems;
@@ -58,7 +59,7 @@ namespace TopView.Core
             }
 
             bool isPlaying = _world.progress.phase == GamePhase.Playing;
-            DamageSystem.Tick(ref _world.progress, _world.players, _world.enemies, _world.playerDamageRequests, _world.enemyDamageRequests);
+            DamageSystem.Tick(ref _world.progress, _world.players, _world.enemies, _world.playerDamageRequests, _world.enemyDamageRequests, _world.enemyDamagedRecords);
             if (isPlaying)
             {
                 TransformSnapshotSystem.Tick(_world.players, _world.enemies, _world.projectiles);
@@ -147,6 +148,7 @@ namespace TopView.Core
             ProjectileViewSystem.Present(_world.projectiles.entities, _projectilePrefabs, _viewContext.projectile);
             LootViewSystem.Present(_world.loots.entities, _lootPrefabs, _viewContext.loot);
             HitEffectViewSystem.Present(_world.projectileHitRecords, _hitEffectPrefabs, _viewContext.hitEffect);
+            DamageTextViewSystem.Present(_world.enemyDamagedRecords, _viewContext.enemy.views, _viewContext.enemy.viewGenerations, _damageTextPrefab, in _damageTextRule, _viewContext.camera.mainCamera, _viewContext.damageText);
             CameraViewSystem.Present(_viewContext.camera, _viewContext.player.view, _playerCameraPriority, _world.commandBuffer.playerCommand.cameraYawInput, _playerCameraYawDegreesPerSecond);
 
             PresentUserInterface();
@@ -154,6 +156,7 @@ namespace TopView.Core
             _world.playerStateChangedRecords.Clear();
             _world.enemyStateChangedRecords.Clear();
             _world.projectileHitRecords.Clear();
+            _world.enemyDamagedRecords.Clear();
         }
     }
 }
