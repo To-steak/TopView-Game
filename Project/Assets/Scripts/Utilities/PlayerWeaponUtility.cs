@@ -1,68 +1,12 @@
-using System.Collections.Generic;
 using TopView.Components;
 using TopView.Entities;
-using TopView.Requests;
 using UnityEngine;
 
 namespace TopView.Systems
 {
-    // 플레이어 무기의 조건 판정, 공격 발동, 재장전, 교체를 처리한다. 언제 부를지는 상태 쪽 System이 정한다.
-    public static class PlayerWeaponSystem
+    // 플레이어 무기의 조건 판정, 재장전, 교체 도구. 언제 부를지는 상태 쪽 System이 정한다.
+    public static class PlayerWeaponUtility
     {
-        /// <summary>
-        /// 공격을 내보낸다. 탄약이 없으면 아무것도 하지 않는다. Ranged와 Throw는 투사체 생성 요청을, Melee는 attackEndTicks까지 이어지는 근접 판정 생성 요청을 넣는다.
-        /// </summary>
-        /// <param name="actionState">행동 상태와 공격 진행</param>
-        /// <param name="weaponSlots">든 무기와 무기별 탄약</param>
-        /// <param name="movement">플레이어 이동 값. 총구 위치를 읽는다</param>
-        /// <param name="position">플레이어 위치(월드)</param>
-        /// <param name="rotation">플레이어 회전(월드)</param>
-        /// <param name="identifier">플레이어를 가리키는 값</param>
-        /// <param name="weapon">들고 있는 무기</param>
-        /// <param name="projectileSpawnRequests">투사체 생성 요청 큐</param>
-        /// <param name="meleeSpawnRequests">근접 판정 생성 요청 큐</param>
-        public static void CommitAttack(ref PlayerActionStateComponent actionState, ref PlayerWeaponSlotsComponent weaponSlots, in PlayerMovementComponent movement, Vector3 position, Quaternion rotation, in EntityIdentifier identifier, in WeaponComponent weapon, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
-        {
-            actionState.isAttackCommitted = true;
-            int weaponIndex = weaponSlots.currentIndex;
-
-            switch (weapon.kind)
-            {
-                case WeaponKind.Ranged:
-                    if (weaponSlots.currentAmmo[weaponIndex] <= 0)
-                    {
-                        Debug.LogWarning($"PlayerWeaponSystem >> 탄창 탄약이 {weaponSlots.currentAmmo[weaponIndex]}이라 원거리 공격을 내보내지 않았다.");
-                        return;
-                    }
-                    weaponSlots.currentAmmo[weaponIndex]--;
-                    RequestProjectile(in movement, position, rotation, in weapon, rotation * Vector3.forward, projectileSpawnRequests);
-                    break;
-
-                case WeaponKind.Throw:
-                    if (weaponSlots.reserveAmmo[weaponIndex] <= 0)
-                    {
-                        Debug.LogWarning($"PlayerWeaponSystem >> 남은 탄약이 {weaponSlots.reserveAmmo[weaponIndex]}이라 투척 공격을 내보내지 않았다.");
-                        return;
-                    }
-                    weaponSlots.reserveAmmo[weaponIndex]--;
-                    Vector3 throwDirection = (rotation * Vector3.forward + Vector3.up * weapon.projectile.upwardRatio).normalized;
-                    RequestProjectile(in movement, position, rotation, in weapon, throwDirection, projectileSpawnRequests);
-                    break;
-
-                case WeaponKind.Melee:
-                    meleeSpawnRequests.Enqueue(new MeleeSpawnRequest
-                    {
-                        owner = identifier,
-                        faction = Faction.Player,
-                        center = position + rotation * Vector3.forward * weapon.meleeOffset,
-                        radius = weapon.meleeRadius,
-                        damage = weapon.damage,
-                        durationTicks = weapon.attackEndTicks - weapon.attackStartTicks
-                    });
-                    break;
-            }
-        }
-
         /// <summary>
         /// 공격 상태를 끝낼 때인지 판정한다. Ranged는 투사체를 내보내면 바로 끝나고, Melee와 Throw는 공격이 나간 뒤 attackDurationTicks까지 기다린다.
         /// </summary>
@@ -169,20 +113,6 @@ namespace TopView.Systems
             int loadAmmo = Mathf.Min(weapons[weaponIndex].maxAmmo - weaponSlots.currentAmmo[weaponIndex], weaponSlots.reserveAmmo[weaponIndex]);
             weaponSlots.currentAmmo[weaponIndex] += loadAmmo;
             weaponSlots.reserveAmmo[weaponIndex] -= loadAmmo;
-        }
-
-        // 총구 위치에서 플레이어 회전으로 투사체를 내보낸다.
-        private static void RequestProjectile(in PlayerMovementComponent movement, Vector3 position, Quaternion rotation, in WeaponComponent weapon, Vector3 direction, Queue<ProjectileSpawnRequest> projectileSpawnRequests)
-        {
-            projectileSpawnRequests.Enqueue(new ProjectileSpawnRequest
-            {
-                projectile = weapon.projectile,
-                faction = Faction.Player,
-                damage = weapon.damage,
-                position = position + rotation * movement.muzzleOffset,
-                rotation = rotation,
-                velocity = direction * weapon.projectile.speed
-            });
         }
 
         private static bool IsValidWeaponIndex(WeaponComponent[] weapons, int weaponIndex)

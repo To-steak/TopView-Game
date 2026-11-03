@@ -20,7 +20,7 @@ namespace TopView.Systems
             while (projectileSpawnRequests.Count > 0)
             {
                 ProjectileSpawnRequest request = projectileSpawnRequests.Dequeue();
-                if (!SpawnSystem.TryTakeFreeIndex(projectiles.freeIndices, out int index))
+                if (!SpawnUtility.TryTakeFreeIndex(projectiles.freeIndices, out int index))
                 {
                     droppedCount++;
                     continue;

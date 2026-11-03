@@ -17,6 +17,8 @@ namespace TopView.Core
         public SpawnPointComponent[] enemySpawnPoints;
         // 한 판의 진행 상태
         public GameProgressComponent progress;
+        // 이번 틱에 적이 노리는 플레이어의 위치. 매 틱 PlayerLocationSystem이 다시 채운다
+        public PlayerLocationComponent playerLocation;
         // 시드 고정 난수 생성기
         public System.Random random;
         // 입력 명령 버퍼

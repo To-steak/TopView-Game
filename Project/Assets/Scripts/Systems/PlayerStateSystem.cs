@@ -68,11 +68,11 @@ namespace TopView.Systems
                     case PlayerState.Shot:
                     case PlayerState.Swing:
                     case PlayerState.Throw:
-                        isFinished = PlayerWeaponSystem.IsAttackFinished(in actionState, in weapons[weaponSlot.currentIndex]);
+                        isFinished = PlayerWeaponUtility.IsAttackFinished(in actionState, in weapons[weaponSlot.currentIndex]);
                         break;
 
                     case PlayerState.Swap:
-                        PlayerWeaponSystem.CommitSwap(ref actionState, ref weaponSlot, in action);
+                        PlayerWeaponUtility.CommitSwap(ref actionState, ref weaponSlot, in action);
                         isFinished = actionState.elapsedTicks >= action.swapTicks;
                         break;
 
@@ -80,7 +80,7 @@ namespace TopView.Systems
                         isFinished = actionState.elapsedTicks >= action.reloadTicks;
                         if (isFinished)
                         {
-                            PlayerWeaponSystem.Reload(weapons, ref weaponSlot);
+                            PlayerWeaponUtility.Reload(weapons, ref weaponSlot);
                         }
                         break;
 
@@ -148,7 +148,7 @@ namespace TopView.Systems
 
                 case PlayerState.Jump:
                     motion.verticalVelocity = movement.jumpPower;
-                    PlayerStaminaSystem.UseMana(ref mana, vital.jumpManaCost);
+                    PlayerStaminaUtility.UseMana(ref mana, vital.jumpManaCost);
                     motion.currentSpeed = movement.inAirSpeed;
                     break;
 
@@ -172,7 +172,7 @@ namespace TopView.Systems
                     {
                         rotation.current = Quaternion.LookRotation(motion.moveDirection);
                     }
-                    PlayerStaminaSystem.UseMana(ref mana, vital.dodgeManaCost);
+                    PlayerStaminaUtility.UseMana(ref mana, vital.dodgeManaCost);
                     break;
 
                 case PlayerState.Shot:

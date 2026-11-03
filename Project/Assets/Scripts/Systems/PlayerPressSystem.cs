@@ -37,7 +37,7 @@ namespace TopView.Systems
 
                 if (command.isJumpPressed && IsIdleOrMove(actionState.state))
                 {
-                    if (motion.isGrounded && PlayerStaminaSystem.HasEnoughMana(in mana, vital.jumpManaCost))
+                    if (motion.isGrounded && PlayerStaminaUtility.HasEnoughMana(in mana, vital.jumpManaCost))
                     {
                         PlayerStateSystem.ChangeState(ref actionState, ref motion, ref rotation, ref mana, in weaponSlot, in movement, in vital, weapons, in identifier, PlayerState.Jump, command.moveDirection, stateRecords);
                     }
@@ -45,7 +45,7 @@ namespace TopView.Systems
 
                 if (command.isDodgePressed && IsIdleOrMove(actionState.state))
                 {
-                    if (motion.isGrounded && PlayerStaminaSystem.HasEnoughMana(in mana, vital.dodgeManaCost))
+                    if (motion.isGrounded && PlayerStaminaUtility.HasEnoughMana(in mana, vital.dodgeManaCost))
                     {
                         PlayerStateSystem.ChangeState(ref actionState, ref motion, ref rotation, ref mana, in weaponSlot, in movement, in vital, weapons, in identifier, PlayerState.Dodge, command.moveDirection, stateRecords);
                     }
@@ -53,7 +53,7 @@ namespace TopView.Systems
 
                 if (command.swapWeaponIndex >= 0 && IsIdleOrMove(actionState.state))
                 {
-                    if (PlayerWeaponSystem.CanSwap(weapons, in weaponSlot, command.swapWeaponIndex))
+                    if (PlayerWeaponUtility.CanSwap(weapons, in weaponSlot, command.swapWeaponIndex))
                     {
                         weaponSlot.pendingIndex = command.swapWeaponIndex;
                         PlayerStateSystem.ChangeState(ref actionState, ref motion, ref rotation, ref mana, in weaponSlot, in movement, in vital, weapons, in identifier, PlayerState.Swap, command.moveDirection, stateRecords);
@@ -62,7 +62,7 @@ namespace TopView.Systems
 
                 if (command.isReloadPressed && IsIdleOrMove(actionState.state))
                 {
-                    if (PlayerWeaponSystem.CanReload(weapons, in weaponSlot))
+                    if (PlayerWeaponUtility.CanReload(weapons, in weaponSlot))
                     {
                         PlayerStateSystem.ChangeState(ref actionState, ref motion, ref rotation, ref mana, in weaponSlot, in movement, in vital, weapons, in identifier, PlayerState.Reload, command.moveDirection, stateRecords);
                     }
@@ -72,7 +72,7 @@ namespace TopView.Systems
                 if ((command.isAttackPressed || command.isAttackHeld) && IsIdleOrMove(actionState.state) && motion.isGrounded && actionState.attackCooldownTicks == 0)
                 {
                     // Throw는 누르고 있을 때 탄약을 다 쓰지 않도록 누른 입력으로만 나간다
-                    if (PlayerWeaponSystem.TryGetAttackState(weapons, in weaponSlot, out PlayerState attackState) && (command.isAttackPressed || attackState != PlayerState.Throw))
+                    if (PlayerWeaponUtility.TryGetAttackState(weapons, in weaponSlot, out PlayerState attackState) && (command.isAttackPressed || attackState != PlayerState.Throw))
                     {
                         PlayerStateSystem.ChangeState(ref actionState, ref motion, ref rotation, ref mana, in weaponSlot, in movement, in vital, weapons, in identifier, attackState, command.moveDirection, stateRecords);
                     }

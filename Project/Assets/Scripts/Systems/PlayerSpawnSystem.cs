@@ -20,7 +20,7 @@ namespace TopView.Systems
             while (playerSpawnRequests.Count > 0)
             {
                 PlayerSpawnRequest request = playerSpawnRequests.Dequeue();
-                if (!SpawnSystem.TryTakeFreeIndex(players.freeIndices, out int index))
+                if (!SpawnUtility.TryTakeFreeIndex(players.freeIndices, out int index))
                 {
                     droppedCount++;
                     continue;
@@ -39,7 +39,7 @@ namespace TopView.Systems
         private static void Spawn(ref PlayerEntity entity, in PlayerSpawnRequest request)
         {
             int generation = entity.generation + 1;
-            WeaponComponent[] weapons = SpawnSystem.ReuseArray(entity.weaponList.weapons, request.weapons);
+            WeaponComponent[] weapons = SpawnUtility.ReuseArray(entity.weaponList.weapons, request.weapons);
             int[] currentAmmo = ReuseAmmoArray(entity.weaponSlots.currentAmmo, weapons.Length);
             int[] reserveAmmo = ReuseAmmoArray(entity.weaponSlots.reserveAmmo, weapons.Length);
             for (int weaponIndex = 0; weaponIndex < weapons.Length; weaponIndex++)
