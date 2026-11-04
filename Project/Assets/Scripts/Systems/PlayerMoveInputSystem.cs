@@ -10,7 +10,7 @@ namespace TopView.Systems
     public static class PlayerMoveInputSystem
     {
         /// <summary>
-        /// Move, 공격, 교체, 재장전 상태는 방향과 속도를 정하고 달리기 마나를 쓴다. Jump와 Land 상태는 방향만 정한다. PlayerPressSystem 다음에 부른다.
+        /// Move, 공격, 교체, 재장전, Jump, Land 상태는 방향과 속도를 정하고 달리기 마나를 쓴다. PlayerPressSystem 다음에 부른다.
         /// </summary>
         /// <param name="players">플레이어 저장소</param>
         /// <param name="command">플레이어 입력</param>
@@ -32,12 +32,9 @@ namespace TopView.Systems
                     case PlayerState.Throw:
                     case PlayerState.Swap:
                     case PlayerState.Reload:
-                        ApplyMoveInput(ref entity.motion, ref entity.mana, in entity.movement, in entity.vitals, in command);
-                        break;
-
                     case PlayerState.Jump:
                     case PlayerState.Land:
-                        entity.motion.moveDirection = command.moveDirection;
+                        ApplyMoveInput(ref entity.motion, ref entity.mana, in entity.movement, in entity.vitals, in command);
                         break;
                 }
             }
