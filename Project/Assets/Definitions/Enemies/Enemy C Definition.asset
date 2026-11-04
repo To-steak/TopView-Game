@@ -17,12 +17,10 @@ MonoBehaviour:
     baseAttackDamage: 30
     baseSpeed: 0.3
     baseScore: 25
-    baseGold: 25
     maxHealthIncrement: 5
     attackDamageIncrement: 20
     speedIncrement: 0.1
     scoreIncrement: 20
-    goldIncrement: 20
     hitRadius: 0.5
   behavior:
     detectionRadius: 50
@@ -60,5 +58,32 @@ MonoBehaviour:
       alternateSpawnOffset: {x: 0, y: 0, z: 0}
     projectilePrefab: {fileID: 1467422185046970197, guid: 94bbe6c225f22584bbed1cfc8a479c95, type: 3}
     hitEffectPrefab: {fileID: 0}
+  - attack:
+      kind: 1
+      attackRange: 50
+      cooldownTicks: 500
+      startTicks: 30
+      endTicks: 0
+      durationTicks: 50
+      damageMultiplier: 1
+      bodyRadius: 0
+      bodyOffset: 0
+      projectile:
+        kind: 0
+        speed: 5
+        radius: 0.25
+        lifetimeTicks: 500
+        upwardRatio: 0
+        gravity: 0
+        fuseTicks: 0
+        explosionRadius: 0
+        collisionLayer:
+          serializedVersion: 2
+          m_Bits: 576
+      spawnOffset: {x: 0, y: 0.5, z: 0}
+      alternateSpawnOffset: {x: 0, y: 0, z: 0}
+    projectilePrefab: {fileID: 1467422185046970197, guid: 94bbe6c225f22584bbed1cfc8a479c95, type: 3}
+    hitEffectPrefab: {fileID: 0}
+  loots: []
   viewPrefab: {fileID: 3745814735767933518, guid: 15ce2362c6dc61145a1e9d46e36f1a8c, type: 3}
   healthGaugePrefab: {fileID: 7240100042028206097, guid: 3f976bcd53dc80f47a8de602438c974c, type: 3}

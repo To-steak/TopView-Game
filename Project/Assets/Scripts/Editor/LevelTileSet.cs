@@ -4,17 +4,15 @@ namespace TopView.Editor
 {
     /// <summary>
     /// 레벨 칠하기 설정. 격자(칸 크기·원점), 칠할 타일 프리팹, 흩뿌릴 소품 프리팹을 담는다. 에디터 전용이며 게임 데이터가 아니다.
-    /// 칸 (x, z)의 중심 = origin + (x × cellSize, 0, z × cellSize).
+    /// 칸 (x, z)의 중심 = origin + (x × tileScale, 0, z × tileScale).
     /// </summary>
     [CreateAssetMenu(fileName = "Level Tile Set", menuName = "TopView/Level Tile Set")]
     public class LevelTileSet : ScriptableObject
     {
         [Header("Grid")]
-        // 칸 한 변의 길이 (월드 유닛, 타일 한 변과 같게)
-        [Min(0.01f)] public float cellSize = 1f;
         // 격자 기준점. 이 위치가 칸 (0, 0)의 중심이고, 높이는 칠하는 바닥면이다
         public Vector3 origin;
-        // 타일 프리팹에 곱할 크기 (타일이 칸 크기와 다를 때)
+        // 타일 프리팹에 곱할 크기이자 칸 한 변의 길이 (월드 유닛, 타일 원본의 한 변이 1유닛이라 둘이 같다)
         [Min(0.01f)] public float tileScale = 1f;
 
         [Header("Tiles")]
