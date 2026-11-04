@@ -666,11 +666,11 @@ namespace TopView.Editor
         }
 
         /// <summary>
-        /// 소품 브러시의 반지름 (월드 유닛). 같은 크기의 타일 브러시 한 변의 절반이다.
+        /// 소품 브러시의 반지름 (월드 유닛). Tile Scale과 상관없다.
         /// </summary>
         private float GetPropBrushRadius()
         {
-            return (_brushRadius + 0.5f) * _tileSet.cellSize;
+            return _brushRadius + 0.5f;
         }
 
         private static float GetSquaredDistanceOnGround(Vector3 first, Vector3 second)
@@ -711,28 +711,33 @@ namespace TopView.Editor
         }
 
         /// <summary>
-        /// 브러시가 덮는 칸 테두리를 그린다. 지우기면 빨간색, 무작위 회전이 아니면 회전 방향(타일의 +Z 쪽) 선도 그린다.
+        /// 브러시가 덮는 칸마다 네모를 그린다. 지우기면 빨간색, 무작위 회전이 아니면 회전 방향(타일의 +Z 쪽) 선도 그린다.
         /// </summary>
         private void DrawTileBrushPreview(Vector2Int centerCell, bool isErasing)
         {
-            Vector3 center = LevelGrid.GetCellCenter(_tileSet, centerCell);
-            float half = (_brushRadius + 0.5f) * _tileSet.cellSize;
-            Vector3[] corners =
-            {
-                center + new Vector3(-half, 0f, -half),
-                center + new Vector3(-half, 0f, half),
-                center + new Vector3(half, 0f, half),
-                center + new Vector3(half, 0f, -half),
-            };
+            float halfCell = _tileSet.tileScale * 0.5f;
             Color outline = isErasing ? ERASE_COLOR : TILE_COLOR;
             Color fill = new Color(outline.r, outline.g, outline.b, PREVIEW_FILL_ALPHA);
-            Handles.DrawSolidRectangleWithOutline(corners, fill, outline);
+            Vector3[] corners = new Vector3[4];
+            for (int offsetZ = -_brushRadius; offsetZ <= _brushRadius; offsetZ++)
+            {
+                for (int offsetX = -_brushRadius; offsetX <= _brushRadius; offsetX++)
+                {
+                    Vector3 cellCenter = LevelGrid.GetCellCenter(_tileSet, centerCell + new Vector2Int(offsetX, offsetZ));
+                    corners[0] = cellCenter + new Vector3(-halfCell, 0f, -halfCell);
+                    corners[1] = cellCenter + new Vector3(-halfCell, 0f, halfCell);
+                    corners[2] = cellCenter + new Vector3(halfCell, 0f, halfCell);
+                    corners[3] = cellCenter + new Vector3(halfCell, 0f, -halfCell);
+                    Handles.DrawSolidRectangleWithOutline(corners, fill, outline);
+                }
+            }
 
             if (!isErasing && !_isRandomRotation)
             {
+                Vector3 center = LevelGrid.GetCellCenter(_tileSet, centerCell);
                 Vector3 forward = Quaternion.Euler(0f, _quarterTurns * 90f, 0f) * Vector3.forward;
                 Handles.color = outline;
-                Handles.DrawLine(center, center + forward * half);
+                Handles.DrawLine(center, center + forward * (_brushRadius + 0.5f) * _tileSet.tileScale);
             }
         }
 

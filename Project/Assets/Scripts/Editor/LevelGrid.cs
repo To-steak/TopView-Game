@@ -16,7 +16,7 @@ namespace TopView.Editor
         /// <returns>칸 중심</returns>
         public static Vector3 GetCellCenter(LevelTileSet tileSet, Vector2Int cell)
         {
-            return tileSet.origin + new Vector3(cell.x * tileSet.cellSize, 0f, cell.y * tileSet.cellSize);
+            return tileSet.origin + new Vector3(cell.x * tileSet.tileScale, 0f, cell.y * tileSet.tileScale);
         }
 
         /// <summary>
@@ -28,8 +28,8 @@ namespace TopView.Editor
         public static Vector2Int GetCell(LevelTileSet tileSet, Vector3 position)
         {
             return new Vector2Int(
-                Mathf.RoundToInt((position.x - tileSet.origin.x) / tileSet.cellSize),
-                Mathf.RoundToInt((position.z - tileSet.origin.z) / tileSet.cellSize));
+                Mathf.RoundToInt((position.x - tileSet.origin.x) / tileSet.tileScale),
+                Mathf.RoundToInt((position.z - tileSet.origin.z) / tileSet.tileScale));
         }
     }
 }
