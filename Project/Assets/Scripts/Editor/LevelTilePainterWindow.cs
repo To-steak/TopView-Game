@@ -85,6 +85,13 @@ namespace TopView.Editor
             "Esc : 칠하기 끄기\n" +
             "Alt + 드래그, 우클릭 드래그 : Scene 뷰 카메라 조작 (그대로)";
 
+        // 방 모드의 길 설정 칸 너비 (픽셀)
+        private const float ROAD_CELL_WIDTH = 70f;
+        // 방 모드의 가운데 네모 크기 (픽셀)
+        private const float ROOM_BOX_WIDTH = 90f;
+        private const float ROOM_BOX_HEIGHT = 60f;
+        // 가운데 네모와 길 설정 칸 사이 간격 (픽셀)
+        private const float ROOM_BOX_SPACING = 8f;
         private const float MODE_BUTTON_HEIGHT = 26f;
         private const float PAINT_BUTTON_HEIGHT = 28f;
         private const float SELECTED_BORDER = 3f;
@@ -255,10 +262,8 @@ namespace TopView.Editor
             EditorGUILayout.LabelField("Room", EditorStyles.boldLabel);
             _roomShape.interiorWidth = Mathf.Max(LevelRoomLayout.MINIMUM_INTERIOR_SIZE, EditorGUILayout.IntField("안쪽 X 칸 수", _roomShape.interiorWidth));
             _roomShape.interiorDepth = Mathf.Max(LevelRoomLayout.MINIMUM_INTERIOR_SIZE, EditorGUILayout.IntField("안쪽 Z 칸 수", _roomShape.interiorDepth));
-            DrawRoadSettings("+X 길", ref _roomShape.hasRightRoad, ref _roomShape.rightRoadLength);
-            DrawRoadSettings("-X 길", ref _roomShape.hasLeftRoad, ref _roomShape.leftRoadLength);
-            DrawRoadSettings("+Z 길", ref _roomShape.hasTopRoad, ref _roomShape.topRoadLength);
-            DrawRoadSettings("-Z 길", ref _roomShape.hasBottomRoad, ref _roomShape.bottomRoadLength);
+            GUILayout.Space(ELEMENT_SPACING);
+            DrawRoadLayout();
 
             if (!HasRoomPrefabs())
             {
@@ -267,18 +272,47 @@ namespace TopView.Editor
         }
 
         /// <summary>
-        /// 한 방향의 길 여부를 그리고, 길을 내는 방향이면 길이도 그린다.
+        /// 가운데 네모를 방으로 삼아, 위에서 내려다본 방향대로 길 설정을 상하좌우에 그린다. 위가 +Z, 오른쪽이 +X다.
         /// </summary>
-        private static void DrawRoadSettings(string label, ref bool hasRoad, ref int roadLength)
+        private void DrawRoadLayout()
         {
-            hasRoad = EditorGUILayout.Toggle(label, hasRoad);
-            roadLength = Mathf.Max(LevelRoomLayout.MINIMUM_ROAD_LENGTH, roadLength);
+            float lineHeight = EditorGUIUtility.singleLineHeight;
+            float lineSpacing = EditorGUIUtility.standardVerticalSpacing;
+            float cellHeight = lineHeight * 2f + lineSpacing;
+            float layoutHeight = cellHeight * 2f + ROOM_BOX_HEIGHT + ROOM_BOX_SPACING * 2f;
+            Rect area = GUILayoutUtility.GetRect(0f, layoutHeight, GUILayout.ExpandWidth(true));
+
+            Rect box = new Rect(area.center.x - ROOM_BOX_WIDTH * 0.5f, area.y + cellHeight + ROOM_BOX_SPACING, ROOM_BOX_WIDTH, ROOM_BOX_HEIGHT);
+            GUI.Box(box, "방\n" + _roomShape.interiorWidth + " × " + _roomShape.interiorDepth);
+
+            float centeredCellX = box.center.x - ROAD_CELL_WIDTH * 0.5f;
+            float centeredCellY = box.center.y - cellHeight * 0.5f;
+            Rect top = new Rect(centeredCellX, area.y, ROAD_CELL_WIDTH, cellHeight);
+            Rect bottom = new Rect(centeredCellX, box.yMax + ROOM_BOX_SPACING, ROAD_CELL_WIDTH, cellHeight);
+            Rect left = new Rect(box.x - ROOM_BOX_SPACING - ROAD_CELL_WIDTH, centeredCellY, ROAD_CELL_WIDTH, cellHeight);
+            Rect right = new Rect(box.xMax + ROOM_BOX_SPACING, centeredCellY, ROAD_CELL_WIDTH, cellHeight);
+
+            DrawRoadCell(top, "+Z", ref _roomShape.hasTopRoad, ref _roomShape.topRoadLength);
+            DrawRoadCell(left, "-X", ref _roomShape.hasLeftRoad, ref _roomShape.leftRoadLength);
+            DrawRoadCell(right, "+X", ref _roomShape.hasRightRoad, ref _roomShape.rightRoadLength);
+            DrawRoadCell(bottom, "-Z", ref _roomShape.hasBottomRoad, ref _roomShape.bottomRoadLength);
+        }
+
+        /// <summary>
+        /// 길 하나의 체크박스를 그리고, 길을 내는 방향이면 그 아래에 길이 입력칸을 그린다.
+        /// </summary>
+        private static void DrawRoadCell(Rect cell, string label, ref bool hasRoad, ref int roadLength)
+        {
+            float lineHeight = EditorGUIUtility.singleLineHeight;
+            Rect toggleRect = new Rect(cell.x, cell.y, cell.width, lineHeight);
+            Rect lengthRect = new Rect(cell.x, cell.yMax - lineHeight, cell.width, lineHeight);
+
+            hasRoad = EditorGUI.ToggleLeft(toggleRect, label, hasRoad);
             if (hasRoad)
             {
-                EditorGUI.indentLevel++;
-                roadLength = Mathf.Max(LevelRoomLayout.MINIMUM_ROAD_LENGTH, EditorGUILayout.IntField("길이", roadLength));
-                EditorGUI.indentLevel--;
+                roadLength = EditorGUI.IntField(lengthRect, roadLength);
             }
+            roadLength = Mathf.Max(LevelRoomLayout.MINIMUM_ROAD_LENGTH, roadLength);
         }
 
         private bool HasRoomPrefabs()
