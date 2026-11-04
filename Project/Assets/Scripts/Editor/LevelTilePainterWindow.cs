@@ -173,10 +173,39 @@ namespace TopView.Editor
             }
 
             GUILayout.Space(ELEMENT_SPACING);
+            DrawSettings();
+
+            GUILayout.Space(ELEMENT_SPACING);
             EditorGUILayout.HelpBox(_mode == LevelPaintMode.Tile ? TILE_CONTROLS_HELP : PROP_CONTROLS_HELP, MessageType.None);
 
             GUILayout.Space(ELEMENT_SPACING);
             DrawThumbnails();
+        }
+
+        /// <summary>
+        /// 현재 모드에 쓰는 Level Tile Set 값을 그린다. 고친 값은 에셋에 저장되고 Undo로 되돌릴 수 있다.
+        /// </summary>
+        private void DrawSettings()
+        {
+            SerializedObject settings = new SerializedObject(_tileSet);
+            settings.Update();
+
+            EditorGUILayout.PropertyField(settings.FindProperty(nameof(LevelTileSet.origin)));
+            if (_mode == LevelPaintMode.Tile)
+            {
+                EditorGUILayout.PropertyField(settings.FindProperty(nameof(LevelTileSet.tileScale)));
+            }
+            else
+            {
+                GUILayout.Space(ELEMENT_SPACING);
+                EditorGUILayout.LabelField("Props", EditorStyles.boldLabel);
+                EditorGUILayout.PropertyField(settings.FindProperty(nameof(LevelTileSet.propMinimumScale)));
+                EditorGUILayout.PropertyField(settings.FindProperty(nameof(LevelTileSet.propMaximumScale)));
+                EditorGUILayout.PropertyField(settings.FindProperty(nameof(LevelTileSet.propSpacing)));
+                EditorGUILayout.PropertyField(settings.FindProperty(nameof(LevelTileSet.propScatterCount)));
+            }
+
+            settings.ApplyModifiedProperties();
         }
 
         private GameObject[] GetCurrentPrefabs()
