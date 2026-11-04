@@ -65,7 +65,6 @@ namespace TopView.Systems
                 case PlayerState.Jump:
                     motion.verticalVelocity = movement.jumpPower;
                     PlayerStaminaUtility.UseMana(ref mana, vital.jumpManaCost);
-                    motion.currentSpeed = movement.inAirSpeed;
                     break;
 
                 case PlayerState.Dodge:
