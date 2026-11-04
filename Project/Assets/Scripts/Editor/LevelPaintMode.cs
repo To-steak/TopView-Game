@@ -9,5 +9,7 @@ namespace TopView.Editor
         Tile,
         // 격자와 상관없이 소품 놓기·지우기
         Prop,
+        // 테두리와 길을 갖춘 방을 한 번에 놓기·지우기
+        Room,
     }
 }
