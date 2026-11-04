@@ -7,7 +7,7 @@ namespace TopView.Editor
 {
     /// <summary>
     /// 레벨 칠하기 창 (Tools → Level Tile Painter). 에디터 전용.
-    /// 타일 모드는 격자 칸에 타일 FBX·프리팹을 놓고, 소품 모드는 격자와 상관없이 마우스 위치에 소품을 놓는다. 타일은 씬 루트의 "Level Tiles (Painted)", 소품은 "Level Props (Painted)" 아래에 둔다.
+    /// 타일 모드는 격자 칸에 타일 FBX·프리팹을 놓고, 소품 모드는 격자와 상관없이 마우스 위치에 소품을 놓고, 방 모드는 테두리와 길을 갖춘 방을 한 번에 놓는다. 타일과 방은 씬 루트의 "Level Tiles (Painted)", 소품은 "Level Props (Painted)" 아래에 둔다.
     /// 클릭·드래그로 칠하고, Shift+클릭·드래그로 지운다. 썸네일을 Ctrl+클릭해 여러 개 고르면 그중 하나를 무작위로 놓는다.
     /// ] / [로 타일을 90도씩 돌린다 (R은 Unity 크기 조절 도구 단축키라 쓰지 않는다). Esc로 칠하기를 끈다.
     /// 한 번의 드래그는 Undo 한 번으로 되돌아간다. Scene 뷰 입력은 SceneView.duringSceneGui로 받는다 (에디터 전용이라 이벤트 금지 규칙 밖).
@@ -23,6 +23,7 @@ namespace TopView.Editor
         [SerializeField] private int _quarterTurns;
         [SerializeField] private bool _isRandomRotation;
         [SerializeField] private bool _isPainting;
+        [SerializeField] private LevelRoomShape _roomShape = new LevelRoomShape { interiorWidth = 9, interiorDepth = 9, topRoadLength = 3, bottomRoadLength = 3, leftRoadLength = 3, rightRoadLength = 3 };
 
         private Vector2 _scrollPosition;
         private bool _isStroking;
@@ -33,8 +34,14 @@ namespace TopView.Editor
         private Vector3 _lastStrokePosition;
         // 이번 드래그에서 무작위로 고를 프리팹 (드래그를 시작할 때 채운다)
         private readonly List<GameObject> _strokePrefabs = new List<GameObject>();
-        // 칸별로 칠해 둔 타일 (드래그를 시작할 때 채운다. 칠할 때마다 자식을 전부 훑지 않으려고 둔다)
-        private readonly Dictionary<Vector2Int, GameObject> _strokeTiles = new Dictionary<Vector2Int, GameObject>();
+        // 씬에 칠해 둔 타일 (드래그를 시작할 때 채우고, 칠하고 지울 때마다 고친다)
+        private readonly List<GameObject> _strokeTiles = new List<GameObject>();
+        // 이번 드래그에서 칠한 타일. 드래그 중에는 이 타일을 덮어쓰지 않는다
+        private readonly HashSet<GameObject> _strokePaintedTiles = new HashSet<GameObject>();
+        // 새 타일과 겹쳐 지울 타일 (칠할 때마다 다시 채운다)
+        private readonly List<GameObject> _overlappingTiles = new List<GameObject>();
+        // 방 하나의 타일 배치 (찍거나 미리보기를 그릴 때마다 다시 채운다)
+        private readonly List<LevelRoomPiece> _roomPieces = new List<LevelRoomPiece>();
         // 창 가장자리 여백 스타일 (GUI 스킨이 준비된 뒤 OnGUI에서 한 번 만든다)
         private GUIStyle _paddingStyle;
         // 썸네일 목록 안쪽 여백 스타일 (선택 테두리가 스크롤 영역 가장자리에서 잘리지 않게)
@@ -43,7 +50,7 @@ namespace TopView.Editor
         private int _previewCacheSize;
 
         // 번호가 LevelPaintMode와 같다
-        private static readonly string[] MODE_LABELS = { "타일", "소품" };
+        private static readonly string[] MODE_LABELS = { "타일", "소품", "방" };
         // 번호가 _brushRadius와 같다
         private static readonly string[] BRUSH_LABELS = { "1×1", "3×3", "5×5", "7×7", "9×9" };
         private static readonly Color SELECTED_COLOR = new Color(0.25f, 0.6f, 1f);
@@ -57,7 +64,7 @@ namespace TopView.Editor
         // 놓은 소품을 모아 두는 씬 루트 오브젝트 이름
         private const string PROP_ROOT_NAME = "Level Props (Painted)";
         private const string TILE_CONTROLS_HELP =
-            "클릭 / 드래그 : 칠하기 (같은 칸은 교체)\n" +
+            "클릭 / 드래그 : 칠하기 (겹치는 타일은 교체, 이번 드래그에서 칠한 타일은 유지)\n" +
             "Shift + 클릭 / 드래그 : 지우기\n" +
             "썸네일 Ctrl + 클릭 : 여러 개 고르기 (칸마다 무작위)\n" +
             "오른쪽 대괄호 키 ] : 시계 방향으로 90도 회전\n" +
@@ -72,6 +79,12 @@ namespace TopView.Editor
             "Esc : 칠하기 끄기\n" +
             "Alt + 드래그, 우클릭 드래그 : Scene 뷰 카메라 조작 (그대로)";
 
+        private const string ROOM_CONTROLS_HELP =
+            "클릭 : 방 놓기 (겹치는 타일은 지워짐)\n" +
+            "Shift + 클릭 : 미리보기 범위의 타일 지우기\n" +
+            "Esc : 칠하기 끄기\n" +
+            "Alt + 드래그, 우클릭 드래그 : Scene 뷰 카메라 조작 (그대로)";
+
         private const float MODE_BUTTON_HEIGHT = 26f;
         private const float PAINT_BUTTON_HEIGHT = 28f;
         private const float SELECTED_BORDER = 3f;
@@ -81,6 +94,8 @@ namespace TopView.Editor
         private const float PREVIEW_FILL_ALPHA = 0.15f;
         // 같은 방향으로 보는 회전 차이 (도)
         private const float SAME_ROTATION_DEGREES = 1f;
+        // 가장자리만 맞닿은 타일을 겹친 것으로 보지 않기 위한 여유 (월드 유닛)
+        private const float OVERLAP_TOLERANCE = 0.001f;
         // 창 가장자리 여백 (픽셀)
         private const int WINDOW_PADDING = 10;
         // 요소 사이 세로 간격 (픽셀)
@@ -158,9 +173,12 @@ namespace TopView.Editor
                 SetPainting(!_isPainting);
             }
 
-            GUILayout.Space(ELEMENT_SPACING);
-            EditorGUILayout.LabelField("브러시 크기", EditorStyles.boldLabel);
-            _brushRadius = GUILayout.Toolbar(_brushRadius, BRUSH_LABELS);
+            if (_mode != LevelPaintMode.Room)
+            {
+                GUILayout.Space(ELEMENT_SPACING);
+                EditorGUILayout.LabelField("브러시 크기", EditorStyles.boldLabel);
+                _brushRadius = GUILayout.Toolbar(_brushRadius, BRUSH_LABELS);
+            }
 
             if (_mode == LevelPaintMode.Tile)
             {
@@ -176,10 +194,26 @@ namespace TopView.Editor
             DrawSettings();
 
             GUILayout.Space(ELEMENT_SPACING);
-            EditorGUILayout.HelpBox(_mode == LevelPaintMode.Tile ? TILE_CONTROLS_HELP : PROP_CONTROLS_HELP, MessageType.None);
+            EditorGUILayout.HelpBox(GetControlsHelp(), MessageType.None);
 
-            GUILayout.Space(ELEMENT_SPACING);
-            DrawThumbnails();
+            if (_mode != LevelPaintMode.Room)
+            {
+                GUILayout.Space(ELEMENT_SPACING);
+                DrawThumbnails();
+            }
+        }
+
+        private string GetControlsHelp()
+        {
+            switch (_mode)
+            {
+                case LevelPaintMode.Tile:
+                    return TILE_CONTROLS_HELP;
+                case LevelPaintMode.Prop:
+                    return PROP_CONTROLS_HELP;
+                default:
+                    return ROOM_CONTROLS_HELP;
+            }
         }
 
         /// <summary>
@@ -195,7 +229,7 @@ namespace TopView.Editor
             {
                 EditorGUILayout.PropertyField(settings.FindProperty(nameof(LevelTileSet.tileScale)));
             }
-            else
+            else if (_mode == LevelPaintMode.Prop)
             {
                 GUILayout.Space(ELEMENT_SPACING);
                 EditorGUILayout.LabelField("Props", EditorStyles.boldLabel);
@@ -204,8 +238,52 @@ namespace TopView.Editor
                 EditorGUILayout.PropertyField(settings.FindProperty(nameof(LevelTileSet.propSpacing)));
                 EditorGUILayout.PropertyField(settings.FindProperty(nameof(LevelTileSet.propScatterCount)));
             }
+            else
+            {
+                DrawRoomSettings();
+            }
 
             settings.ApplyModifiedProperties();
+        }
+
+        /// <summary>
+        /// 방 크기와 길 낼 면을 그린다. 방을 찍을 수 없는 상태면 이유도 보여 준다.
+        /// </summary>
+        private void DrawRoomSettings()
+        {
+            GUILayout.Space(ELEMENT_SPACING);
+            EditorGUILayout.LabelField("Room", EditorStyles.boldLabel);
+            _roomShape.interiorWidth = Mathf.Max(LevelRoomLayout.MINIMUM_INTERIOR_SIZE, EditorGUILayout.IntField("안쪽 X 칸 수", _roomShape.interiorWidth));
+            _roomShape.interiorDepth = Mathf.Max(LevelRoomLayout.MINIMUM_INTERIOR_SIZE, EditorGUILayout.IntField("안쪽 Z 칸 수", _roomShape.interiorDepth));
+            DrawRoadSettings("+X 길", ref _roomShape.hasRightRoad, ref _roomShape.rightRoadLength);
+            DrawRoadSettings("-X 길", ref _roomShape.hasLeftRoad, ref _roomShape.leftRoadLength);
+            DrawRoadSettings("+Z 길", ref _roomShape.hasTopRoad, ref _roomShape.topRoadLength);
+            DrawRoadSettings("-Z 길", ref _roomShape.hasBottomRoad, ref _roomShape.bottomRoadLength);
+
+            if (!HasRoomPrefabs())
+            {
+                EditorGUILayout.HelpBox("Level Tile Set 에셋의 Room 항목에 프리팹 4개를 넣어야 방을 놓을 수 있다.", MessageType.Warning);
+            }
+        }
+
+        /// <summary>
+        /// 한 방향의 길 여부를 그리고, 길을 내는 방향이면 길이도 그린다.
+        /// </summary>
+        private static void DrawRoadSettings(string label, ref bool hasRoad, ref int roadLength)
+        {
+            hasRoad = EditorGUILayout.Toggle(label, hasRoad);
+            roadLength = Mathf.Max(LevelRoomLayout.MINIMUM_ROAD_LENGTH, roadLength);
+            if (hasRoad)
+            {
+                EditorGUI.indentLevel++;
+                roadLength = Mathf.Max(LevelRoomLayout.MINIMUM_ROAD_LENGTH, EditorGUILayout.IntField("길이", roadLength));
+                EditorGUI.indentLevel--;
+            }
+        }
+
+        private bool HasRoomPrefabs()
+        {
+            return _tileSet.roomOpenPrefab != null && _tileSet.roomSidePrefab != null && _tileSet.roomCornerPrefab != null && _tileSet.roomInnerCornerPrefab != null;
         }
 
         private GameObject[] GetCurrentPrefabs()
@@ -448,13 +526,16 @@ namespace TopView.Editor
             _isErasingStroke = isErasing;
             _hasLastStroke = false;
 
-            CollectStrokePrefabs();
-            if (!isErasing && _strokePrefabs.Count == 0)
+            if (_mode != LevelPaintMode.Room)
             {
-                Debug.LogWarning("[LevelTilePainterWindow] 고른 프리팹이 없어 칠할 수 없다. Level Tile Set의 목록을 확인한다.");
+                CollectStrokePrefabs();
+                if (!isErasing && _strokePrefabs.Count == 0)
+                {
+                    Debug.LogWarning("[LevelTilePainterWindow] 고른 프리팹이 없어 칠할 수 없다. Level Tile Set의 목록을 확인한다.");
+                }
             }
 
-            if (_mode == LevelPaintMode.Tile)
+            if (_mode != LevelPaintMode.Prop)
             {
                 CollectStrokeTiles();
             }
@@ -483,6 +564,7 @@ namespace TopView.Editor
         private void CollectStrokeTiles()
         {
             _strokeTiles.Clear();
+            _strokePaintedTiles.Clear();
             GameObject tileRoot = FindRootObject(TILE_ROOT_NAME);
             if (tileRoot == null)
             {
@@ -492,8 +574,7 @@ namespace TopView.Editor
             Transform rootTransform = tileRoot.transform;
             for (int childIndex = 0; childIndex < rootTransform.childCount; childIndex++)
             {
-                Transform child = rootTransform.GetChild(childIndex);
-                _strokeTiles[LevelGrid.GetCell(_tileSet, child.position)] = child.gameObject;
+                _strokeTiles.Add(rootTransform.GetChild(childIndex).gameObject);
             }
         }
 
@@ -503,10 +584,64 @@ namespace TopView.Editor
             {
                 ApplyTileStroke(LevelGrid.GetCell(_tileSet, point));
             }
-            else
+            else if (_mode == LevelPaintMode.Prop)
             {
                 ApplyPropStroke(point);
             }
+            else
+            {
+                ApplyRoomStroke(point);
+            }
+        }
+
+        /// <summary>
+        /// 클릭 한 번에 방 하나를 놓거나 지운다. 드래그해도 다시 찍지 않는다.
+        /// </summary>
+        private void ApplyRoomStroke(Vector3 point)
+        {
+            if (_hasLastStroke)
+            {
+                return;
+            }
+            _hasLastStroke = true;
+
+            if (!_isErasingStroke && !HasRoomPrefabs())
+            {
+                Debug.LogWarning("[LevelTilePainterWindow] Level Tile Set의 Room 프리팹이 비어 있어 방을 놓을 수 없다.");
+                return;
+            }
+
+            LevelRoomLayout.Build(_tileSet, _roomShape, point, _roomPieces);
+            Transform tileRoot = _isErasingStroke ? null : GetOrCreateRoot(TILE_ROOT_NAME);
+            for (int pieceIndex = 0; pieceIndex < _roomPieces.Count; pieceIndex++)
+            {
+                LevelRoomPiece piece = _roomPieces[pieceIndex];
+                EraseTilesInArea(piece.center, piece.width * 0.5f, piece.depth * 0.5f);
+                if (!_isErasingStroke)
+                {
+                    PlaceRoomPiece(tileRoot, piece);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 방 타일 하나를 놓는다. 크기는 로컬 축 기준이라, 90도나 270도 돌리면 월드 X, Z 길이를 서로 바꿔 넣는다.
+        /// </summary>
+        private void PlaceRoomPiece(Transform tileRoot, in LevelRoomPiece piece)
+        {
+            Quaternion rotation = Quaternion.Euler(0f, piece.quarterTurns * 90f, 0f) * piece.prefab.transform.rotation;
+            Vector3 localScale = piece.quarterTurns % 2 == 0 ? new Vector3(piece.width, 1f, piece.depth) : new Vector3(piece.depth, 1f, piece.width);
+
+            GameObject tile = (GameObject)PrefabUtility.InstantiatePrefab(piece.prefab, tileRoot);
+            Undo.RegisterCreatedObjectUndo(tile, "레벨 칠하기");
+            tile.name = piece.prefab.name + " " + piece.center.x + "," + piece.center.z;
+            tile.transform.SetPositionAndRotation(piece.center, rotation);
+            tile.transform.localScale = Vector3.Scale(piece.prefab.transform.localScale, localScale);
+            if (_tileSet.markTilesStatic)
+            {
+                MarkBatchingStatic(tile.transform);
+            }
+            _strokeTiles.Add(tile);
         }
 
         private void EndStroke()
@@ -527,42 +662,63 @@ namespace TopView.Editor
             _lastStrokeCell = centerCell;
             _hasLastStroke = true;
 
-            if (!_isErasingStroke && _strokePrefabs.Count == 0)
+            if (_isErasingStroke)
+            {
+                EraseTiles(centerCell);
+                return;
+            }
+
+            if (_strokePrefabs.Count == 0)
             {
                 return;
             }
 
-            Transform tileRoot = _isErasingStroke ? null : GetOrCreateRoot(TILE_ROOT_NAME);
+            Transform tileRoot = GetOrCreateRoot(TILE_ROOT_NAME);
             for (int offsetZ = -_brushRadius; offsetZ <= _brushRadius; offsetZ++)
             {
                 for (int offsetX = -_brushRadius; offsetX <= _brushRadius; offsetX++)
                 {
-                    Vector2Int cell = centerCell + new Vector2Int(offsetX, offsetZ);
-                    if (_isErasingStroke)
-                    {
-                        EraseTile(cell);
-                    }
-                    else
-                    {
-                        PaintTile(tileRoot, cell);
-                    }
+                    PaintTile(tileRoot, GetBrushTileCenter(centerCell, offsetX, offsetZ));
                 }
             }
         }
 
         /// <summary>
-        /// 칸에 고른 타일을 놓는다. 고른 타일 중 하나가 같은 방향으로 이미 있으면 그대로 두고 (무작위 회전이면 방향은 보지 않는다), 그 밖의 타일이 있으면 교체한다.
+        /// 브러시 중심 칸에서 타일 몇 개만큼 떨어진 타일의 중심. 브러시 안의 타일은 빈틈없이 타일 크기만큼 떨어져 있다.
         /// </summary>
-        private void PaintTile(Transform tileRoot, Vector2Int cell)
+        private Vector3 GetBrushTileCenter(Vector2Int centerCell, int offsetX, int offsetZ)
         {
-            GameObject existing;
-            if (_strokeTiles.TryGetValue(cell, out existing))
+            return LevelGrid.GetCellCenter(_tileSet, centerCell) + new Vector3(offsetX * _tileSet.tileScale.x, 0f, offsetZ * _tileSet.tileScale.z);
+        }
+
+        /// <summary>
+        /// 위치에 고른 타일을 놓고 겹치는 타일을 지운다. 이번 드래그에서 칠한 타일과 겹치면 놓지 않는다 (브러시가 1칸씩 움직여도 타일이 겹겹이 쌓이지 않게).
+        /// 같은 자리에 고른 타일 중 하나가 같은 방향으로 이미 있으면 그대로 둔다 (무작위 회전이면 방향은 보지 않는다).
+        /// </summary>
+        private void PaintTile(Transform tileRoot, Vector3 center)
+        {
+            float halfWidth = _tileSet.tileScale.x * 0.5f;
+            float halfDepth = _tileSet.tileScale.z * 0.5f;
+            _overlappingTiles.Clear();
+            for (int tileIndex = 0; tileIndex < _strokeTiles.Count; tileIndex++)
             {
-                if (IsSelectedTile(existing))
+                GameObject existing = _strokeTiles[tileIndex];
+                if (!IsOverlapping(existing.transform, center, halfWidth, halfDepth))
+                {
+                    continue;
+                }
+
+                if (_strokePaintedTiles.Contains(existing) || (IsSameFootprint(existing.transform, center) && IsSelectedTile(existing)))
                 {
                     return;
                 }
-                Undo.DestroyObjectImmediate(existing);
+                _overlappingTiles.Add(existing);
+            }
+
+            for (int tileIndex = 0; tileIndex < _overlappingTiles.Count; tileIndex++)
+            {
+                _strokeTiles.Remove(_overlappingTiles[tileIndex]);
+                Undo.DestroyObjectImmediate(_overlappingTiles[tileIndex]);
             }
 
             GameObject prefab = _strokePrefabs[Random.Range(0, _strokePrefabs.Count)];
@@ -571,14 +727,46 @@ namespace TopView.Editor
 
             GameObject tile = (GameObject)PrefabUtility.InstantiatePrefab(prefab, tileRoot);
             Undo.RegisterCreatedObjectUndo(tile, "레벨 칠하기");
-            tile.name = prefab.name + " " + cell.x + "," + cell.y;
-            tile.transform.SetPositionAndRotation(LevelGrid.GetCellCenter(_tileSet, cell), rotation);
-            tile.transform.localScale = prefab.transform.localScale * _tileSet.tileScale;
+            tile.name = prefab.name + " " + center.x + "," + center.z;
+            tile.transform.SetPositionAndRotation(center, rotation);
+            tile.transform.localScale = Vector3.Scale(prefab.transform.localScale, GetLocalTileScale(quarterTurns));
             if (_tileSet.markTilesStatic)
             {
                 MarkBatchingStatic(tile.transform);
             }
-            _strokeTiles[cell] = tile;
+            _strokeTiles.Add(tile);
+            _strokePaintedTiles.Add(tile);
+        }
+
+        /// <summary>
+        /// 타일이 중심과 절반 크기로 정한 XZ 사각형과 겹치는지 본다. 가장자리만 맞닿으면 겹친 것이 아니다.
+        /// </summary>
+        private static bool IsOverlapping(Transform tile, Vector3 center, float halfWidth, float halfDepth)
+        {
+            Vector3 size = tile.TransformVector(Vector3.one);
+            return Mathf.Abs(tile.position.x - center.x) < halfWidth + Mathf.Abs(size.x) * 0.5f - OVERLAP_TOLERANCE
+                && Mathf.Abs(tile.position.z - center.z) < halfDepth + Mathf.Abs(size.z) * 0.5f - OVERLAP_TOLERANCE;
+        }
+
+        /// <summary>
+        /// 타일이 그 위치에서 지금 Tile Scale 크기로 놓여 있는지 본다.
+        /// </summary>
+        private bool IsSameFootprint(Transform tile, Vector3 center)
+        {
+            Vector3 size = tile.TransformVector(Vector3.one);
+            return Mathf.Abs(tile.position.x - center.x) < OVERLAP_TOLERANCE
+                && Mathf.Abs(tile.position.z - center.z) < OVERLAP_TOLERANCE
+                && Mathf.Abs(Mathf.Abs(size.x) - _tileSet.tileScale.x) < OVERLAP_TOLERANCE
+                && Mathf.Abs(Mathf.Abs(size.z) - _tileSet.tileScale.z) < OVERLAP_TOLERANCE;
+        }
+
+        /// <summary>
+        /// 회전한 타일의 로컬 축에 줄 크기. 90도나 270도 돌리면 로컬 x, z가 월드 z, x를 향하므로 서로 바꿔야 칸에 맞는다.
+        /// </summary>
+        private Vector3 GetLocalTileScale(int quarterTurns)
+        {
+            Vector3 tileScale = _tileSet.tileScale;
+            return quarterTurns % 2 == 0 ? tileScale : new Vector3(tileScale.z, tileScale.y, tileScale.x);
         }
 
         private bool IsSelectedTile(GameObject tile)
@@ -597,13 +785,30 @@ namespace TopView.Editor
             return Quaternion.Angle(tile.transform.rotation, rotation) < SAME_ROTATION_DEGREES;
         }
 
-        private void EraseTile(Vector2Int cell)
+        /// <summary>
+        /// 브러시 전체 범위와 겹치는 타일을 지운다.
+        /// </summary>
+        private void EraseTiles(Vector2Int centerCell)
         {
-            GameObject existing;
-            if (_strokeTiles.TryGetValue(cell, out existing))
+            Vector3 center = LevelGrid.GetCellCenter(_tileSet, centerCell);
+            float halfWidth = (_brushRadius + 0.5f) * _tileSet.tileScale.x;
+            float halfDepth = (_brushRadius + 0.5f) * _tileSet.tileScale.z;
+            EraseTilesInArea(center, halfWidth, halfDepth);
+        }
+
+        /// <summary>
+        /// 중심과 절반 크기로 정한 XZ 사각형과 겹치는 타일을 지운다.
+        /// </summary>
+        private void EraseTilesInArea(Vector3 center, float halfWidth, float halfDepth)
+        {
+            for (int tileIndex = _strokeTiles.Count - 1; tileIndex >= 0; tileIndex--)
             {
-                Undo.DestroyObjectImmediate(existing);
-                _strokeTiles.Remove(cell);
+                GameObject existing = _strokeTiles[tileIndex];
+                if (IsOverlapping(existing.transform, center, halfWidth, halfDepth))
+                {
+                    _strokeTiles.RemoveAt(tileIndex);
+                    Undo.DestroyObjectImmediate(existing);
+                }
             }
         }
 
@@ -733,9 +938,35 @@ namespace TopView.Editor
             {
                 DrawTileBrushPreview(LevelGrid.GetCell(_tileSet, point), isErasing);
             }
-            else
+            else if (_mode == LevelPaintMode.Prop)
             {
                 DrawPropBrushPreview(point, isErasing);
+            }
+            else
+            {
+                DrawRoomPreview(point, isErasing);
+            }
+        }
+
+        /// <summary>
+        /// 방을 이루는 타일마다 네모를 그린다. 지우기면 빨간색이다.
+        /// </summary>
+        private void DrawRoomPreview(Vector3 point, bool isErasing)
+        {
+            Color outline = isErasing ? ERASE_COLOR : TILE_COLOR;
+            Color fill = new Color(outline.r, outline.g, outline.b, PREVIEW_FILL_ALPHA);
+            Vector3[] corners = new Vector3[4];
+            LevelRoomLayout.Build(_tileSet, _roomShape, point, _roomPieces);
+            for (int pieceIndex = 0; pieceIndex < _roomPieces.Count; pieceIndex++)
+            {
+                LevelRoomPiece piece = _roomPieces[pieceIndex];
+                float halfWidth = piece.width * 0.5f;
+                float halfDepth = piece.depth * 0.5f;
+                corners[0] = piece.center + new Vector3(-halfWidth, 0f, -halfDepth);
+                corners[1] = piece.center + new Vector3(-halfWidth, 0f, halfDepth);
+                corners[2] = piece.center + new Vector3(halfWidth, 0f, halfDepth);
+                corners[3] = piece.center + new Vector3(halfWidth, 0f, -halfDepth);
+                Handles.DrawSolidRectangleWithOutline(corners, fill, outline);
             }
         }
 
@@ -744,7 +975,8 @@ namespace TopView.Editor
         /// </summary>
         private void DrawTileBrushPreview(Vector2Int centerCell, bool isErasing)
         {
-            float halfCell = _tileSet.tileScale * 0.5f;
+            float halfWidth = _tileSet.tileScale.x * 0.5f;
+            float halfDepth = _tileSet.tileScale.z * 0.5f;
             Color outline = isErasing ? ERASE_COLOR : TILE_COLOR;
             Color fill = new Color(outline.r, outline.g, outline.b, PREVIEW_FILL_ALPHA);
             Vector3[] corners = new Vector3[4];
@@ -752,11 +984,11 @@ namespace TopView.Editor
             {
                 for (int offsetX = -_brushRadius; offsetX <= _brushRadius; offsetX++)
                 {
-                    Vector3 cellCenter = LevelGrid.GetCellCenter(_tileSet, centerCell + new Vector2Int(offsetX, offsetZ));
-                    corners[0] = cellCenter + new Vector3(-halfCell, 0f, -halfCell);
-                    corners[1] = cellCenter + new Vector3(-halfCell, 0f, halfCell);
-                    corners[2] = cellCenter + new Vector3(halfCell, 0f, halfCell);
-                    corners[3] = cellCenter + new Vector3(halfCell, 0f, -halfCell);
+                    Vector3 cellCenter = GetBrushTileCenter(centerCell, offsetX, offsetZ);
+                    corners[0] = cellCenter + new Vector3(-halfWidth, 0f, -halfDepth);
+                    corners[1] = cellCenter + new Vector3(-halfWidth, 0f, halfDepth);
+                    corners[2] = cellCenter + new Vector3(halfWidth, 0f, halfDepth);
+                    corners[3] = cellCenter + new Vector3(halfWidth, 0f, -halfDepth);
                     Handles.DrawSolidRectangleWithOutline(corners, fill, outline);
                 }
             }
@@ -766,7 +998,7 @@ namespace TopView.Editor
                 Vector3 center = LevelGrid.GetCellCenter(_tileSet, centerCell);
                 Vector3 forward = Quaternion.Euler(0f, _quarterTurns * 90f, 0f) * Vector3.forward;
                 Handles.color = outline;
-                Handles.DrawLine(center, center + forward * (_brushRadius + 0.5f) * _tileSet.tileScale);
+                Handles.DrawLine(center, center + Vector3.Scale(forward, _tileSet.tileScale) * (_brushRadius + 0.5f));
             }
         }
 
