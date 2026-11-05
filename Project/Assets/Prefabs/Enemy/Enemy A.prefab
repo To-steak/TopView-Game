@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1355596676088675820}
   - component: {fileID: 6778476641910709706}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: Enemy A
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -59,7 +59,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8822778373023207406}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: Health Gauge Anchor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -90,7 +90,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6987017784026942292}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: Damage Anchor
   m_TagString: Untagged
   m_Icon: {fileID: 0}

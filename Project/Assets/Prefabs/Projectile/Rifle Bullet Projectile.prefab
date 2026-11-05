@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8224734101838536049}
   - component: {fileID: 8103415328838333458}
   - component: {fileID: 2101660744078935182}
-  m_Layer: 8
+  m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -101,7 +101,7 @@ GameObject:
   - component: {fileID: 5914036252617628633}
   - component: {fileID: 3250196645098199015}
   - component: {fileID: 5276967004449942712}
-  m_Layer: 8
+  m_Layer: 0
   m_Name: Rifle Bullet Projectile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -256,4 +256,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: TopView.Presentation::TopView.Presentation.Projectile.Views.ProjectileView
   trail: {fileID: 3250196645098199015}
-  pitchPivot: {fileID: 5914036252617628633}
+  rotationPivot: {fileID: 0}
+  pitchSpeed: 0
+  yawSpeed: 0
+  rollSpeed: 0
