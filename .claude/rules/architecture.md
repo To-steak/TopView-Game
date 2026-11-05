@@ -250,6 +250,8 @@ Presentation/
 
 - **World**는 한 판의 데이터(종류별 저장소, 기록 목록, 요청 큐, 명령 버퍼, 난수 생성기)를 모아 두는 컨테이너다. Core에 있고 Runner만 쓴다. 판마다 `new World()`로 새로 만든다.
   - 이유: 한 판의 상태가 객체 하나에 있으면 새 판을 시작할 때 이전 판의 값이 남지 않는다.
+- 예외: `Editor/`의 Gizmo는 Runner가 `#if UNITY_EDITOR`로 연 통로로 World를 읽을 수 있다. 값을 바꾸지 않고 읽기만 한다.
+  - 이유: 디버그 표시는 게임 결과를 바꾸지 않고, 통로가 빌드에 포함되지 않아 Logic과 View가 World에 닿는 길이 생기지 않는다.
 - **Runner가 World에서 필요한 데이터를 꺼내 System, ViewSystem, Presenter에 넘긴다.** 이들은 World를 받지 않는다.
   - 이유: World를 통째로 받으면 시그니처만 보고 무엇을 읽고 쓰는지 알 수 없다.
 - 틱 순서와 호출 순서는 Runner가 관리한다.
@@ -261,3 +263,6 @@ Presentation/
 
 ### Editor/
 Gizmo, PropertyDrawer, Custom Editor 등 에디터 도구를 둔다. 플랫폼을 Editor 전용으로 두어 빌드에 포함되지 않는다.
+
+- **Gizmo는 모두 `Editor/`에 두고 `[DrawGizmo]`로 그린다.** 씬에 배치한 값은 `~Authoring`을 읽어 그리고, 플레이 중의 Logic 값은 Runner의 에디터 전용 통로로 World를 읽어 그린다.
+  - 이유: Runner는 플레이 중에만 있어서 배치할 때 봐야 하는 값을 그릴 수 없다. Gizmo가 한 곳에 모이면 무엇을 어디에 둘지 고민하지 않는다.
