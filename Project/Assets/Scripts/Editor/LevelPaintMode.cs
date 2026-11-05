@@ -11,5 +11,7 @@ namespace TopView.Editor
         Prop,
         // 테두리와 길을 갖춘 방을 한 번에 놓기·지우기
         Room,
+        // 드래그한 범위의 빈 칸을 가장 적은 수의 타일로 채우기
+        Fill,
     }
 }

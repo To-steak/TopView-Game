@@ -8,6 +8,7 @@ namespace TopView.Editor
     /// <summary>
     /// 레벨 칠하기 창 (Tools → Level Tile Painter). 에디터 전용.
     /// 타일 모드는 격자 칸에 타일 FBX·프리팹을 놓고, 소품 모드는 격자와 상관없이 마우스 위치에 소품을 놓고, 방 모드는 테두리와 길을 갖춘 방을 한 번에 놓는다. 타일과 방은 고른 층의 씬 루트 "Level Tiles (Painted) - N Layer", 소품은 "Level Props (Painted)" 아래에 둔다.
+    /// 채우기 모드는 드래그한 범위에서 고른 층의 빈 칸을 찾아, 가장 적은 수의 타일을 늘려 빈틈과 겹침 없이 채운다.
     /// 층은 서로 독립이라, 칠하기의 교체와 지우기는 고른 층의 타일만 건드린다.
     /// 클릭·드래그로 칠하고, Shift+클릭·드래그로 지운다. 썸네일을 Ctrl+클릭해 여러 개 고르면 그중 하나를 무작위로 놓는다.
     /// ] / [로 타일을 90도씩 돌린다 (R은 Unity 크기 조절 도구 단축키라 쓰지 않는다). Esc로 칠하기를 끈다.
@@ -37,6 +38,10 @@ namespace TopView.Editor
         private bool _hasLastStroke;
         private Vector2Int _lastStrokeCell;
         private Vector3 _lastStrokePosition;
+        // 채우기 드래그를 시작한 칸 (끝 칸은 _lastStrokeCell이다)
+        private Vector2Int _fillStartCell;
+        // 채울 사각형 (채울 때마다 다시 채운다)
+        private readonly List<RectInt> _fillRectangles = new List<RectInt>();
         // 이번 드래그에서 무작위로 고를 프리팹 (드래그를 시작할 때 채운다)
         private readonly List<GameObject> _strokePrefabs = new List<GameObject>();
         // 씬에 칠해 둔 타일 (드래그를 시작할 때 채우고, 칠하고 지울 때마다 고친다)
@@ -55,7 +60,7 @@ namespace TopView.Editor
         private int _previewCacheSize;
 
         // 번호가 LevelPaintMode와 같다
-        private static readonly string[] MODE_LABELS = { "타일", "소품", "방" };
+        private static readonly string[] MODE_LABELS = { "타일", "소품", "방", "채우기" };
         // 번호가 _brushRadius와 같다
         private static readonly string[] BRUSH_LABELS = { "1×1", "3×3", "5×5", "7×7", "9×9" };
         // 번호가 _tileLayer와 같다
@@ -91,6 +96,12 @@ namespace TopView.Editor
             "클릭 : 방 놓기 (고른 층에서 겹치는 타일은 지워짐)\n" +
             "Shift + 클릭 : 미리보기 범위에서 고른 층의 타일 지우기\n" +
             "Esc : 칠하기 끄기\n" +
+            "Alt + 드래그, 우클릭 드래그 : Scene 뷰 카메라 조작 (그대로)";
+
+        private const string FILL_CONTROLS_HELP =
+            "드래그 : 범위 정하기, 놓으면 고른 층의 빈 칸을 가장 적은 수의 타일로 채움\n" +
+            "썸네일 Ctrl + 클릭 : 여러 개 고르기 (사각형마다 무작위)\n" +
+            "Esc : 칠하기 끄기 (드래그 중이면 채우지 않음)\n" +
             "Alt + 드래그, 우클릭 드래그 : Scene 뷰 카메라 조작 (그대로)";
 
         // 방 모드의 길 설정 칸 너비 (픽셀)
@@ -188,7 +199,7 @@ namespace TopView.Editor
                 SetPainting(!_isPainting);
             }
 
-            if (_mode != LevelPaintMode.Room)
+            if (_mode == LevelPaintMode.Tile || _mode == LevelPaintMode.Prop)
             {
                 GUILayout.Space(ELEMENT_SPACING);
                 EditorGUILayout.LabelField("브러시 크기", EditorStyles.boldLabel);
@@ -233,6 +244,8 @@ namespace TopView.Editor
                     return TILE_CONTROLS_HELP;
                 case LevelPaintMode.Prop:
                     return PROP_CONTROLS_HELP;
+                case LevelPaintMode.Fill:
+                    return FILL_CONTROLS_HELP;
                 default:
                     return ROOM_CONTROLS_HELP;
             }
@@ -260,7 +273,7 @@ namespace TopView.Editor
                 EditorGUILayout.PropertyField(settings.FindProperty(nameof(LevelTileSet.propSpacing)));
                 EditorGUILayout.PropertyField(settings.FindProperty(nameof(LevelTileSet.propScatterCount)));
             }
-            else
+            else if (_mode == LevelPaintMode.Room)
             {
                 DrawRoomSettings();
             }
@@ -373,12 +386,12 @@ namespace TopView.Editor
 
         private GameObject[] GetCurrentPrefabs()
         {
-            return _mode == LevelPaintMode.Tile ? _tileSet.prefabs : _tileSet.propPrefabs;
+            return _mode == LevelPaintMode.Prop ? _tileSet.propPrefabs : _tileSet.prefabs;
         }
 
         private List<int> GetCurrentSelection()
         {
-            return _mode == LevelPaintMode.Tile ? _selectedTileIndexes : _selectedPropIndexes;
+            return _mode == LevelPaintMode.Prop ? _selectedPropIndexes : _selectedTileIndexes;
         }
 
         /// <summary>
@@ -389,7 +402,7 @@ namespace TopView.Editor
             GameObject[] prefabs = GetCurrentPrefabs();
             if (prefabs == null || prefabs.Length == 0)
             {
-                string listName = _mode == LevelPaintMode.Tile ? "prefabs" : "propPrefabs";
+                string listName = _mode == LevelPaintMode.Prop ? "propPrefabs" : "prefabs";
                 EditorGUILayout.HelpBox("Level Tile Set의 " + listName + "가 비어 있다. Project 창에서 FBX·프리팹을 끌어 넣는다.", MessageType.Warning);
                 return;
             }
@@ -568,6 +581,10 @@ namespace TopView.Editor
                 case EventType.MouseUp:
                     if (_isStroking && current.button == 0)
                     {
+                        if (_mode == LevelPaintMode.Fill)
+                        {
+                            ApplyFill();
+                        }
                         EndStroke();
                         GUIUtility.hotControl = 0;
                         current.Use();
@@ -673,10 +690,114 @@ namespace TopView.Editor
             {
                 ApplyPropStroke(point);
             }
+            else if (_mode == LevelPaintMode.Fill)
+            {
+                ApplyFillStroke(point);
+            }
             else
             {
                 ApplyRoomStroke(point);
             }
+        }
+
+        /// <summary>
+        /// 드래그하는 동안 채울 범위의 시작 칸과 끝 칸을 기억한다. 실제로 채우는 일은 마우스를 놓을 때 한다.
+        /// </summary>
+        private void ApplyFillStroke(Vector3 point)
+        {
+            Vector2Int cell = GetUnitCell(point);
+            if (!_hasLastStroke)
+            {
+                _fillStartCell = cell;
+                _hasLastStroke = true;
+            }
+            _lastStrokeCell = cell;
+        }
+
+        /// <summary>
+        /// 드래그한 범위에서 고른 층의 빈 칸을 찾아, 가장 적은 수의 사각형으로 나눠 타일을 놓는다.
+        /// </summary>
+        private void ApplyFill()
+        {
+            if (_strokePrefabs.Count == 0)
+            {
+                return;
+            }
+
+            int minimumColumn = Mathf.Min(_fillStartCell.x, _lastStrokeCell.x);
+            int minimumRow = Mathf.Min(_fillStartCell.y, _lastStrokeCell.y);
+            int width = Mathf.Abs(_fillStartCell.x - _lastStrokeCell.x) + 1;
+            int depth = Mathf.Abs(_fillStartCell.y - _lastStrokeCell.y) + 1;
+
+            bool[,] isEmptyCells = new bool[width, depth];
+            for (int row = 0; row < depth; row++)
+            {
+                for (int column = 0; column < width; column++)
+                {
+                    isEmptyCells[column, row] = true;
+                }
+            }
+            for (int tileIndex = 0; tileIndex < _strokeTiles.Count; tileIndex++)
+            {
+                MarkOccupiedCells(_strokeTiles[tileIndex].transform, isEmptyCells, minimumColumn, minimumRow);
+            }
+
+            LevelFillLayout.Build(isEmptyCells, _fillRectangles);
+            if (_fillRectangles.Count == 0)
+            {
+                return;
+            }
+
+            Transform tileRoot = GetOrCreateRoot(GetTileRootName());
+            for (int rectangleIndex = 0; rectangleIndex < _fillRectangles.Count; rectangleIndex++)
+            {
+                RectInt rectangle = _fillRectangles[rectangleIndex];
+                LevelRoomPiece piece = new LevelRoomPiece
+                {
+                    prefab = _strokePrefabs[Random.Range(0, _strokePrefabs.Count)],
+                    center = _tileSet.origin + new Vector3(
+                        minimumColumn + rectangle.x + (rectangle.width - 1) * 0.5f,
+                        0f,
+                        minimumRow + rectangle.y + (rectangle.height - 1) * 0.5f),
+                    width = rectangle.width,
+                    depth = rectangle.height,
+                    quarterTurns = 0,
+                };
+                PlaceRoomPiece(tileRoot, piece);
+            }
+        }
+
+        /// <summary>
+        /// 타일이 조금이라도 덮는 칸을 빈 칸에서 뺀다. 칸 경계에 맞지 않는 타일이 걸친 칸도 뺀다 (새 타일이 겹치지 않게).
+        /// </summary>
+        private void MarkOccupiedCells(Transform tile, bool[,] isEmptyCells, int minimumColumn, int minimumRow)
+        {
+            Vector3 size = tile.TransformVector(Vector3.one);
+            float halfWidth = Mathf.Abs(size.x) * 0.5f;
+            float halfDepth = Mathf.Abs(size.z) * 0.5f;
+            float centerColumn = tile.position.x - _tileSet.origin.x;
+            float centerRow = tile.position.z - _tileSet.origin.z;
+
+            int firstColumn = Mathf.Max(Mathf.CeilToInt(centerColumn - halfWidth - 0.5f + OVERLAP_TOLERANCE), minimumColumn);
+            int lastColumn = Mathf.Min(Mathf.FloorToInt(centerColumn + halfWidth + 0.5f - OVERLAP_TOLERANCE), minimumColumn + isEmptyCells.GetLength(0) - 1);
+            int firstRow = Mathf.Max(Mathf.CeilToInt(centerRow - halfDepth - 0.5f + OVERLAP_TOLERANCE), minimumRow);
+            int lastRow = Mathf.Min(Mathf.FloorToInt(centerRow + halfDepth + 0.5f - OVERLAP_TOLERANCE), minimumRow + isEmptyCells.GetLength(1) - 1);
+
+            for (int row = firstRow; row <= lastRow; row++)
+            {
+                for (int column = firstColumn; column <= lastColumn; column++)
+                {
+                    isEmptyCells[column - minimumColumn, row - minimumRow] = false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 월드 위치가 속한 1유닛 칸. origin이 칸 (0, 0)의 중심이고 Tile Scale과 상관없다.
+        /// </summary>
+        private Vector2Int GetUnitCell(Vector3 point)
+        {
+            return new Vector2Int(Mathf.RoundToInt(point.x - _tileSet.origin.x), Mathf.RoundToInt(point.z - _tileSet.origin.z));
         }
 
         /// <summary>
@@ -1028,10 +1149,32 @@ namespace TopView.Editor
             {
                 DrawPropBrushPreview(point, isErasing);
             }
+            else if (_mode == LevelPaintMode.Fill)
+            {
+                DrawFillPreview(point);
+            }
             else
             {
                 DrawRoomPreview(point, isErasing);
             }
+        }
+
+        /// <summary>
+        /// 채울 범위를 네모로 그린다. 드래그 전에는 마우스가 가리키는 칸 하나다.
+        /// </summary>
+        private void DrawFillPreview(Vector3 point)
+        {
+            Vector2Int endCell = GetUnitCell(point);
+            Vector2Int startCell = _isStroking ? _fillStartCell : endCell;
+            Vector3 minimumCorner = _tileSet.origin + new Vector3(Mathf.Min(startCell.x, endCell.x) - 0.5f, 0f, Mathf.Min(startCell.y, endCell.y) - 0.5f);
+            Vector3 maximumCorner = _tileSet.origin + new Vector3(Mathf.Max(startCell.x, endCell.x) + 0.5f, 0f, Mathf.Max(startCell.y, endCell.y) + 0.5f);
+
+            Vector3[] corners = new Vector3[4];
+            corners[0] = minimumCorner;
+            corners[1] = new Vector3(minimumCorner.x, minimumCorner.y, maximumCorner.z);
+            corners[2] = maximumCorner;
+            corners[3] = new Vector3(maximumCorner.x, minimumCorner.y, minimumCorner.z);
+            Handles.DrawSolidRectangleWithOutline(corners, new Color(TILE_COLOR.r, TILE_COLOR.g, TILE_COLOR.b, PREVIEW_FILL_ALPHA), TILE_COLOR);
         }
 
         /// <summary>
