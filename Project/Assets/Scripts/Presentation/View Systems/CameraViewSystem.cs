@@ -1,5 +1,6 @@
 using TopView.Presentation.Views;
 using TopView.Presentation.ViewContexts;
+using Unity.Cinemachine;
 using UnityEngine;
 
 namespace TopView.Presentation.ViewSystems
@@ -8,7 +9,7 @@ namespace TopView.Presentation.ViewSystems
     public static class CameraViewSystem
     {
         /// <summary>
-        /// 플레이어 View가 생기면 플레이어 카메라가 그 View를 따라가게 하고(한 판에 한 번만 정한다), Yaw 입력만큼 플레이어 카메라를 월드 Y축으로 돌린다.
+        /// 플레이어 View가 생기면 플레이어 카메라가 그 View를 따라가게 하고(한 판에 한 번만 정한다), Yaw 입력만큼 플레이어 카메라의 Pan 값을 돌린다.
         /// </summary>
         /// <param name="context">카메라 실행 상태</param>
         /// <param name="playerView">따라갈 플레이어 View. 아직 없으면 null</param>
@@ -29,7 +30,8 @@ namespace TopView.Presentation.ViewSystems
                 context.isPlayerCameraFollowing = true;
             }
 
-            context.playerCameraView.playerCamera.transform.Rotate(Vector3.up, yawInput * yawDegreesPerSecond * Time.deltaTime, Space.World);
+            CinemachinePanTilt panTilt = context.playerCameraView.playerCameraPanTilt;
+            panTilt.PanAxis.Value = panTilt.PanAxis.ClampValue(panTilt.PanAxis.Value + yawInput * yawDegreesPerSecond * Time.deltaTime);
         }
     }
 }

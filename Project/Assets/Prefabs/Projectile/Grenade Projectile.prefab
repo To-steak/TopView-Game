@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6207869182737144073}
   - component: {fileID: 2463003761926118705}
-  m_Layer: 8
+  m_Layer: 0
   m_Name: Grenade Projectile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -46,7 +46,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: TopView.Presentation::TopView.Presentation.Projectile.Views.ProjectileView
   trail: {fileID: 0}
-  pitchPivot: {fileID: 6207869182737144073}
+  rotationPivot: {fileID: 0}
+  pitchSpeed: 0
+  yawSpeed: 0
+  rollSpeed: 0
 --- !u!1001 &2795760997375767398
 PrefabInstance:
   m_ObjectHideFlags: 0

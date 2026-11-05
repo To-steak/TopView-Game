@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4677088424083482870}
   - component: {fileID: 4972151900226264020}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: Enemy D
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -47,6 +47,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: TopView.Presentation::TopView.Presentation.Enemy.Views.EnemyView
   animator: {fileID: 7834020961119801843}
   healthGaugeAnchor: {fileID: 0}
+  damageAnchor: {fileID: 0}
 --- !u!1001 &3777786291576326184
 PrefabInstance:
   m_ObjectHideFlags: 0
