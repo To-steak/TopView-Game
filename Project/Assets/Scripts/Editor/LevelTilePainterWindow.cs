@@ -9,6 +9,7 @@ namespace TopView.Editor
     /// 레벨 칠하기 창 (Tools → Level Tile Painter). 에디터 전용.
     /// 타일 모드는 격자 칸에 타일 FBX·프리팹을 놓고, 소품 모드는 격자와 상관없이 마우스 위치에 소품을 놓고, 방 모드는 테두리와 길을 갖춘 방을 한 번에 놓는다. 타일과 방은 고른 층의 씬 루트 "Level Tiles (Painted) - N Layer", 소품은 "Level Props (Painted)" 아래에 둔다.
     /// 채우기 모드는 드래그한 범위에서 고른 층의 빈 칸을 찾아, 가장 적은 수의 타일을 늘려 빈틈과 겹침 없이 채운다.
+    /// 산 모드는 칸 수와 높이를 입력해 두 층의 벽과 뚜껑을 갖춘 산을 한 번에 놓는다. 섬도 같은 구조라 이 모드로 만든다.
     /// 층은 서로 독립이라, 칠하기의 교체와 지우기는 고른 층의 타일만 건드린다.
     /// 클릭·드래그로 칠하고, Shift+클릭·드래그로 지운다. 썸네일을 Ctrl+클릭해 여러 개 고르면 그중 하나를 무작위로 놓는다.
     /// ] / [로 타일을 90도씩 돌린다 (R은 Unity 크기 조절 도구 단축키라 쓰지 않는다). Esc로 칠하기를 끈다.
@@ -30,6 +31,9 @@ namespace TopView.Editor
         [SerializeField] private LevelRoomShape _roomShape = new LevelRoomShape { interiorWidth = 9, interiorDepth = 9, topRoadLength = 3, bottomRoadLength = 3, leftRoadLength = 3, rightRoadLength = 3 };
         // 고른 방 종류. LevelTileSet.roomTiles의 번호다
         [SerializeField] private int _roomTilesIndex;
+        [SerializeField] private LevelMountainShape _mountainShape = new LevelMountainShape { interiorWidth = 9, interiorDepth = 9, startHeight = -10f, lowerHeight = 10f, upperHeight = 1.5f };
+        // 고른 산 종류. LevelTileSet.mountainTiles의 번호다
+        [SerializeField] private int _mountainTilesIndex;
 
         private Vector2 _scrollPosition;
         private bool _isStroking;
@@ -60,7 +64,7 @@ namespace TopView.Editor
         private int _previewCacheSize;
 
         // 번호가 LevelPaintMode와 같다
-        private static readonly string[] MODE_LABELS = { "타일", "소품", "방", "채우기" };
+        private static readonly string[] MODE_LABELS = { "타일", "소품", "방", "채우기", "산" };
         // 번호가 _brushRadius와 같다
         private static readonly string[] BRUSH_LABELS = { "1×1", "3×3", "5×5", "7×7", "9×9" };
         // 번호가 _tileLayer와 같다
@@ -102,6 +106,12 @@ namespace TopView.Editor
             "드래그 : 범위 정하기, 놓으면 고른 층의 빈 칸을 가장 적은 수의 타일로 채움\n" +
             "썸네일 Ctrl + 클릭 : 여러 개 고르기 (사각형마다 무작위)\n" +
             "Esc : 칠하기 끄기 (드래그 중이면 채우지 않음)\n" +
+            "Alt + 드래그, 우클릭 드래그 : Scene 뷰 카메라 조작 (그대로)";
+
+        private const string MOUNTAIN_CONTROLS_HELP =
+            "클릭 : 산 놓기 (고른 층에서 겹치는 타일은 지워짐)\n" +
+            "Shift + 클릭 : 미리보기 범위에서 고른 층의 타일 지우기\n" +
+            "Esc : 칠하기 끄기\n" +
             "Alt + 드래그, 우클릭 드래그 : Scene 뷰 카메라 조작 (그대로)";
 
         // 방 모드의 길 설정 칸 너비 (픽셀)
@@ -229,7 +239,7 @@ namespace TopView.Editor
             GUILayout.Space(ELEMENT_SPACING);
             EditorGUILayout.HelpBox(GetControlsHelp(), MessageType.None);
 
-            if (_mode != LevelPaintMode.Room)
+            if (UsesThumbnails())
             {
                 GUILayout.Space(ELEMENT_SPACING);
                 DrawThumbnails();
@@ -246,9 +256,19 @@ namespace TopView.Editor
                     return PROP_CONTROLS_HELP;
                 case LevelPaintMode.Fill:
                     return FILL_CONTROLS_HELP;
+                case LevelPaintMode.Mountain:
+                    return MOUNTAIN_CONTROLS_HELP;
                 default:
                     return ROOM_CONTROLS_HELP;
             }
+        }
+
+        /// <summary>
+        /// 썸네일로 고른 프리팹을 놓는 모드인지 본다. 방과 산은 종류 목록에서 고른다.
+        /// </summary>
+        private bool UsesThumbnails()
+        {
+            return _mode != LevelPaintMode.Room && _mode != LevelPaintMode.Mountain;
         }
 
         /// <summary>
@@ -277,6 +297,10 @@ namespace TopView.Editor
             {
                 DrawRoomSettings();
             }
+            else if (_mode == LevelPaintMode.Mountain)
+            {
+                DrawMountainSettings();
+            }
 
             settings.ApplyModifiedProperties();
         }
@@ -298,6 +322,71 @@ namespace TopView.Editor
             {
                 EditorGUILayout.HelpBox("Level Tile Set 에셋의 Room Tiles에 방 종류를 넣고, 프리팹 4개를 모두 채워야 방을 놓을 수 있다.", MessageType.Warning);
             }
+        }
+
+        /// <summary>
+        /// 산 크기와 높이를 그린다. 산을 찍을 수 없는 상태면 이유도 보여 준다.
+        /// </summary>
+        private void DrawMountainSettings()
+        {
+            GUILayout.Space(ELEMENT_SPACING);
+            EditorGUILayout.LabelField("Mountain", EditorStyles.boldLabel);
+            DrawMountainTilesToolbar();
+            _mountainShape.interiorWidth = Mathf.Max(LevelMountainLayout.MINIMUM_INTERIOR_SIZE, EditorGUILayout.IntField("안쪽 X 칸 수", _mountainShape.interiorWidth));
+            _mountainShape.interiorDepth = Mathf.Max(LevelMountainLayout.MINIMUM_INTERIOR_SIZE, EditorGUILayout.IntField("안쪽 Z 칸 수", _mountainShape.interiorDepth));
+            _mountainShape.startHeight = EditorGUILayout.FloatField("1층 시작 높이 Y", _mountainShape.startHeight);
+            _mountainShape.lowerHeight = Mathf.Max(LevelMountainLayout.MINIMUM_HEIGHT, EditorGUILayout.FloatField("1층 높이", _mountainShape.lowerHeight));
+            _mountainShape.upperHeight = Mathf.Max(LevelMountainLayout.MINIMUM_HEIGHT, EditorGUILayout.FloatField("2층 높이", _mountainShape.upperHeight));
+
+            EditorGUILayout.LabelField("2층 시작 높이 Y", LevelMountainLayout.GetUpperStartHeight(in _mountainShape).ToString());
+            EditorGUILayout.LabelField("뚜껑 높이 Y", LevelMountainLayout.GetCapHeight(in _mountainShape).ToString());
+            EditorGUILayout.LabelField("1층 Y Scale", LevelMountainLayout.GetLowerHeightScale(in _mountainShape).ToString());
+            EditorGUILayout.LabelField("2층 Y Scale", LevelMountainLayout.GetUpperHeightScale(in _mountainShape).ToString());
+
+            if (!HasMountainPrefabs())
+            {
+                EditorGUILayout.HelpBox("Level Tile Set 에셋의 Mountain Tiles에 산 종류를 넣고, 프리팹 5개를 모두 채워야 산을 놓을 수 있다.", MessageType.Warning);
+            }
+        }
+
+        /// <summary>
+        /// 산 종류를 고르는 버튼을 그린다. 이름이 비어 있으면 번호로 보여 준다.
+        /// </summary>
+        private void DrawMountainTilesToolbar()
+        {
+            LevelMountainTiles[] mountainTiles = _tileSet.mountainTiles;
+            if (mountainTiles == null || mountainTiles.Length == 0)
+            {
+                return;
+            }
+
+            string[] labels = new string[mountainTiles.Length];
+            for (int index = 0; index < mountainTiles.Length; index++)
+            {
+                labels[index] = string.IsNullOrEmpty(mountainTiles[index].name) ? "Mountain " + (index + 1) : mountainTiles[index].name;
+            }
+            _mountainTilesIndex = GUILayout.Toolbar(Mathf.Clamp(_mountainTilesIndex, 0, mountainTiles.Length - 1), labels);
+            GUILayout.Space(ELEMENT_SPACING);
+        }
+
+        /// <summary>
+        /// 고른 산 종류를 구한다. 목록이 비어 있으면 프리팹이 없는 값이다.
+        /// </summary>
+        private LevelMountainTiles GetSelectedMountainTiles()
+        {
+            LevelMountainTiles[] mountainTiles = _tileSet.mountainTiles;
+            if (mountainTiles == null || mountainTiles.Length == 0)
+            {
+                return default;
+            }
+
+            return mountainTiles[Mathf.Clamp(_mountainTilesIndex, 0, mountainTiles.Length - 1)];
+        }
+
+        private bool HasMountainPrefabs()
+        {
+            LevelMountainTiles tiles = GetSelectedMountainTiles();
+            return tiles.lowerSidePrefab != null && tiles.lowerCornerPrefab != null && tiles.upperSidePrefab != null && tiles.upperCornerPrefab != null && tiles.capPrefab != null;
         }
 
         /// <summary>
@@ -628,7 +717,7 @@ namespace TopView.Editor
             _isErasingStroke = isErasing;
             _hasLastStroke = false;
 
-            if (_mode != LevelPaintMode.Room)
+            if (UsesThumbnails())
             {
                 CollectStrokePrefabs();
                 if (!isErasing && _strokePrefabs.Count == 0)
@@ -694,9 +783,51 @@ namespace TopView.Editor
             {
                 ApplyFillStroke(point);
             }
+            else if (_mode == LevelPaintMode.Mountain)
+            {
+                ApplyMountainStroke(point);
+            }
             else
             {
                 ApplyRoomStroke(point);
+            }
+        }
+
+        /// <summary>
+        /// 클릭 한 번에 산 하나를 놓거나 지운다. 드래그해도 다시 찍지 않는다.
+        /// 겹침은 XZ로만 판정해서 위아래 층이 서로를 지우므로, 먼저 다 지운 다음 놓는다.
+        /// </summary>
+        private void ApplyMountainStroke(Vector3 point)
+        {
+            if (_hasLastStroke)
+            {
+                return;
+            }
+            _hasLastStroke = true;
+
+            if (!_isErasingStroke && !HasMountainPrefabs())
+            {
+                Debug.LogWarning("[LevelTilePainterWindow] 고른 산 종류의 프리팹이 비어 있어 산을 놓을 수 없다.");
+                return;
+            }
+
+            LevelMountainTiles tiles = GetSelectedMountainTiles();
+            LevelMountainLayout.Build(_tileSet.origin, in tiles, in _mountainShape, point, _roomPieces);
+            for (int pieceIndex = 0; pieceIndex < _roomPieces.Count; pieceIndex++)
+            {
+                LevelRoomPiece piece = _roomPieces[pieceIndex];
+                EraseTilesInArea(piece.center, piece.width * 0.5f, piece.depth * 0.5f);
+            }
+
+            if (_isErasingStroke)
+            {
+                return;
+            }
+
+            Transform tileRoot = GetOrCreateRoot(GetTileRootName());
+            for (int pieceIndex = 0; pieceIndex < _roomPieces.Count; pieceIndex++)
+            {
+                PlaceRoomPiece(tileRoot, _roomPieces[pieceIndex]);
             }
         }
 
@@ -761,6 +892,7 @@ namespace TopView.Editor
                         minimumRow + rectangle.y + (rectangle.height - 1) * 0.5f),
                     width = rectangle.width,
                     depth = rectangle.height,
+                    heightScale = 1f,
                     quarterTurns = 0,
                 };
                 PlaceRoomPiece(tileRoot, piece);
@@ -832,12 +964,12 @@ namespace TopView.Editor
         }
 
         /// <summary>
-        /// 방 타일 하나를 놓는다. 크기는 로컬 축 기준이라, 90도나 270도 돌리면 월드 X, Z 길이를 서로 바꿔 넣는다.
+        /// 배치 정보대로 타일 하나를 놓는다. 크기는 로컬 축 기준이라, 90도나 270도 돌리면 월드 X, Z 길이를 서로 바꿔 넣는다.
         /// </summary>
         private void PlaceRoomPiece(Transform tileRoot, in LevelRoomPiece piece)
         {
             Quaternion rotation = Quaternion.Euler(0f, piece.quarterTurns * 90f, 0f) * piece.prefab.transform.rotation;
-            Vector3 localScale = piece.quarterTurns % 2 == 0 ? new Vector3(piece.width, 1f, piece.depth) : new Vector3(piece.depth, 1f, piece.width);
+            Vector3 localScale = piece.quarterTurns % 2 == 0 ? new Vector3(piece.width, piece.heightScale, piece.depth) : new Vector3(piece.depth, piece.heightScale, piece.width);
 
             GameObject tile = (GameObject)PrefabUtility.InstantiatePrefab(piece.prefab, tileRoot);
             Undo.RegisterCreatedObjectUndo(tile, "레벨 칠하기");
@@ -1153,10 +1285,45 @@ namespace TopView.Editor
             {
                 DrawFillPreview(point);
             }
+            else if (_mode == LevelPaintMode.Mountain)
+            {
+                DrawMountainPreview(point, isErasing);
+            }
             else
             {
                 DrawRoomPreview(point, isErasing);
             }
+        }
+
+        /// <summary>
+        /// 산이 차지하는 범위를 바닥면(origin 높이)에 네모로 그린다. 지우기면 빨간색이다.
+        /// </summary>
+        private void DrawMountainPreview(Vector3 point, bool isErasing)
+        {
+            LevelMountainTiles tiles = GetSelectedMountainTiles();
+            LevelMountainLayout.Build(_tileSet.origin, in tiles, in _mountainShape, point, _roomPieces);
+
+            float minimumX = float.MaxValue;
+            float maximumX = float.MinValue;
+            float minimumZ = float.MaxValue;
+            float maximumZ = float.MinValue;
+            for (int pieceIndex = 0; pieceIndex < _roomPieces.Count; pieceIndex++)
+            {
+                LevelRoomPiece piece = _roomPieces[pieceIndex];
+                minimumX = Mathf.Min(minimumX, piece.center.x - piece.width * 0.5f);
+                maximumX = Mathf.Max(maximumX, piece.center.x + piece.width * 0.5f);
+                minimumZ = Mathf.Min(minimumZ, piece.center.z - piece.depth * 0.5f);
+                maximumZ = Mathf.Max(maximumZ, piece.center.z + piece.depth * 0.5f);
+            }
+
+            float height = _tileSet.origin.y;
+            Vector3[] corners = new Vector3[4];
+            corners[0] = new Vector3(minimumX, height, minimumZ);
+            corners[1] = new Vector3(minimumX, height, maximumZ);
+            corners[2] = new Vector3(maximumX, height, maximumZ);
+            corners[3] = new Vector3(maximumX, height, minimumZ);
+            Color outline = isErasing ? ERASE_COLOR : TILE_COLOR;
+            Handles.DrawSolidRectangleWithOutline(corners, new Color(outline.r, outline.g, outline.b, PREVIEW_FILL_ALPHA), outline);
         }
 
         /// <summary>
