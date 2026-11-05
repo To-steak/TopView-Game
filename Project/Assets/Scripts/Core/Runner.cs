@@ -102,7 +102,7 @@ namespace TopView.Core
             if (isPlaying)
             {
                 PlayerDetectorSystem.Tick(_world.playerDetectors, _world.playerDetectorStates, in _world.playerLocation, _world.enemySpawnerActivationRequests);
-                EnemySpawnTimerSystem.Tick(in _world.rule, _world.enemySpawnPoints, _world.enemySpawnTemplates, ref _world.progress, _world.enemySpawnRequests);
+                EnemySpawnerSystem.Tick(in _world.rule, _world.enemySpawners, _world.enemySpawnerStates, _world.enemySpawnTemplates, _world.enemySpawnerActivationRequests, _world.enemySpawnRequests);
                 PlayerSpawnSystem.Tick(_world.players, _world.playerSpawnRequests);
                 EnemySpawnSystem.Tick(_world.enemies, _world.enemySpawnRequests, _world.rule.navMeshSampleDistance);
                 ProjectileSpawnSystem.Tick(_world.projectiles, _world.projectileSpawnRequests);

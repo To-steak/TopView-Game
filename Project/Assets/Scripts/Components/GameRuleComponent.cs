@@ -8,9 +8,7 @@ namespace TopView.Components
     {
         // 제한 시간(틱). 0이 되면 게임오버
         public int timeLimitTicks;
-        // 스폰 지점마다 다음 적을 내보내기까지의 간격(틱)
-        public int spawnIntervalTicks;
-        // 스폰 지점에서 생기는 적의 레벨
+        // 스포너에서 생기는 적의 레벨
         public int enemyLevel;
         // World의 난수 생성기 시드
         public int randomSeed;

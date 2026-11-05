@@ -13,8 +13,7 @@ MonoBehaviour:
   m_Name: Game Settings Definition
   m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.GameSettingsDefinition
   rule:
-    timeLimitTicks: 500
-    spawnIntervalTicks: 250
+    timeLimitTicks: 90000
     enemyLevel: 1
     randomSeed: 0
     navMeshSampleDistance: 3
