@@ -7,7 +7,6 @@ namespace TopView.Editor
     // 씬에 배치한 Authoring의 값을 씬 뷰에 그린다. 배치할 때 보이도록 플레이 중이 아니어도, 선택하지 않아도 그린다.
     public static class AuthoringGizmos
     {
-        private const int CIRCLE_SEGMENTS = 32;
         private const float SPAWNER_POSITION_RADIUS = 0.3f;
         private const float SPAWNER_DIRECTION_LENGTH = 1f;
         private const float SPAWNER_LABEL_HEIGHT = 0.5f;
@@ -17,18 +16,9 @@ namespace TopView.Editor
         private static void DrawPlayerDetector(PlayerDetectorAuthoring authoring, GizmoType gizmoType)
         {
             Vector3 center = authoring.transform.position;
-            float radius = authoring.range.detectionRadius;
 
             Gizmos.color = Color.red;
-            Vector3 previousPoint = center + new Vector3(radius, 0f, 0f);
-            for (int segmentIndex = 1; segmentIndex <= CIRCLE_SEGMENTS; segmentIndex++)
-            {
-                float angle = segmentIndex * Mathf.PI * 2f / CIRCLE_SEGMENTS;
-                Vector3 point = center + new Vector3(Mathf.Cos(angle) * radius, 0f, Mathf.Sin(angle) * radius);
-                Gizmos.DrawLine(previousPoint, point);
-                previousPoint = point;
-            }
-
+            GizmoShapes.DrawCircle(center, authoring.range.detectionRadius);
             DrawSpawnerLinks(authoring, center);
         }
 
