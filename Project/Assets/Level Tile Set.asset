@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Level Tile Set
   m_EditorClassIdentifier: TopView.Editor::TopView.Editor.LevelTileSet
   origin: {x: 0, y: 0, z: 0}
-  tileScale: {x: 1, y: 1, z: 1}
+  tileScale: {x: 3, y: 3, z: 3}
   prefabs:
   - {fileID: 3873420172927118035, guid: 8f1fab885ef4e4a4b9f9363cf49bb858, type: 3}
   - {fileID: 2369369151981221940, guid: 5862824ecd5321447be97fc30e2416cc, type: 3}
@@ -281,8 +281,15 @@ MonoBehaviour:
   propMaximumScale: 1.2
   propSpacing: 1
   propScatterCount: 5
-  roomOpenPrefab: {fileID: 3152686274889434214, guid: 823d2c31c7c2a8b44b8cab6f610af593, type: 3}
-  roomSidePrefab: {fileID: 2208987284786876863, guid: a062365ddc5ad5b46b05bd9d6db73a82, type: 3}
-  roomCornerPrefab: {fileID: 5254733167832917180, guid: 45ac7ff31c383b245917ff3289e7073d, type: 3}
-  roomInnerCornerPrefab: {fileID: 3749475697674829009, guid: 67540a8925c01b14d926c092aa3792d0, type: 3}
+  roomTiles:
+  - name: Ground
+    openPrefab: {fileID: 3152686274889434214, guid: 823d2c31c7c2a8b44b8cab6f610af593, type: 3}
+    sidePrefab: {fileID: 2208987284786876863, guid: a062365ddc5ad5b46b05bd9d6db73a82, type: 3}
+    cornerPrefab: {fileID: 5254733167832917180, guid: 45ac7ff31c383b245917ff3289e7073d, type: 3}
+    innerCornerPrefab: {fileID: 3749475697674829009, guid: 67540a8925c01b14d926c092aa3792d0, type: 3}
+  - name: River
+    openPrefab: {fileID: 4624377187195932189, guid: d6b93d4735cdffe4a960c9dff39f5952, type: 3}
+    sidePrefab: {fileID: 6066489417234538374, guid: 32195bdc8e5931a459f77f57a6c9cff3, type: 3}
+    cornerPrefab: {fileID: 3374842283360559537, guid: 95ec947c0f685f548a6f42bb389d9859, type: 3}
+    innerCornerPrefab: {fileID: 198738742145522791, guid: eb3fee44f5cb7bf43bacd5f4ed452808, type: 3}
   markTilesStatic: 1
