@@ -17,6 +17,10 @@ namespace TopView.Core
         public LootRuleComponent lootRule;
         // 적이 생기는 지점 목록. 판 시작 때 켜진 Spawner Authoring에서 채운다
         public SpawnPointComponent[] enemySpawnPoints;
+        // 플레이어 감지기 목록. 판 시작 때 켜진 Player Detector Authoring에서 채운다
+        public PlayerDetectorComponent[] playerDetectors;
+        // 플레이어 감지기 상태 목록. 번호가 playerDetectors와 같다
+        public PlayerDetectorStateComponent[] playerDetectorStates;
         // 한 판의 진행 상태
         public GameProgressComponent progress;
         // 이번 틱에 적이 노리는 플레이어의 위치. 매 틱 PlayerLocationSystem이 다시 채운다
@@ -54,6 +58,8 @@ namespace TopView.Core
         public Queue<PlayerSpawnRequest> playerSpawnRequests = new Queue<PlayerSpawnRequest>();
         // 적 생성 요청 큐
         public Queue<EnemySpawnRequest> enemySpawnRequests = new Queue<EnemySpawnRequest>();
+        // 적 스포너 발동 요청 큐
+        public Queue<EnemySpawnerActivationRequest> enemySpawnerActivationRequests = new Queue<EnemySpawnerActivationRequest>();
         // 투사체 생성 요청 큐
         public Queue<ProjectileSpawnRequest> projectileSpawnRequests = new Queue<ProjectileSpawnRequest>();
         // 근접 판정 생성 요청 큐

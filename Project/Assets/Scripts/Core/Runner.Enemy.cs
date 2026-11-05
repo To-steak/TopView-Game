@@ -17,13 +17,15 @@ namespace TopView.Core
         private GameObject[] _enemyHealthGaugePrefabs;
 
         // 씬의 켜진 Spawner Authoring을 이름순으로 읽어 적 종류 목록과 스폰 지점 목록을 만든다. 적 종류 번호는 스포너 이름순에서 처음 나온 순서다. 같은 시드에서 같은 결과가 나오도록 순서를 고정한다.
-        private static void ReadEnemySpawners(out EnemyDefinition[] enemyDefinitions, out SpawnPointComponent[] spawnPoints)
+        // spawnerAuthorings는 스폰 지점과 번호가 같은 Authoring 목록이다. 감지기의 연결을 번호로 바꿀 때 쓴다.
+        private static void ReadEnemySpawners(out EnemyDefinition[] enemyDefinitions, out SpawnPointComponent[] spawnPoints, out EnemySpawnerAuthoring[] spawnerAuthorings)
         {
             EnemySpawnerAuthoring[] spawners = FindObjectsByType<EnemySpawnerAuthoring>(FindObjectsSortMode.None);
             SortByName(spawners);
 
             List<EnemyDefinition> kinds = new List<EnemyDefinition>();
             List<SpawnPointComponent> spawnPointList = new List<SpawnPointComponent>();
+            List<EnemySpawnerAuthoring> spawnerAuthoringList = new List<EnemySpawnerAuthoring>();
             for (int spawnerIndex = 0; spawnerIndex < spawners.Length; spawnerIndex++)
             {
                 EnemySpawnerAuthoring spawner = spawners[spawnerIndex];
@@ -47,6 +49,7 @@ namespace TopView.Core
                     position = spawnerTransform.position,
                     rotation = spawnerTransform.rotation
                 });
+                spawnerAuthoringList.Add(spawner);
             }
 
             if (spawnPointList.Count == 0)
@@ -56,6 +59,72 @@ namespace TopView.Core
 
             enemyDefinitions = kinds.ToArray();
             spawnPoints = spawnPointList.ToArray();
+            spawnerAuthorings = spawnerAuthoringList.ToArray();
+        }
+
+        // 씬의 켜진 Player Detector Authoring을 이름순으로 읽어 감지기 목록을 만든다. 연결된 스포너는 spawnerAuthorings에서의 번호로 바꾼다.
+        private static PlayerDetectorComponent[] ReadPlayerDetectors(EnemySpawnerAuthoring[] spawnerAuthorings)
+        {
+            PlayerDetectorAuthoring[] authorings = FindObjectsByType<PlayerDetectorAuthoring>(FindObjectsSortMode.None);
+            SortByName(authorings);
+
+            List<PlayerDetectorComponent> detectors = new List<PlayerDetectorComponent>();
+            for (int authoringIndex = 0; authoringIndex < authorings.Length; authoringIndex++)
+            {
+                PlayerDetectorAuthoring authoring = authorings[authoringIndex];
+                if (authoring.range.detectionRadius <= 0f)
+                {
+                    Debug.LogWarning($"Runner >> Player Detector Authoring {authoring.name}의 Detection Radius가 0 이하라 건너뛰었다.");
+                    continue;
+                }
+
+                int[] spawnerIndices = ReadLinkedSpawnerIndices(authoring, spawnerAuthorings);
+                if (spawnerIndices.Length == 0)
+                {
+                    Debug.LogWarning($"Runner >> Player Detector Authoring {authoring.name}에 발동할 수 있는 스포너가 없어 건너뛰었다.");
+                    continue;
+                }
+
+                detectors.Add(new PlayerDetectorComponent
+                {
+                    position = authoring.transform.position,
+                    range = authoring.range,
+                    spawnerIndices = spawnerIndices
+                });
+            }
+
+            return detectors.ToArray();
+        }
+
+        // 감지기에 연결된 스포너를 번호로 바꾼다. 빈 슬롯과 판에서 쓰지 않는 스포너(꺼졌거나 Definition이 없음)는 경고를 남기고 뺀다.
+        private static int[] ReadLinkedSpawnerIndices(PlayerDetectorAuthoring authoring, EnemySpawnerAuthoring[] spawnerAuthorings)
+        {
+            if (authoring.spawners == null)
+            {
+                return new int[0];
+            }
+
+            List<int> spawnerIndices = new List<int>();
+            for (int linkIndex = 0; linkIndex < authoring.spawners.Length; linkIndex++)
+            {
+                EnemySpawnerAuthoring spawner = authoring.spawners[linkIndex];
+                if (spawner == null)
+                {
+                    Debug.LogWarning($"Runner >> Player Detector Authoring {authoring.name}의 Spawners {linkIndex}번 슬롯이 비어 있어 건너뛰었다.");
+                    continue;
+                }
+
+                int spawnerIndex = System.Array.IndexOf(spawnerAuthorings, spawner);
+                if (spawnerIndex < 0)
+                {
+                    Debug.LogWarning($"Runner >> Player Detector Authoring {authoring.name}에 연결된 스포너 {spawner.name}가 꺼져 있거나 Enemy Definition이 없어 건너뛰었다.");
+                    continue;
+                }
+
+                spawnerIndices.Add(spawnerIndex);
+            }
+
+            return spawnerIndices.ToArray();
         }
 
         // 적 종류별 Enemy Definition에서 생성 요청 템플릿과 View·게이지 값을 꺼낸다.
@@ -135,18 +204,18 @@ namespace TopView.Core
             }
         }
 
-        private static void SortByName(EnemySpawnerAuthoring[] spawners)
+        private static void SortByName<T>(T[] authorings) where T : MonoBehaviour
         {
-            for (int sortedCount = 1; sortedCount < spawners.Length; sortedCount++)
+            for (int sortedCount = 1; sortedCount < authorings.Length; sortedCount++)
             {
-                EnemySpawnerAuthoring current = spawners[sortedCount];
+                T current = authorings[sortedCount];
                 int insertIndex = sortedCount;
-                while (insertIndex > 0 && string.CompareOrdinal(spawners[insertIndex - 1].name, current.name) > 0)
+                while (insertIndex > 0 && string.CompareOrdinal(authorings[insertIndex - 1].name, current.name) > 0)
                 {
-                    spawners[insertIndex] = spawners[insertIndex - 1];
+                    authorings[insertIndex] = authorings[insertIndex - 1];
                     insertIndex--;
                 }
-                spawners[insertIndex] = current;
+                authorings[insertIndex] = current;
             }
         }
     }
