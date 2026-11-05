@@ -24,6 +24,8 @@ namespace TopView.Editor
         [SerializeField] private bool _isRandomRotation;
         [SerializeField] private bool _isPainting;
         [SerializeField] private LevelRoomShape _roomShape = new LevelRoomShape { interiorWidth = 9, interiorDepth = 9, topRoadLength = 3, bottomRoadLength = 3, leftRoadLength = 3, rightRoadLength = 3 };
+        // 고른 방 종류. LevelTileSet.roomTiles의 번호다
+        [SerializeField] private int _roomTilesIndex;
 
         private Vector2 _scrollPosition;
         private bool _isStroking;
@@ -260,15 +262,50 @@ namespace TopView.Editor
         {
             GUILayout.Space(ELEMENT_SPACING);
             EditorGUILayout.LabelField("Room", EditorStyles.boldLabel);
-            _roomShape.interiorWidth = Mathf.Max(LevelRoomLayout.MINIMUM_INTERIOR_SIZE, EditorGUILayout.IntField("안쪽 X 칸 수", _roomShape.interiorWidth));
+            DrawRoomTilesToolbar();
+            _roomShape.interiorWidth =Mathf.Max(LevelRoomLayout.MINIMUM_INTERIOR_SIZE, EditorGUILayout.IntField("안쪽 X 칸 수", _roomShape.interiorWidth));
             _roomShape.interiorDepth = Mathf.Max(LevelRoomLayout.MINIMUM_INTERIOR_SIZE, EditorGUILayout.IntField("안쪽 Z 칸 수", _roomShape.interiorDepth));
             GUILayout.Space(ELEMENT_SPACING);
             DrawRoadLayout();
 
             if (!HasRoomPrefabs())
             {
-                EditorGUILayout.HelpBox("Level Tile Set 에셋의 Room 항목에 프리팹 4개를 넣어야 방을 놓을 수 있다.", MessageType.Warning);
+                EditorGUILayout.HelpBox("Level Tile Set 에셋의 Room Tiles에 방 종류를 넣고, 프리팹 4개를 모두 채워야 방을 놓을 수 있다.", MessageType.Warning);
             }
+        }
+
+        /// <summary>
+        /// 방 종류를 고르는 버튼을 그린다. 이름이 비어 있으면 번호로 보여 준다.
+        /// </summary>
+        private void DrawRoomTilesToolbar()
+        {
+            LevelRoomTiles[] roomTiles = _tileSet.roomTiles;
+            if (roomTiles == null || roomTiles.Length == 0)
+            {
+                return;
+            }
+
+            string[] labels = new string[roomTiles.Length];
+            for (int index = 0; index < roomTiles.Length; index++)
+            {
+                labels[index] = string.IsNullOrEmpty(roomTiles[index].name) ? "Room " + (index + 1) : roomTiles[index].name;
+            }
+            _roomTilesIndex = GUILayout.Toolbar(Mathf.Clamp(_roomTilesIndex, 0, roomTiles.Length - 1), labels);
+            GUILayout.Space(ELEMENT_SPACING);
+        }
+
+        /// <summary>
+        /// 고른 방 종류를 구한다. 목록이 비어 있으면 프리팹이 없는 값이다.
+        /// </summary>
+        private LevelRoomTiles GetSelectedRoomTiles()
+        {
+            LevelRoomTiles[] roomTiles = _tileSet.roomTiles;
+            if (roomTiles == null || roomTiles.Length == 0)
+            {
+                return default;
+            }
+
+            return roomTiles[Mathf.Clamp(_roomTilesIndex, 0, roomTiles.Length - 1)];
         }
 
         /// <summary>
@@ -317,7 +354,8 @@ namespace TopView.Editor
 
         private bool HasRoomPrefabs()
         {
-            return _tileSet.roomOpenPrefab != null && _tileSet.roomSidePrefab != null && _tileSet.roomCornerPrefab != null && _tileSet.roomInnerCornerPrefab != null;
+            LevelRoomTiles tiles = GetSelectedRoomTiles();
+            return tiles.openPrefab != null && tiles.sidePrefab != null && tiles.cornerPrefab != null && tiles.innerCornerPrefab != null;
         }
 
         private GameObject[] GetCurrentPrefabs()
@@ -641,11 +679,12 @@ namespace TopView.Editor
 
             if (!_isErasingStroke && !HasRoomPrefabs())
             {
-                Debug.LogWarning("[LevelTilePainterWindow] Level Tile Set의 Room 프리팹이 비어 있어 방을 놓을 수 없다.");
+                Debug.LogWarning("[LevelTilePainterWindow] 고른 방 종류의 프리팹이 비어 있어 방을 놓을 수 없다.");
                 return;
             }
 
-            LevelRoomLayout.Build(_tileSet, _roomShape, point, _roomPieces);
+            LevelRoomTiles tiles = GetSelectedRoomTiles();
+            LevelRoomLayout.Build(_tileSet.origin, in tiles, in _roomShape, point, _roomPieces);
             Transform tileRoot = _isErasingStroke ? null : GetOrCreateRoot(TILE_ROOT_NAME);
             for (int pieceIndex = 0; pieceIndex < _roomPieces.Count; pieceIndex++)
             {
@@ -990,7 +1029,8 @@ namespace TopView.Editor
             Color outline = isErasing ? ERASE_COLOR : TILE_COLOR;
             Color fill = new Color(outline.r, outline.g, outline.b, PREVIEW_FILL_ALPHA);
             Vector3[] corners = new Vector3[4];
-            LevelRoomLayout.Build(_tileSet, _roomShape, point, _roomPieces);
+            LevelRoomTiles tiles = GetSelectedRoomTiles();
+            LevelRoomLayout.Build(_tileSet.origin, in tiles, in _roomShape, point, _roomPieces);
             for (int pieceIndex = 0; pieceIndex < _roomPieces.Count; pieceIndex++)
             {
                 LevelRoomPiece piece = _roomPieces[pieceIndex];

@@ -32,14 +32,8 @@ namespace TopView.Editor
         [Min(1)] public int propScatterCount = 5;
 
         [Header("Room")]
-        // 방 안쪽과 길을 채우는 타일 (ground_pathOpen)
-        public GameObject roomOpenPrefab;
-        // 방 테두리와 길 양옆을 채우는 타일 (ground_pathSide)
-        public GameObject roomSidePrefab;
-        // 방 네 모서리의 타일 (ground_pathCorner)
-        public GameObject roomCornerPrefab;
-        // 테두리와 길이 만나는 곳의 타일 (ground_pathCornerSmall)
-        public GameObject roomInnerCornerPrefab;
+        // 방 종류 목록. 칠하기 창에서 이 중 하나를 골라 방을 놓는다
+        public LevelRoomTiles[] roomTiles = new LevelRoomTiles[0];
 
         [Header("Options")]
         // 칠한 타일과 소품을 Batching Static으로 표시할지
