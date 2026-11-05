@@ -14147,6 +14147,37 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4874969941009546758, guid: 45ac7ff31c383b245917ff3289e7073d, type: 3}
   m_PrefabInstance: {fileID: 1041475898}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1043107950
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1043107951}
+  m_Layer: 0
+  m_Name: Level Tiles (Painted) - 2 Layer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1043107951
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1043107950}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1052925200
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -23956,6 +23987,37 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1579697594918226693, guid: a062365ddc5ad5b46b05bd9d6db73a82, type: 3}
   m_PrefabInstance: {fileID: 1769283751}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1769577452
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1769577453}
+  m_Layer: 0
+  m_Name: Level Tiles (Painted) - 3 Layer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1769577453
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1769577452}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1771201561
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -29130,6 +29192,37 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4874969941009546758, guid: 45ac7ff31c383b245917ff3289e7073d, type: 3}
   m_PrefabInstance: {fileID: 2099854481}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2106517728
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2106517729}
+  m_Layer: 0
+  m_Name: Level Tiles (Painted) - 1 Layer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2106517729
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2106517728}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &2107223088
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -30469,6 +30562,9 @@ SceneRoots:
   - {fileID: 2038409080}
   - {fileID: 99911220}
   - {fileID: 214887862}
+  - {fileID: 2106517729}
+  - {fileID: 1043107951}
+  - {fileID: 1769577453}
   - {fileID: 1120490072}
   - {fileID: 109578707}
   - {fileID: 661503622}

@@ -7,7 +7,8 @@ namespace TopView.Editor
 {
     /// <summary>
     /// 레벨 칠하기 창 (Tools → Level Tile Painter). 에디터 전용.
-    /// 타일 모드는 격자 칸에 타일 FBX·프리팹을 놓고, 소품 모드는 격자와 상관없이 마우스 위치에 소품을 놓고, 방 모드는 테두리와 길을 갖춘 방을 한 번에 놓는다. 타일과 방은 씬 루트의 "Level Tiles (Painted)", 소품은 "Level Props (Painted)" 아래에 둔다.
+    /// 타일 모드는 격자 칸에 타일 FBX·프리팹을 놓고, 소품 모드는 격자와 상관없이 마우스 위치에 소품을 놓고, 방 모드는 테두리와 길을 갖춘 방을 한 번에 놓는다. 타일과 방은 고른 층의 씬 루트 "Level Tiles (Painted) - N Layer", 소품은 "Level Props (Painted)" 아래에 둔다.
+    /// 층은 서로 독립이라, 칠하기의 교체와 지우기는 고른 층의 타일만 건드린다.
     /// 클릭·드래그로 칠하고, Shift+클릭·드래그로 지운다. 썸네일을 Ctrl+클릭해 여러 개 고르면 그중 하나를 무작위로 놓는다.
     /// ] / [로 타일을 90도씩 돌린다 (R은 Unity 크기 조절 도구 단축키라 쓰지 않는다). Esc로 칠하기를 끈다.
     /// 한 번의 드래그는 Undo 한 번으로 되돌아간다. Scene 뷰 입력은 SceneView.duringSceneGui로 받는다 (에디터 전용이라 이벤트 금지 규칙 밖).
@@ -20,6 +21,8 @@ namespace TopView.Editor
         [SerializeField] private List<int> _selectedPropIndexes = new List<int>();
         // 브러시 중심에서 가장자리까지의 칸 수 (0이면 1×1, 1이면 3×3)
         [SerializeField] private int _brushRadius;
+        // 타일 모드와 방 모드에서 칠하고 지울 층 번호
+        [SerializeField] private int _tileLayer;
         [SerializeField] private int _quarterTurns;
         [SerializeField] private bool _isRandomRotation;
         [SerializeField] private bool _isPainting;
@@ -55,19 +58,22 @@ namespace TopView.Editor
         private static readonly string[] MODE_LABELS = { "타일", "소품", "방" };
         // 번호가 _brushRadius와 같다
         private static readonly string[] BRUSH_LABELS = { "1×1", "3×3", "5×5", "7×7", "9×9" };
+        // 번호가 _tileLayer와 같다
+        private static readonly string[] TILE_LAYER_LABELS = { "0", "1", "2", "3" };
         private static readonly Color SELECTED_COLOR = new Color(0.25f, 0.6f, 1f);
         private static readonly Color TILE_COLOR = new Color(0.3f, 0.9f, 1f);
         private static readonly Color PROP_COLOR = new Color(0.4f, 1f, 0.4f);
         private static readonly Color ERASE_COLOR = new Color(1f, 0.2f, 0.2f);
 
         private const string WINDOW_TITLE = "Level Tile Painter";
-        // 칠한 타일을 모아 두는 씬 루트 오브젝트 이름
-        private const string TILE_ROOT_NAME = "Level Tiles (Painted)";
+        // 칠한 타일을 층별로 모아 두는 씬 루트 오브젝트 이름 (앞 + 층 번호 + 뒤)
+        private const string TILE_ROOT_NAME_PREFIX = "Level Tiles (Painted) - ";
+        private const string TILE_ROOT_NAME_SUFFIX = " Layer";
         // 놓은 소품을 모아 두는 씬 루트 오브젝트 이름
         private const string PROP_ROOT_NAME = "Level Props (Painted)";
         private const string TILE_CONTROLS_HELP =
-            "클릭 / 드래그 : 칠하기 (겹치는 타일은 교체, 이번 드래그에서 칠한 타일은 유지)\n" +
-            "Shift + 클릭 / 드래그 : 지우기\n" +
+            "클릭 / 드래그 : 칠하기 (고른 층에서 겹치는 타일은 교체, 이번 드래그에서 칠한 타일은 유지)\n" +
+            "Shift + 클릭 / 드래그 : 고른 층의 타일 지우기\n" +
             "썸네일 Ctrl + 클릭 : 여러 개 고르기 (칸마다 무작위)\n" +
             "오른쪽 대괄호 키 ] : 시계 방향으로 90도 회전\n" +
             "왼쪽 대괄호 키 [ : 반시계 방향으로 90도 회전\n" +
@@ -82,8 +88,8 @@ namespace TopView.Editor
             "Alt + 드래그, 우클릭 드래그 : Scene 뷰 카메라 조작 (그대로)";
 
         private const string ROOM_CONTROLS_HELP =
-            "클릭 : 방 놓기 (겹치는 타일은 지워짐)\n" +
-            "Shift + 클릭 : 미리보기 범위의 타일 지우기\n" +
+            "클릭 : 방 놓기 (고른 층에서 겹치는 타일은 지워짐)\n" +
+            "Shift + 클릭 : 미리보기 범위에서 고른 층의 타일 지우기\n" +
             "Esc : 칠하기 끄기\n" +
             "Alt + 드래그, 우클릭 드래그 : Scene 뷰 카메라 조작 (그대로)";
 
@@ -187,6 +193,13 @@ namespace TopView.Editor
                 GUILayout.Space(ELEMENT_SPACING);
                 EditorGUILayout.LabelField("브러시 크기", EditorStyles.boldLabel);
                 _brushRadius = GUILayout.Toolbar(_brushRadius, BRUSH_LABELS);
+            }
+
+            if (_mode != LevelPaintMode.Prop)
+            {
+                GUILayout.Space(ELEMENT_SPACING);
+                EditorGUILayout.LabelField("층", EditorStyles.boldLabel);
+                _tileLayer = GUILayout.Toolbar(_tileLayer, TILE_LAYER_LABELS);
             }
 
             if (_mode == LevelPaintMode.Tile)
@@ -637,7 +650,7 @@ namespace TopView.Editor
         {
             _strokeTiles.Clear();
             _strokePaintedTiles.Clear();
-            GameObject tileRoot = FindRootObject(TILE_ROOT_NAME);
+            GameObject tileRoot = FindRootObject(GetTileRootName());
             if (tileRoot == null)
             {
                 return;
@@ -685,7 +698,7 @@ namespace TopView.Editor
 
             LevelRoomTiles tiles = GetSelectedRoomTiles();
             LevelRoomLayout.Build(_tileSet.origin, in tiles, in _roomShape, point, _roomPieces);
-            Transform tileRoot = _isErasingStroke ? null : GetOrCreateRoot(TILE_ROOT_NAME);
+            Transform tileRoot = _isErasingStroke ? null : GetOrCreateRoot(GetTileRootName());
             for (int pieceIndex = 0; pieceIndex < _roomPieces.Count; pieceIndex++)
             {
                 LevelRoomPiece piece = _roomPieces[pieceIndex];
@@ -746,7 +759,7 @@ namespace TopView.Editor
                 return;
             }
 
-            Transform tileRoot = GetOrCreateRoot(TILE_ROOT_NAME);
+            Transform tileRoot = GetOrCreateRoot(GetTileRootName());
             for (int offsetZ = -_brushRadius; offsetZ <= _brushRadius; offsetZ++)
             {
                 for (int offsetX = -_brushRadius; offsetX <= _brushRadius; offsetX++)
@@ -1103,6 +1116,14 @@ namespace TopView.Editor
             }
             SceneView.RepaintAll();
             Repaint();
+        }
+
+        /// <summary>
+        /// 고른 층의 씬 루트 이름.
+        /// </summary>
+        private string GetTileRootName()
+        {
+            return TILE_ROOT_NAME_PREFIX + _tileLayer + TILE_ROOT_NAME_SUFFIX;
         }
 
         private static GameObject FindRootObject(string objectName)
