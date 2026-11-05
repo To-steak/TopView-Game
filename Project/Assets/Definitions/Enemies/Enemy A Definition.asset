@@ -23,8 +23,6 @@ MonoBehaviour:
     scoreIncrement: 3
     hitRadius: 0.75
   behavior:
-    detectionRadius: 25
-    wanderIntervalTicks: 100
     stopDistance: 1
     acceleration: 8
     angularSpeed: 360
