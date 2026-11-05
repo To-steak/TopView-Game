@@ -70,7 +70,8 @@ namespace TopView.Core
                 return;
             }
 
-            ReadEnemySpawners(out EnemyDefinition[] enemyDefinitions, out SpawnPointComponent[] enemySpawnPoints);
+            ReadEnemySpawners(out EnemyDefinition[] enemyDefinitions, out SpawnPointComponent[] enemySpawnPoints, out EnemySpawnerAuthoring[] enemySpawners);
+            PlayerDetectorComponent[] playerDetectors = ReadPlayerDetectors(enemySpawners);
 
             int enemyKindCount = enemyDefinitions.Length;
             ReadEnemies(enemyDefinitions, projectilePrefabs, hitEffectPrefabs, out EnemySpawnRequest[] enemySpawnTemplates, out GameObject[] enemyViewPrefabs, out GameObject[] enemyHealthGaugePrefabs);
@@ -79,6 +80,8 @@ namespace TopView.Core
             world.rule = gameSettings.rule;
             world.lootRule = lootDefinition.rule;
             world.enemySpawnPoints = enemySpawnPoints;
+            world.playerDetectors = playerDetectors;
+            world.playerDetectorStates = new PlayerDetectorStateComponent[playerDetectors.Length];
             world.random = new System.Random(world.rule.randomSeed);
             world.playerSpawnRequests.Enqueue(playerSpawnRequest);
             world.enemySpawnTemplates = enemySpawnTemplates;
