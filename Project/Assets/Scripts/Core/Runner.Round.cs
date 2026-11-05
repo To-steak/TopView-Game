@@ -64,14 +64,14 @@ namespace TopView.Core
                 return;
             }
 
-            if (gameSettings.rule.navMeshSampleDistance <= 0f || gameSettings.rule.spawnIntervalTicks <= 0)
+            if (gameSettings.rule.navMeshSampleDistance <= 0f)
             {
-                Debug.LogError("Runner >> Game Settings Definition의 Nav Mesh Sample Distance나 Spawn Interval Ticks가 0 이하라 판을 시작할 수 없다.");
+                Debug.LogError("Runner >> Game Settings Definition의 Nav Mesh Sample Distance가 0 이하라 판을 시작할 수 없다.");
                 return;
             }
 
-            ReadEnemySpawners(out EnemyDefinition[] enemyDefinitions, out SpawnPointComponent[] enemySpawnPoints, out EnemySpawnerAuthoring[] enemySpawners);
-            PlayerDetectorComponent[] playerDetectors = ReadPlayerDetectors(enemySpawners);
+            ReadEnemySpawners(out EnemyDefinition[] enemyDefinitions, out EnemySpawnerComponent[] enemySpawners, out EnemySpawnerAuthoring[] enemySpawnerAuthorings);
+            PlayerDetectorComponent[] playerDetectors = ReadPlayerDetectors(enemySpawnerAuthorings);
 
             int enemyKindCount = enemyDefinitions.Length;
             ReadEnemies(enemyDefinitions, projectilePrefabs, hitEffectPrefabs, out EnemySpawnRequest[] enemySpawnTemplates, out GameObject[] enemyViewPrefabs, out GameObject[] enemyHealthGaugePrefabs);
@@ -79,7 +79,8 @@ namespace TopView.Core
             World world = new World();
             world.rule = gameSettings.rule;
             world.lootRule = lootDefinition.rule;
-            world.enemySpawnPoints = enemySpawnPoints;
+            world.enemySpawners = enemySpawners;
+            world.enemySpawnerStates = new EnemySpawnerStateComponent[enemySpawners.Length];
             world.playerDetectors = playerDetectors;
             world.playerDetectorStates = new PlayerDetectorStateComponent[playerDetectors.Length];
             world.random = new System.Random(world.rule.randomSeed);
@@ -101,9 +102,7 @@ namespace TopView.Core
                 phase = GamePhase.Playing,
                 remainingTicks = world.rule.timeLimitTicks,
                 score = 0,
-                gold = 0,
-                // 첫 틱에 바로 적을 내보낸다
-                enemySpawnRemainingTicks = 1
+                gold = 0
             };
 
             Application.targetFrameRate = gameSettings.targetFrameRate;

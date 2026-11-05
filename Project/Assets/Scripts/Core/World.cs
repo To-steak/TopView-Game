@@ -15,8 +15,10 @@ namespace TopView.Core
         public GameRuleComponent rule;
         // 전리품 규칙 값. 판 시작 때 Definition에서 복사한다
         public LootRuleComponent lootRule;
-        // 적이 생기는 지점 목록. 판 시작 때 켜진 Spawner Authoring에서 채운다
-        public SpawnPointComponent[] enemySpawnPoints;
+        // 적 스포너 목록. 판 시작 때 켜진 Enemy Spawner Authoring에서 채운다
+        public EnemySpawnerComponent[] enemySpawners;
+        // 적 스포너 상태 목록. 번호가 enemySpawners와 같다
+        public EnemySpawnerStateComponent[] enemySpawnerStates;
         // 플레이어 감지기 목록. 판 시작 때 켜진 Player Detector Authoring에서 채운다
         public PlayerDetectorComponent[] playerDetectors;
         // 플레이어 감지기 상태 목록. 번호가 playerDetectors와 같다

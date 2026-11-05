@@ -11,7 +11,5 @@ namespace TopView.Components
         public int score;
         // 이번 판에 번 골드
         public int gold;
-        // 다음 스폰까지 남은 시간(틱)
-        public int enemySpawnRemainingTicks;
     }
 }
