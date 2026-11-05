@@ -17,7 +17,6 @@ MonoBehaviour:
     runSpeed: 4
     jumpPower: 5
     dodgeSpeed: 6
-    inAirSpeed: 3
     gravity: -9.81
     groundPressure: -2
     groundCheckOffset: {x: 0, y: -0.51, z: 0}
@@ -31,7 +30,7 @@ MonoBehaviour:
     skinWidth: 0.08
     collisionLayer:
       serializedVersion: 2
-      m_Bits: 1088
+      m_Bits: 1600
     muzzleOffset: {x: 0, y: 0, z: 0.5}
   vitals:
     maxHealth: 100

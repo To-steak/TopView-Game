@@ -107,6 +107,7 @@ namespace TopView.Editor
                 center = offset + new Vector3((minimumColumn + maximumColumn) * 0.5f, 0f, (minimumRow + maximumRow) * 0.5f),
                 width = maximumColumn - minimumColumn + 1,
                 depth = maximumRow - minimumRow + 1,
+                heightScale = 1f,
                 quarterTurns = quarterTurns,
             });
         }

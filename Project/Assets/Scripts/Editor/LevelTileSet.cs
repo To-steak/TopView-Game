@@ -35,6 +35,10 @@ namespace TopView.Editor
         // 방 종류 목록. 칠하기 창에서 이 중 하나를 골라 방을 놓는다
         public LevelRoomTiles[] roomTiles = new LevelRoomTiles[0];
 
+        [Header("Mountain")]
+        // 산 종류 목록. 칠하기 창에서 이 중 하나를 골라 산을 놓는다
+        public LevelMountainTiles[] mountainTiles = new LevelMountainTiles[0];
+
         [Header("Options")]
         // 칠한 타일과 소품을 Batching Static으로 표시할지
         public bool markTilesStatic = true;
