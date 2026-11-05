@@ -83,7 +83,7 @@ namespace TopView.Systems
                     case PlayerState.Die:
                         if (actionState.elapsedTicks == action.dieTicks)
                         {
-                            gameOverRequests.Enqueue(new GameOverRequest());
+                            gameOverRequests.Enqueue(new GameOverRequest { isVictory = false });
                         }
                         break;
                 }

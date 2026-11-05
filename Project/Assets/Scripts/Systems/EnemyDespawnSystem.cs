@@ -10,7 +10,7 @@ namespace TopView.Systems
     public static class EnemyDespawnSystem
     {
         /// <summary>
-        /// 사망 상태에서 dieTicks가 지난 적의 칸을 그 종류 구간에 반납하고, 드롭 표에서 뽑은 전리품의 생성을 요청한다. 게임을 끝내는 적이면 게임오버를 요청한다.
+        /// 사망 상태에서 dieTicks가 지난 적의 칸을 그 종류 구간에 반납하고, 드롭 표에서 뽑은 전리품의 생성을 요청한다. 게임을 끝내는 적이면 승리로 끝내 달라고 요청한다.
         /// </summary>
         /// <param name="enemies">적 저장소</param>
         /// <param name="gameOverRequests">게임오버 요청 큐</param>
@@ -38,7 +38,7 @@ namespace TopView.Systems
                     }
                     if (entity.behavior.endsGameOnDeath)
                     {
-                        gameOverRequests.Enqueue(new GameOverRequest());
+                        gameOverRequests.Enqueue(new GameOverRequest { isVictory = true });
                     }
                 }
             }

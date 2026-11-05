@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace TopView.UserInterface.Presenters
 {
-    // 게임오버가 되면 GameOverView를 보이고, 재시작과 종료 버튼 입력을 판 흐름 명령으로 넣는다.
+    // 판이 끝나면 승패를 담아 GameOverView를 보이고, 재시작과 종료 버튼 입력을 판 흐름 명령으로 넣는다.
     public class GameOverPresenter : MonoBehaviour
     {
         [SerializeField] private GameOverView _view;
@@ -25,13 +25,14 @@ namespace TopView.UserInterface.Presenters
         }
 
         /// <summary>
-        /// 게임오버가 되면 View를 보인다.
+        /// 판이 끝나면 승패를 담아 View를 보인다.
         /// </summary>
         /// <param name="phase">진행 단계</param>
         public void Present(GamePhase phase)
         {
-            if (!_isShown && phase == GamePhase.Over)
+            if (!_isShown && phase != GamePhase.Playing)
             {
+                _view.SetResult(phase == GamePhase.Won);
                 _view.SetVisible(true);
                 _isShown = true;
             }
