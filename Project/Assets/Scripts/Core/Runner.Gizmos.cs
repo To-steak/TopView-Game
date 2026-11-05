@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace TopView.Core
 {
-    // 디버그 표시: 요소별 Gizmo를 모두 여기에 둔다
+    // 디버그 표시: 플레이 중 Logic 값을 그리는 요소별 Gizmo를 여기에 둔다. 배치할 때 봐야 하는 Gizmo는 Editor/에 둔다
     public partial class Runner
     {
         private const int CIRCLE_GIZMO_SEGMENTS = 32;
