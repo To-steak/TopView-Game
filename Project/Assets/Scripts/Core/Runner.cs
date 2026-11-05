@@ -12,6 +12,11 @@ namespace TopView.Core
     // 요소별 상태와 처리는 Runner.<요소>.cs에 나눠 두고, 이 파일에는 판 전체의 상태와 호출 순서만 둔다.
     public partial class Runner : MonoBehaviour
     {
+#if UNITY_EDITOR
+        // 이번 판의 World. Editor의 RunnerGizmos가 읽기만 한다. 판이 없으면 null이다
+        public World EditorWorld => _world;
+#endif
+
         private DefinitionCatalog _catalog;
         private World _world;
         private ViewContext _viewContext;
