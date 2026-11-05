@@ -51,7 +51,6 @@ namespace TopView.Systems
             switch (request.state)
             {
                 case EnemyState.Idle:
-                    actionState.wanderElapsedTicks = 0;
                     EnemyNavigationUtility.StopMove(ref agent);
                     break;
                 case EnemyState.Attack:

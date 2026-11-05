@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Level Tile Set
   m_EditorClassIdentifier: TopView.Editor::TopView.Editor.LevelTileSet
   origin: {x: 0, y: 0, z: 0}
-  tileScale: {x: 3, y: 3, z: 3}
+  tileScale: {x: 1, y: 1, z: 1}
   prefabs:
   - {fileID: 3873420172927118035, guid: 8f1fab885ef4e4a4b9f9363cf49bb858, type: 3}
   - {fileID: 2369369151981221940, guid: 5862824ecd5321447be97fc30e2416cc, type: 3}
