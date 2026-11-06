@@ -37,6 +37,10 @@ namespace TopView.Core
             {
                 command.isReloadPressed = true;
             }
+            if (actions.Cancel.WasPerformedThisFrame())
+            {
+                command.isCancelPressed = true;
+            }
             if (actions.Swap.WasPerformedThisFrame())
             {
                 command.swapWeaponIndex = (int)actions.Swap.ReadValue<float>() - 1;

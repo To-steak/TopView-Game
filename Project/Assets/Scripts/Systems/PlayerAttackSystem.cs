@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using TopView.Components;
 using TopView.Entities;
 using TopView.Requests;
+using TopView.Utilities;
 using UnityEngine;
 
 namespace TopView.Systems
@@ -56,7 +57,7 @@ namespace TopView.Systems
                         return;
                     }
                     weaponSlots.currentAmmo[weaponIndex]--;
-                    RequestProjectile(in movement, position, rotation, in weapon, rotation * Vector3.forward, projectileSpawnRequests);
+                    RequestProjectile(in movement, position, rotation, in weapon, rotation * Vector3.forward * weapon.projectile.speed, projectileSpawnRequests);
                     break;
 
                 case WeaponKind.Throw:
@@ -65,9 +66,13 @@ namespace TopView.Systems
                         Debug.LogWarning($"PlayerAttackSystem >> 남은 탄약이 {weaponSlots.reserveAmmo[weaponIndex]}이라 투척 공격을 내보내지 않았다.");
                         return;
                     }
+                    if (!PlayerWeaponUtility.TryGetThrowVelocity(in weapon.projectile, rotation, actionState.throwCharge, out Vector3 throwVelocity))
+                    {
+                        Debug.LogWarning($"PlayerAttackSystem >> upwardRatio({weapon.projectile.upwardRatio})나 gravity({weapon.projectile.gravity})로 던지는 속도를 구할 수 없어 투척 공격을 내보내지 않았다. upwardRatio는 양수, gravity는 음수여야 한다.");
+                        return;
+                    }
                     weaponSlots.reserveAmmo[weaponIndex]--;
-                    Vector3 throwDirection = (rotation * Vector3.forward + Vector3.up * weapon.projectile.upwardRatio).normalized;
-                    RequestProjectile(in movement, position, rotation, in weapon, throwDirection, projectileSpawnRequests);
+                    RequestProjectile(in movement, position, rotation, in weapon, throwVelocity, projectileSpawnRequests);
                     break;
 
                 case WeaponKind.Melee:
@@ -84,8 +89,8 @@ namespace TopView.Systems
             }
         }
 
-        // 총구 위치에서 플레이어 회전으로 투사체를 내보낸다.
-        private static void RequestProjectile(in PlayerMovementComponent movement, Vector3 position, Quaternion rotation, in WeaponComponent weapon, Vector3 direction, Queue<ProjectileSpawnRequest> projectileSpawnRequests)
+        // 총구 위치에서 플레이어 회전과 주어진 속도로 투사체를 내보낸다.
+        private static void RequestProjectile(in PlayerMovementComponent movement, Vector3 position, Quaternion rotation, in WeaponComponent weapon, Vector3 velocity, Queue<ProjectileSpawnRequest> projectileSpawnRequests)
         {
             projectileSpawnRequests.Enqueue(new ProjectileSpawnRequest
             {
@@ -94,7 +99,7 @@ namespace TopView.Systems
                 damage = weapon.damage,
                 position = position + rotation * movement.muzzleOffset,
                 rotation = rotation,
-                velocity = direction * weapon.projectile.speed
+                velocity = velocity
             });
         }
     }
