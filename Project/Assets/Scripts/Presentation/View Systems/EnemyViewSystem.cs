@@ -17,7 +17,6 @@ namespace TopView.Presentation.ViewSystems
         private static readonly int BIG_SHOT_HASH = Animator.StringToHash("BigShot");
         private static readonly int DIE_HASH = Animator.StringToHash("Die");
         private static readonly int IDLE_STATE_HASH = Animator.StringToHash("Idle");
-        private static readonly int TAUNT_STATE_HASH = Animator.StringToHash("Taunt");
 
         private const int BASE_LAYER_INDEX = 0;
 
@@ -52,7 +51,7 @@ namespace TopView.Presentation.ViewSystems
 
                 if (view == null)
                 {
-                    view = Acquire(context, index, entity.kind.kind, entity.generation, entity.actionState.state, viewPrefabsByKind);
+                    view = Acquire(context, index, entity.kind.kind, entity.generation, viewPrefabsByKind);
                 }
 
                 Vector3 position = Vector3.Lerp(entity.position.previous, entity.position.current, alpha);
@@ -72,8 +71,7 @@ namespace TopView.Presentation.ViewSystems
             }
         }
 
-        // 칸에 그 종류의 View를 붙이고, 도발 중이면 Taunt 상태를, 아니면 Idle 상태를 처음부터 재생한다.
-        private static EnemyView Acquire(EnemyViewContext context, int index, int kind, int generation, EnemyState state, GameObject[] viewPrefabsByKind)
+        private static EnemyView Acquire(EnemyViewContext context, int index, int kind, int generation, GameObject[] viewPrefabsByKind)
         {
             Stack<EnemyView> pool = context.viewPools[kind];
             EnemyView view = pool.Count > 0 ? pool.Pop() : Object.Instantiate(viewPrefabsByKind[kind]).GetComponent<EnemyView>();
@@ -87,7 +85,7 @@ namespace TopView.Presentation.ViewSystems
             context.views[index] = view;
             context.viewGenerations[index] = generation;
 
-            PlayFromStart(view.animator, context.triggerHashesByKind[kind], state == EnemyState.Taunt ? TAUNT_STATE_HASH : IDLE_STATE_HASH);
+            PlayIdle(view.animator, context.triggerHashesByKind[kind]);
             return view;
         }
 
@@ -105,7 +103,7 @@ namespace TopView.Presentation.ViewSystems
             switch (record.state)
             {
                 case EnemyState.Idle:
-                    PlayFromStart(animator, triggerHashes, IDLE_STATE_HASH);
+                    PlayIdle(animator, triggerHashes);
                     break;
                 case EnemyState.Walk:
                     animator.SetBool(IS_WALK_HASH, true);
@@ -133,15 +131,15 @@ namespace TopView.Presentation.ViewSystems
             }
         }
 
-        // 트리거를 모두 지우고 걷기를 끈 뒤 Animator 상태 하나를 처음부터 재생한다.
-        private static void PlayFromStart(Animator animator, int[] triggerHashes, int stateHash)
+        // 트리거를 모두 지우고 걷기를 끈 뒤 Idle 상태를 처음부터 재생한다.
+        private static void PlayIdle(Animator animator, int[] triggerHashes)
         {
             for (int triggerIndex = 0; triggerIndex < triggerHashes.Length; triggerIndex++)
             {
                 animator.ResetTrigger(triggerHashes[triggerIndex]);
             }
             animator.SetBool(IS_WALK_HASH, false);
-            animator.Play(stateHash, BASE_LAYER_INDEX, 0f);
+            animator.Play(IDLE_STATE_HASH, BASE_LAYER_INDEX, 0f);
         }
 
         private static int[] CollectTriggerHashes(Animator animator)

@@ -7,11 +7,11 @@ using UnityEngine;
 
 namespace TopView.Systems
 {
-    // Taunt 상태의 적이 언제 도발을 끝낼지, Idle과 Walk 상태의 적이 플레이어를 어떻게 쫓고 공격할지 정한다. 실제 이동은 EnemyNavigationSystem이, 공격 진행은 EnemyAttackStateSystem이 한다.
+    // Idle과 Walk 상태의 적이 플레이어를 어떻게 쫓고 공격할지 정한다. 실제 이동은 EnemyNavigationSystem이, 공격 진행은 EnemyAttackStateSystem이 한다.
     public static class EnemyBehaviorSystem
     {
         /// <summary>
-        /// Taunt 상태의 적은 도발 시간이 지나면 Idle을 요청한다. Idle과 Walk 상태의 적마다 플레이어 추적과 공격 시작을 정한다. 플레이어가 없으면 새 행동을 정하지 않는다. EnemyStateChangeSystem 앞에 부른다.
+        /// Idle과 Walk 상태의 적마다 플레이어 추적과 공격 시작을 정한다. 플레이어가 없으면 새 행동을 정하지 않는다. EnemyStateChangeSystem 앞에 부른다.
         /// </summary>
         /// <param name="enemies">적 저장소</param>
         /// <param name="playerLocation">추적과 공격 대상인 플레이어의 위치와 반지름</param>
@@ -44,10 +44,6 @@ namespace TopView.Systems
 
                 switch (actionState.state)
                 {
-                    case EnemyState.Taunt:
-                        UpdateTaunt(in actionState, ref rotation, position, in behavior, in identifier, hasPlayer, playerPosition, deltaTime, stateChangeRequests);
-                        break;
-
                     case EnemyState.Idle:
                         if (hasPlayer)
                         {
@@ -82,20 +78,6 @@ namespace TopView.Systems
             if (missingAttackCount > 0)
             {
                 Debug.LogWarning($"EnemyBehaviorSystem >> 공격이 없어 공격하지 않은 적 {missingAttackCount}마리가 있다. 마지막 적 종류: {missingAttackKind}");
-            }
-        }
-
-        // 제자리에서 플레이어 쪽으로 돌고, 도발 시간이 지나면 Idle을 요청한다.
-        private static void UpdateTaunt(in EnemyActionStateComponent actionState, ref RotationComponent rotation, Vector3 position, in EnemyBehaviorComponent behavior, in EntityIdentifier identifier, bool hasPlayer, Vector3 playerPosition, float deltaTime, Queue<EnemyStateChangeRequest> stateChangeRequests)
-        {
-            if (hasPlayer)
-            {
-                TargetingUtility.RotateToward(ref rotation.current, position, playerPosition, behavior.angularSpeed * deltaTime);
-            }
-
-            if (actionState.elapsedTicks >= behavior.tauntTicks)
-            {
-                stateChangeRequests.Enqueue(new EnemyStateChangeRequest { target = identifier, state = EnemyState.Idle });
             }
         }
 
