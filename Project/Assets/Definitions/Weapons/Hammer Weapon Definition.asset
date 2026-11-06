@@ -16,17 +16,18 @@ MonoBehaviour:
     kind: 0
     damage: 15
     maxAmmo: 0
-    currentAmmo: 0
-    reserveAmmo: 0
+    startingCurrentAmmo: 0
+    startingReserveAmmo: 0
     attackStartTicks: 18
     attackEndTicks: 24
     attackDurationTicks: 40
-    attackIntervalTicks: 100
+    attackIntervalTicks: 50
     projectile:
       kind: 0
       speed: 0
       radius: 0
       lifetimeTicks: 0
+      maxThrowDistance: 0
       upwardRatio: 0
       gravity: 0
       fuseTicks: 0

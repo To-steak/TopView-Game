@@ -3,6 +3,8 @@ namespace TopView.Entities
     // 적의 행동 상태
     public enum EnemyState
     {
+        // 스폰 직후 도발. 제자리에서 플레이어 쪽으로 돌다가 시간이 지나면 Idle로 바뀐다
+        Taunt,
         // 서서 플레이어를 쫓거나 공격할 수 있는지 본다. 플레이어가 없으면 그대로 서 있다
         Idle,
         // 목적지로 걷는다. 플레이어가 있으면 목적지는 플레이어다
