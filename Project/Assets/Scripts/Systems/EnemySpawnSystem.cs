@@ -94,7 +94,7 @@ namespace TopView.Systems
                 rotation = new RotationComponent { previous = request.rotation, current = request.rotation },
                 actionState = new EnemyActionStateComponent
                 {
-                    state = request.behavior.tauntTicks > 0 ? EnemyState.Taunt : EnemyState.Idle,
+                    state = EnemyState.Idle,
                     attackCooldownRemainingTicks = attackCooldownRemainingTicks
                 },
                 agent = new NavigationAgentComponent
