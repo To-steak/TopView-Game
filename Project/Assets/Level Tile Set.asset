@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Level Tile Set
   m_EditorClassIdentifier: TopView.Editor::TopView.Editor.LevelTileSet
   origin: {x: 0, y: 0, z: 0}
-  tileScale: {x: 1, y: 1, z: 1}
+  tileScale: {x: 8, y: 8, z: 8}
   prefabs:
   - {fileID: 3873420172927118035, guid: 8f1fab885ef4e4a4b9f9363cf49bb858, type: 3}
   - {fileID: 2369369151981221940, guid: 5862824ecd5321447be97fc30e2416cc, type: 3}
@@ -284,7 +284,10 @@ MonoBehaviour:
   propMinimumScale: 0.5
   propMaximumScale: 1
   propSpacing: 1
-  propScatterCount: 9
+  propScatterCount: 3
+  propSurfaceLayers:
+    serializedVersion: 2
+    m_Bits: 576
   roomTiles:
   - name: Ground
     openPrefab: {fileID: 3152686274889434214, guid: 823d2c31c7c2a8b44b8cab6f610af593, type: 3}
