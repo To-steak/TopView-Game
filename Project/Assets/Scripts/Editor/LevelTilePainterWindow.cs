@@ -91,6 +91,7 @@ namespace TopView.Editor
         private const string PROP_CONTROLS_HELP =
             "클릭 / 드래그 : 놓기 (1×1은 마우스 위치, 큰 브러시는 원 안에 흩뿌리기)\n" +
             "회전과 크기는 무작위, 소품끼리 Prop Spacing보다 가까우면 놓지 않음\n" +
+            "Prop Surface Layers의 가장 높은 면 위에 놓음 (면이 없으면 Origin 높이)\n" +
             "Shift + 클릭 / 드래그 : 원 안의 소품 지우기\n" +
             "썸네일 Ctrl + 클릭 : 여러 개 고르기 (소품마다 무작위)\n" +
             "Esc : 칠하기 끄기\n" +
@@ -128,6 +129,8 @@ namespace TopView.Editor
         private const float THUMBNAIL_SPACING = 10f;
         private const float THUMBNAIL_LABEL_HEIGHT = 16f;
         private const float PREVIEW_FILL_ALPHA = 0.15f;
+        // 소품을 놓을 면을 찾을 때 아래로 쏘기 시작하는 높이 (origin 높이 기준, 월드 유닛). 가장 높은 산보다 높아야 한다
+        private const float PROP_SURFACE_SEARCH_HEIGHT = 1000f;
         // 같은 방향으로 보는 회전 차이 (도)
         private const float SAME_ROTATION_DEGREES = 1f;
         // 가장자리만 맞닿은 타일을 겹친 것으로 보지 않기 위한 여유 (월드 유닛)
@@ -292,6 +295,7 @@ namespace TopView.Editor
                 EditorGUILayout.PropertyField(settings.FindProperty(nameof(LevelTileSet.propMaximumScale)));
                 EditorGUILayout.PropertyField(settings.FindProperty(nameof(LevelTileSet.propSpacing)));
                 EditorGUILayout.PropertyField(settings.FindProperty(nameof(LevelTileSet.propScatterCount)));
+                EditorGUILayout.PropertyField(settings.FindProperty(nameof(LevelTileSet.propSurfaceLayers)));
             }
             else if (_mode == LevelPaintMode.Room)
             {
@@ -1205,6 +1209,7 @@ namespace TopView.Editor
                 }
             }
 
+            point = GetPropSurfacePoint(point);
             GameObject prefab = _strokePrefabs[Random.Range(0, _strokePrefabs.Count)];
             Quaternion rotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f) * prefab.transform.rotation;
 
@@ -1254,12 +1259,25 @@ namespace TopView.Editor
         }
 
         /// <summary>
-        /// 마우스가 가리키는 바닥(origin 높이의 수평면) 위 지점을 구한다.
+        /// 마우스가 가리키는 지점을 구한다. 소품 모드는 마우스 광선이 처음 맞은 면(Prop Surface Layers)의 XZ에서 가장 높은 면 위 지점이고,
+        /// 맞은 면이 없거나 다른 모드면 바닥(origin 높이의 수평면) 위 지점이다.
         /// </summary>
         private bool TryGetHoveredPoint(Vector2 mousePosition, out Vector3 point)
         {
             point = Vector3.zero;
             Ray ray = HandleUtility.GUIPointToWorldRay(mousePosition);
+            if (_mode == LevelPaintMode.Prop)
+            {
+                // 에디터에서 옮기거나 새로 놓은 타일의 Collider를 질의에 반영한다
+                Physics.SyncTransforms();
+                RaycastHit hit;
+                if (Physics.Raycast(ray, out hit, Mathf.Infinity, _tileSet.propSurfaceLayers, QueryTriggerInteraction.Ignore))
+                {
+                    point = GetPropSurfacePoint(hit.point);
+                    return true;
+                }
+            }
+
             Plane ground = new Plane(Vector3.up, new Vector3(0f, _tileSet.origin.y, 0f));
             float distance;
             if (!ground.Raycast(ray, out distance))
@@ -1268,7 +1286,26 @@ namespace TopView.Editor
             }
 
             point = ray.GetPoint(distance);
+            if (_mode == LevelPaintMode.Prop)
+            {
+                point = GetPropSurfacePoint(point);
+            }
             return true;
+        }
+
+        /// <summary>
+        /// 위치의 XZ에서 위에서 아래로 쏴 처음 맞은 소품 면(가장 높은 면) 위 지점을 구한다. 맞은 면이 없으면 origin 높이다.
+        /// </summary>
+        private Vector3 GetPropSurfacePoint(Vector3 point)
+        {
+            Vector3 rayStart = new Vector3(point.x, _tileSet.origin.y + PROP_SURFACE_SEARCH_HEIGHT, point.z);
+            RaycastHit hit;
+            if (Physics.Raycast(rayStart, Vector3.down, out hit, Mathf.Infinity, _tileSet.propSurfaceLayers, QueryTriggerInteraction.Ignore))
+            {
+                return hit.point;
+            }
+
+            return new Vector3(point.x, _tileSet.origin.y, point.z);
         }
 
         private void DrawBrushPreview(Vector3 point, bool isErasing)
