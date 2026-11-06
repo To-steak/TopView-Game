@@ -39,13 +39,27 @@ namespace TopView.Systems
             }
         }
 
-        // XZ 평면에서 플레이어 캡슐 가장자리가 감지 원에 닿았는지 본다.
+        // XZ 평면에서 플레이어 캡슐 가장자리가 감지 범위(원 또는 월드 축에 맞춘 사각형)에 닿았는지 본다.
         private static bool IsPlayerInRange(in PlayerDetectorComponent detector, in PlayerLocationComponent playerLocation)
         {
             Vector3 offset = playerLocation.position - detector.position;
             offset.y = 0f;
-            float range = detector.range.detectionRadius + playerLocation.radius;
-            return offset.sqrMagnitude <= range * range;
+
+            switch (detector.range.shape)
+            {
+                case PlayerDetectorShapeKind.Circle:
+                    float range = detector.range.detectionRadius + playerLocation.radius;
+                    return offset.sqrMagnitude <= range * range;
+
+                case PlayerDetectorShapeKind.Rectangle:
+                    // 사각형에서 플레이어와 가장 가까운 점까지의 거리가 캡슐 반지름 이하면 닿았다
+                    float halfWidth = detector.range.detectionSize.x * 0.5f;
+                    float halfDepth = detector.range.detectionSize.y * 0.5f;
+                    Vector3 closestPoint = new Vector3(Mathf.Clamp(offset.x, -halfWidth, halfWidth), 0f, Mathf.Clamp(offset.z, -halfDepth, halfDepth));
+                    return (offset - closestPoint).sqrMagnitude <= playerLocation.radius * playerLocation.radius;
+            }
+
+            return false;
         }
     }
 }
