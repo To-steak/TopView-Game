@@ -30,6 +30,8 @@ namespace TopView.Editor
         [Min(0.01f)] public float propSpacing = 1f;
         // 큰 브러시로 한 번 찍을 때 소품을 놓아 보는 횟수 (간격에 걸리면 실제로 놓이는 수는 줄어든다)
         [Min(1)] public int propScatterCount = 5;
+        // 소품을 올려놓는 면의 레이어 (Ground, Obstacle 등). 소품마다 위에서 아래로 쏴 처음 맞은 면에 놓고, 맞은 면이 없으면 origin 높이에 놓는다
+        public LayerMask propSurfaceLayers;
 
         [Header("Room")]
         // 방 종류 목록. 칠하기 창에서 이 중 하나를 골라 방을 놓는다
