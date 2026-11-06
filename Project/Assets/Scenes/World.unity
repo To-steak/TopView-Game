@@ -54838,7 +54838,7 @@ Transform:
   m_GameObject: {fileID: 657470568}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 21.5, y: 0, z: 0}
+  m_LocalPosition: {x: 16.54, y: 0, z: 1.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -54858,7 +54858,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: TopView.Authoring::TopView.Authoring.EnemySpawnerAuthoring
   definition: {fileID: 11400000, guid: 7e27ad8917b2b2344a07a7ef6f3f8468, type: 2}
   rule:
-    spawnIntervalTicks: 1500
+    spawnIntervalTicks: 500
     maxSpawnCount: 3
 --- !u!1001 &657478868
 PrefabInstance:
@@ -75891,7 +75891,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: TopView.Authoring::TopView.Authoring.EnemySpawnerAuthoring
   definition: {fileID: 11400000, guid: 7e27ad8917b2b2344a07a7ef6f3f8468, type: 2}
   rule:
-    spawnIntervalTicks: 1500
+    spawnIntervalTicks: 500
     maxSpawnCount: 3
 --- !u!4 &931902181
 Transform:
@@ -75902,7 +75902,7 @@ Transform:
   m_GameObject: {fileID: 931902179}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 21.5, y: 0, z: -11}
+  m_LocalPosition: {x: 16.45, y: 0, z: -9.93}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -136886,7 +136886,7 @@ Transform:
   m_GameObject: {fileID: 1599869948}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 21.5, y: 0, z: 9}
+  m_LocalPosition: {x: 15.25, y: 0, z: 13.41}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -136906,7 +136906,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: TopView.Authoring::TopView.Authoring.EnemySpawnerAuthoring
   definition: {fileID: 11400000, guid: 7e27ad8917b2b2344a07a7ef6f3f8468, type: 2}
   rule:
-    spawnIntervalTicks: 1500
+    spawnIntervalTicks: 500
     maxSpawnCount: 3
 --- !u!1001 &1601158342
 PrefabInstance:
