@@ -61,6 +61,19 @@ namespace TopView.Systems
                         isFinished = actionState.elapsedTicks >= action.dodgeTicks;
                         break;
 
+                    case PlayerState.ThrowCharge:
+                        // 취소하면 탄약을 쓰지 않고 Idle이나 Move로, 공격 키를 떼면 그때의 충전량으로 Throw에 들어간다
+                        actionState.throwCharge = PlayerWeaponUtility.GetThrowCharge(actionState.elapsedTicks);
+                        if (command.isCancelPressed)
+                        {
+                            isFinished = true;
+                        }
+                        else if (!command.isAttackHeld)
+                        {
+                            stateChangeRequests.Enqueue(new PlayerStateChangeRequest { target = identifier, state = PlayerState.Throw, moveInput = moveInput });
+                        }
+                        break;
+
                     case PlayerState.Shot:
                     case PlayerState.Swing:
                     case PlayerState.Throw:

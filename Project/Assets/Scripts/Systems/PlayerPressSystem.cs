@@ -62,8 +62,8 @@ namespace TopView.Systems
                 // 공격 키를 누르고 있어도 다른 입력이 사라지지 않도록 공격을 마지막에 본다
                 if ((command.isAttackPressed || command.isAttackHeld) && motion.isGrounded && actionState.attackCooldownTicks == 0)
                 {
-                    // Throw는 누르고 있을 때 탄약을 다 쓰지 않도록 누른 입력으로만 나간다
-                    if (PlayerWeaponUtility.TryGetAttackState(weapons, in weaponSlot, out PlayerState attackState) && (command.isAttackPressed || attackState != PlayerState.Throw))
+                    // 투척 충전은 던진 뒤에도 누르고 있으면 다시 충전되지 않도록 누른 입력으로만 들어간다
+                    if (PlayerWeaponUtility.TryGetAttackState(weapons, in weaponSlot, out PlayerState attackState) && (command.isAttackPressed || attackState != PlayerState.ThrowCharge))
                     {
                         stateChangeRequests.Enqueue(new PlayerStateChangeRequest { target = identifier, state = attackState, moveInput = command.moveDirection });
                     }
