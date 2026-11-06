@@ -187,7 +187,7 @@ namespace TopView.Presentation.ViewSystems
         // 움직일 수 있는 상태(Move, Land, 공격, Swap, Reload)에서만 이동 입력과 달리기 여부로 MovementSpeed를 정한다. 다른 상태에서는 그대로 둔다.
         private static void ApplyMovementAnimation(in PlayerActionStateComponent actionState, in PlayerMotionComponent motion, Animator animator)
         {
-            bool canMove = actionState.state == PlayerState.Move || actionState.state == PlayerState.Land || actionState.state == PlayerState.Shot || actionState.state == PlayerState.Swing || actionState.state == PlayerState.Throw || actionState.state == PlayerState.Swap || actionState.state == PlayerState.Reload;
+            bool canMove = actionState.state == PlayerState.Move || actionState.state == PlayerState.Land || actionState.state == PlayerState.Shot || actionState.state == PlayerState.Swing || actionState.state == PlayerState.ThrowCharge || actionState.state == PlayerState.Throw || actionState.state == PlayerState.Swap || actionState.state == PlayerState.Reload;
             if (!canMove)
             {
                 return;

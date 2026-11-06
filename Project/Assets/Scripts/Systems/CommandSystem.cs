@@ -15,6 +15,7 @@ namespace TopView.Systems
             playerCommand.isDodgePressed = false;
             playerCommand.isAttackPressed = false;
             playerCommand.isReloadPressed = false;
+            playerCommand.isCancelPressed = false;
             playerCommand.swapWeaponIndex = -1;
         }
     }
