@@ -27,6 +27,7 @@ MonoBehaviour:
       speed: 10
       radius: 0.15
       lifetimeTicks: 0
+      maxThrowDistance: 5
       upwardRatio: 0.75
       gravity: -9.81
       fuseTicks: 75
