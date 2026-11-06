@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Level Tile Set
   m_EditorClassIdentifier: TopView.Editor::TopView.Editor.LevelTileSet
   origin: {x: 0, y: 0, z: 0}
-  tileScale: {x: 18, y: 1, z: 18}
+  tileScale: {x: 1, y: 1, z: 1}
   prefabs:
   - {fileID: 3873420172927118035, guid: 8f1fab885ef4e4a4b9f9363cf49bb858, type: 3}
   - {fileID: 2369369151981221940, guid: 5862824ecd5321447be97fc30e2416cc, type: 3}
@@ -293,10 +293,16 @@ MonoBehaviour:
     cornerPrefab: {fileID: 3374842283360559537, guid: 95ec947c0f685f548a6f42bb389d9859, type: 3}
     innerCornerPrefab: {fileID: 198738742145522791, guid: eb3fee44f5cb7bf43bacd5f4ed452808, type: 3}
   mountainTiles:
-  - name: Rock
+  - name: Rock_Grass
     lowerSidePrefab: {fileID: 481422141376936801, guid: 662e3d300d88a80429687e9b4552b65e, type: 3}
     lowerCornerPrefab: {fileID: 7618839673536129976, guid: 00d538c9619f5e2429226ef98a4ad5cb, type: 3}
     upperSidePrefab: {fileID: 641999042441991601, guid: 51e91672b76891048bbbda036ac30bf0, type: 3}
     upperCornerPrefab: {fileID: 7189279605977730724, guid: 7c781be8075a77f42b0ac6b820b011e3, type: 3}
+    capPrefab: {fileID: 3206409509365242496, guid: 25908afa12e135c4b9cb13b821a3b667, type: 3}
+  - name: Stone_Grass
+    lowerSidePrefab: {fileID: 8573036576736237482, guid: 1b36fa14dfba3f44a88bc03fe2c3f27c, type: 3}
+    lowerCornerPrefab: {fileID: 8631609040239087648, guid: 7f270a2d5d1af174b9b879ba7641366e, type: 3}
+    upperSidePrefab: {fileID: 631756237484819784, guid: 7105882617476f049b4843732a94377c, type: 3}
+    upperCornerPrefab: {fileID: 1845904049730234313, guid: 0aa89184479b358438534fa9fb38f7ca, type: 3}
     capPrefab: {fileID: 3206409509365242496, guid: 25908afa12e135c4b9cb13b821a3b667, type: 3}
   markTilesStatic: 1

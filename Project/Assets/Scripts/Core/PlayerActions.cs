@@ -181,6 +181,16 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""initialStateCheck"": true,
                     ""priority"": 0
+                },
+                {
+                    ""name"": ""Cancel"",
+                    ""type"": ""Button"",
+                    ""id"": ""9373c371-bf8d-44d2-bc3a-520fd0c1a9bb"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
                 }
             ],
             ""bindings"": [
@@ -381,6 +391,17 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
                     ""action"": ""CameraYaw"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ad029081-6abb-4aa1-b663-421b6cd72242"",
+                    ""path"": ""<Keyboard>/x"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Cancel"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -415,6 +436,7 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         m_Global_Swap = m_Global.FindAction("Swap", throwIfNotFound: true);
         m_Global_Reload = m_Global.FindAction("Reload", throwIfNotFound: true);
         m_Global_CameraYaw = m_Global.FindAction("CameraYaw", throwIfNotFound: true);
+        m_Global_Cancel = m_Global.FindAction("Cancel", throwIfNotFound: true);
     }
 
     ~@PlayerActions()
@@ -504,6 +526,7 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Global_Swap;
     private readonly InputAction m_Global_Reload;
     private readonly InputAction m_Global_CameraYaw;
+    private readonly InputAction m_Global_Cancel;
     /// <summary>
     /// Provides access to input actions defined in input action map "Global".
     /// </summary>
@@ -551,6 +574,10 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Global/CameraYaw".
         /// </summary>
         public InputAction @CameraYaw => m_Wrapper.m_Global_CameraYaw;
+        /// <summary>
+        /// Provides access to the underlying input action "Global/Cancel".
+        /// </summary>
+        public InputAction @Cancel => m_Wrapper.m_Global_Cancel;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -604,6 +631,9 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
             @CameraYaw.started += instance.OnCameraYaw;
             @CameraYaw.performed += instance.OnCameraYaw;
             @CameraYaw.canceled += instance.OnCameraYaw;
+            @Cancel.started += instance.OnCancel;
+            @Cancel.performed += instance.OnCancel;
+            @Cancel.canceled += instance.OnCancel;
         }
 
         /// <summary>
@@ -642,6 +672,9 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
             @CameraYaw.started -= instance.OnCameraYaw;
             @CameraYaw.performed -= instance.OnCameraYaw;
             @CameraYaw.canceled -= instance.OnCameraYaw;
+            @Cancel.started -= instance.OnCancel;
+            @Cancel.performed -= instance.OnCancel;
+            @Cancel.canceled -= instance.OnCancel;
         }
 
         /// <summary>
@@ -758,5 +791,12 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnCameraYaw(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Cancel" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnCancel(InputAction.CallbackContext context);
     }
 }
