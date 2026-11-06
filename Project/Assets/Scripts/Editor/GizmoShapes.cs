@@ -23,5 +23,15 @@ namespace TopView.Editor
                 previousPoint = point;
             }
         }
+
+        /// <summary>
+        /// center 높이의 XZ 평면에 월드 축에 맞춘 사각형을 지금 Gizmos 색으로 그린다.
+        /// </summary>
+        /// <param name="center">사각형의 중심(월드)</param>
+        /// <param name="size">사각형의 전체 크기(유닛). x는 월드 X, y는 월드 Z 길이다</param>
+        public static void DrawRectangle(Vector3 center, Vector2 size)
+        {
+            Gizmos.DrawWireCube(center, new Vector3(size.x, 0f, size.y));
+        }
     }
 }
