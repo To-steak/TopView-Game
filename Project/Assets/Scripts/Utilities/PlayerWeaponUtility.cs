@@ -7,6 +7,9 @@ namespace TopView.Utilities
     // 플레이어 무기의 조건 판정, 재장전, 교체 도구. 언제 부를지는 상태 쪽 System이 정한다.
     public static class PlayerWeaponUtility
     {
+        // 투척 충전량의 최댓값. 충전량은 최대 거리에 대한 비율(%)이다
+        private const int MAX_THROW_CHARGE = 100;
+
         /// <summary>
         /// 공격 상태를 끝낼 때인지 판정한다. Ranged는 투사체를 내보내면 바로 끝나고, Melee와 Throw는 공격이 나간 뒤 attackDurationTicks까지 기다린다.
         /// </summary>
@@ -50,11 +53,52 @@ namespace TopView.Utilities
                     return weaponSlots.currentAmmo[weaponSlots.currentIndex] > 0;
 
                 case WeaponKind.Throw:
-                    attackState = PlayerState.Throw;
+                    attackState = PlayerState.ThrowCharge;
                     return weaponSlots.reserveAmmo[weaponSlots.currentIndex] > 0;
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// 충전한 시간으로 투척 충전량을 구한다. 1틱에 1씩 오르고, 100에 닿으면 1씩 내려가 0까지 돌아오기를 되풀이한다.
+        /// </summary>
+        /// <param name="chargeTicks">충전한 시간(틱)</param>
+        /// <returns>충전량(0~100)</returns>
+        public static int GetThrowCharge(int chargeTicks)
+        {
+            int cycleTicks = chargeTicks % (MAX_THROW_CHARGE * 2);
+            return cycleTicks <= MAX_THROW_CHARGE ? cycleTicks : MAX_THROW_CHARGE * 2 - cycleTicks;
+        }
+
+        /// <summary>
+        /// 충전량에 비례한 거리에 떨어지도록 던지는 속도를 구한다. 각도는 upwardRatio로 고정하고, 던진 높이와 같은 높이에 떨어진다고 본다.
+        /// </summary>
+        /// <param name="projectile">던질 투사체</param>
+        /// <param name="rotation">던지는 쪽의 회전</param>
+        /// <param name="throwCharge">투척 충전량(0~100)</param>
+        /// <param name="velocity">던지는 속도(월드, 유닛/초)</param>
+        /// <returns>구했으면 true. upwardRatio가 양수가 아니거나 gravity가 음수가 아니면 false</returns>
+        public static bool TryGetThrowVelocity(in ProjectileComponent projectile, Quaternion rotation, int throwCharge, out Vector3 velocity)
+        {
+            velocity = Vector3.zero;
+            float downwardGravity = -projectile.gravity;
+            if (projectile.upwardRatio <= 0f || downwardGravity <= 0f)
+            {
+                return false;
+            }
+
+            Vector3 forward = rotation * Vector3.forward;
+            forward.y = 0f;
+            forward.Normalize();
+            Vector3 direction = (forward + Vector3.up * projectile.upwardRatio).normalized;
+
+            // 같은 높이에 떨어지는 거리 = 속도² × sin(2 × 각도) / 중력이고, sin(2 × 각도) = 2 × 수직 비율 × 수평 비율이다
+            float sinDoubleAngle = 2f * direction.y * Mathf.Sqrt(1f - direction.y * direction.y);
+            float distance = projectile.maxThrowDistance * Mathf.Clamp(throwCharge, 0, MAX_THROW_CHARGE) / MAX_THROW_CHARGE;
+            float speed = Mathf.Sqrt(Mathf.Max(0f, distance) * downwardGravity / sinDoubleAngle);
+            velocity = direction * speed;
+            return true;
         }
 
         /// <summary>

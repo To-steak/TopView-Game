@@ -13,5 +13,7 @@ namespace TopView.Components
         public bool isAttackCommitted;
         // 다음 공격 상태에 들어갈 수 있기까지 남은 시간(틱). 0이면 들어갈 수 있다
         public int attackCooldownTicks;
+        // 투척 충전량(0~100). ThrowCharge 상태에서 매 틱 정하고, Throw 상태에서 던질 거리를 정할 때 쓴다
+        public int throwCharge;
     }
 }

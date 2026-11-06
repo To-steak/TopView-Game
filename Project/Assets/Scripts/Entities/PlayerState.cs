@@ -17,6 +17,8 @@ namespace TopView.Entities
         Shot,
         // 근접 무기 공격
         Swing,
+        // 투척 무기 충전. 공격 키를 떼면 Throw로, 취소 키를 누르면 Idle이나 Move로 간다
+        ThrowCharge,
         // 투척 무기 공격
         Throw,
         // 무기 교체

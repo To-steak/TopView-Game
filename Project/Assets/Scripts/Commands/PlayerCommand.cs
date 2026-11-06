@@ -25,6 +25,8 @@ namespace TopView.Commands
         public bool isAttackPressed;
         // 이번 틱 전에 재장전 키를 눌렀는지
         public bool isReloadPressed;
+        // 이번 틱 전에 취소 키를 눌렀는지
+        public bool isCancelPressed;
         // 이번 틱 전에 누른 무기 교체 번호. 음수면 없음
         public int swapWeaponIndex;
     }

@@ -29,6 +29,7 @@ namespace TopView.Systems
                     case PlayerState.Move:
                     case PlayerState.Shot:
                     case PlayerState.Swing:
+                    case PlayerState.ThrowCharge:
                     case PlayerState.Throw:
                     case PlayerState.Swap:
                     case PlayerState.Reload:
