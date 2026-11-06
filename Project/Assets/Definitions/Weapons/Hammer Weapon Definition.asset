@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.WeaponDefinition
   weapon:
     kind: 0
-    damage: 15
+    damage: 85
     maxAmmo: 0
     startingCurrentAmmo: 0
     startingReserveAmmo: 0
@@ -35,8 +35,8 @@ MonoBehaviour:
       collisionLayer:
         serializedVersion: 2
         m_Bits: 0
-    meleeRadius: 3
-    meleeOffset: 3
+    meleeRadius: 2
+    meleeOffset: 1
   modelPrefab: {fileID: 4377655535536273225, guid: 48b3e48d1e96a0c4490dc61536c17515, type: 3}
   projectilePrefab: {fileID: 0}
   hitEffectPrefab: {fileID: 0}

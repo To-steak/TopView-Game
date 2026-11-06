@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Player Definition
   m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.PlayerDefinition
   movement:
-    walkSpeed: 22
+    walkSpeed: 2
     runSpeed: 4
     jumpPower: 5
     dodgeSpeed: 6
