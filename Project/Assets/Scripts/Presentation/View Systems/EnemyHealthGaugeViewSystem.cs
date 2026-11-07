@@ -5,20 +5,21 @@ using TopView.Entities;
 using TopView.Presentation.Views;
 using TopView.Presentation.ViewContexts;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace TopView.Presentation.ViewSystems
 {
-    // 적 View가 있는 칸마다 체력 게이지를 풀에서 꺼내 붙이고, 적 위에 띄워 카메라를 바라보게 하고 체력 비율까지 너비를 부드럽게 옮기고 체력을 글자로 보여 준다.
+    // 적 View가 있는 칸마다 체력 게이지를 풀에서 꺼내 붙이고, 적 위에 띄워 카메라를 바라보게 하고, 마스크로 가린 게이지를 체력 비율까지 부드럽게 옮기고 체력을 글자로 보여 준다.
     public static class EnemyHealthGaugeViewSystem
     {
         /// <summary>
-        /// 저장소의 칸마다 적 View와 게이지를 맞추고, 게이지의 위치·회전·너비·글자를 적에 맞춘다. EnemyViewSystem.Present 다음에 부른다.
+        /// 저장소의 칸마다 적 View와 게이지를 맞추고, 게이지의 위치·회전·보이는 비율·글자를 적에 맞춘다. EnemyViewSystem.Present 다음에 부른다.
         /// </summary>
         /// <param name="entities">적 엔티티 배열</param>
         /// <param name="gaugePrefabsByKind">적 종류별 EnemyHealthGaugeView 프리팹</param>
         /// <param name="mainCamera">게이지가 바라볼 카메라. 없으면 null</param>
         /// <param name="context">적 View 실행 상태</param>
-        public static void Present(EnemyEntity[] entities, GameObject[] gaugePrefabsByKind, UnityEngine.Camera mainCamera, EnemyViewContext context)
+        public static void Present(EnemyEntity[] entities, GameObject[] gaugePrefabsByKind, Camera mainCamera, EnemyViewContext context)
         {
             for (int index = 0; index < context.views.Length; index++)
             {
@@ -64,21 +65,47 @@ namespace TopView.Presentation.ViewSystems
                         context.healthGaugeRatios[index] = healthRatio;
                         gauge.healthText.text = $"{health.current:F0} / {health.max:F0}";
 
-                        RectTransform gaugeFrontTransform = gauge.gaugeFront.rectTransform;
-                        Vector2 anchorMax = new Vector2(healthRatio, 1f);
-                        // 막 꺼낸 게이지는 이전 적의 너비가 남아 있으므로 연출 없이 맞춘다
+                        // 막 꺼낸 게이지는 이전 적의 비율이 남아 있으므로 연출 없이 맞춘다
                         if (isAcquired)
                         {
-                            gaugeFrontTransform.anchorMax = anchorMax;
+                            context.healthGaugeDisplayedRatios[index] = healthRatio;
+                            SetMaskRatio(gauge.healthMask, healthRatio);
                         }
-                        else
-                        {
-                            gaugeFrontTransform.DOKill();
-                            gaugeFrontTransform.DOAnchorMax(anchorMax, gauge.tweenTicks * Time.fixedDeltaTime).SetLink(gauge.gameObject);
-                        }
+                        context.healthGaugeStartRatios[index] = context.healthGaugeDisplayedRatios[index];
+                        context.healthGaugeElapsedSeconds[index] = 0f;
                     }
+
+                    UpdateDisplayedRatio(context, index, gauge, healthRatio);
                 }
             }
+        }
+
+        // 연출 시간을 이 프레임만큼 늘리고, 시작 비율에서 목표 비율까지 DOTween 기본 이징으로 옮긴 비율을 마스크에 맞춘다.
+        private static void UpdateDisplayedRatio(EnemyViewContext context, int index, EnemyHealthGaugeView gauge, float targetRatio)
+        {
+            float displayedRatio = context.healthGaugeDisplayedRatios[index];
+            if (displayedRatio == targetRatio)
+            {
+                return;
+            }
+
+            float durationSeconds = gauge.tweenTicks * Time.fixedDeltaTime;
+            float elapsedSeconds = context.healthGaugeElapsedSeconds[index] + Time.deltaTime;
+            context.healthGaugeElapsedSeconds[index] = elapsedSeconds;
+
+            displayedRatio = elapsedSeconds < durationSeconds
+                ? DOVirtual.EasedValue(context.healthGaugeStartRatios[index], targetRatio, elapsedSeconds / durationSeconds, DOTween.defaultEaseType)
+                : targetRatio;
+            context.healthGaugeDisplayedRatios[index] = displayedRatio;
+            SetMaskRatio(gauge.healthMask, displayedRatio);
+        }
+
+        // 마스크의 오른쪽 여백을 비율 밖의 폭으로 맞춘다.
+        private static void SetMaskRatio(RectMask2D mask, float ratio)
+        {
+            Vector4 padding = mask.padding;
+            padding.z = mask.rectTransform.rect.width * (1f - ratio);
+            mask.padding = padding;
         }
 
         private static EnemyHealthGaugeView Acquire(EnemyViewContext context, int enemyIndex, int kind, GameObject[] gaugePrefabsByKind)
@@ -94,7 +121,6 @@ namespace TopView.Presentation.ViewSystems
         {
             EnemyHealthGaugeView gauge = context.healthGaugeViews[enemyIndex];
             context.healthGaugeViews[enemyIndex] = null;
-            gauge.gaugeFront.rectTransform.DOKill();
             gauge.gameObject.SetActive(false);
             context.healthGaugePools[kind].Push(gauge);
         }

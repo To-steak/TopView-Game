@@ -86,6 +86,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7916076766150780736}
+  - component: {fileID: 7571629773460080368}
   m_Layer: 5
   m_Name: Gauge Area
   m_TagString: Untagged
@@ -113,6 +114,20 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: -20, y: -20}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &7571629773460080368
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1908598060896363705}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3312d7739989d2b4e91e6319e9a96d76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RectMask2D
+  m_Padding: {x: 0, y: 0, z: 0, w: 0}
+  m_Softness: {x: 0, y: 0}
 --- !u!1 &2642587081741898604
 GameObject:
   m_ObjectHideFlags: 0
@@ -168,7 +183,8 @@ MonoBehaviour:
   body: {fileID: 5380665070492729715}
   footer: {fileID: 6511398374641085327}
   _healthText: {fileID: 1333071523580498861}
-  _healthGauge: {fileID: 4976000158590032376}
+  _healthMask: {fileID: 7571629773460080368}
+  _tweenTicks: 15
 --- !u!114 &6032119051261708947
 MonoBehaviour:
   m_ObjectHideFlags: 0
