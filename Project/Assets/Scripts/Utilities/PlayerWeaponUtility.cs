@@ -61,44 +61,39 @@ namespace TopView.Utilities
         }
 
         /// <summary>
-        /// 충전한 시간으로 투척 충전량을 구한다. 1틱에 1씩 오르고, 100에 닿으면 1씩 내려가 0까지 돌아오기를 되풀이한다.
+        /// 충전한 시간으로 투척 충전량을 구한다. 1틱에 chargePerTick씩 오르고, 100에 닿으면 같은 빠르기로 내려가 0까지 돌아오기를 되풀이한다. 소수점 아래는 버린다.
         /// </summary>
         /// <param name="chargeTicks">충전한 시간(틱)</param>
-        /// <returns>충전량(0~100)</returns>
-        public static int GetThrowCharge(int chargeTicks)
+        /// <param name="chargePerTick">1틱에 오르는 충전량(%)</param>
+        /// <returns>충전량(0~100). chargePerTick이 0 이하면 0</returns>
+        public static int GetThrowCharge(int chargeTicks, float chargePerTick)
         {
-            int cycleTicks = chargeTicks % (MAX_THROW_CHARGE * 2);
-            return cycleTicks <= MAX_THROW_CHARGE ? cycleTicks : MAX_THROW_CHARGE * 2 - cycleTicks;
+            if (chargePerTick <= 0f)
+            {
+                return 0;
+            }
+
+            float cycleCharge = chargeTicks * chargePerTick % (MAX_THROW_CHARGE * 2);
+            float charge = cycleCharge <= MAX_THROW_CHARGE ? cycleCharge : MAX_THROW_CHARGE * 2 - cycleCharge;
+            return Mathf.Clamp(Mathf.FloorToInt(charge), 0, MAX_THROW_CHARGE);
         }
 
         /// <summary>
-        /// 충전량에 비례한 거리에 떨어지도록 던지는 속도를 구한다. 각도는 upwardRatio로 고정하고, 던진 높이와 같은 높이에 떨어진다고 본다.
+        /// 충전량에 비례한 거리로 착탄점을 구한다. 던지는 쪽의 앞 방향(XZ)으로 거리만큼 떨어진 곳이며, 높이는 던지는 쪽의 발 높이다.
         /// </summary>
         /// <param name="projectile">던질 투사체</param>
+        /// <param name="position">던지는 쪽의 위치(발)</param>
         /// <param name="rotation">던지는 쪽의 회전</param>
         /// <param name="throwCharge">투척 충전량(0~100)</param>
-        /// <param name="velocity">던지는 속도(월드, 유닛/초)</param>
-        /// <returns>구했으면 true. upwardRatio가 양수가 아니거나 gravity가 음수가 아니면 false</returns>
-        public static bool TryGetThrowVelocity(in ProjectileComponent projectile, Quaternion rotation, int throwCharge, out Vector3 velocity)
+        /// <returns>착탄점(월드)</returns>
+        public static Vector3 GetThrowTargetPosition(in ProjectileComponent projectile, Vector3 position, Quaternion rotation, int throwCharge)
         {
-            velocity = Vector3.zero;
-            float downwardGravity = -projectile.gravity;
-            if (projectile.upwardRatio <= 0f || downwardGravity <= 0f)
-            {
-                return false;
-            }
-
             Vector3 forward = rotation * Vector3.forward;
             forward.y = 0f;
             forward.Normalize();
-            Vector3 direction = (forward + Vector3.up * projectile.upwardRatio).normalized;
 
-            // 같은 높이에 떨어지는 거리 = 속도² × sin(2 × 각도) / 중력이고, sin(2 × 각도) = 2 × 수직 비율 × 수평 비율이다
-            float sinDoubleAngle = 2f * direction.y * Mathf.Sqrt(1f - direction.y * direction.y);
-            float distance = projectile.maxThrowDistance * Mathf.Clamp(throwCharge, 0, MAX_THROW_CHARGE) / MAX_THROW_CHARGE;
-            float speed = Mathf.Sqrt(Mathf.Max(0f, distance) * downwardGravity / sinDoubleAngle);
-            velocity = direction * speed;
-            return true;
+            float distance = Mathf.Max(0f, projectile.maxThrowDistance) * Mathf.Clamp(throwCharge, 0, MAX_THROW_CHARGE) / MAX_THROW_CHARGE;
+            return position + forward * distance;
         }
 
         /// <summary>

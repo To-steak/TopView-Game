@@ -112,6 +112,10 @@ namespace TopView.Presentation.ViewSystems
             {
                 Debug.LogError("PlayerViewSystem >> PlayerView에 Sound Effect Source가 연결되어 있지 않아 공격 효과음이 나오지 않는다.");
             }
+            if (context.view.throwPreviewLine == null || context.view.throwPreviewCircle == null)
+            {
+                Debug.LogError("PlayerViewSystem >> PlayerView에 Throw Preview Line이나 Throw Preview Circle이 연결되어 있지 않아 투척 미리보기 일부가 보이지 않는다.");
+            }
 
             context.weaponModels = new GameObject[weaponModelPrefabs.Length];
             context.weaponViews = new WeaponView[weaponModelPrefabs.Length];

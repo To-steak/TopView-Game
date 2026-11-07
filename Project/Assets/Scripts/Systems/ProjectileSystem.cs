@@ -2,11 +2,12 @@ using System.Collections.Generic;
 using TopView.Components;
 using TopView.Entities;
 using TopView.Requests;
+using TopView.Utilities;
 using UnityEngine;
 
 namespace TopView.Systems
 {
-    // 투사체를 움직인다. Straight는 수명이 다하면 소멸을 요청하고, 둘 다 환경에 닿으면 멈춘다. 판정과 폭발, 벽에 막힌 Straight의 소멸은 ProjectileHitSystem이 한다.
+    // 투사체를 움직인다. Straight는 수명이 다하면 소멸을 요청하고, 둘 다 환경에 닿으면 멈춘다. Grenade는 착탄점에 도착해도 멈춘다. 판정과 폭발, 벽에 막힌 Straight의 소멸은 ProjectileHitSystem이 한다.
     public static class ProjectileSystem
     {
         /// <summary>
@@ -41,7 +42,7 @@ namespace TopView.Systems
 
             if (!motion.isResting)
             {
-                MoveGrenade(in projectile, ref motion, ref position, deltaTime);
+                MoveGrenade(in projectile, ref motion, ref position);
             }
             return false;
         }
@@ -69,27 +70,44 @@ namespace TopView.Systems
             position.current += displacement;
         }
 
-        // 중력을 받아 움직이다가 환경 레이어에 닿으면 그 자리에서 멈춘다.
-        private static void MoveGrenade(in ProjectileComponent projectile, ref ProjectileMotionComponent motion, ref PositionComponent position, float deltaTime)
+        // 지난 시간으로 포물선 위의 다음 위치를 구해 옮긴다. 가는 길에 환경 레이어에 닿으면 닿은 자리에서, 아니면 착탄점에 도착하면 멈춘다.
+        // 위치를 누적하지 않고 매 틱 공식으로 구하므로 오차가 쌓이지 않는다. 투척 미리보기도 같은 계산을 쓴다.
+        private static void MoveGrenade(in ProjectileComponent projectile, ref ProjectileMotionComponent motion, ref PositionComponent position)
         {
-            motion.velocity.y += projectile.gravity * deltaTime;
-            Vector3 displacement = motion.velocity * deltaTime;
-            float distance = displacement.magnitude;
-            if (distance <= 0f)
-            {
-                return;
-            }
+            float progress = ThrowableUtility.GetArcProgress(motion.elapsedTicks, projectile.flightTicks);
+            Vector3 nextPosition = ThrowableUtility.GetArcPosition(motion.launchPosition, motion.targetPosition, projectile.arcHeight, progress);
 
-            Vector3 direction = displacement / distance;
-            if (Physics.SphereCast(position.current, projectile.radius, direction, out RaycastHit hit, distance, projectile.collisionLayer, QueryTriggerInteraction.Ignore))
+            if (TrySweep(in projectile, position.current, nextPosition, out Vector3 stopPosition))
             {
-                position.current += direction * hit.distance;
-                motion.velocity = Vector3.zero;
+                position.current = stopPosition;
                 motion.isResting = true;
                 return;
             }
 
-            position.current += displacement;
+            position.current = nextPosition;
+            motion.isResting = progress >= 1f;
+        }
+
+        // from에서 to로 한 틱 움직일 때 환경 레이어에 닿는지 투사체 반지름의 구로 검사한다. 닿으면 닿은 자리, 아니면 to를 stopPosition에 넣는다.
+        // 투척 미리보기와 결과가 같도록 PlayerThrowPreviewSystem.TrySweep과 같은 질의를 한다. 한쪽을 고치면 다른 쪽도 고친다.
+        private static bool TrySweep(in ProjectileComponent projectile, Vector3 from, Vector3 to, out Vector3 stopPosition)
+        {
+            stopPosition = to;
+            Vector3 displacement = to - from;
+            float distance = displacement.magnitude;
+            if (distance <= 0f)
+            {
+                return false;
+            }
+
+            Vector3 direction = displacement / distance;
+            if (Physics.SphereCast(from, projectile.radius, direction, out RaycastHit hit, distance, projectile.collisionLayer, QueryTriggerInteraction.Ignore))
+            {
+                stopPosition = from + direction * hit.distance;
+                return true;
+            }
+
+            return false;
         }
     }
 }

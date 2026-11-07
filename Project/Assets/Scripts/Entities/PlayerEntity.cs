@@ -36,5 +36,7 @@ namespace TopView.Entities
         public WeaponListComponent weaponList;
         // 든 무기와 무기별 탄약
         public PlayerWeaponSlotsComponent weaponSlots;
+        // 투척 충전 중의 궤도 미리보기
+        public PlayerThrowPreviewComponent throwPreview;
     }
 }
