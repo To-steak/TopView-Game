@@ -20,13 +20,14 @@ namespace TopView.Core
 
         private const int PLAYER_CAPACITY = 1;
 
-        // 씬의 Player Spawner Authoring을 찾는다. 없으면 판을 하지 않는 씬이라 로그 없이 false, 둘 이상이면 false
+        // 씬의 Player Spawner Authoring을 찾는다. 하나가 아니면 false
         private static bool TryFindPlayerSpawner(out PlayerSpawnerAuthoring playerSpawner)
         {
             PlayerSpawnerAuthoring[] playerSpawners = FindObjectsByType<PlayerSpawnerAuthoring>(FindObjectsSortMode.None);
             playerSpawner = null;
             if (playerSpawners.Length == 0)
             {
+                Debug.LogError("Runner >> 씬에 Player Spawner Authoring이 없어 판을 시작할 수 없다.");
                 return false;
             }
 

@@ -16,9 +16,6 @@ namespace TopView.Core
         // 새 World를 만들고 Definition과 씬의 Authoring 값을 채운 뒤, 씬의 View와 Presenter를 찾아 연결한다.
         private void StartRound()
         {
-            ClearRound();
-
-            // Player Spawner Authoring이 없는 씬(메뉴 등)은 판을 하지 않는 씬이다
             if (!TryFindPlayerSpawner(out PlayerSpawnerAuthoring playerSpawner))
             {
                 return;
@@ -124,7 +121,7 @@ namespace TopView.Core
             BindPresenters();
         }
 
-        // 이전 판의 World, View 실행 상태, Presenter 연결을 비운다.
+        // 판의 World, View 실행 상태, Presenter 연결을 비운다. 씬을 다시 불러오기 전에 불러, 씬이 바뀌기까지 남은 프레임에 판이 돌지 않게 한다.
         private void ClearRound()
         {
             _world = null;
