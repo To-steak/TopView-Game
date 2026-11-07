@@ -21,10 +21,10 @@ namespace TopView.Editor
                     || childName == nameof(ProjectileComponent.lifetimeTicks);
             }
 
-            return childName == nameof(ProjectileComponent.maxThrowDistance)
-                || childName == nameof(ProjectileComponent.upwardRatio)
-                || childName == nameof(ProjectileComponent.gravity)
-                || childName == nameof(ProjectileComponent.fuseTicks)
+            return childName == nameof(ProjectileComponent.chargePerTick)
+                || childName == nameof(ProjectileComponent.maxThrowDistance)
+                || childName == nameof(ProjectileComponent.flightTicks)
+                || childName == nameof(ProjectileComponent.arcHeight)
                 || childName == nameof(ProjectileComponent.explosionRadius);
         }
     }

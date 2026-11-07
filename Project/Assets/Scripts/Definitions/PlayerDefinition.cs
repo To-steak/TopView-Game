@@ -23,5 +23,7 @@ namespace TopView.Definitions
         public float cameraYawDegreesPerSecond = 90f;
         // 원거리 레이어 가중치가 0에서 1로 올라오는 시간(틱). 0이면 바로 1이 된다
         public int rangedLayerBlendInTicks;
+        // 투척 미리보기 원이 바닥과 겹쳐 깜빡이지 않도록 폭발 위치보다 띄우는 높이(유닛)
+        public float throwPreviewCircleHeightOffset = 0.02f;
     }
 }

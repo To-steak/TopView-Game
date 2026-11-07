@@ -15,6 +15,7 @@ namespace TopView.Core
         private int _playerCameraPriority;
         private float _playerCameraYawDegreesPerSecond;
         private int _playerRangedLayerBlendInTicks;
+        private float _playerThrowPreviewCircleHeightOffset;
         private GameObject[] _playerWeaponModelPrefabs;
 
         private const int PLAYER_CAPACITY = 1;

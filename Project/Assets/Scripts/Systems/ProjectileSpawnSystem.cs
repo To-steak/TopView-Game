@@ -11,16 +11,22 @@ namespace TopView.Systems
     public static class ProjectileSpawnSystem
     {
         /// <summary>
-        /// 투사체 생성 요청을 모두 처리한다. 빈 칸이 없으면 요청을 버린다.
+        /// 투사체 생성 요청을 모두 처리한다. 빈 칸이 없거나 flightTicks가 0 이하인 Grenade면 요청을 버린다.
         /// </summary>
         /// <param name="projectiles">투사체 저장소</param>
         /// <param name="projectileSpawnRequests">투사체 생성 요청 큐</param>
         public static void Tick(ProjectileStorage projectiles, Queue<ProjectileSpawnRequest> projectileSpawnRequests)
         {
             int droppedCount = 0;
+            int invalidFlightCount = 0;
             while (projectileSpawnRequests.Count > 0)
             {
                 ProjectileSpawnRequest request = projectileSpawnRequests.Dequeue();
+                if (request.projectile.kind == ProjectileKind.Grenade && request.projectile.flightTicks <= 0)
+                {
+                    invalidFlightCount++;
+                    continue;
+                }
                 if (!SpawnUtility.TryTakeFreeIndex(projectiles.freeIndices, out int index))
                 {
                     droppedCount++;
@@ -30,6 +36,10 @@ namespace TopView.Systems
                 Spawn(ref projectiles.entities[index], in request);
             }
 
+            if (invalidFlightCount > 0)
+            {
+                Debug.LogWarning($"ProjectileSpawnSystem >> flightTicks가 0 이하인 Grenade 생성 요청 {invalidFlightCount}개를 버렸다. flightTicks는 0보다 커야 한다.");
+            }
             if (droppedCount > 0)
             {
                 Debug.LogWarning($"ProjectileSpawnSystem >> 투사체 저장소에 빈 칸이 없어 생성 요청 {droppedCount}개를 버렸다.");
@@ -46,7 +56,7 @@ namespace TopView.Systems
                 isAlive = true,
                 generation = generation,
                 projectile = request.projectile,
-                motion = new ProjectileMotionComponent { velocity = request.velocity },
+                motion = new ProjectileMotionComponent { velocity = request.velocity, launchPosition = request.position, targetPosition = request.targetPosition },
                 position = new PositionComponent { previous = request.position, current = request.position },
                 rotation = new RotationComponent { previous = request.rotation, current = request.rotation },
                 payload = new AttackPayloadComponent { faction = request.faction, damage = request.damage }

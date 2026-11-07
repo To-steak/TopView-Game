@@ -63,7 +63,7 @@ namespace TopView.Systems
                         return false;
                     }
                     weaponSlots.currentAmmo[weaponIndex]--;
-                    RequestProjectile(position, rotation, in weapon, rotation * Vector3.forward * weapon.projectile.speed, projectileSpawnRequests);
+                    RequestProjectile(position, rotation, in weapon, rotation * Vector3.forward * weapon.projectile.speed, Vector3.zero, projectileSpawnRequests);
                     break;
 
                 case WeaponKind.Throw:
@@ -72,13 +72,14 @@ namespace TopView.Systems
                         Debug.LogWarning($"PlayerAttackSystem >> 남은 탄약이 {weaponSlots.reserveAmmo[weaponIndex]}이라 투척 공격을 내보내지 않았다.");
                         return false;
                     }
-                    if (!PlayerWeaponUtility.TryGetThrowVelocity(in weapon.projectile, rotation, actionState.throwCharge, out Vector3 throwVelocity))
+                    if (weapon.projectile.flightTicks <= 0)
                     {
-                        Debug.LogWarning($"PlayerAttackSystem >> upwardRatio({weapon.projectile.upwardRatio})나 gravity({weapon.projectile.gravity})로 던지는 속도를 구할 수 없어 투척 공격을 내보내지 않았다. upwardRatio는 양수, gravity는 음수여야 한다.");
+                        Debug.LogWarning($"PlayerAttackSystem >> flightTicks({weapon.projectile.flightTicks})가 0 이하라 투척 공격을 내보내지 않았다. flightTicks는 0보다 커야 한다.");
                         return false;
                     }
                     weaponSlots.reserveAmmo[weaponIndex]--;
-                    RequestProjectile(position, rotation, in weapon, throwVelocity, projectileSpawnRequests);
+                    Vector3 targetPosition = PlayerWeaponUtility.GetThrowTargetPosition(in weapon.projectile, position, rotation, actionState.throwCharge);
+                    RequestProjectile(position, rotation, in weapon, Vector3.zero, targetPosition, projectileSpawnRequests);
                     break;
 
                 case WeaponKind.Melee:
@@ -101,8 +102,8 @@ namespace TopView.Systems
             return true;
         }
 
-        // 무기의 총구 위치에서 플레이어 회전과 주어진 속도로 투사체를 내보낸다.
-        private static void RequestProjectile(Vector3 position, Quaternion rotation, in WeaponComponent weapon, Vector3 velocity, Queue<ProjectileSpawnRequest> projectileSpawnRequests)
+        // 무기의 총구 위치에서 플레이어 회전으로 투사체를 내보낸다. Straight는 velocity로, Grenade는 targetPosition을 향해 날아간다.
+        private static void RequestProjectile(Vector3 position, Quaternion rotation, in WeaponComponent weapon, Vector3 velocity, Vector3 targetPosition, Queue<ProjectileSpawnRequest> projectileSpawnRequests)
         {
             projectileSpawnRequests.Enqueue(new ProjectileSpawnRequest
             {
@@ -111,7 +112,8 @@ namespace TopView.Systems
                 damage = weapon.damage,
                 position = position + rotation * weapon.muzzleOffset,
                 rotation = rotation,
-                velocity = velocity
+                velocity = velocity,
+                targetPosition = targetPosition
             });
         }
     }

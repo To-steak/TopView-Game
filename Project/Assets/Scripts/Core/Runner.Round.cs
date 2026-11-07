@@ -111,6 +111,7 @@ namespace TopView.Core
             _playerCameraPriority = playerDefinition.cameraPriority;
             _playerCameraYawDegreesPerSecond = playerDefinition.cameraYawDegreesPerSecond;
             _playerRangedLayerBlendInTicks = playerDefinition.rangedLayerBlendInTicks;
+            _playerThrowPreviewCircleHeightOffset = playerDefinition.throwPreviewCircleHeightOffset;
             _playerWeaponModelPrefabs = weaponModelPrefabs;
             _enemyViewPrefabs = enemyViewPrefabs;
             _enemyHealthGaugePrefabs = enemyHealthGaugePrefabs;
