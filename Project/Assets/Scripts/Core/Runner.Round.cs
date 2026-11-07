@@ -5,6 +5,7 @@ using TopView.Definitions;
 using TopView.Entities;
 using TopView.Presentation.Views;
 using TopView.Presentation.ViewContexts;
+using TopView.Presentation.ViewSystems;
 using TopView.Requests;
 using UnityEngine;
 
@@ -70,6 +71,7 @@ namespace TopView.Core
             World world = new World();
             world.rule = gameSettings.rule;
             world.lootRule = lootDefinition.rule;
+            world.flowRule = gameSettings.flowRule;
             world.enemySpawners = enemySpawners;
             world.enemySpawnerStates = new EnemySpawnerStateComponent[enemySpawners.Length];
             world.playerDetectors = playerDetectors;
@@ -118,6 +120,11 @@ namespace TopView.Core
         // 판의 World, View 실행 상태, Presenter 연결을 비운다. 씬을 다시 불러오기 전에 불러, 씬이 바뀌기까지 남은 프레임에 판이 돌지 않게 한다.
         private void ClearRound()
         {
+            if (_viewContext != null)
+            {
+                PauseViewSystem.Release(_viewContext.pause);
+            }
+
             _world = null;
             _viewContext = null;
             _gameOverPresenter = null;
@@ -128,6 +135,9 @@ namespace TopView.Core
             _ammoPresenter = null;
             _playerManaPresenter = null;
             _bossHealthPresenter = null;
+            _pausePresenter = null;
+            _settingsPresenter = null;
+            _isSettingsOpen = false;
         }
 
         // 이번 판의 저장소 크기와 View 표에 맞춰 View 실행 상태를 만들고 씬의 카메라를 찾는다.
@@ -177,7 +187,8 @@ namespace TopView.Core
                     viewKinds = new int[_world.loots.entities.Length],
                     viewPools = new Stack<LootView>[_lootPrefabs.Length]
                 },
-                music = CreateMusicViewContext()
+                music = CreateMusicViewContext(),
+                pause = new PauseViewContext()
             };
             for (int kind = 0; kind < enemyKindCount; kind++)
             {

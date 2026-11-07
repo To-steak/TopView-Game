@@ -406,7 +406,7 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
             ]
         },
         {
-            ""name"": ""System"",
+            ""name"": ""UserInterface"",
             ""id"": ""db4d9c6b-ca20-4d6f-aaca-dddf39661f29"",
             ""actions"": [
                 {
@@ -466,15 +466,15 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         m_Global_Reload = m_Global.FindAction("Reload", throwIfNotFound: true);
         m_Global_CameraYaw = m_Global.FindAction("CameraYaw", throwIfNotFound: true);
         m_Global_Cancel = m_Global.FindAction("Cancel", throwIfNotFound: true);
-        // System
-        m_System = asset.FindActionMap("System", throwIfNotFound: true);
-        m_System_Escape = m_System.FindAction("Escape", throwIfNotFound: true);
+        // UserInterface
+        m_UserInterface = asset.FindActionMap("UserInterface", throwIfNotFound: true);
+        m_UserInterface_Escape = m_UserInterface.FindAction("Escape", throwIfNotFound: true);
     }
 
     ~@PlayerActions()
     {
         UnityEngine.Debug.Assert(!m_Global.enabled, "This will cause a leak and performance issues, PlayerActions.Global.Disable() has not been called.");
-        UnityEngine.Debug.Assert(!m_System.enabled, "This will cause a leak and performance issues, PlayerActions.System.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_UserInterface.enabled, "This will cause a leak and performance issues, PlayerActions.UserInterface.Disable() has not been called.");
     }
 
     /// <summary>
@@ -742,29 +742,29 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
     /// </summary>
     public GlobalActions @Global => new GlobalActions(this);
 
-    // System
-    private readonly InputActionMap m_System;
-    private List<ISystemActions> m_SystemActionsCallbackInterfaces = new List<ISystemActions>();
-    private readonly InputAction m_System_Escape;
+    // UserInterface
+    private readonly InputActionMap m_UserInterface;
+    private List<IUserInterfaceActions> m_UserInterfaceActionsCallbackInterfaces = new List<IUserInterfaceActions>();
+    private readonly InputAction m_UserInterface_Escape;
     /// <summary>
-    /// Provides access to input actions defined in input action map "System".
+    /// Provides access to input actions defined in input action map "UserInterface".
     /// </summary>
-    public struct SystemActions
+    public struct UserInterfaceActions
     {
         private @PlayerActions m_Wrapper;
 
         /// <summary>
         /// Construct a new instance of the input action map wrapper class.
         /// </summary>
-        public SystemActions(@PlayerActions wrapper) { m_Wrapper = wrapper; }
+        public UserInterfaceActions(@PlayerActions wrapper) { m_Wrapper = wrapper; }
         /// <summary>
-        /// Provides access to the underlying input action "System/Escape".
+        /// Provides access to the underlying input action "UserInterface/Escape".
         /// </summary>
-        public InputAction @Escape => m_Wrapper.m_System_Escape;
+        public InputAction @Escape => m_Wrapper.m_UserInterface_Escape;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
-        public InputActionMap Get() { return m_Wrapper.m_System; }
+        public InputActionMap Get() { return m_Wrapper.m_UserInterface; }
         /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
         public void Enable() { Get().Enable(); }
         /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
@@ -772,9 +772,9 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
         public bool enabled => Get().enabled;
         /// <summary>
-        /// Implicitly converts an <see ref="SystemActions" /> to an <see ref="InputActionMap" /> instance.
+        /// Implicitly converts an <see ref="UserInterfaceActions" /> to an <see ref="InputActionMap" /> instance.
         /// </summary>
-        public static implicit operator InputActionMap(SystemActions set) { return set.Get(); }
+        public static implicit operator InputActionMap(UserInterfaceActions set) { return set.Get(); }
         /// <summary>
         /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
         /// </summary>
@@ -782,11 +782,11 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         /// <remarks>
         /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
         /// </remarks>
-        /// <seealso cref="SystemActions" />
-        public void AddCallbacks(ISystemActions instance)
+        /// <seealso cref="UserInterfaceActions" />
+        public void AddCallbacks(IUserInterfaceActions instance)
         {
-            if (instance == null || m_Wrapper.m_SystemActionsCallbackInterfaces.Contains(instance)) return;
-            m_Wrapper.m_SystemActionsCallbackInterfaces.Add(instance);
+            if (instance == null || m_Wrapper.m_UserInterfaceActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_UserInterfaceActionsCallbackInterfaces.Add(instance);
             @Escape.started += instance.OnEscape;
             @Escape.performed += instance.OnEscape;
             @Escape.canceled += instance.OnEscape;
@@ -798,8 +798,8 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         /// <remarks>
         /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
         /// </remarks>
-        /// <seealso cref="SystemActions" />
-        private void UnregisterCallbacks(ISystemActions instance)
+        /// <seealso cref="UserInterfaceActions" />
+        private void UnregisterCallbacks(IUserInterfaceActions instance)
         {
             @Escape.started -= instance.OnEscape;
             @Escape.performed -= instance.OnEscape;
@@ -807,12 +807,12 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         }
 
         /// <summary>
-        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="SystemActions.UnregisterCallbacks(ISystemActions)" />.
+        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="UserInterfaceActions.UnregisterCallbacks(IUserInterfaceActions)" />.
         /// </summary>
-        /// <seealso cref="SystemActions.UnregisterCallbacks(ISystemActions)" />
-        public void RemoveCallbacks(ISystemActions instance)
+        /// <seealso cref="UserInterfaceActions.UnregisterCallbacks(IUserInterfaceActions)" />
+        public void RemoveCallbacks(IUserInterfaceActions instance)
         {
-            if (m_Wrapper.m_SystemActionsCallbackInterfaces.Remove(instance))
+            if (m_Wrapper.m_UserInterfaceActionsCallbackInterfaces.Remove(instance))
                 UnregisterCallbacks(instance);
         }
 
@@ -822,21 +822,21 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         /// <remarks>
         /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
         /// </remarks>
-        /// <seealso cref="SystemActions.AddCallbacks(ISystemActions)" />
-        /// <seealso cref="SystemActions.RemoveCallbacks(ISystemActions)" />
-        /// <seealso cref="SystemActions.UnregisterCallbacks(ISystemActions)" />
-        public void SetCallbacks(ISystemActions instance)
+        /// <seealso cref="UserInterfaceActions.AddCallbacks(IUserInterfaceActions)" />
+        /// <seealso cref="UserInterfaceActions.RemoveCallbacks(IUserInterfaceActions)" />
+        /// <seealso cref="UserInterfaceActions.UnregisterCallbacks(IUserInterfaceActions)" />
+        public void SetCallbacks(IUserInterfaceActions instance)
         {
-            foreach (var item in m_Wrapper.m_SystemActionsCallbackInterfaces)
+            foreach (var item in m_Wrapper.m_UserInterfaceActionsCallbackInterfaces)
                 UnregisterCallbacks(item);
-            m_Wrapper.m_SystemActionsCallbackInterfaces.Clear();
+            m_Wrapper.m_UserInterfaceActionsCallbackInterfaces.Clear();
             AddCallbacks(instance);
         }
     }
     /// <summary>
-    /// Provides a new <see cref="SystemActions" /> instance referencing this action map.
+    /// Provides a new <see cref="UserInterfaceActions" /> instance referencing this action map.
     /// </summary>
-    public SystemActions @System => new SystemActions(this);
+    public UserInterfaceActions @UserInterface => new UserInterfaceActions(this);
     private int m_PCControlSchemeSchemeIndex = -1;
     /// <summary>
     /// Provides access to the input control scheme.
@@ -929,11 +929,11 @@ public partial class @PlayerActions: IInputActionCollection2, IDisposable
         void OnCancel(InputAction.CallbackContext context);
     }
     /// <summary>
-    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "System" which allows adding and removing callbacks.
+    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UserInterface" which allows adding and removing callbacks.
     /// </summary>
-    /// <seealso cref="SystemActions.AddCallbacks(ISystemActions)" />
-    /// <seealso cref="SystemActions.RemoveCallbacks(ISystemActions)" />
-    public interface ISystemActions
+    /// <seealso cref="UserInterfaceActions.AddCallbacks(IUserInterfaceActions)" />
+    /// <seealso cref="UserInterfaceActions.RemoveCallbacks(IUserInterfaceActions)" />
+    public interface IUserInterfaceActions
     {
         /// <summary>
         /// Method invoked when associated input action "Escape" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.

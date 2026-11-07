@@ -21,5 +21,7 @@ namespace TopView.Presentation.ViewContexts
         public LootViewContext loot;
         // 배경음악 실행 상태. Definition이 없으면 null
         public MusicViewContext music;
+        // 일시정지 연출 실행 상태
+        public PauseViewContext pause;
     }
 }

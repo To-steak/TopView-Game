@@ -17,6 +17,8 @@ namespace TopView.Core
         private PlayerManaPresenter _playerManaPresenter;
         private ReloadPresenter _reloadPresenter;
         private BossHealthPresenter _bossHealthPresenter;
+        private PausePresenter _pausePresenter;
+        private SettingsPresenter _settingsPresenter;
 
         private void BindPresenters()
         {
@@ -109,6 +111,26 @@ namespace TopView.Core
             {
                 _bossHealthPresenter.Initialize();
             }
+
+            _pausePresenter = FindAnyObjectByType<PausePresenter>();
+            if (_pausePresenter == null)
+            {
+                Debug.LogError("Runner >> 씬에 PausePresenter가 없다.");
+            }
+            else
+            {
+                _pausePresenter.Initialize(_world.commandBuffer);
+            }
+
+            _settingsPresenter = FindAnyObjectByType<SettingsPresenter>();
+            if (_settingsPresenter == null)
+            {
+                Debug.LogError("Runner >> 씬에 SettingsPresenter가 없다.");
+            }
+            else
+            {
+                _settingsPresenter.Initialize(_world.commandBuffer.settingsCommands);
+            }
         }
 
         private void PresentUserInterface()
@@ -129,6 +151,15 @@ namespace TopView.Core
             if (_goldPresenter != null)
             {
                 _goldPresenter.Present(_world.progress.gold);
+            }
+            // 설정 화면이 열려 있으면 그 뒤의 일시정지 버튼을 누르지 않도록 일시정지 화면을 숨긴다
+            if (_pausePresenter != null)
+            {
+                _pausePresenter.Present(_world.progress.isPaused && !_isSettingsOpen);
+            }
+            if (_settingsPresenter != null)
+            {
+                _settingsPresenter.Present(_isSettingsOpen, in _volume);
             }
 
             if (!TryFindAlivePlayer(out int playerIndex))

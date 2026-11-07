@@ -14,8 +14,9 @@ namespace TopView.Presentation.ViewSystems
         /// </summary>
         /// <param name="entities">전리품 엔티티 배열</param>
         /// <param name="lootPrefabs">전리품 종류 번호별 LootView 프리팹. 없는 종류는 null</param>
+        /// <param name="isPaused">판이 일시정지 중이면 true. 모델을 회전시키지 않는다</param>
         /// <param name="context">전리품 View 실행 상태</param>
-        public static void Present(LootEntity[] entities, GameObject[] lootPrefabs, LootViewContext context)
+        public static void Present(LootEntity[] entities, GameObject[] lootPrefabs, bool isPaused, LootViewContext context)
         {
             for (int index = 0; index < entities.Length; index++)
             {
@@ -45,7 +46,7 @@ namespace TopView.Presentation.ViewSystems
                 }
 
                 Vector3 rotationSpeed = new Vector3(view.pitchSpeed, view.yawSpeed, view.rollSpeed);
-                if (rotationSpeed != Vector3.zero && view.rotationPivot != null)
+                if (!isPaused && rotationSpeed != Vector3.zero && view.rotationPivot != null)
                 {
                     view.rotationPivot.Rotate(rotationSpeed * Time.deltaTime, Space.Self);
                 }

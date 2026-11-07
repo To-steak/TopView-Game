@@ -6,6 +6,7 @@ using TopView.Persistence;
 using TopView.Presentation.ViewContexts;
 using TopView.Presentation.ViewSystems;
 using TopView.UserInterface.Presenters;
+using TopView.Utilities;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -23,6 +24,7 @@ namespace TopView.Core
         [SerializeField] private MenuSettingsDefinition _menuSettingsDefinition;
 
         private readonly List<MenuCommand> _commands = new List<MenuCommand>();
+        private readonly List<SettingsCommand> _settingsCommands = new List<SettingsCommand>();
         // Start에서 Menu Settings Definition에서 복사한 흐름 값
         private MenuRuleComponent _rule;
         // 흐름 값을 복사했는지. Menu Settings Definition이 없으면 false이고, 이때는 World를 불러오지 않는다
@@ -90,7 +92,7 @@ namespace TopView.Core
             }
             else
             {
-                _settingsPresenter.Initialize(_commands);
+                _settingsPresenter.Initialize(_settingsCommands);
             }
 
             if (_loadingPresenter == null)
@@ -110,6 +112,12 @@ namespace TopView.Core
                 HandleCommand(_commands[commandIndex]);
             }
             _commands.Clear();
+
+            for (int commandIndex = 0; commandIndex < _settingsCommands.Count; commandIndex++)
+            {
+                HandleSettingsCommand(_settingsCommands[commandIndex]);
+            }
+            _settingsCommands.Clear();
 
             // LoadSceneAsync는 부른 프레임에 메인 스레드를 멈출 수 있어, 로딩 화면이 한 번 그려진 다음 프레임에 부른다
             if (_isLoadingRequested && _loading == null && Time.frameCount > _loadingRequestedFrame)
@@ -174,18 +182,6 @@ namespace TopView.Core
                 case MenuCommandType.OpenSettings:
                     _isSettingsOpen = true;
                     break;
-                case MenuCommandType.CloseSettings:
-                    _isSettingsOpen = false;
-                    SaveVolume();
-                    break;
-                case MenuCommandType.SetMusicVolume:
-                    _volume.musicVolume = ReadVolume(in command);
-                    PresentVolume();
-                    break;
-                case MenuCommandType.SetSoundEffectVolume:
-                    _volume.soundEffectVolume = ReadVolume(in command);
-                    PresentVolume();
-                    break;
                 case MenuCommandType.Exit:
                     SaveVolume();
                     Quit();
@@ -239,19 +235,27 @@ namespace TopView.Core
             _loading.allowSceneActivation = true;
         }
 
-        private float ReadVolume(in MenuCommand command)
+        private void HandleSettingsCommand(in SettingsCommand command)
         {
-            if (command.value < 0f || command.value > 1f)
+            // 로딩을 요청하면 설정 화면이 숨겨지므로, 그 뒤에 남은 설정 명령은 정상적으로 무시한다
+            if (_isLoadingRequested)
             {
-                if (!_hasReportedVolumeOutOfRange)
-                {
-                    Debug.LogWarning($"MenuFlow >> {command.type} 볼륨 {command.value}이 0~1 밖이라 범위 안으로 맞춘다. 슬라이더의 Min/Max Value를 확인한다. 이 경고는 한 번만 남긴다.");
-                    _hasReportedVolumeOutOfRange = true;
-                }
-                return Mathf.Clamp01(command.value);
+                return;
             }
 
-            return command.value;
+            if (command.type == SettingsCommandType.Close)
+            {
+                _isSettingsOpen = false;
+                SaveVolume();
+                return;
+            }
+
+            if (!AudioVolumeUtility.Apply(ref _volume, in command) && !_hasReportedVolumeOutOfRange)
+            {
+                Debug.LogWarning($"MenuFlow >> {command.type} 볼륨 {command.value}이 0~1 밖이라 범위 안으로 맞췄다. 슬라이더의 Min/Max Value를 확인한다. 이 경고는 한 번만 남긴다.");
+                _hasReportedVolumeOutOfRange = true;
+            }
+            PresentVolume();
         }
 
         // Audio Settings Definition이 없으면 Start에서 경고했으므로 로그 없이 건너뛴다

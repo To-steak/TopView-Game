@@ -14,8 +14,9 @@ namespace TopView.Presentation.ViewSystems
         /// </summary>
         /// <param name="entities">투사체 엔티티 배열</param>
         /// <param name="projectilePrefabs">투사체 View 표. 번호별 ProjectileView 프리팹</param>
+        /// <param name="isPaused">판이 일시정지 중이면 true. 모델을 회전시키지 않는다</param>
         /// <param name="context">투사체 View 실행 상태</param>
-        public static void Present(ProjectileEntity[] entities, GameObject[] projectilePrefabs, ProjectileViewContext context)
+        public static void Present(ProjectileEntity[] entities, GameObject[] projectilePrefabs, bool isPaused, ProjectileViewContext context)
         {
             float alpha = Mathf.Clamp01((Time.time - Time.fixedTime) / Time.fixedDeltaTime);
 
@@ -46,7 +47,7 @@ namespace TopView.Presentation.ViewSystems
                 }
 
                 Vector3 rotationSpeed = new Vector3(view.pitchSpeed, view.yawSpeed, view.rollSpeed);
-                if (rotationSpeed != Vector3.zero && view.rotationPivot != null)
+                if (!isPaused && rotationSpeed != Vector3.zero && view.rotationPivot != null)
                 {
                     view.rotationPivot.Rotate(rotationSpeed * Time.deltaTime, Space.Self);
                 }

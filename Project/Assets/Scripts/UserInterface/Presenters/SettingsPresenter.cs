@@ -6,22 +6,22 @@ using UnityEngine;
 
 namespace TopView.UserInterface.Presenters
 {
-    // 설정이 열려 있으면 SettingsView를 보이고 볼륨을 슬라이더에 맞춘다. 슬라이더와 닫기 입력을 메뉴 명령으로 넣는다.
+    // 설정이 열려 있으면 SettingsView를 보이고 볼륨을 슬라이더에 맞춘다. 슬라이더와 닫기 입력을 설정 명령으로 넣는다. Menu와 World 씬이 함께 쓴다.
     public class SettingsPresenter : MonoBehaviour
     {
         [SerializeField] private SettingsView _view;
 
-        private List<MenuCommand> _commands;
+        private List<SettingsCommand> _commands;
         private bool _isShown;
         // 같은 값을 매 프레임 다시 쓰지 않도록 마지막으로 보여 준 값을 기억한다
         private float _presentedMusicVolume;
         private float _presentedSoundEffectVolume;
 
         /// <summary>
-        /// 명령을 넣을 목록을 받고 View를 숨긴다. MenuFlow가 시작할 때 부른다.
+        /// 명령을 넣을 목록을 받고 View를 숨긴다. 그 씬의 흐름을 맡은 쪽(MenuFlow, Runner)이 시작할 때 부른다.
         /// </summary>
-        /// <param name="commands">메뉴 명령 목록</param>
-        public void Initialize(List<MenuCommand> commands)
+        /// <param name="commands">설정 명령 목록</param>
+        public void Initialize(List<SettingsCommand> commands)
         {
             _commands = commands;
             _view.SetVisible(false);
@@ -76,20 +76,20 @@ namespace TopView.UserInterface.Presenters
 
         private void HandleMusicVolumeChanged(float volume)
         {
-            AddCommand(MenuCommandType.SetMusicVolume, volume);
+            AddCommand(SettingsCommandType.SetMusicVolume, volume);
         }
 
         private void HandleSoundEffectVolumeChanged(float volume)
         {
-            AddCommand(MenuCommandType.SetSoundEffectVolume, volume);
+            AddCommand(SettingsCommandType.SetSoundEffectVolume, volume);
         }
 
         private void HandleCloseClicked()
         {
-            AddCommand(MenuCommandType.CloseSettings, 0f);
+            AddCommand(SettingsCommandType.Close, 0f);
         }
 
-        private void AddCommand(MenuCommandType type, float value)
+        private void AddCommand(SettingsCommandType type, float value)
         {
             if (_commands == null)
             {
@@ -97,7 +97,7 @@ namespace TopView.UserInterface.Presenters
                 return;
             }
 
-            _commands.Add(new MenuCommand { type = type, value = value });
+            _commands.Add(new SettingsCommand { type = type, value = value });
         }
     }
 }

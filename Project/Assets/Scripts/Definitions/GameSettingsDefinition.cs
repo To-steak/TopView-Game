@@ -19,5 +19,10 @@ namespace TopView.Definitions
         public int projectileCapacity;
         // 동시에 있을 수 있는 전리품 최대 수. 판을 준비할 때 전리품 저장소 칸 수로 쓴다
         public int lootCapacity;
+        // 판이 있는 씬의 흐름 값
+        public GameFlowRuleComponent flowRule = new GameFlowRuleComponent
+        {
+            menuSceneName = "Menu"
+        };
     }
 }

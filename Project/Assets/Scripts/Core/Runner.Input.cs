@@ -11,6 +11,33 @@ namespace TopView.Core
     {
         private PlayerActions _playerActions;
 
+        // ESC를 누르면 설정 화면이 열려 있으면 닫고, 일시정지 중이면 풀고, 아니면 일시정지한다. 판이 끝난 뒤에는 정상적으로 무시한다
+        private void ReadEscapeInput(CommandBuffer commandBuffer, in GameProgressComponent progress)
+        {
+            if (!_playerActions.UserInterface.Escape.WasPerformedThisFrame() || progress.phase != GamePhase.Playing)
+            {
+                return;
+            }
+
+            if (_isSettingsOpen)
+            {
+                commandBuffer.settingsCommands.Add(new SettingsCommand { type = SettingsCommandType.Close });
+                return;
+            }
+
+            GameFlowCommandType type = progress.isPaused ? GameFlowCommandType.Resume : GameFlowCommandType.Pause;
+            commandBuffer.gameFlowCommands.Add(new GameFlowCommand { type = type });
+        }
+
+        // 일시정지 중에는 플레이어 입력을 읽지 않고 누르고 있는 입력을 비운다. 카메라 회전처럼 틱 밖에서 쓰는 입력이 계속 남지 않게 한다
+        private static void ClearHeldPlayerInput(ref PlayerCommand command)
+        {
+            command.moveDirection = Vector3.zero;
+            command.isRunning = false;
+            command.isAttackHeld = false;
+            command.cameraYawInput = 0f;
+        }
+
         // 프레임 단위 입력을 읽어 플레이어 명령에 쌓는다. 누름 입력은 틱이 소비할 때까지 남는다.
         private void ReadPlayerInput(ref PlayerCommand command)
         {

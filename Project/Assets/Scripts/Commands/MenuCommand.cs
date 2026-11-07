@@ -5,7 +5,5 @@ namespace TopView.Commands
     {
         // 명령 종류
         public MenuCommandType type;
-        // SetMusicVolume, SetSoundEffectVolume일 때 바꿀 볼륨(0~1). 다른 명령은 쓰지 않는다
-        public float value;
     }
 }

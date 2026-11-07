@@ -320,7 +320,7 @@
             ]
         },
         {
-            "name": "System",
+            "name": "UserInterface",
             "id": "db4d9c6b-ca20-4d6f-aaca-dddf39661f29",
             "actions": [
                 {

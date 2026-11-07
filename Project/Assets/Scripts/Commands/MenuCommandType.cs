@@ -9,12 +9,6 @@ namespace TopView.Commands
         EnterWorld,
         // 설정 화면을 연다
         OpenSettings,
-        // 설정 화면을 닫고 볼륨을 저장한다
-        CloseSettings,
-        // 배경음악 볼륨을 바꾼다
-        SetMusicVolume,
-        // 효과음 볼륨을 바꾼다
-        SetSoundEffectVolume,
         // 게임을 끝낸다
         Exit
     }
