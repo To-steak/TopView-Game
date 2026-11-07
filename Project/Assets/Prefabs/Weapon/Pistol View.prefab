@@ -46,6 +46,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: TopView.Presentation::TopView.Presentation.Views.WeaponView
   attackClip: {fileID: 8300000, guid: 06ada5590eba8d6489b36c6f3c54ff78, type: 3}
+  reloadSounds:
+  - clip: {fileID: 8300000, guid: 3de7713f7dd4a144fb85bdf1efdc1ead, type: 3}
+    startTicks: 0
+  - clip: {fileID: 8300000, guid: 6e95c1f9872c66348afdabf419de6f7a, type: 3}
+    startTicks: 30
+  - clip: {fileID: 8300000, guid: d715b7c425963954b8732277063971ee, type: 3}
+    startTicks: 60
+  - clip: {fileID: 8300000, guid: 8a6916b0948e95a458df68134a4ec9ae, type: 3}
+    startTicks: 90
+  - clip: {fileID: 8300000, guid: 0691163014aba1549afecc26fec14ab4, type: 3}
+    startTicks: 120
 --- !u!1001 &5977208850403862887
 PrefabInstance:
   m_ObjectHideFlags: 0
