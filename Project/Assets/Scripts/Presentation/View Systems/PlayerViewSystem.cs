@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace TopView.Presentation.ViewSystems
 {
-    // 플레이어 View를 만들고, 위치·회전 보간, Animator 파라미터, 무기 모델을 엔티티에 맞춘다.
+    // 플레이어 View를 만들고, 위치·회전 보간, Animator 파라미터, 무기 모델, 공격 효과음을 엔티티에 맞춘다.
     public static class PlayerViewSystem
     {
         private static readonly int MOVEMENT_SPEED_HASH = Animator.StringToHash("MovementSpeed");
@@ -37,11 +37,12 @@ namespace TopView.Presentation.ViewSystems
         /// </summary>
         /// <param name="entities">플레이어 엔티티 배열</param>
         /// <param name="stateRecords">이번 프레임의 상태 변경 기록</param>
+        /// <param name="attackRecords">이번 프레임의 공격을 내보낸 기록</param>
         /// <param name="viewPrefab">PlayerView가 붙은 프리팹</param>
         /// <param name="weaponModelPrefabs">무기 번호 순서의 무기 모델 프리팹. 없는 칸은 null</param>
         /// <param name="rangedLayerBlendInTicks">원거리 레이어 가중치가 0에서 1로 올라오는 시간(틱)</param>
         /// <param name="context">플레이어 View 실행 상태</param>
-        public static void Present(PlayerEntity[] entities, List<PlayerStateChangedRecord> stateRecords, GameObject viewPrefab, GameObject[] weaponModelPrefabs, int rangedLayerBlendInTicks, PlayerViewContext context)
+        public static void Present(PlayerEntity[] entities, List<PlayerStateChangedRecord> stateRecords, List<PlayerAttackCommittedRecord> attackRecords, GameObject viewPrefab, GameObject[] weaponModelPrefabs, int rangedLayerBlendInTicks, PlayerViewContext context)
         {
             if (!TryFindAlivePlayer(entities, out int playerIndex))
             {
@@ -70,6 +71,7 @@ namespace TopView.Presentation.ViewSystems
 
             Animator animator = context.view.animator;
             ApplyStateRecords(in identifier, stateRecords, animator);
+            PlayAttackSounds(in identifier, attackRecords, context.weaponViews, context.view.soundEffectSource);
             ApplyMovementAnimation(in actionState, in entity.motion, animator);
             ApplyRangedLayerWeight(in actionState, in weaponSlot, entity.weaponList.weapons, animator, context.rangedLayerIndex, rangedLayerBlendInTicks);
             ApplyActionLayerWeight(in actionState, animator, context.actionLayerIndex);
@@ -98,7 +100,13 @@ namespace TopView.Presentation.ViewSystems
             context.rangedLayerIndex = FindLayerIndex(context.view.animator, RANGED_LAYER_NAME);
             context.actionLayerIndex = FindLayerIndex(context.view.animator, ACTION_LAYER_NAME);
 
+            if (context.view.soundEffectSource == null)
+            {
+                Debug.LogError("PlayerViewSystem >> PlayerView에 Sound Effect Source가 연결되어 있지 않아 공격 효과음이 나오지 않는다.");
+            }
+
             context.weaponModels = new GameObject[weaponModelPrefabs.Length];
+            context.weaponViews = new WeaponView[weaponModelPrefabs.Length];
             for (int weaponIndex = 0; weaponIndex < weaponModelPrefabs.Length; weaponIndex++)
             {
                 if (weaponModelPrefabs[weaponIndex] == null)
@@ -111,6 +119,49 @@ namespace TopView.Presentation.ViewSystems
                 model.transform.localRotation = Quaternion.identity;
                 model.SetActive(false);
                 context.weaponModels[weaponIndex] = model;
+
+                WeaponView weaponView = model.GetComponent<WeaponView>();
+                if (weaponView == null)
+                {
+                    Debug.LogError($"PlayerViewSystem >> {weaponModelPrefabs[weaponIndex].name} 무기 모델 프리팹에 WeaponView가 없어 이 무기의 공격 효과음이 나오지 않는다.");
+                }
+                else if (weaponView.attackClip == null)
+                {
+                    Debug.LogWarning($"PlayerViewSystem >> {weaponModelPrefabs[weaponIndex].name}의 WeaponView에 Attack Clip이 없어 이 무기의 공격 효과음이 나오지 않는다.");
+                }
+                context.weaponViews[weaponIndex] = weaponView;
+            }
+        }
+
+        // 이 플레이어가 공격을 내보낸 기록마다 그 무기의 공격 Clip을 겹쳐 재생한다. 연결이 빠진 경우는 View를 만들 때 이미 알렸다.
+        private static void PlayAttackSounds(in EntityIdentifier identifier, List<PlayerAttackCommittedRecord> attackRecords, WeaponView[] weaponViews, AudioSource soundEffectSource)
+        {
+            if (soundEffectSource == null)
+            {
+                return;
+            }
+
+            for (int recordIndex = 0; recordIndex < attackRecords.Count; recordIndex++)
+            {
+                PlayerAttackCommittedRecord record = attackRecords[recordIndex];
+                if (record.player.index != identifier.index || record.player.generation != identifier.generation)
+                {
+                    continue;
+                }
+
+                if (record.weaponIndex < 0 || record.weaponIndex >= weaponViews.Length)
+                {
+                    Debug.LogWarning($"PlayerViewSystem >> 공격 기록의 무기 번호({record.weaponIndex})가 무기 수({weaponViews.Length}) 밖이라 공격 효과음을 재생하지 않았다.");
+                    continue;
+                }
+
+                WeaponView weaponView = weaponViews[record.weaponIndex];
+                if (weaponView == null || weaponView.attackClip == null)
+                {
+                    continue;
+                }
+
+                soundEffectSource.PlayOneShot(weaponView.attackClip);
             }
         }
 

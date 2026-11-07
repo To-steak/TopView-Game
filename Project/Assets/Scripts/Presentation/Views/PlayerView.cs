@@ -11,5 +11,7 @@ namespace TopView.Presentation.Views
         public Transform weaponSocket;
         // 투사체가 나가는 Transform. 조준 평면의 높이도 이 위치를 쓴다
         public Transform muzzle;
+        // 플레이어의 효과음을 재생하는 AudioSource. Output은 Audio Mixer의 효과음 그룹으로 둔다
+        public AudioSource soundEffectSource;
     }
 }

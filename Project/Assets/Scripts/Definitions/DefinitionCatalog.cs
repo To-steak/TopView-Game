@@ -12,5 +12,7 @@ namespace TopView.Definitions
         public LootDefinition loot;
         // WorldTextView가 붙은 월드 글자 프리팹
         public GameObject worldTextPrefab;
+        // 배경음악 곡과 재생 값
+        public MusicDefinition music;
     }
 }
