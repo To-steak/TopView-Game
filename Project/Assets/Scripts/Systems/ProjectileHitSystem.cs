@@ -12,7 +12,7 @@ namespace TopView.Systems
     public static class ProjectileHitSystem
     {
         /// <summary>
-        /// Straight 투사체는 이번 틱의 이동 선분에서 가장 먼저 닿은 대상 하나에, 시간이 된 Grenade는 폭발 반경 안의 대상 모두에게 피해 요청을 넣고 소멸을 요청한다.
+        /// Straight 투사체는 이번 틱의 이동 선분에서 가장 먼저 닿은 대상 하나에, 시간이 된 Grenade는 폭발 반경 안의 대상 모두에게 피해 요청을 넣고 소멸을 요청한다. 벽에 막혀 멈춘 Straight 투사체는 맞은 대상이 없으면 닿은 자리에 명중 기록을 남기고 소멸을 요청한다.
         /// </summary>
         /// <param name="projectiles">투사체 저장소</param>
         /// <param name="playerHitTargets">플레이어 피격 대상 목록</param>
@@ -51,6 +51,12 @@ namespace TopView.Systems
 
                 if (HitNearest(in entity.projectile, in entity.position, in entity.payload, hitTargets, hitTargetCount, damageRequests, hitRecords))
                 {
+                    despawnRequests.Enqueue(new ProjectileDespawnRequest { target = identifier });
+                }
+                else if (entity.motion.isResting)
+                {
+                    // 맞은 대상 없이 벽에 막혀 멈췄으면 닿은 자리에 피격 이펙트를 남기고 사라진다
+                    hitRecords.Add(new ProjectileHitRecord { position = entity.position.current, hitEffectIndex = entity.projectile.hitEffectIndex });
                     despawnRequests.Enqueue(new ProjectileDespawnRequest { target = identifier });
                 }
             }

@@ -256,7 +256,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: TopView.Presentation::TopView.Presentation.Projectile.Views.ProjectileView
   trail: {fileID: 3250196645098199015}
-  rotationPivot: {fileID: 0}
+  rotationPivot: {fileID: 8224734101838536049}
   pitchSpeed: 0
   yawSpeed: 0
   rollSpeed: 0
