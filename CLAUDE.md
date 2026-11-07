@@ -7,7 +7,6 @@
 - Unity 프로젝트 루트: `Project/`
 - 스크립트 루트: `Project/Assets/Scripts/`
 - 어셈블리·네임스페이스 접두사: `TopView`
-- Definition Catalog: `Project/Assets/Resources/Definition Catalog.asset` (`Resources.Load` 경로는 `"Definition Catalog"`)
 - Fixed Timestep: 0.02초 (50Hz)
 - 외부 패키지 참조
   - `TopView.Core` → `Unity.InputSystem`
