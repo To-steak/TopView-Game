@@ -8,6 +8,9 @@ namespace TopView.Core
     // 배경음악: 판마다 AudioSource를 만들고 Music Definition 값을 담는다
     public partial class Runner
     {
+        // 배경음악 곡과 재생 값
+        [SerializeField] private MusicDefinition _musicDefinition;
+
         private const string MUSIC_OBJECT_NAME = "Music";
 
         // 활성 씬에 배경음악 오브젝트를 만들어 평소 곡의 AudioSource를 둔다.
@@ -15,10 +18,10 @@ namespace TopView.Core
         // Music Definition이나 평소 곡이 없으면 null을 돌려준다.
         private MusicViewContext CreateMusicViewContext()
         {
-            MusicDefinition definition = _catalog.music;
+            MusicDefinition definition = _musicDefinition;
             if (definition == null)
             {
-                Debug.LogError("Runner >> Definition Catalog에 Music Definition이 연결되어 있지 않아 배경음악이 나오지 않는다.");
+                Debug.LogError("Runner >> Runner에 Music Definition이 연결되어 있지 않아 배경음악이 나오지 않는다.");
                 return null;
             }
 
