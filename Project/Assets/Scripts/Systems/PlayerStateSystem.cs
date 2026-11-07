@@ -86,6 +86,12 @@ namespace TopView.Systems
                         break;
 
                     case PlayerState.Reload:
+                        // 취소하면 탄약을 채우지 않고 Idle이나 Move로, 재장전 시간이 다 차면 탄약을 채우고 끝난다
+                        if (command.isCancelPressed)
+                        {
+                            isFinished = true;
+                            break;
+                        }
                         isFinished = actionState.elapsedTicks >= action.reloadTicks;
                         if (isFinished)
                         {

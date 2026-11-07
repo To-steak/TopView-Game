@@ -22,6 +22,10 @@ namespace TopView.Presentation.ViewSystems
         private static readonly int DIE_HASH = Animator.StringToHash("Die");
         private static readonly int[] TRIGGER_HASHES = { DODGE_HASH, SHOT_HASH, SWING_HASH, SWAP_HASH, RELOAD_HASH, THROW_HASH, DIE_HASH };
 
+        // Ranged Layer의 상태 이름
+        private static readonly int SHOT_IDLE_STATE_HASH = Animator.StringToHash("Shot Idle");
+        private static readonly int RELOAD_STATE_HASH = Animator.StringToHash("Reload");
+
         // MovementSpeed 파라미터 값
         private const float IDLE_SPEED = 0f;
         private const float WALK_SPEED = 1f;
@@ -31,6 +35,9 @@ namespace TopView.Presentation.ViewSystems
         private const string ACTION_LAYER_NAME = "Action Layer";
         private const float LAYER_ON_WEIGHT = 1f;
         private const float LAYER_OFF_WEIGHT = 0f;
+
+        // 장전이 끊겼을 때 Ranged Layer가 Reload에서 Shot Idle로 넘어가는 시간(초)
+        private const float RELOAD_INTERRUPT_CROSS_FADE_SECONDS = 0.1f;
 
         /// <summary>
         /// 살아 있는 플레이어가 있으면 View를 만들거나 맞추고, 없으면 View를 끈다.
@@ -70,7 +77,7 @@ namespace TopView.Presentation.ViewSystems
             }
 
             Animator animator = context.view.animator;
-            ApplyStateRecords(in identifier, stateRecords, animator);
+            ApplyStateRecords(in identifier, stateRecords, animator, context.rangedLayerIndex);
             PlayAttackSounds(in identifier, attackRecords, context.weaponViews, context.view.soundEffectSource);
             PlayReloadSounds(in identifier, stateRecords, in actionState, weaponSlot.currentIndex, context);
             ApplyMovementAnimation(in actionState, in entity.motion, animator);
@@ -247,7 +254,8 @@ namespace TopView.Presentation.ViewSystems
 
         // 상태가 바뀔 때마다 새 상태에 맞는 파라미터를 건다. 새 행동에 들어갈 때만 트리거를 모두 지운다.
         // Idle과 Move에서 지우면 공격 상태가 바로 끝날 때 아직 소비되지 않은 공격 트리거가 사라진다.
-        private static void ApplyStateRecords(in EntityIdentifier identifier, List<PlayerStateChangedRecord> stateRecords, Animator animator)
+        // Reload에서 Idle이나 Move로 돌아오면(장전 취소 포함) 원거리 레이어를 Shot Idle로 되돌린다.
+        private static void ApplyStateRecords(in EntityIdentifier identifier, List<PlayerStateChangedRecord> stateRecords, Animator animator, int rangedLayerIndex)
         {
             for (int recordIndex = 0; recordIndex < stateRecords.Count; recordIndex++)
             {
@@ -301,6 +309,29 @@ namespace TopView.Presentation.ViewSystems
                         animator.SetTrigger(DIE_HASH);
                         break;
                 }
+
+                if (record.previousState == PlayerState.Reload && (record.state == PlayerState.Idle || record.state == PlayerState.Move))
+                {
+                    ReturnRangedLayerFromReload(animator, rangedLayerIndex);
+                }
+            }
+        }
+
+        // 같은 프레임에 장전을 시작하고 취소하면 Reload 트리거가 소비되지 않고 남으므로 지운다.
+        // 원거리 레이어가 아직 Reload에 있거나 Reload로 넘어가는 중일 때만 Shot Idle로 넘긴다. 이미 Shot Idle이면 다시 들어가지 않는다.
+        private static void ReturnRangedLayerFromReload(Animator animator, int rangedLayerIndex)
+        {
+            animator.ResetTrigger(RELOAD_HASH);
+            if (rangedLayerIndex < 0)
+            {
+                return;
+            }
+
+            bool isInReload = animator.GetCurrentAnimatorStateInfo(rangedLayerIndex).shortNameHash == RELOAD_STATE_HASH;
+            bool isEnteringReload = animator.IsInTransition(rangedLayerIndex) && animator.GetNextAnimatorStateInfo(rangedLayerIndex).shortNameHash == RELOAD_STATE_HASH;
+            if (isInReload || isEnteringReload)
+            {
+                animator.CrossFadeInFixedTime(SHOT_IDLE_STATE_HASH, RELOAD_INTERRUPT_CROSS_FADE_SECONDS, rangedLayerIndex);
             }
         }
 
