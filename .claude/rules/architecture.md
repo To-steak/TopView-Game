@@ -176,8 +176,8 @@ ProjectileHitSystem.Tick(_world.projectiles, _world.playerHitTargets, _world.pla
 
 - 수치는 하드코딩하지 않고 `~Definition`(ScriptableObject)에 둔다.
   - 이유: 수치를 코드 수정 없이 에디터에서 조정한다.
-- Authoring이 가리키지 않는 Definition은 `Resources/` 아래의 Definition Catalog 에셋 하나에 모은다(경로는 `CLAUDE.md`의 프로젝트 값). Runner가 시작할 때 `Resources.Load`로 이 Catalog만 읽는다. 다른 곳에서 `Resources.Load`를 쓰지 않는다.
-  - 이유: 로드 경로가 한 곳이라 에셋 누락이 Runner 시작 시점에 바로 드러난다.
+- Definition은 씬에 배치한 오브젝트가 인스펙터 필드로 가리킨다. 엔티티 종류는 `~Authoring`이, 판 전체의 Definition은 Runner가 가리킨다. `Resources.Load`는 쓰지 않는다.
+  - 이유: 참조가 인스펙터에 보여 무엇을 쓰는지 씬에서 바로 알고, 누락은 판 시작 시 null 검사에서 드러난다. `Resources/`는 문자열 경로에 의존하고 안의 에셋을 모두 빌드에 넣는다.
 - 테이블은 생성 시점에만 조회하고 필요한 값은 칸의 컴포넌트로 복사한다. 매 틱 로직은 칸의 컴포넌트만 쓴다.
   - 이유: 컴포넌트 값만 보면 동작을 알 수 있고, 진행 중에 에셋을 바꿔도 판이 흔들리지 않는다.
 
