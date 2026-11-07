@@ -56735,7 +56735,8 @@ MonoBehaviour:
   definition: {fileID: 11400000, guid: 7e27ad8917b2b2344a07a7ef6f3f8468, type: 2}
   rule:
     spawnIntervalTicks: 500
-    maxSpawnCount: 3
+    maxSpawnCount: 1
+    isInfinite: 0
 --- !u!1001 &657478868
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -78540,7 +78541,8 @@ MonoBehaviour:
   definition: {fileID: 11400000, guid: 7e27ad8917b2b2344a07a7ef6f3f8468, type: 2}
   rule:
     spawnIntervalTicks: 500
-    maxSpawnCount: 3
+    maxSpawnCount: 1
+    isInfinite: 1
 --- !u!4 &931902181
 Transform:
   m_ObjectHideFlags: 0
@@ -142522,7 +142524,8 @@ MonoBehaviour:
   definition: {fileID: 11400000, guid: 7e27ad8917b2b2344a07a7ef6f3f8468, type: 2}
   rule:
     spawnIntervalTicks: 500
-    maxSpawnCount: 3
+    maxSpawnCount: 1
+    isInfinite: 0
 --- !u!1001 &1601158342
 PrefabInstance:
   m_ObjectHideFlags: 0

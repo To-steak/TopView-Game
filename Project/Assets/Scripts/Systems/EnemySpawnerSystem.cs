@@ -4,7 +4,7 @@ using TopView.Requests;
 
 namespace TopView.Systems
 {
-    // 발동 요청을 받은 적 스포너가 생성 주기마다 적 생성 요청을 넣는다. 최대 마릿수를 다 만들면 멈추고, 다시 발동하지 않는다.
+    // 발동 요청을 받은 적 스포너가 생성 주기마다 적 생성 요청을 넣는다. 최대 마릿수를 다 만들면 멈추고, 다시 발동하지 않는다. 무한 스포너는 멈추지 않는다.
     public static class EnemySpawnerSystem
     {
         /// <summary>
@@ -47,7 +47,7 @@ namespace TopView.Systems
 
                 state.spawnedCount++;
                 state.remainingTicks = spawner.rule.spawnIntervalTicks;
-                state.isActive = state.spawnedCount < spawner.rule.maxSpawnCount;
+                state.isActive = spawner.rule.isInfinite || state.spawnedCount < spawner.rule.maxSpawnCount;
             }
         }
 

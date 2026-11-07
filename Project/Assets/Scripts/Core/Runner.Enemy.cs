@@ -35,9 +35,15 @@ namespace TopView.Core
                     continue;
                 }
 
-                if (spawner.rule.spawnIntervalTicks <= 0 || spawner.rule.maxSpawnCount <= 0)
+                if (spawner.rule.spawnIntervalTicks <= 0)
                 {
-                    Debug.LogWarning($"Runner >> Spawner Authoring {spawner.name}의 Spawn Interval Ticks나 Max Spawn Count가 0 이하라 건너뛰었다.");
+                    Debug.LogWarning($"Runner >> Spawner Authoring {spawner.name}의 Spawn Interval Ticks가 0 이하라 건너뛰었다.");
+                    continue;
+                }
+
+                if (!spawner.rule.isInfinite && spawner.rule.maxSpawnCount <= 0)
+                {
+                    Debug.LogWarning($"Runner >> Spawner Authoring {spawner.name}의 Max Spawn Count가 0 이하라 건너뛰었다.");
                     continue;
                 }
 
