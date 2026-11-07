@@ -1,17 +1,24 @@
 using DG.Tweening;
+using DG.Tweening.Core;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace TopView.UserInterface.Views
 {
-    // 플레이어의 체력을 글자와 게이지로 보여 준다.
+    // 플레이어의 체력을 글자와 게이지로 보여 준다. 게이지는 꽉 찬 크기로 두고, 마스크가 오른쪽을 가려 비율만큼만 보인다.
     public class PlayerHealthView : UserInterfaceView
     {
         [SerializeField] private TMP_Text _healthText;
-        [SerializeField] private Image _healthGauge;
+        // 게이지 Image의 부모에 붙은 마스크. 오른쪽 여백으로 게이지를 가린다
+        [SerializeField] private RectMask2D _healthMask;
         // 게이지가 새 체력 비율까지 부드럽게 움직이는 시간(틱). 0이면 바로 맞춘다
         [SerializeField] private int _tweenTicks = 15;
+
+        // 지금 보이는 게이지 비율(0~1)
+        private float _displayedRatio = 1f;
+        private DOGetter<float> _getDisplayedRatio;
+        private DOSetter<float> _setDisplayedRatio;
 
         /// <summary>
         /// 체력을 "현재 / 최대" 글자와 게이지로 보여 준다.
@@ -23,17 +30,34 @@ namespace TopView.UserInterface.Views
         {
             _healthText.text = $"{current:F0} / {max:F0}";
 
-            RectTransform gaugeTransform = _healthGauge.rectTransform;
-            Vector2 anchorMax = new Vector2(current / max, 1f);
-            gaugeTransform.DOKill();
+            float ratio = current / max;
+            _healthMask.DOKill();
             if (isInstant)
             {
-                gaugeTransform.anchorMax = anchorMax;
+                SetDisplayedRatio(ratio);
+                return;
             }
-            else
+
+            if (_getDisplayedRatio == null)
             {
-                gaugeTransform.DOAnchorMax(anchorMax, _tweenTicks * Time.fixedDeltaTime).SetLink(_healthGauge.gameObject);
+                _getDisplayedRatio = GetDisplayedRatio;
+                _setDisplayedRatio = SetDisplayedRatio;
             }
+            DOTween.To(_getDisplayedRatio, _setDisplayedRatio, ratio, _tweenTicks * Time.fixedDeltaTime).SetTarget(_healthMask).SetLink(_healthMask.gameObject);
+        }
+
+        private float GetDisplayedRatio()
+        {
+            return _displayedRatio;
+        }
+
+        // 비율을 기억하고, 마스크의 오른쪽 여백을 가릴 폭으로 맞춘다.
+        private void SetDisplayedRatio(float ratio)
+        {
+            _displayedRatio = ratio;
+            Vector4 padding = _healthMask.padding;
+            padding.z = _healthMask.rectTransform.rect.width * (1f - ratio);
+            _healthMask.padding = padding;
         }
     }
 }

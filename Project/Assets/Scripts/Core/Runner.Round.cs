@@ -157,6 +157,9 @@ namespace TopView.Core
                     triggerHashesByKind = new int[enemyKindCount][],
                     healthGaugeViews = new EnemyHealthGaugeView[_world.enemies.entities.Length],
                     healthGaugeRatios = new float[_world.enemies.entities.Length],
+                    healthGaugeDisplayedRatios = new float[_world.enemies.entities.Length],
+                    healthGaugeStartRatios = new float[_world.enemies.entities.Length],
+                    healthGaugeElapsedSeconds = new float[_world.enemies.entities.Length],
                     healthGaugePools = new Stack<EnemyHealthGaugeView>[enemyKindCount]
                 },
                 projectile = new ProjectileViewContext

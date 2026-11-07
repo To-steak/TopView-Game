@@ -469,7 +469,7 @@ MonoBehaviour:
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
-  m_FillMethod: 4
+  m_FillMethod: 0
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
@@ -621,6 +621,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3256405705016491541}
+  - component: {fileID: 8728756511862609643}
   m_Layer: 5
   m_Name: Gauge Area
   m_TagString: Untagged
@@ -648,6 +649,20 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: -20, y: -20}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &8728756511862609643
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6087396580007536139}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3312d7739989d2b4e91e6319e9a96d76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RectMask2D
+  m_Padding: {x: 0, y: 0, z: 0, w: 0}
+  m_Softness: {x: 0, y: 0}
 --- !u!1 &6780196220980579405
 GameObject:
   m_ObjectHideFlags: 0
@@ -703,7 +718,8 @@ MonoBehaviour:
   body: {fileID: 6519510888257018961}
   footer: {fileID: 987249838103267871}
   _manaText: {fileID: 1372446764969020156}
-  _manaGauge: {fileID: 2924665750848966614}
+  _manaMask: {fileID: 8728756511862609643}
+  _tweenTicks: 15
 --- !u!114 &3350229679602930076
 MonoBehaviour:
   m_ObjectHideFlags: 0
