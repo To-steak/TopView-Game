@@ -4,11 +4,10 @@ using TopView.Presentation.ViewContexts;
 using TopView.Presentation.ViewSystems;
 using TopView.Systems;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace TopView.Core
 {
-    // 틱 순서와 호출 순서를 관리한다. 씬 로드 전에 스스로 만들어져 DDOL에 하나만 남는다.
+    // 판이 있는 씬에 하나 배치해 그 판의 틱 순서와 호출 순서를 관리한다. 씬과 함께 생기고 사라진다.
     // 요소별 상태와 처리는 Runner.<요소>.cs에 나눠 두고, 이 파일에는 판 전체의 상태와 호출 순서만 둔다.
     public partial class Runner : MonoBehaviour
     {
@@ -20,18 +19,8 @@ namespace TopView.Core
         private DefinitionCatalog _catalog;
         private World _world;
         private ViewContext _viewContext;
-        // 마지막으로 판을 준비한 씬. 활성 씬이 바뀌면 새 판을 준비한다
-        private int _sceneHandle;
 
         private const string DEFINITION_CATALOG_PATH = "Definition Catalog";
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void Create()
-        {
-            GameObject runnerObject = new GameObject(nameof(Runner));
-            DontDestroyOnLoad(runnerObject);
-            runnerObject.AddComponent<Runner>();
-        }
 
         private void Awake()
         {
@@ -43,6 +32,12 @@ namespace TopView.Core
 
             _playerActions = new PlayerActions();
             _playerActions.Global.Enable();
+        }
+
+        // 씬의 다른 오브젝트가 Awake를 마친 뒤에 판을 준비한다
+        private void Start()
+        {
+            StartRound();
         }
 
         private void OnDestroy()
@@ -122,13 +117,6 @@ namespace TopView.Core
 
         private void Update()
         {
-            int sceneHandle = SceneManager.GetActiveScene().handle;
-            if (sceneHandle != _sceneHandle)
-            {
-                _sceneHandle = sceneHandle;
-                StartRound();
-            }
-
             if (_world == null)
             {
                 return;
