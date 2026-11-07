@@ -11,5 +11,7 @@ namespace TopView.Presentation.Views
         public Transform healthGaugeAnchor;
         // 피해량 글자를 띄울 위치. 루트 바로 아래에 두어 애니메이션을 따라 흔들리지 않게 한다
         public Transform damageAnchor;
+        // 피해를 받을 때 재생하는 AudioSource. 여러 소리 중 무작위로 고르려면 Audio Generator 칸에 Audio Random Container를 넣는다. Play On Awake와 Loop는 끈다
+        public AudioSource hitSoundSource;
     }
 }
