@@ -77,7 +77,7 @@ namespace TopView.Systems
             float progress = ThrowableUtility.GetArcProgress(motion.elapsedTicks, projectile.flightTicks);
             Vector3 nextPosition = ThrowableUtility.GetArcPosition(motion.launchPosition, motion.targetPosition, projectile.arcHeight, progress);
 
-            if (TrySweep(in projectile, position.current, nextPosition, out Vector3 stopPosition))
+            if (ThrowableUtility.TrySweep(in projectile, position.current, nextPosition, out Vector3 stopPosition))
             {
                 position.current = stopPosition;
                 motion.isResting = true;
@@ -86,28 +86,6 @@ namespace TopView.Systems
 
             position.current = nextPosition;
             motion.isResting = progress >= 1f;
-        }
-
-        // from에서 to로 한 틱 움직일 때 환경 레이어에 닿는지 투사체 반지름의 구로 검사한다. 닿으면 닿은 자리, 아니면 to를 stopPosition에 넣는다.
-        // 투척 미리보기와 결과가 같도록 PlayerThrowPreviewSystem.TrySweep과 같은 질의를 한다. 한쪽을 고치면 다른 쪽도 고친다.
-        private static bool TrySweep(in ProjectileComponent projectile, Vector3 from, Vector3 to, out Vector3 stopPosition)
-        {
-            stopPosition = to;
-            Vector3 displacement = to - from;
-            float distance = displacement.magnitude;
-            if (distance <= 0f)
-            {
-                return false;
-            }
-
-            Vector3 direction = displacement / distance;
-            if (Physics.SphereCast(from, projectile.radius, direction, out RaycastHit hit, distance, projectile.collisionLayer, QueryTriggerInteraction.Ignore))
-            {
-                stopPosition = from + direction * hit.distance;
-                return true;
-            }
-
-            return false;
         }
     }
 }
