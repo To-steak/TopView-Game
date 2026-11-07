@@ -15,6 +15,8 @@ namespace TopView.Presentation.ViewContexts
         public HitEffectViewContext hitEffect;
         // 월드 글자 실행 상태
         public WorldTextViewContext worldText;
+        // 월드 정보 UI 실행 상태
+        public WorldInformationViewContext worldInformation;
         // 전리품 View 실행 상태
         public LootViewContext loot;
         // 배경음악 실행 상태. Definition이 없으면 null

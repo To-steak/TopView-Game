@@ -142,6 +142,7 @@ namespace TopView.Core
         // 이번 판의 저장소 크기와 View 표에 맞춰 View 실행 상태를 만들고 씬의 카메라를 찾는다.
         private ViewContext CreateViewContext(int enemyKindCount)
         {
+            WorldInformationAnchorView[] worldInformationAnchors = ReadWorldInformationAnchors();
             ViewContext viewContext = new ViewContext
             {
                 camera = new CameraViewContext
@@ -173,6 +174,11 @@ namespace TopView.Core
                     pools = new Stack<ParticleSystem>[_hitEffectPrefabs.Length]
                 },
                 worldText = new WorldTextViewContext(),
+                worldInformation = new WorldInformationViewContext
+                {
+                    anchors = worldInformationAnchors,
+                    views = new WorldInformationView[worldInformationAnchors.Length]
+                },
                 loot = new LootViewContext
                 {
                     views = new LootView[_world.loots.entities.Length],
@@ -210,12 +216,13 @@ namespace TopView.Core
             WorldCanvasView worldCanvasView = FindAnyObjectByType<WorldCanvasView>();
             if (worldCanvasView == null)
             {
-                Debug.LogError("Runner >> 씬에 WorldCanvasView가 없어 적 체력 게이지와 월드 글자가 보이지 않는다.");
+                Debug.LogError("Runner >> 씬에 WorldCanvasView가 없어 적 체력 게이지, 월드 글자, 월드 정보 UI가 보이지 않는다.");
             }
             else
             {
                 viewContext.enemy.healthGaugeParent = worldCanvasView.transform;
                 viewContext.worldText.parent = worldCanvasView.transform;
+                viewContext.worldInformation.parent = worldCanvasView.transform;
             }
 
             return viewContext;
