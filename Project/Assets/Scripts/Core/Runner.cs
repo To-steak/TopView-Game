@@ -28,9 +28,10 @@ namespace TopView.Core
             _playerActions.Global.Enable();
         }
 
-        // 씬의 다른 오브젝트가 Awake를 마친 뒤에 판을 준비한다
+        // 씬의 다른 오브젝트가 Awake를 마친 뒤에 판을 준비한다. Audio Mixer는 Awake에서 값을 무시할 수 있어 볼륨도 여기서 반영한다
         private void Start()
         {
+            PresentSavedAudioVolume();
             StartRound();
         }
 
