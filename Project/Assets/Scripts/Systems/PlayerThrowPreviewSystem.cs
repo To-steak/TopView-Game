@@ -81,7 +81,7 @@ namespace TopView.Systems
             {
                 float progress = ThrowableUtility.GetArcProgress(elapsedTicks, projectile.flightTicks);
                 Vector3 nextPosition = ThrowableUtility.GetArcPosition(launchPosition, targetPosition, projectile.arcHeight, progress);
-                bool isBlocked = TrySweep(in projectile, currentPosition, nextPosition, out currentPosition);
+                bool isBlocked = ThrowableUtility.TrySweep(in projectile, currentPosition, nextPosition, out currentPosition);
 
                 preview.points[pointCount] = currentPosition;
                 pointCount++;
@@ -96,28 +96,6 @@ namespace TopView.Systems
             preview.impactPosition = currentPosition;
             preview.explosionRadius = projectile.explosionRadius;
             return true;
-        }
-
-        // from에서 to로 한 틱 움직일 때 환경 레이어에 닿는지 투사체 반지름의 구로 검사한다. 닿으면 닿은 자리, 아니면 to를 stopPosition에 넣는다.
-        // 실제 비행과 결과가 같도록 ProjectileSystem.TrySweep과 같은 질의를 한다. 한쪽을 고치면 다른 쪽도 고친다.
-        private static bool TrySweep(in ProjectileComponent projectile, Vector3 from, Vector3 to, out Vector3 stopPosition)
-        {
-            stopPosition = to;
-            Vector3 displacement = to - from;
-            float distance = displacement.magnitude;
-            if (distance <= 0f)
-            {
-                return false;
-            }
-
-            Vector3 direction = displacement / distance;
-            if (Physics.SphereCast(from, projectile.radius, direction, out RaycastHit hit, distance, projectile.collisionLayer, QueryTriggerInteraction.Ignore))
-            {
-                stopPosition = from + direction * hit.distance;
-                return true;
-            }
-
-            return false;
         }
     }
 }
