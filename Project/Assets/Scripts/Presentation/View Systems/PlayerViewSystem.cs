@@ -48,8 +48,9 @@ namespace TopView.Presentation.ViewSystems
         /// <param name="viewPrefab">PlayerView가 붙은 프리팹</param>
         /// <param name="weaponModelPrefabs">무기 번호 순서의 무기 모델 프리팹. 없는 칸은 null</param>
         /// <param name="rangedLayerBlendInTicks">원거리 레이어 가중치가 0에서 1로 올라오는 시간(틱)</param>
+        /// <param name="isPaused">판이 일시정지 중이면 true. Animator와 원거리 레이어 가중치를 멈춘다</param>
         /// <param name="context">플레이어 View 실행 상태</param>
-        public static void Present(PlayerEntity[] entities, List<PlayerStateChangedRecord> stateRecords, List<PlayerAttackCommittedRecord> attackRecords, GameObject viewPrefab, GameObject[] weaponModelPrefabs, int rangedLayerBlendInTicks, PlayerViewContext context)
+        public static void Present(PlayerEntity[] entities, List<PlayerStateChangedRecord> stateRecords, List<PlayerAttackCommittedRecord> attackRecords, GameObject viewPrefab, GameObject[] weaponModelPrefabs, int rangedLayerBlendInTicks, bool isPaused, PlayerViewContext context)
         {
             if (!TryFindAlivePlayer(entities, out int playerIndex))
             {
@@ -77,11 +78,16 @@ namespace TopView.Presentation.ViewSystems
             }
 
             Animator animator = context.view.animator;
+            animator.speed = isPaused ? 0f : 1f;
             ApplyStateRecords(in identifier, stateRecords, animator, context.rangedLayerIndex);
             PlayAttackSounds(in identifier, attackRecords, context.weaponViews, context.view.soundEffectSource);
             PlayReloadSounds(in identifier, stateRecords, in actionState, weaponSlot.currentIndex, context);
             ApplyMovementAnimation(in actionState, in entity.motion, animator);
-            ApplyRangedLayerWeight(in actionState, in weaponSlot, entity.weaponList.weapons, animator, context.rangedLayerIndex, rangedLayerBlendInTicks);
+            // 가중치는 프레임 시간만큼 목표로 다가가므로, 일시정지 중에는 Animator와 함께 멈춘다
+            if (!isPaused)
+            {
+                ApplyRangedLayerWeight(in actionState, in weaponSlot, entity.weaponList.weapons, animator, context.rangedLayerIndex, rangedLayerBlendInTicks);
+            }
             ApplyActionLayerWeight(in actionState, animator, context.actionLayerIndex);
             ApplyWeaponModels(in weaponSlot, context.weaponModels);
             ApplyTransform(in position, in rotation, context.view.transform);

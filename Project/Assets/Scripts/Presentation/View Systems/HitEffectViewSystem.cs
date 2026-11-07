@@ -13,10 +13,12 @@ namespace TopView.Presentation.ViewSystems
         /// </summary>
         /// <param name="hitRecords">이번 프레임의 명중·폭발 기록</param>
         /// <param name="hitEffectPrefabs">피격 이펙트 표. 번호별 ParticleSystem 프리팹</param>
+        /// <param name="isPaused">판이 일시정지 중이면 true. 재생 중인 이펙트를 멈춘다</param>
         /// <param name="context">피격 이펙트 실행 상태</param>
-        public static void Present(List<ProjectileHitRecord> hitRecords, GameObject[] hitEffectPrefabs, HitEffectViewContext context)
+        public static void Present(List<ProjectileHitRecord> hitRecords, GameObject[] hitEffectPrefabs, bool isPaused, HitEffectViewContext context)
         {
             ReturnFinishedHitEffects(context);
+            ApplyPause(context, isPaused);
 
             for (int recordIndex = 0; recordIndex < hitRecords.Count; recordIndex++)
             {
@@ -43,6 +45,23 @@ namespace TopView.Presentation.ViewSystems
                 context.pools[context.playingEffectIndices[playingIndex]].Push(effect);
                 context.playingEffects.RemoveAt(playingIndex);
                 context.playingEffectIndices.RemoveAt(playingIndex);
+            }
+        }
+
+        private static void ApplyPause(HitEffectViewContext context, bool isPaused)
+        {
+            for (int playingIndex = 0; playingIndex < context.playingEffects.Count; playingIndex++)
+            {
+                ParticleSystem effect = context.playingEffects[playingIndex];
+                if (isPaused && !effect.isPaused)
+                {
+                    effect.Pause(true);
+                }
+                // 멈추지 않은 이펙트에 Play를 부르면 처음부터 다시 재생되므로, 멈춰 둔 이펙트만 이어서 재생한다
+                else if (!isPaused && effect.isPaused)
+                {
+                    effect.Play(true);
+                }
             }
         }
 

@@ -145,16 +145,16 @@ namespace TopView.Core
             }
 
             bool isPaused = _world.progress.isPaused;
-            // 이번 프레임에 일시정지가 걸리거나 풀리면 다른 연출보다 먼저 반영한다
-            PauseViewSystem.Present(isPaused, _viewContext.player.view, _viewContext.enemy.views, _viewContext.hitEffect.playingEffects, _viewContext.pause);
-            PlayerViewSystem.Present(_world.players.entities, _world.playerStateChangedRecords, _world.playerAttackCommittedRecords, _playerViewPrefab, _playerWeaponModelPrefabs, _playerRangedLayerBlendInTicks, _viewContext.player);
+            // 이번 프레임에 일시정지가 걸리거나 풀리면 소리와 DOTween에 먼저 반영한다
+            PauseViewSystem.Present(isPaused, _viewContext.pause);
+            PlayerViewSystem.Present(_world.players.entities, _world.playerStateChangedRecords, _world.playerAttackCommittedRecords, _playerViewPrefab, _playerWeaponModelPrefabs, _playerRangedLayerBlendInTicks, isPaused, _viewContext.player);
             PlayerThrowPreviewViewSystem.Present(_world.players.entities, _viewContext.player.view, _playerThrowPreviewCircleHeightOffset);
-            EnemyViewSystem.Present(_world.enemies.entities, _world.enemyStateChangedRecords, _world.enemyDamagedRecords, _enemyViewPrefabs, _viewContext.enemy);
+            EnemyViewSystem.Present(_world.enemies.entities, _world.enemyStateChangedRecords, _world.enemyDamagedRecords, _enemyViewPrefabs, isPaused, _viewContext.enemy);
             EnemyHealthGaugeViewSystem.Present(_world.enemies.entities, _enemyHealthGaugePrefabs, _viewContext.camera.mainCamera, _viewContext.enemy);
             WorldInformationViewSystem.Present(_viewContext.camera.mainCamera, _viewContext.worldInformation);
             ProjectileViewSystem.Present(_world.projectiles.entities, _projectilePrefabs, isPaused, _viewContext.projectile);
             LootViewSystem.Present(_world.loots.entities, _lootPrefabs, isPaused, _viewContext.loot);
-            HitEffectViewSystem.Present(_world.projectileHitRecords, _hitEffectPrefabs, _viewContext.hitEffect);
+            HitEffectViewSystem.Present(_world.projectileHitRecords, _hitEffectPrefabs, isPaused, _viewContext.hitEffect);
             DamageTextViewSystem.Present(_world.enemyDamagedRecords, _viewContext.enemy.views, _viewContext.enemy.viewGenerations, _worldTextViewPrefab, _viewContext.camera.mainCamera, _viewContext.worldText.pendingTexts);
             LootTextViewSystem.Present(_world.lootPickedUpRecords, _worldTextViewPrefab, _viewContext.worldText.pendingTexts);
             WorldTextViewSystem.Present(_worldTextViewPrefab, _viewContext.camera.mainCamera, _viewContext.worldText);

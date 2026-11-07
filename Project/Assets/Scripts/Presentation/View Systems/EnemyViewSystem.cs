@@ -27,10 +27,12 @@ namespace TopView.Presentation.ViewSystems
         /// <param name="stateRecords">이번 프레임의 적 상태 변경 기록</param>
         /// <param name="damagedRecords">이번 프레임의 적 피해 기록</param>
         /// <param name="viewPrefabsByKind">적 종류별 EnemyView 프리팹</param>
+        /// <param name="isPaused">판이 일시정지 중이면 true. Animator를 멈춘다</param>
         /// <param name="context">적 View 실행 상태</param>
-        public static void Present(EnemyEntity[] entities, List<EnemyStateChangedRecord> stateRecords, List<EnemyDamagedRecord> damagedRecords, GameObject[] viewPrefabsByKind, EnemyViewContext context)
+        public static void Present(EnemyEntity[] entities, List<EnemyStateChangedRecord> stateRecords, List<EnemyDamagedRecord> damagedRecords, GameObject[] viewPrefabsByKind, bool isPaused, EnemyViewContext context)
         {
             float alpha = Mathf.Clamp01((Time.time - Time.fixedTime) / Time.fixedDeltaTime);
+            float animatorSpeed = isPaused ? 0f : 1f;
 
             for (int index = 0; index < entities.Length; index++)
             {
@@ -55,6 +57,7 @@ namespace TopView.Presentation.ViewSystems
                     view = Acquire(context, index, entity.kind.kind, entity.generation, viewPrefabsByKind);
                 }
 
+                view.animator.speed = animatorSpeed;
                 Vector3 position = Vector3.Lerp(entity.position.previous, entity.position.current, alpha);
                 view.transform.SetPositionAndRotation(position, Quaternion.Slerp(entity.rotation.previous, entity.rotation.current, alpha));
             }
