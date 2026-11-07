@@ -6,6 +6,7 @@
         "TopView.Systems",
         "TopView.Definitions",
         "TopView.Authoring",
+        "TopView.Persistence",
         "TopView.Presentation",
         "TopView.UserInterface",
         "Unity.InputSystem"
