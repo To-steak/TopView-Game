@@ -21,23 +21,17 @@ namespace TopView.Core
                 return;
             }
 
-            if (_catalog == null)
-            {
-                Debug.LogError("Runner >> Definition Catalog가 없어 판을 시작할 수 없다.");
-                return;
-            }
-
-            GameSettingsDefinition gameSettings = _catalog.gameSettings;
+            GameSettingsDefinition gameSettings = _gameSettingsDefinition;
             if (gameSettings == null)
             {
-                Debug.LogError("Runner >> Definition Catalog에 Game Settings Definition이 연결되어 있지 않아 판을 시작할 수 없다.");
+                Debug.LogError("Runner >> Runner에 Game Settings Definition이 연결되어 있지 않아 판을 시작할 수 없다.");
                 return;
             }
 
-            LootDefinition lootDefinition = _catalog.loot;
+            LootDefinition lootDefinition = _lootDefinition;
             if (lootDefinition == null)
             {
-                Debug.LogError("Runner >> Definition Catalog에 Loot Definition이 연결되어 있지 않아 판을 시작할 수 없다.");
+                Debug.LogError("Runner >> Runner에 Loot Definition이 연결되어 있지 않아 판을 시작할 수 없다.");
                 return;
             }
 
@@ -115,7 +109,7 @@ namespace TopView.Core
             _projectilePrefabs = projectilePrefabs.ToArray();
             _hitEffectPrefabs = hitEffectPrefabs.ToArray();
             _lootPrefabs = ReadLootPrefabs(lootDefinition);
-            ReadWorldText(_catalog.worldTextPrefab);
+            ReadWorldText(_worldTextPrefab);
             _viewContext = CreateViewContext(enemyKindCount);
 
             BindPresenters();

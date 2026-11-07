@@ -8,6 +8,9 @@ namespace TopView.Core
     // 전리품: 종류별 View 표 만들기와 드롭 표 확인
     public partial class Runner
     {
+        // 전리품의 규칙과 종류별 프리팹
+        [SerializeField] private LootDefinition _lootDefinition;
+
         // 전리품 종류별 View 프리팹. 번호가 LootKind 값이고, 없는 종류는 null이다
         private GameObject[] _lootPrefabs;
 

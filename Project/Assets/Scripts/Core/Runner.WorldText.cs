@@ -6,6 +6,9 @@ namespace TopView.Core
     // 월드 글자: 프리팹 읽기
     public partial class Runner
     {
+        // WorldTextView가 붙은 월드 글자 프리팹
+        [SerializeField] private GameObject _worldTextPrefab;
+
         // 월드 글자 프리팹. 없으면 글자를 띄우지 않는다
         private WorldTextView _worldTextViewPrefab;
 
@@ -16,7 +19,7 @@ namespace TopView.Core
 
             if (prefab == null)
             {
-                Debug.LogWarning("Runner >> Definition Catalog에 World Text Prefab이 연결되어 있지 않아 월드 글자 없이 진행한다.");
+                Debug.LogWarning("Runner >> Runner에 World Text Prefab이 연결되어 있지 않아 월드 글자 없이 진행한다.");
                 return;
             }
 

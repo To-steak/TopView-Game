@@ -16,20 +16,14 @@ namespace TopView.Core
         public World EditorWorld => _world;
 #endif
 
-        private DefinitionCatalog _catalog;
+        // 한 판의 규칙과 저장소 용량
+        [SerializeField] private GameSettingsDefinition _gameSettingsDefinition;
+
         private World _world;
         private ViewContext _viewContext;
 
-        private const string DEFINITION_CATALOG_PATH = "Definition Catalog";
-
         private void Awake()
         {
-            _catalog = Resources.Load<DefinitionCatalog>(DEFINITION_CATALOG_PATH);
-            if (_catalog == null)
-            {
-                Debug.LogError($"Runner >> Resources/{DEFINITION_CATALOG_PATH} 에셋이 없다.");
-            }
-
             _playerActions = new PlayerActions();
             _playerActions.Global.Enable();
         }
