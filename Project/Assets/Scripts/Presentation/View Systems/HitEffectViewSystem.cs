@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace TopView.Presentation.ViewSystems
 {
-    // 명중·폭발 기록마다 피격 이펙트를 풀에서 꺼내 재생하고, 끝난 이펙트를 풀에 돌려놓는다.
+    // 명중·폭발 기록마다 피격 이펙트(와 이펙트에 붙은 소리)를 풀에서 꺼내 재생하고, 끝난 이펙트를 풀에 돌려놓는다.
     public static class HitEffectViewSystem
     {
         /// <summary>
@@ -33,7 +33,8 @@ namespace TopView.Presentation.ViewSystems
             for (int playingIndex = context.playingEffects.Count - 1; playingIndex >= 0; playingIndex--)
             {
                 ParticleSystem effect = context.playingEffects[playingIndex];
-                if (effect.IsAlive(true))
+                // 소리가 파티클보다 길면 끝까지 들리도록 소리도 끝난 뒤에 돌려놓는다
+                if (effect.IsAlive(true) || (effect.TryGetComponent(out AudioSource sound) && sound.isPlaying))
                 {
                     continue;
                 }
@@ -45,7 +46,7 @@ namespace TopView.Presentation.ViewSystems
             }
         }
 
-        // 풀에서 꺼낸 이펙트는 스스로 지워지지 않도록 Stop Action을 끈 뒤 재생한다.
+        // 풀에서 꺼낸 이펙트는 스스로 지워지지 않도록 Stop Action을 끈 뒤 재생한다. 이펙트에 AudioSource가 있으면 그 소리도 함께 재생한다.
         private static void PlayHitEffect(HitEffectViewContext context, int hitEffectIndex, Vector3 position, GameObject[] hitEffectPrefabs)
         {
             Stack<ParticleSystem> pool = context.pools[hitEffectIndex];
@@ -64,6 +65,10 @@ namespace TopView.Presentation.ViewSystems
             effect.transform.SetPositionAndRotation(position, Quaternion.identity);
             effect.gameObject.SetActive(true);
             effect.Play(true);
+            if (effect.TryGetComponent(out AudioSource sound))
+            {
+                sound.Play();
+            }
             context.playingEffects.Add(effect);
             context.playingEffectIndices.Add(hitEffectIndex);
         }

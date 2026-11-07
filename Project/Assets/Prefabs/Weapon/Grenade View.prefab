@@ -46,7 +46,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd5a1b1bb30434c4abb3fc51f65c9fe5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: TopView.Presentation::TopView.Presentation.Views.WeaponView
-  attackClip: {fileID: 0}
+  attackClip: {fileID: 8300000, guid: 9c577242a6a3afc4b99351b9772ed5ec, type: 3}
   reloadSounds: []
   muzzle: {fileID: 196496051059306791}
 --- !u!1 &3993777973877806982

@@ -13,7 +13,7 @@ namespace TopView.Definitions
         public GameObject modelPrefab;
         // ProjectileView가 붙은 투사체 프리팹. Ranged와 Throw가 쓴다
         public GameObject projectilePrefab;
-        // 투사체가 맞거나 폭발할 때 재생할 ParticleSystem 프리팹. 없으면 null
+        // 투사체가 맞거나 폭발할 때 재생할 ParticleSystem 프리팹. 없으면 null. 루트에 AudioSource가 있으면 그 소리도 함께 재생한다
         public GameObject hitEffectPrefab;
     }
 }
