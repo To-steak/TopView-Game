@@ -293,7 +293,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2392852020978920594}
-  - component: {fileID: 7067191604853174723}
   m_Layer: 5
   m_Name: Gauge Area
   m_TagString: Untagged
@@ -321,20 +320,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: -20, y: -20}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &7067191604853174723
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3698950575318695102}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3312d7739989d2b4e91e6319e9a96d76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RectMask2D
-  m_Padding: {x: 0, y: 0, z: 0, w: 0}
-  m_Softness: {x: 0, y: 0}
 --- !u!1 &3940376543463850740
 GameObject:
   m_ObjectHideFlags: 0
@@ -737,7 +722,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7ef2a26b87518d429be1fd53a197cfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: TopView.Presentation::TopView.Presentation.Enemy.Views.EnemyHealthGaugeView
-  healthMask: {fileID: 7067191604853174723}
+  gaugeFront: {fileID: 5493103209942339786}
   tweenTicks: 15
   healthText: {fileID: 4453292683864033407}
 --- !u!1 &9112013117436395937
