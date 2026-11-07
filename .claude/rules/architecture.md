@@ -26,10 +26,12 @@ Runner가 World의 데이터를 꺼내 호출 순서대로 넘긴다. 게임 상
 ## 공통 원칙
 
 ### Logic / View 분리
-- **Logic은 FixedUpdate에서만 실행한다.** 게임 상태를 바꾸는 코드는 System의 `Tick` 안에만 둔다.
+- **Logic의 루프는 FixedUpdate에서만 돈다.** 게임 상태를 바꾸는 코드는 System의 `Tick` 안에만 둔다.
   - 이유: 프레임레이트에 따라 판정과 결과가 달라지지 않는다.
-- **View는 Update / LateUpdate에서만 실행한다.** 애니메이션, SFX, VFX, UI, 카메라가 View다.
+- **View의 루프는 Update / LateUpdate에서 돈다.** 애니메이션, SFX, VFX, UI, 카메라가 View다.
   - 이유: 화면은 프레임마다 그리되, 그리는 일이 게임 결과를 바꾸지 않는다.
+- 이 구분은 매 틱·매 프레임 반복되는 일에만 적용한다. 한 번만 하는 초기화(Awake / Start)는 어디에 둬도 된다.
+  - 이유: 초기화는 반복되지 않아 프레임레이트나 틱 횟수에 따라 결과가 달라지지 않는다.
 - Logic은 View를 참조하지 않는다. 그 틱에 일어난 일은 프레임 기록 목록(`List<~Record>`)에 남긴다.
   - 이유: View 없이도 Logic이 돈다. 사건을 데이터로 남기면 누가 언제 읽을지가 Runner의 호출 순서에 고정된다.
 - View는 게임 상태를 읽기만 한다. 입력은 명령 버퍼(`~Command`)를 거친다.
@@ -132,6 +134,8 @@ Runner가 World의 데이터를 꺼내 호출 순서대로 넘긴다. 게임 상
   - 이유: FixedUpdate에서 읽으면 한 프레임에 틱이 0번이나 2번 돌 때 입력을 놓치거나 두 번 읽는다.
 - Runner가 Update에서 명령 버퍼에 쌓고, CommandSystem이 Tick에서 소비한다.
   - 이유: Logic은 입력이 어디서 왔는지 모르고 명령만 본다.
+- 판이 없는 씬에서는 그 씬의 `~Flow`가 명령 목록(`List<~Command>`)을 가지고, Presenter가 넣은 명령을 Update에서 소비한다.
+  - 이유: 틱이 없는 씬에는 Logic이 없어, 그 씬의 흐름을 맡은 `~Flow` 한 곳에서 명령을 소비하면 된다.
 
 ### Systems/
 게임 상태를 바꾸는 유일한 곳이다.
@@ -216,7 +220,7 @@ Presentation/
   - 이유: 연출 판단이 ViewSystem 한 곳에 모이고, View는 프리팹의 참조 묶음으로만 남는다.
 - 연출의 판단과 동작은 모두 `~ViewSystem`(static)이 한다. Animator 파라미터 이름 등은 `~ViewSystem`의 상수로 둔다.
   - 이유: 문자열 이름이 흩어지면 오타가 실행해 봐야 드러난다.
-- View는 Runner(판이 없는 씬에서는 그 씬의 `~Flow`)가 정해진 순서로 호출하는 `~ViewSystem.Present`가 처리한다. 인자는 System처럼 필요한 데이터와 자기 영역의 `~ViewContext`만 받는다. 저장소 대신 읽기만 하는 엔티티 배열(`~Entity[]`)을 받는다. 다른 영역의 값이 필요하면 그 값만 인자로 받는다.
+- View는 Runner가 LateUpdate에서 정해진 순서로 호출하는 `~ViewSystem.Present`가 처리한다. 판이 없는 씬에서는 그 씬의 `~Flow`가 Update 또는 LateUpdate에서 호출한다. 인자는 System처럼 필요한 데이터와 자기 영역의 `~ViewContext`만 받는다. 저장소 대신 읽기만 하는 엔티티 배열(`~Entity[]`)을 받는다. 다른 영역의 값이 필요하면 그 값만 인자로 받는다.
   - 이유: 연출의 순서와 읽는 데이터도 Logic처럼 한 곳에서 보인다. `ViewContext`를 통째로 받으면 시그니처가 영향 범위를 보여 주지 못한다.
 - ViewSystem은 다른 ViewSystem을 호출하지 않는다.
   - 이유: 호출 안에 다른 ViewSystem의 동작이 숨으면 시그니처와 Runner의 호출 순서만 보고 언제 무엇이 일어나는지 알 수 없다.
