@@ -156,8 +156,8 @@ ProjectileHitSystem.Tick(_world.projectiles, _world.playerHitTargets, _world.pla
   - 이유: 위치의 정본이 둘이면 판정 위치와 보이는 위치가 어긋난다.
 - 판정 시점은 Logic의 타이머가 정한다. 애니메이션 이벤트로 게임 상태를 바꾸지 않는다.
   - 이유: 애니메이션 이벤트는 블렌딩, 컬링, 프레임레이트에 따라 늦거나 빠지거나 두 번 불린다.
-- Unity 물리는 질의로만 쓴다. 지형 등 씬에 배치한 정적 오브젝트에 Collider를 붙이고, System이 `Tick` 안에서 `Physics` 질의(Raycast, SphereCast, Overlap 등)를 호출해 그 결과로 위치 데이터를 고친다.
-  - 이유: 질의는 호출 시점과 결과가 System 코드 안에서 보인다.
+- Unity 물리는 질의로만 쓴다. 지형 등 씬에 배치한 정적 오브젝트에 Collider를 붙이고, System이 `Tick` 안에서 직접 또는 Utility를 거쳐 `Physics` 질의(Raycast, SphereCast, Overlap 등)를 호출해 그 결과로 위치 데이터를 고친다. Utility는 질의 결과를 돌려주기만 하고 데이터를 고치지 않는다.
+  - 이유: 질의는 호출 시점과 결과가 System 코드 안에서 보인다. 여러 System이 같은 질의를 써야 할 때 Utility 하나에 두면 결과가 어긋나지 않는다.
 - NavMesh도 질의로만 쓴다. System이 `Tick` 안에서 `NavMesh` 질의(CalculatePath, SamplePosition 등)를 호출해 경로를 얻고, 위치 데이터는 System이 직접 옮긴다. NavMeshAgent는 쓰지 않는다.
   - 이유: NavMeshAgent는 자체 업데이트에서 Transform을 옮기고 회피를 계산해, Tick 밖의 시점에 위치가 바뀐다.
 - Rigidbody, 물리 시뮬레이션, 충돌 콜백(`OnCollision~`, `OnTrigger~`)은 쓰지 않는다. 엔티티는 Collider를 갖지 않으며, 엔티티끼리의 충돌과 범위 판정은 Logic이 직접 계산한다.
