@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace TopView.Components
@@ -34,5 +35,7 @@ namespace TopView.Components
         public float meleeRadius;
         // 근접 판정 구 중심을 플레이어 앞쪽으로 띄우는 거리(유닛). Melee만 쓴다
         public float meleeOffset;
+        // 투사체가 생기는 위치. 플레이어 회전 기준의 로컬 위치. Ranged와 Throw가 쓰며, 조준 평면의 높이는 모든 종류가 이 값의 높이를 쓴다
+        public Vector3 muzzleOffset;
     }
 }
