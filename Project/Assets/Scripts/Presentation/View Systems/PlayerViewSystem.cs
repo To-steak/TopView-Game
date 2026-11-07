@@ -72,6 +72,7 @@ namespace TopView.Presentation.ViewSystems
             Animator animator = context.view.animator;
             ApplyStateRecords(in identifier, stateRecords, animator);
             PlayAttackSounds(in identifier, attackRecords, context.weaponViews, context.view.soundEffectSource);
+            PlayReloadSounds(in identifier, stateRecords, in actionState, weaponSlot.currentIndex, context);
             ApplyMovementAnimation(in actionState, in entity.motion, animator);
             ApplyRangedLayerWeight(in actionState, in weaponSlot, entity.weaponList.weapons, animator, context.rangedLayerIndex, rangedLayerBlendInTicks);
             ApplyActionLayerWeight(in actionState, animator, context.actionLayerIndex);
@@ -129,7 +130,32 @@ namespace TopView.Presentation.ViewSystems
                 {
                     Debug.LogWarning($"PlayerViewSystem >> {weaponModelPrefabs[weaponIndex].name}의 WeaponView에 Attack Clip이 없어 이 무기의 공격 효과음이 나오지 않는다.");
                 }
+                if (weaponView != null)
+                {
+                    WarnInvalidReloadSounds(weaponView.reloadSounds, weaponModelPrefabs[weaponIndex].name);
+                }
                 context.weaponViews[weaponIndex] = weaponView;
+            }
+        }
+
+        // 장전 소리 중 Clip이 빠졌거나 startTicks가 오름차순이 아닌 칸을 알린다. 오름차순이 아니면 뒤 칸이 앞 칸의 시점까지 기다렸다가 함께 재생된다.
+        private static void WarnInvalidReloadSounds(TimedSoundEntry[] reloadSounds, string prefabName)
+        {
+            if (reloadSounds == null)
+            {
+                return;
+            }
+
+            for (int soundIndex = 0; soundIndex < reloadSounds.Length; soundIndex++)
+            {
+                if (reloadSounds[soundIndex].clip == null)
+                {
+                    Debug.LogWarning($"PlayerViewSystem >> {prefabName}의 WeaponView Reload Sounds {soundIndex}번 칸에 Clip이 없어 그 칸은 소리를 내지 않는다.");
+                }
+                if (soundIndex > 0 && reloadSounds[soundIndex].startTicks < reloadSounds[soundIndex - 1].startTicks)
+                {
+                    Debug.LogWarning($"PlayerViewSystem >> {prefabName}의 WeaponView Reload Sounds {soundIndex}번 칸의 Start Ticks({reloadSounds[soundIndex].startTicks})가 앞 칸({reloadSounds[soundIndex - 1].startTicks})보다 작아 앞 칸의 시점에 함께 재생된다.");
+                }
             }
         }
 
@@ -162,6 +188,49 @@ namespace TopView.Presentation.ViewSystems
                 }
 
                 soundEffectSource.PlayOneShot(weaponView.attackClip);
+            }
+        }
+
+        // 장전 상태에 들어간 기록이 있으면 장전 소리를 처음부터 다시 센다. 장전 중에는 경과 틱이 startTicks에 닿은 소리를 차례로 재생한다.
+        // 장전이 끊기면 남은 소리는 재생하지 않고, 이미 재생 중인 소리만 끝까지 난다.
+        private static void PlayReloadSounds(in EntityIdentifier identifier, List<PlayerStateChangedRecord> stateRecords, in PlayerActionStateComponent actionState, int currentWeaponIndex, PlayerViewContext context)
+        {
+            for (int recordIndex = 0; recordIndex < stateRecords.Count; recordIndex++)
+            {
+                PlayerStateChangedRecord record = stateRecords[recordIndex];
+                if (record.state == PlayerState.Reload && record.player.index == identifier.index && record.player.generation == identifier.generation)
+                {
+                    context.nextReloadSoundIndex = 0;
+                }
+            }
+
+            AudioSource soundEffectSource = context.view.soundEffectSource;
+            if (actionState.state != PlayerState.Reload || soundEffectSource == null)
+            {
+                return;
+            }
+
+            if (currentWeaponIndex < 0 || currentWeaponIndex >= context.weaponViews.Length)
+            {
+                Debug.LogWarning($"PlayerViewSystem >> 들고 있는 무기 번호({currentWeaponIndex})가 무기 수({context.weaponViews.Length}) 밖이라 장전 효과음을 재생하지 않았다.");
+                return;
+            }
+
+            WeaponView weaponView = context.weaponViews[currentWeaponIndex];
+            if (weaponView == null || weaponView.reloadSounds == null)
+            {
+                return;
+            }
+
+            TimedSoundEntry[] reloadSounds = weaponView.reloadSounds;
+            while (context.nextReloadSoundIndex < reloadSounds.Length && reloadSounds[context.nextReloadSoundIndex].startTicks <= actionState.elapsedTicks)
+            {
+                AudioClip clip = reloadSounds[context.nextReloadSoundIndex].clip;
+                if (clip != null)
+                {
+                    soundEffectSource.PlayOneShot(clip);
+                }
+                context.nextReloadSoundIndex++;
             }
         }
 

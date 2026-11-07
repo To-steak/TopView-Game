@@ -12,6 +12,8 @@ namespace TopView.Presentation.ViewContexts
         public GameObject[] weaponModels;
         // weaponModels에 붙은 WeaponView. 번호는 무기 번호와 같고, 모델이나 WeaponView가 없는 칸은 null
         public WeaponView[] weaponViews;
+        // 이번 장전에서 다음에 재생할 장전 소리 번호. 장전 상태에 들어갈 때 0으로 되돌린다
+        public int nextReloadSoundIndex;
         // view Animator의 원거리 레이어 번호. 레이어가 없으면 -1
         public int rangedLayerIndex;
         // view Animator의 행동 레이어(Swing, Throw, Swap) 번호. 레이어가 없으면 -1
