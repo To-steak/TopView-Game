@@ -9,7 +9,7 @@ namespace TopView.Components
         public Vector3 velocity;
         // 생긴 뒤 지난 시간(틱)
         public int elapsedTicks;
-        // 땅이나 벽에 닿아 멈췄는지. Grenade만 쓴다
+        // 땅이나 벽에 닿아 멈췄는지. Grenade는 그 자리에서 폭발을 기다리고, Straight는 그 틱의 명중 판정 뒤 사라진다
         public bool isResting;
     }
 }

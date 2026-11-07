@@ -16,8 +16,8 @@ MonoBehaviour:
     kind: 1
     damage: 45
     maxAmmo: 8
-    currentAmmo: 8
-    reserveAmmo: 32
+    startingCurrentAmmo: 8
+    startingReserveAmmo: 32
     attackStartTicks: 3
     attackEndTicks: 0
     attackDurationTicks: 0
@@ -27,13 +27,14 @@ MonoBehaviour:
       speed: 35
       radius: 0.1
       lifetimeTicks: 250
+      maxThrowDistance: 0
       upwardRatio: 0
       gravity: 0
       fuseTicks: 0
       explosionRadius: 0
       collisionLayer:
         serializedVersion: 2
-        m_Bits: 0
+        m_Bits: 576
     meleeRadius: 0
     meleeOffset: 0
   modelPrefab: {fileID: 3196504383240874190, guid: c82cad46dd5eeac4cbfebf8c18d4a631, type: 3}

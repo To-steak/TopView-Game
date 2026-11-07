@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace TopView.Systems
 {
-    // 투사체를 움직인다. Straight는 수명이 다하면 소멸을 요청하고, Grenade는 환경에 닿으면 멈춘다. 판정과 폭발은 ProjectileHitSystem이 한다.
+    // 투사체를 움직인다. Straight는 수명이 다하면 소멸을 요청하고, 둘 다 환경에 닿으면 멈춘다. 판정과 폭발, 벽에 막힌 Straight의 소멸은 ProjectileHitSystem이 한다.
     public static class ProjectileSystem
     {
         /// <summary>
@@ -35,7 +35,7 @@ namespace TopView.Systems
 
             if (projectile.kind == ProjectileKind.Straight)
             {
-                position.current += motion.velocity * deltaTime;
+                MoveStraight(in projectile, ref motion, ref position, deltaTime);
                 return motion.elapsedTicks >= projectile.lifetimeTicks;
             }
 
@@ -44,6 +44,29 @@ namespace TopView.Systems
                 MoveGrenade(in projectile, ref motion, ref position, deltaTime);
             }
             return false;
+        }
+
+        // 곧게 움직이다가 환경 레이어에 닿으면 닿은 자리까지만 옮기고 멈춘다.
+        // 소멸은 ProjectileHitSystem이 이번 틱의 명중 판정을 마친 뒤 요청한다. 벽 앞에 있던 대상이 같은 틱에 맞을 수 있게 하기 위해서다.
+        private static void MoveStraight(in ProjectileComponent projectile, ref ProjectileMotionComponent motion, ref PositionComponent position, float deltaTime)
+        {
+            Vector3 displacement = motion.velocity * deltaTime;
+            float distance = displacement.magnitude;
+            if (distance <= 0f)
+            {
+                return;
+            }
+
+            Vector3 direction = displacement / distance;
+            if (Physics.SphereCast(position.current, projectile.radius, direction, out RaycastHit hit, distance, projectile.collisionLayer, QueryTriggerInteraction.Ignore))
+            {
+                position.current += direction * hit.distance;
+                motion.velocity = Vector3.zero;
+                motion.isResting = true;
+                return;
+            }
+
+            position.current += displacement;
         }
 
         // 중력을 받아 움직이다가 환경 레이어에 닿으면 그 자리에서 멈춘다.
