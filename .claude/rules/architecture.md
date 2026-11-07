@@ -256,8 +256,8 @@ Presentation/
   - 이유: World를 통째로 받으면 시그니처만 보고 무엇을 읽고 쓰는지 알 수 없다.
 - 틱 순서와 호출 순서는 Runner가 관리한다.
   - 이유: 호출 순서가 결과를 바꾸므로, 순서를 정하는 곳이 한 곳이어야 한 화면에서 흐름을 따라갈 수 있다.
-- DDOL에는 `Runner` 하나만 올린다. `RuntimeInitializeOnLoadMethod(BeforeSceneLoad)`에서 생성한다.
-  - 이유: 씬 배치 실수로 Runner가 없거나 둘이 되는 일이 없다.
+- Runner는 판이 있는 씬에 하나 배치한다. DDOL에 올리지 않고 씬과 함께 생기고 사라진다. 판이 없는 씬(메뉴 등)의 일을 Runner에 두지 않는다.
+  - 이유: Runner가 가진 상태(World, View 실행 상태, Presenter 연결)는 모두 판의 수명을 따른다. 씬보다 오래 살면 판과 상관없는 전역 일이 붙어 서비스처럼 커지고, 씬 전환을 알아채는 코드가 따로 필요해진다.
 - **로딩:** Core가 `~Definition`의 struct를 World에 대입한다. 판 시작 시 Core는 `~Authoring`마다 Transform 위치 등 씬 값을 채운 생성 요청을 큐에 넣고, 엔티티는 첫 틱의 `~SpawnSystem`이 만든다. Core는 World에 엔티티를 직접 넣지 않는다. System은 Definition과 Authoring을 참조하지 않는다.
   - 이유: 씬에 놓인 엔티티와 게임 중 생긴 엔티티가 같은 경로로 만들어진다. Logic이 에셋에 묶이지 않는다.
 
@@ -265,4 +265,4 @@ Presentation/
 Gizmo, PropertyDrawer, Custom Editor 등 에디터 도구를 둔다. 플랫폼을 Editor 전용으로 두어 빌드에 포함되지 않는다.
 
 - **Gizmo는 모두 `Editor/`에 두고 `[DrawGizmo]`로 그린다.** 씬에 배치한 값은 `~Authoring`을 읽어 그리고, 플레이 중의 Logic 값은 Runner의 에디터 전용 통로로 World를 읽어 그린다.
-  - 이유: Runner는 플레이 중에만 있어서 배치할 때 봐야 하는 값을 그릴 수 없다. Gizmo가 한 곳에 모이면 무엇을 어디에 둘지 고민하지 않는다.
+  - 이유: World는 플레이 중에만 있어서 배치할 때 봐야 하는 값을 그릴 수 없다. Gizmo가 한 곳에 모이면 무엇을 어디에 둘지 고민하지 않는다.
