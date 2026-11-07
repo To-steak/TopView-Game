@@ -5,15 +5,14 @@ using TopView.Entities;
 using TopView.Presentation.Views;
 using TopView.Presentation.ViewContexts;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace TopView.Presentation.ViewSystems
 {
-    // 적 View가 있는 칸마다 체력 게이지를 풀에서 꺼내 붙이고, 적 위에 띄워 카메라를 바라보게 하고, 마스크로 가린 게이지를 체력 비율까지 부드럽게 옮기고 체력을 글자로 보여 준다.
+    // 적 View가 있는 칸마다 체력 게이지를 풀에서 꺼내 붙이고, 적 위에 띄워 카메라를 바라보게 하고 체력 비율까지 너비를 부드럽게 옮기고 체력을 글자로 보여 준다.
     public static class EnemyHealthGaugeViewSystem
     {
         /// <summary>
-        /// 저장소의 칸마다 적 View와 게이지를 맞추고, 게이지의 위치·회전·보이는 비율·글자를 적에 맞춘다. EnemyViewSystem.Present 다음에 부른다.
+        /// 저장소의 칸마다 적 View와 게이지를 맞추고, 게이지의 위치·회전·너비·글자를 적에 맞춘다. EnemyViewSystem.Present 다음에 부른다.
         /// </summary>
         /// <param name="entities">적 엔티티 배열</param>
         /// <param name="gaugePrefabsByKind">적 종류별 EnemyHealthGaugeView 프리팹</param>
@@ -43,12 +42,13 @@ namespace TopView.Presentation.ViewSystems
                     continue;
                 }
 
-                // 막 꺼낸 게이지는 비율이 같아도 글자가 이전 값이므로 체력 표시를 다시 쓴다
-                bool isAcquired = gauge == null;
-                if (isAcquired)
+                // 막 꺼냈거나 칸이 다시 채워져 다른 적을 보여 주게 된 게이지는 너비와 글자가 이전 적의 값이므로 다시 맞춘다
+                bool isNewEnemy = gauge == null || context.healthGaugeGenerations[index] != entities[index].generation;
+                if (gauge == null)
                 {
                     gauge = Acquire(context, index, kind, gaugePrefabsByKind);
                 }
+                context.healthGaugeGenerations[index] = entities[index].generation;
 
                 Vector3 position = enemyView.healthGaugeAnchor.position;
                 Quaternion rotation = mainCamera != null
@@ -60,52 +60,26 @@ namespace TopView.Presentation.ViewSystems
                 if (health.max > 0f)
                 {
                     float healthRatio = health.current / health.max;
-                    if (isAcquired || context.healthGaugeRatios[index] != healthRatio)
+                    if (isNewEnemy || context.healthGaugeRatios[index] != healthRatio)
                     {
                         context.healthGaugeRatios[index] = healthRatio;
                         gauge.healthText.text = $"{health.current:F0} / {health.max:F0}";
 
-                        // 막 꺼낸 게이지는 이전 적의 비율이 남아 있으므로 연출 없이 맞춘다
-                        if (isAcquired)
+                        RectTransform gaugeFrontTransform = gauge.gaugeFront.rectTransform;
+                        Vector2 anchorMax = new Vector2(healthRatio, 1f);
+                        gaugeFrontTransform.DOKill();
+                        // 새 적은 이전 적의 너비에서 연출하지 않고 바로 맞춘다
+                        if (isNewEnemy)
                         {
-                            context.healthGaugeDisplayedRatios[index] = healthRatio;
-                            SetMaskRatio(gauge.healthMask, healthRatio);
+                            gaugeFrontTransform.anchorMax = anchorMax;
                         }
-                        context.healthGaugeStartRatios[index] = context.healthGaugeDisplayedRatios[index];
-                        context.healthGaugeElapsedSeconds[index] = 0f;
+                        else
+                        {
+                            gaugeFrontTransform.DOAnchorMax(anchorMax, gauge.tweenTicks * Time.fixedDeltaTime).SetLink(gauge.gameObject);
+                        }
                     }
-
-                    UpdateDisplayedRatio(context, index, gauge, healthRatio);
                 }
             }
-        }
-
-        // 연출 시간을 이 프레임만큼 늘리고, 시작 비율에서 목표 비율까지 DOTween 기본 이징으로 옮긴 비율을 마스크에 맞춘다.
-        private static void UpdateDisplayedRatio(EnemyViewContext context, int index, EnemyHealthGaugeView gauge, float targetRatio)
-        {
-            float displayedRatio = context.healthGaugeDisplayedRatios[index];
-            if (displayedRatio == targetRatio)
-            {
-                return;
-            }
-
-            float durationSeconds = gauge.tweenTicks * Time.fixedDeltaTime;
-            float elapsedSeconds = context.healthGaugeElapsedSeconds[index] + Time.deltaTime;
-            context.healthGaugeElapsedSeconds[index] = elapsedSeconds;
-
-            displayedRatio = elapsedSeconds < durationSeconds
-                ? DOVirtual.EasedValue(context.healthGaugeStartRatios[index], targetRatio, elapsedSeconds / durationSeconds, DOTween.defaultEaseType)
-                : targetRatio;
-            context.healthGaugeDisplayedRatios[index] = displayedRatio;
-            SetMaskRatio(gauge.healthMask, displayedRatio);
-        }
-
-        // 마스크의 오른쪽 여백을 비율 밖의 폭으로 맞춘다.
-        private static void SetMaskRatio(RectMask2D mask, float ratio)
-        {
-            Vector4 padding = mask.padding;
-            padding.z = mask.rectTransform.rect.width * (1f - ratio);
-            mask.padding = padding;
         }
 
         private static EnemyHealthGaugeView Acquire(EnemyViewContext context, int enemyIndex, int kind, GameObject[] gaugePrefabsByKind)
@@ -121,6 +95,7 @@ namespace TopView.Presentation.ViewSystems
         {
             EnemyHealthGaugeView gauge = context.healthGaugeViews[enemyIndex];
             context.healthGaugeViews[enemyIndex] = null;
+            gauge.gaugeFront.rectTransform.DOKill();
             gauge.gameObject.SetActive(false);
             context.healthGaugePools[kind].Push(gauge);
         }
