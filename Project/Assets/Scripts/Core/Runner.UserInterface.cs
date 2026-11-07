@@ -15,6 +15,7 @@ namespace TopView.Core
         private PlayerHealthPresenter _playerHealthPresenter;
         private AmmoPresenter _ammoPresenter;
         private PlayerManaPresenter _playerManaPresenter;
+        private ReloadPresenter _reloadPresenter;
         private BossHealthPresenter _bossHealthPresenter;
 
         private void BindPresenters()
@@ -89,6 +90,16 @@ namespace TopView.Core
                 _playerManaPresenter.Initialize();
             }
 
+            _reloadPresenter = FindAnyObjectByType<ReloadPresenter>();
+            if (_reloadPresenter == null)
+            {
+                Debug.LogError("Runner >> 씬에 ReloadPresenter가 없다.");
+            }
+            else
+            {
+                _reloadPresenter.Initialize();
+            }
+
             _bossHealthPresenter = FindAnyObjectByType<BossHealthPresenter>();
             if (_bossHealthPresenter == null)
             {
@@ -133,6 +144,10 @@ namespace TopView.Core
                 if (_playerManaPresenter != null)
                 {
                     _playerManaPresenter.Present(false, 0f, 0f);
+                }
+                if (_reloadPresenter != null)
+                {
+                    _reloadPresenter.Present(false, 0, 0);
                 }
             }
             else
@@ -185,6 +200,11 @@ namespace TopView.Core
             if (_playerManaPresenter != null)
             {
                 _playerManaPresenter.Present(true, entity.mana.current, entity.vitals.maxMana);
+            }
+
+            if (_reloadPresenter != null)
+            {
+                _reloadPresenter.Present(entity.actionState.state == PlayerState.Reload, entity.actionState.elapsedTicks, entity.action.reloadTicks);
             }
         }
 
