@@ -147,7 +147,7 @@ namespace TopView.Core
 
             PlayerViewSystem.Present(_world.players.entities, _world.playerStateChangedRecords, _world.playerAttackCommittedRecords, _playerViewPrefab, _playerWeaponModelPrefabs, _playerRangedLayerBlendInTicks, _viewContext.player);
             PlayerThrowPreviewViewSystem.Present(_world.players.entities, _viewContext.player.view, _playerThrowPreviewCircleHeightOffset);
-            EnemyViewSystem.Present(_world.enemies.entities, _world.enemyStateChangedRecords, _enemyViewPrefabs, _viewContext.enemy);
+            EnemyViewSystem.Present(_world.enemies.entities, _world.enemyStateChangedRecords, _world.enemyDamagedRecords, _enemyViewPrefabs, _viewContext.enemy);
             EnemyHealthGaugeViewSystem.Present(_world.enemies.entities, _enemyHealthGaugePrefabs, _viewContext.camera.mainCamera, _viewContext.enemy);
             ProjectileViewSystem.Present(_world.projectiles.entities, _projectilePrefabs, _viewContext.projectile);
             LootViewSystem.Present(_world.loots.entities, _lootPrefabs, _viewContext.loot);
