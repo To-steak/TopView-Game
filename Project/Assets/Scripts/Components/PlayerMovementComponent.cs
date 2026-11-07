@@ -35,7 +35,5 @@ namespace TopView.Components
         public float skinWidth;
         // 이동을 막는 레이어
         public LayerMask collisionLayer;
-        // 투사체가 생기는 위치. 플레이어 회전 기준의 로컬 위치
-        public Vector3 muzzleOffset;
     }
 }

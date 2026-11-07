@@ -39,7 +39,7 @@ namespace TopView.Systems
                 if (!actionState.isAttackCommitted && actionState.elapsedTicks >= weapon.attackStartTicks)
                 {
                     EntityIdentifier identifier = new EntityIdentifier { index = index, generation = entity.generation };
-                    if (CommitAttack(ref actionState, ref weaponSlot, in entity.movement, entity.position.current, entity.rotation.current, in identifier, in weapon, projectileSpawnRequests, meleeSpawnRequests))
+                    if (CommitAttack(ref actionState, ref weaponSlot, entity.position.current, entity.rotation.current, in identifier, in weapon, projectileSpawnRequests, meleeSpawnRequests))
                     {
                         attackCommittedRecords.Add(new PlayerAttackCommittedRecord { player = identifier, weaponIndex = weaponSlot.currentIndex });
                     }
@@ -49,7 +49,7 @@ namespace TopView.Systems
 
         // 공격을 내보낸다. 탄약이 없으면 아무것도 하지 않는다. Ranged와 Throw는 투사체 생성 요청을, Melee는 attackEndTicks까지 이어지는 근접 판정 생성 요청을 넣는다.
         // 공격이 실제로 나갔으면 true를 돌려준다.
-        private static bool CommitAttack(ref PlayerActionStateComponent actionState, ref PlayerWeaponSlotsComponent weaponSlots, in PlayerMovementComponent movement, Vector3 position, Quaternion rotation, in EntityIdentifier identifier, in WeaponComponent weapon, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
+        private static bool CommitAttack(ref PlayerActionStateComponent actionState, ref PlayerWeaponSlotsComponent weaponSlots, Vector3 position, Quaternion rotation, in EntityIdentifier identifier, in WeaponComponent weapon, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
         {
             actionState.isAttackCommitted = true;
             int weaponIndex = weaponSlots.currentIndex;
@@ -63,7 +63,7 @@ namespace TopView.Systems
                         return false;
                     }
                     weaponSlots.currentAmmo[weaponIndex]--;
-                    RequestProjectile(in movement, position, rotation, in weapon, rotation * Vector3.forward * weapon.projectile.speed, projectileSpawnRequests);
+                    RequestProjectile(position, rotation, in weapon, rotation * Vector3.forward * weapon.projectile.speed, projectileSpawnRequests);
                     break;
 
                 case WeaponKind.Throw:
@@ -78,7 +78,7 @@ namespace TopView.Systems
                         return false;
                     }
                     weaponSlots.reserveAmmo[weaponIndex]--;
-                    RequestProjectile(in movement, position, rotation, in weapon, throwVelocity, projectileSpawnRequests);
+                    RequestProjectile(position, rotation, in weapon, throwVelocity, projectileSpawnRequests);
                     break;
 
                 case WeaponKind.Melee:
@@ -101,15 +101,15 @@ namespace TopView.Systems
             return true;
         }
 
-        // 총구 위치에서 플레이어 회전과 주어진 속도로 투사체를 내보낸다.
-        private static void RequestProjectile(in PlayerMovementComponent movement, Vector3 position, Quaternion rotation, in WeaponComponent weapon, Vector3 velocity, Queue<ProjectileSpawnRequest> projectileSpawnRequests)
+        // 무기의 총구 위치에서 플레이어 회전과 주어진 속도로 투사체를 내보낸다.
+        private static void RequestProjectile(Vector3 position, Quaternion rotation, in WeaponComponent weapon, Vector3 velocity, Queue<ProjectileSpawnRequest> projectileSpawnRequests)
         {
             projectileSpawnRequests.Enqueue(new ProjectileSpawnRequest
             {
                 projectile = weapon.projectile,
                 faction = Faction.Player,
                 damage = weapon.damage,
-                position = position + rotation * movement.muzzleOffset,
+                position = position + rotation * weapon.muzzleOffset,
                 rotation = rotation,
                 velocity = velocity
             });
