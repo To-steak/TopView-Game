@@ -17,5 +17,7 @@ namespace TopView.Presentation.ViewContexts
         public WorldTextViewContext worldText;
         // 전리품 View 실행 상태
         public LootViewContext loot;
+        // 배경음악 실행 상태. Definition이 없으면 null
+        public MusicViewContext music;
     }
 }

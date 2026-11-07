@@ -71,7 +71,7 @@ namespace TopView.Core
                 PlayerPressSystem.Tick(_world.players, in _world.commandBuffer.playerCommand, _world.playerStateChangeRequests);
                 PlayerStateChangeSystem.Tick(_world.players, _world.playerStateChangeRequests, _world.playerStateChangedRecords);
                 PlayerMoveInputSystem.Tick(_world.players, in _world.commandBuffer.playerCommand);
-                PlayerAttackSystem.Tick(_world.players, _world.projectileSpawnRequests, _world.meleeSpawnRequests);
+                PlayerAttackSystem.Tick(_world.players, _world.projectileSpawnRequests, _world.meleeSpawnRequests, _world.playerAttackCommittedRecords);
                 PlayerStateSystem.Tick(_world.players, in _world.commandBuffer.playerCommand, _world.playerStateChangeRequests, _world.gameOverRequests);
                 PlayerStateChangeSystem.Tick(_world.players, _world.playerStateChangeRequests, _world.playerStateChangedRecords);
                 // 막기는 이동이 끝난 위치를 읽고, 조준은 막힌 뒤의 위치를 읽으므로 이 순서를 지킨다
@@ -143,7 +143,7 @@ namespace TopView.Core
                 return;
             }
 
-            PlayerViewSystem.Present(_world.players.entities, _world.playerStateChangedRecords, _playerViewPrefab, _playerWeaponModelPrefabs, _playerRangedLayerBlendInTicks, _viewContext.player);
+            PlayerViewSystem.Present(_world.players.entities, _world.playerStateChangedRecords, _world.playerAttackCommittedRecords, _playerViewPrefab, _playerWeaponModelPrefabs, _playerRangedLayerBlendInTicks, _viewContext.player);
             EnemyViewSystem.Present(_world.enemies.entities, _world.enemyStateChangedRecords, _enemyViewPrefabs, _viewContext.enemy);
             EnemyHealthGaugeViewSystem.Present(_world.enemies.entities, _enemyHealthGaugePrefabs, _viewContext.camera.mainCamera, _viewContext.enemy);
             ProjectileViewSystem.Present(_world.projectiles.entities, _projectilePrefabs, _viewContext.projectile);
@@ -153,10 +153,15 @@ namespace TopView.Core
             LootTextViewSystem.Present(_world.lootPickedUpRecords, _worldTextViewPrefab, _viewContext.worldText.pendingTexts);
             WorldTextViewSystem.Present(_worldTextViewPrefab, _viewContext.camera.mainCamera, _viewContext.worldText);
             CameraViewSystem.Present(_viewContext.camera, _viewContext.player.view, _playerCameraPriority, _world.commandBuffer.playerCommand.cameraYawInput, _playerCameraYawDegreesPerSecond);
+            if (_viewContext.music != null)
+            {
+                MusicViewSystem.Present(_viewContext.music);
+            }
 
             PresentUserInterface();
 
             _world.playerStateChangedRecords.Clear();
+            _world.playerAttackCommittedRecords.Clear();
             _world.enemyStateChangedRecords.Clear();
             _world.projectileHitRecords.Clear();
             _world.enemyDamagedRecords.Clear();

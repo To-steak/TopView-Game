@@ -87,6 +87,8 @@ namespace TopView.Core
 
         // 이번 프레임의 플레이어 상태 변경 기록. LateUpdate 마지막에 비운다
         public List<PlayerStateChangedRecord> playerStateChangedRecords = new List<PlayerStateChangedRecord>();
+        // 이번 프레임에 플레이어가 공격을 내보낸 기록. LateUpdate 마지막에 비운다
+        public List<PlayerAttackCommittedRecord> playerAttackCommittedRecords = new List<PlayerAttackCommittedRecord>();
         // 이번 프레임의 적 상태 변경 기록. LateUpdate 마지막에 비운다
         public List<EnemyStateChangedRecord> enemyStateChangedRecords = new List<EnemyStateChangedRecord>();
         // 이번 프레임의 투사체 명중·폭발 기록. LateUpdate 마지막에 비운다

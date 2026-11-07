@@ -178,7 +178,8 @@ namespace TopView.Core
                     viewGenerations = new int[_world.loots.entities.Length],
                     viewKinds = new int[_world.loots.entities.Length],
                     viewPools = new Stack<LootView>[_lootPrefabs.Length]
-                }
+                },
+                music = CreateMusicViewContext()
             };
             for (int kind = 0; kind < enemyKindCount; kind++)
             {
