@@ -19,7 +19,11 @@ namespace TopView.Definitions
         public GameObject viewPrefab;
         // 플레이어 카메라가 환경 카메라보다 앞서도록 주는 Cinemachine 우선순위
         public int cameraPriority;
+        // 플레이어 카메라의 Yaw 회전 속도(도/초)
+        public float cameraYawDegreesPerSecond = 90f;
         // 원거리 레이어 가중치가 0에서 1로 올라오는 시간(틱). 0이면 바로 1이 된다
         public int rangedLayerBlendInTicks;
+        // 투척 미리보기 원이 바닥과 겹쳐 깜빡이지 않도록 폭발 위치보다 띄우는 높이(유닛)
+        public float throwPreviewCircleHeightOffset = 0.02f;
     }
 }

@@ -13,12 +13,15 @@ MonoBehaviour:
   m_Name: Game Settings Definition
   m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.GameSettingsDefinition
   rule:
-    timeLimitTicks: 7500
-    spawnIntervalTicks: 250
+    timeLimitTicks: 90000
     enemyLevel: 1
     randomSeed: 0
     navMeshSampleDistance: 3
   targetFrameRate: 144
+  crosshairCursor: {fileID: 2800000, guid: f30868bff5489e34fb9f6e0020a5e622, type: 3}
   enemyCapacityPerKind: 1024
   enemyPathCornerCapacity: 8
   projectileCapacity: 2048
+  lootCapacity: 1024
+  flowRule:
+    menuSceneName: Menu

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using TopView.Components;
 using TopView.Entities;
 using TopView.Records;
+using TopView.Utilities;
 
 namespace TopView.Systems
 {
@@ -38,7 +39,7 @@ namespace TopView.Systems
         {
             actionState.state = EnemyState.Die;
             actionState.elapsedTicks = 0;
-            EnemyNavigationSystem.StopMove(ref agent);
+            EnemyNavigationUtility.StopMove(ref agent);
         }
     }
 }

@@ -1,0 +1,19 @@
+using UnityEngine;
+
+namespace TopView.Presentation.Views
+{
+    // 적 프리팹의 참조 묶음
+    public class EnemyView : MonoBehaviour
+    {
+        // 적 모델의 Animator
+        public Animator animator;
+        // 체력 게이지를 띄울 위치. 루트 바로 아래에 두어 애니메이션을 따라 흔들리지 않게 한다
+        public Transform healthGaugeAnchor;
+        // 피해량 글자를 띄울 위치. 루트 바로 아래에 두어 애니메이션을 따라 흔들리지 않게 한다
+        public Transform damageAnchor;
+        // 피해를 받을 때 재생하는 AudioSource. 여러 소리 중 무작위로 고르려면 Audio Generator 칸에 Audio Random Container를 넣는다. Play On Awake와 Loop는 끈다
+        public AudioSource hitSoundSource;
+        // 투사체가 나가는 자리들. 에디터에서 Enemy Definition의 Shots 칸마다 Spawn Offset을 구울 때만 읽고, 게임 중에는 쓰지 않는다
+        public Transform[] muzzles;
+    }
+}

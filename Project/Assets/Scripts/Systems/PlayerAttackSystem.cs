@@ -1,7 +1,10 @@
 using System.Collections.Generic;
 using TopView.Components;
 using TopView.Entities;
+using TopView.Records;
 using TopView.Requests;
+using TopView.Utilities;
+using UnityEngine;
 
 namespace TopView.Systems
 {
@@ -14,7 +17,8 @@ namespace TopView.Systems
         /// <param name="players">플레이어 저장소</param>
         /// <param name="projectileSpawnRequests">투사체 생성 요청 큐</param>
         /// <param name="meleeSpawnRequests">근접 판정 생성 요청 큐</param>
-        public static void Tick(PlayerStorage players, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
+        /// <param name="attackCommittedRecords">공격을 내보낸 기록 목록. 공격이 실제로 나갔을 때만 남긴다</param>
+        public static void Tick(PlayerStorage players, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, List<PlayerAttackCommittedRecord> attackCommittedRecords)
         {
             for (int index = 0; index < players.entities.Length; index++)
             {
@@ -35,9 +39,82 @@ namespace TopView.Systems
                 if (!actionState.isAttackCommitted && actionState.elapsedTicks >= weapon.attackStartTicks)
                 {
                     EntityIdentifier identifier = new EntityIdentifier { index = index, generation = entity.generation };
-                    PlayerWeaponSystem.CommitAttack(ref actionState, ref weaponSlot, in entity.movement, entity.position.current, entity.rotation.current, in identifier, in weapon, projectileSpawnRequests, meleeSpawnRequests);
+                    if (CommitAttack(ref actionState, ref weaponSlot, entity.position.current, entity.rotation.current, in identifier, in weapon, projectileSpawnRequests, meleeSpawnRequests))
+                    {
+                        attackCommittedRecords.Add(new PlayerAttackCommittedRecord { player = identifier, weaponIndex = weaponSlot.currentIndex });
+                    }
                 }
             }
+        }
+
+        // 공격을 내보낸다. 탄약이 없으면 아무것도 하지 않는다. Ranged와 Throw는 투사체 생성 요청을, Melee는 attackEndTicks까지 이어지는 근접 판정 생성 요청을 넣는다.
+        // 공격이 실제로 나갔으면 true를 돌려준다.
+        private static bool CommitAttack(ref PlayerActionStateComponent actionState, ref PlayerWeaponSlotsComponent weaponSlots, Vector3 position, Quaternion rotation, in EntityIdentifier identifier, in WeaponComponent weapon, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
+        {
+            actionState.isAttackCommitted = true;
+            int weaponIndex = weaponSlots.currentIndex;
+
+            switch (weapon.kind)
+            {
+                case WeaponKind.Ranged:
+                    if (weaponSlots.currentAmmo[weaponIndex] <= 0)
+                    {
+                        Debug.LogWarning($"PlayerAttackSystem >> 탄창 탄약이 {weaponSlots.currentAmmo[weaponIndex]}이라 원거리 공격을 내보내지 않았다.");
+                        return false;
+                    }
+                    weaponSlots.currentAmmo[weaponIndex]--;
+                    RequestProjectile(position, rotation, in weapon, rotation * Vector3.forward * weapon.projectile.speed, Vector3.zero, projectileSpawnRequests);
+                    break;
+
+                case WeaponKind.Throw:
+                    if (weaponSlots.reserveAmmo[weaponIndex] <= 0)
+                    {
+                        Debug.LogWarning($"PlayerAttackSystem >> 남은 탄약이 {weaponSlots.reserveAmmo[weaponIndex]}이라 투척 공격을 내보내지 않았다.");
+                        return false;
+                    }
+                    if (weapon.projectile.flightTicks <= 0)
+                    {
+                        Debug.LogWarning($"PlayerAttackSystem >> flightTicks({weapon.projectile.flightTicks})가 0 이하라 투척 공격을 내보내지 않았다. flightTicks는 0보다 커야 한다.");
+                        return false;
+                    }
+                    weaponSlots.reserveAmmo[weaponIndex]--;
+                    Vector3 targetPosition = PlayerWeaponUtility.GetThrowTargetPosition(in weapon.projectile, position, rotation, actionState.throwCharge);
+                    RequestProjectile(position, rotation, in weapon, Vector3.zero, targetPosition, projectileSpawnRequests);
+                    break;
+
+                case WeaponKind.Melee:
+                    meleeSpawnRequests.Enqueue(new MeleeSpawnRequest
+                    {
+                        owner = identifier,
+                        faction = Faction.Player,
+                        center = position + rotation * Vector3.forward * weapon.meleeOffset,
+                        radius = weapon.meleeRadius,
+                        damage = weapon.damage,
+                        durationTicks = weapon.attackEndTicks - weapon.attackStartTicks
+                    });
+                    break;
+
+                default:
+                    Debug.LogWarning($"PlayerAttackSystem >> 처리하지 않는 무기 종류({weapon.kind})라 공격을 내보내지 않았다.");
+                    return false;
+            }
+
+            return true;
+        }
+
+        // 무기의 총구 위치에서 플레이어 회전으로 투사체를 내보낸다. Straight는 velocity로, Grenade는 targetPosition을 향해 날아간다.
+        private static void RequestProjectile(Vector3 position, Quaternion rotation, in WeaponComponent weapon, Vector3 velocity, Vector3 targetPosition, Queue<ProjectileSpawnRequest> projectileSpawnRequests)
+        {
+            projectileSpawnRequests.Enqueue(new ProjectileSpawnRequest
+            {
+                projectile = weapon.projectile,
+                faction = Faction.Player,
+                damage = weapon.damage,
+                position = position + rotation * weapon.muzzleOffset,
+                rotation = rotation,
+                velocity = velocity,
+                targetPosition = targetPosition
+            });
         }
     }
 }

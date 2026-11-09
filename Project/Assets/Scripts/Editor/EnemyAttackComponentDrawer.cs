@@ -4,9 +4,9 @@ using UnityEngine;
 
 namespace TopView.Editor
 {
-    // EnemyAttackComponent 아래에 클립 구간 변환 칸을 붙인다.
-    // Body는 시작·끝 백분율과 클립 길이로 Start/End/Duration Ticks를, 투사체 공격은 시작 백분율과 클립 길이로 Start/Duration Ticks를 채우고 End 칸을 숨긴다.
-    // 공격 종류가 쓰지 않는 칸도 숨긴다. Body는 투사체와 발사 위치, 투사체 공격은 Body 판정, BossMissile이 아닌 공격은 번갈아 쏘는 위치다.
+    // EnemyAttackComponent 아래에 클립 변환 칸을 붙인다.
+    // Body는 시작·끝 백분율과 클립 길이로 Start/End/Duration Ticks를 채운다. 투사체 공격은 클립 길이로 Duration Ticks를 채우고, 발마다의 시작 백분율은 Shots의 칸에서 채운다.
+    // 공격 종류가 쓰지 않는 칸도 숨긴다. Body는 투사체와 Shots, 투사체 공격은 Body 판정과 Start/End Ticks다.
     [CustomPropertyDrawer(typeof(EnemyAttackComponent))]
     public class EnemyAttackComponentDrawer : AnimationTicksDrawer
     {
@@ -20,38 +20,35 @@ namespace TopView.Editor
             if (IsBody(property))
             {
                 return childName == nameof(EnemyAttackComponent.projectile)
-                    || childName == nameof(EnemyAttackComponent.spawnOffset)
-                    || childName == nameof(EnemyAttackComponent.alternateSpawnOffset);
+                    || childName == nameof(EnemyAttackComponent.shots);
             }
 
-            EnemyAttackKind kind = (EnemyAttackKind)property.FindPropertyRelative(nameof(EnemyAttackComponent.kind)).intValue;
-            if (childName == nameof(EnemyAttackComponent.alternateSpawnOffset))
-            {
-                return kind != EnemyAttackKind.BossMissile;
-            }
-
-            return childName == nameof(EnemyAttackComponent.endTicks)
+            // 투사체 공격의 Duration Ticks는 아래 변환 칸에서 클립 칸과 함께 그린다
+            return childName == nameof(EnemyAttackComponent.startTicks)
+                || childName == nameof(EnemyAttackComponent.endTicks)
+                || childName == nameof(EnemyAttackComponent.durationTicks)
                 || childName == nameof(EnemyAttackComponent.bodyRadius)
                 || childName == nameof(EnemyAttackComponent.bodyOffset);
         }
 
         protected override float GetExtraHeight(SerializedProperty property)
         {
-            return EditorGUIUtility.standardVerticalSpacing + AnimationTickConverter.RangeHeight;
+            float extraHeight = IsBody(property) ? AnimationTickConverter.RangeHeight : AnimationTickConverter.LineHeight;
+            return EditorGUIUtility.standardVerticalSpacing + extraHeight;
         }
 
         protected override void DrawExtra(Rect rect, SerializedProperty property)
         {
             rect.y += EditorGUIUtility.standardVerticalSpacing;
             rect.height -= EditorGUIUtility.standardVerticalSpacing;
-            SerializedProperty startTicks = property.FindPropertyRelative(nameof(EnemyAttackComponent.startTicks));
+            SerializedProperty durationTicks = property.FindPropertyRelative(nameof(EnemyAttackComponent.durationTicks));
             if (IsBody(property))
             {
-                AnimationTickConverter.DrawRange(rect, startTicks, property.FindPropertyRelative(nameof(EnemyAttackComponent.endTicks)), property.FindPropertyRelative(nameof(EnemyAttackComponent.durationTicks)));
+                AnimationTickConverter.DrawRange(rect, property.FindPropertyRelative(nameof(EnemyAttackComponent.startTicks)), property.FindPropertyRelative(nameof(EnemyAttackComponent.endTicks)), durationTicks);
             }
             else
             {
-                AnimationTickConverter.DrawRange(rect, startTicks, null, property.FindPropertyRelative(nameof(EnemyAttackComponent.durationTicks)));
+                AnimationTickConverter.DrawLengthTicks(new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight), durationTicks);
             }
         }
 

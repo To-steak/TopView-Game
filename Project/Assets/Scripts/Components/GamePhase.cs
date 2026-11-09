@@ -5,7 +5,9 @@ namespace TopView.Components
     {
         // 진행 중
         Playing,
-        // 게임오버
-        Over
+        // 승리로 끝남
+        Won,
+        // 패배로 끝남
+        Lost
     }
 }

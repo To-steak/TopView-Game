@@ -16,7 +16,9 @@ namespace TopView.Requests
         public Vector3 position;
         // 회전(월드)
         public Quaternion rotation;
-        // 처음 속도(월드, 유닛/초)
+        // 처음 속도(월드, 유닛/초). Straight만 쓴다
         public Vector3 velocity;
+        // 착탄점(월드). Grenade만 쓴다
+        public Vector3 targetPosition;
     }
 }

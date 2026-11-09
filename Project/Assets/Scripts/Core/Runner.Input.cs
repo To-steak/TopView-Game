@@ -1,4 +1,6 @@
 using TopView.Commands;
+using TopView.Components;
+using TopView.Entities;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -8,6 +10,33 @@ namespace TopView.Core
     public partial class Runner
     {
         private PlayerActions _playerActions;
+
+        // ESC를 누르면 설정 화면이 열려 있으면 닫고, 일시정지 중이면 풀고, 아니면 일시정지한다. 판이 끝난 뒤에는 정상적으로 무시한다
+        private void ReadEscapeInput(CommandBuffer commandBuffer, in GameProgressComponent progress)
+        {
+            if (!_playerActions.UserInterface.Escape.WasPerformedThisFrame() || progress.phase != GamePhase.Playing)
+            {
+                return;
+            }
+
+            if (_isSettingsOpen)
+            {
+                commandBuffer.settingsCommands.Add(new SettingsCommand { type = SettingsCommandType.Close });
+                return;
+            }
+
+            GameFlowCommandType type = progress.isPaused ? GameFlowCommandType.Resume : GameFlowCommandType.Pause;
+            commandBuffer.gameFlowCommands.Add(new GameFlowCommand { type = type });
+        }
+
+        // 일시정지 중에는 플레이어 입력을 읽지 않고 누르고 있는 입력을 비운다. 카메라 회전처럼 틱 밖에서 쓰는 입력이 계속 남지 않게 한다
+        private static void ClearHeldPlayerInput(ref PlayerCommand command)
+        {
+            command.moveDirection = Vector3.zero;
+            command.isRunning = false;
+            command.isAttackHeld = false;
+            command.cameraYawInput = 0f;
+        }
 
         // 프레임 단위 입력을 읽어 플레이어 명령에 쌓는다. 누름 입력은 틱이 소비할 때까지 남는다.
         private void ReadPlayerInput(ref PlayerCommand command)
@@ -19,6 +48,7 @@ namespace TopView.Core
             command.isRunning = actions.Run.IsPressed();
             command.isAttackHeld = actions.Attack.IsPressed();
             command.hasAimPoint = TryGetAimPoint(out command.aimPoint);
+            command.cameraYawInput = actions.CameraYaw.ReadValue<float>();
 
             if (actions.Jump.WasPerformedThisFrame())
             {
@@ -35,6 +65,10 @@ namespace TopView.Core
             if (actions.Reload.WasPerformedThisFrame())
             {
                 command.isReloadPressed = true;
+            }
+            if (actions.Cancel.WasPerformedThisFrame())
+            {
+                command.isCancelPressed = true;
             }
             if (actions.Swap.WasPerformedThisFrame())
             {
@@ -61,17 +95,17 @@ namespace TopView.Core
             return cameraForward * input.z + cameraRight * input.x;
         }
 
-        // 마우스가 가리키는 점을 총구 높이의 수평면 위에서 구한다. 카메라나 플레이어 View가 없으면 false
+        // 마우스가 가리키는 점을 든 무기의 총구 높이의 수평면 위에서 구한다. 카메라나 살아 있는 플레이어가 없으면 false
         private bool TryGetAimPoint(out Vector3 aimPoint)
         {
             aimPoint = Vector3.zero;
-            if (_viewContext.camera.mainCamera == null || _viewContext.player.view == null || Mouse.current == null)
+            if (_viewContext.camera.mainCamera == null || Mouse.current == null || !TryFindAlivePlayer(out int playerIndex))
             {
                 return false;
             }
 
             Ray ray = _viewContext.camera.mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
-            Plane plane = new Plane(Vector3.up, new Vector3(0f, _viewContext.player.view.muzzle.position.y, 0f));
+            Plane plane = new Plane(Vector3.up, new Vector3(0f, GetMuzzleHeight(in _world.players.entities[playerIndex]), 0f));
             if (!plane.Raycast(ray, out float distance))
             {
                 return false;
@@ -79,6 +113,19 @@ namespace TopView.Core
 
             aimPoint = ray.GetPoint(distance);
             return true;
+        }
+
+        // 든 무기의 총구 높이(월드). 투사체가 생기는 위치와 같은 식으로 구한다. 든 무기가 없으면 플레이어 위치의 높이
+        private static float GetMuzzleHeight(in PlayerEntity entity)
+        {
+            WeaponComponent[] weapons = entity.weaponList.weapons;
+            int weaponIndex = entity.weaponSlots.currentIndex;
+            if (weapons == null || weaponIndex < 0 || weaponIndex >= weapons.Length)
+            {
+                return entity.position.current.y;
+            }
+
+            return (entity.position.current + entity.rotation.current * weapons[weaponIndex].muzzleOffset).y;
         }
     }
 }

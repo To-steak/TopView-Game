@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TopView.Components;
 using TopView.Entities;
 using TopView.Requests;
+using TopView.Utilities;
 using UnityEngine;
 
 namespace TopView.Systems
@@ -21,7 +22,7 @@ namespace TopView.Systems
             while (meleeSpawnRequests.Count > 0)
             {
                 MeleeSpawnRequest request = meleeSpawnRequests.Dequeue();
-                if (!SpawnSystem.TryTakeFreeIndex(melees.freeIndices, out int index))
+                if (!SpawnUtility.TryTakeFreeIndex(melees.freeIndices, out int index))
                 {
                     droppedCount++;
                     continue;

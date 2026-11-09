@@ -1,5 +1,6 @@
 using TopView.Components;
 using TopView.Entities;
+using TopView.Utilities;
 using UnityEngine;
 
 namespace TopView.Systems
@@ -30,22 +31,6 @@ namespace TopView.Systems
             }
         }
 
-        /// <summary>
-        /// 플레이어 이동 충돌 캡슐의 위아래 구 중심을 구한다.
-        /// </summary>
-        /// <param name="movement">플레이어 이동 값</param>
-        /// <param name="rotation">플레이어 회전(월드)</param>
-        /// <param name="position">캡슐을 놓을 플레이어 위치</param>
-        /// <param name="top">위쪽 구의 중심</param>
-        /// <param name="bottom">아래쪽 구의 중심</param>
-        public static void GetCapsulePoints(in PlayerMovementComponent movement, Quaternion rotation, Vector3 position, out Vector3 top, out Vector3 bottom)
-        {
-            Vector3 center = position + rotation * movement.capsuleCenter;
-            float halfLine = Mathf.Max(movement.capsuleHeight * 0.5f - movement.capsuleRadius, 0f);
-            top = center + Vector3.up * halfLine;
-            bottom = center - Vector3.up * halfLine;
-        }
-
         private static void Move(ref PositionComponent position, ref PlayerMotionComponent motion, in PlayerMovementComponent movement, Quaternion rotation, float deltaTime)
         {
             motion.isGrounded = Physics.CheckSphere(position.current + movement.groundCheckOffset, movement.groundCheckRadius, movement.groundLayer);
@@ -72,7 +57,7 @@ namespace TopView.Systems
                 }
 
                 Vector3 direction = displacement / distance;
-                GetCapsulePoints(in movement, rotation, position, out Vector3 top, out Vector3 bottom);
+                PlayerMovementUtility.GetCapsulePoints(in movement, rotation, position, out Vector3 top, out Vector3 bottom);
                 if (!Physics.CapsuleCast(top, bottom, movement.capsuleRadius, direction, out RaycastHit hit, distance + movement.skinWidth, movement.collisionLayer, QueryTriggerInteraction.Ignore))
                 {
                     position += displacement;

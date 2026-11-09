@@ -17,20 +17,18 @@ MonoBehaviour:
     baseAttackDamage: 20
     baseSpeed: 1
     baseScore: 10
-    baseGold: 10
     maxHealthIncrement: 20
     attackDamageIncrement: 2
     speedIncrement: 0.2
     scoreIncrement: 3
-    goldIncrement: 5
     hitRadius: 0.75
   behavior:
-    detectionRadius: 25
-    wanderIntervalTicks: 100
     stopDistance: 1
     acceleration: 8
     angularSpeed: 360
     dieTicks: 36
+    endsGameOnDeath: 0
+    showsOverlayHealthBar: 0
   attacks:
   - attack:
       kind: 0
@@ -58,5 +56,10 @@ MonoBehaviour:
       alternateSpawnOffset: {x: 0, y: 0, z: 0}
     projectilePrefab: {fileID: 0}
     hitEffectPrefab: {fileID: 0}
+  loots:
+  - kind: 3
+    weight: 100
+    baseAmount: 10
+    amountIncrement: 10
   viewPrefab: {fileID: 7360897978464151965, guid: 3b02148a60e7b3f4189f63f9ca2715b8, type: 3}
   healthGaugePrefab: {fileID: 7240100042028206097, guid: 61bf5277b80621842967d75ffba1dcbe, type: 3}

@@ -54,6 +54,10 @@ namespace TopView.Editor
                 DrawRelative(weapon, nameof(WeaponComponent.meleeRadius));
                 DrawRelative(weapon, nameof(WeaponComponent.meleeOffset));
             }
+            // 조준 평면의 높이에 모든 종류가 쓴다
+            SerializedProperty muzzleOffset = weapon.FindPropertyRelative(nameof(WeaponComponent.muzzleOffset));
+            EditorGUILayout.PropertyField(muzzleOffset);
+            MuzzleOffsetBaker.Draw((WeaponDefinition)target, muzzleOffset, weapon.FindPropertyRelative(nameof(WeaponComponent.attackStartTicks)).intValue);
             EditorGUI.indentLevel--;
 
             EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(WeaponDefinition.modelPrefab)));

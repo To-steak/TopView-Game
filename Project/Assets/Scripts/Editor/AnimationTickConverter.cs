@@ -124,6 +124,17 @@ namespace TopView.Editor
             }
         }
 
+        /// <summary>
+        /// DrawRange의 클립 칸에 넣어 둔 클립을 돌려준다. 넣은 적이 없으면 null이다.
+        /// </summary>
+        /// <param name="startTicks">DrawRange에 넘긴 시작 틱 칸</param>
+        /// <returns>기억하고 있는 클립</returns>
+        public static AnimationClip GetRangeClip(SerializedProperty startTicks)
+        {
+            CLIPS.TryGetValue(GetKey(startTicks), out AnimationClip clip);
+            return clip;
+        }
+
         // 에셋과 칸 경로로 칸마다 다른 열쇠를 만든다. 같은 에셋의 배열 원소도 서로 구분된다.
         private static string GetKey(SerializedProperty property)
         {

@@ -14,12 +14,12 @@ namespace TopView.Components
         public float attackRange;
         // 공격 상태가 끝난 뒤 이 공격을 다시 고를 수 있을 때까지의 시간(틱). 0이면 바로 고를 수 있다
         public int cooldownTicks;
-        // 공격 상태에 들어간 뒤 공격이 나가기까지의 시간(틱). Body는 판정이 시작되고, 투사체 공격은 투사체를 내보낸다
+        // 공격 상태에 들어간 뒤 Body 판정이 시작되기까지의 시간(틱). Body만 쓴다. 투사체 공격은 shots의 칸마다 정한다
         [FormerlySerializedAs("commitTicks")]
         public int startTicks;
         // 공격 상태에 들어간 뒤 Body 판정이 끝나기까지의 시간(틱). startTicks보다 커야 한다. Body만 쓴다
         public int endTicks;
-        // 공격 상태에 들어간 뒤 공격 상태가 끝나기까지의 시간(틱). 공격이 나가기 전에는 끝나지 않는다. Body는 endTicks 이후가 판정 없는 후딜레이다
+        // 공격 상태에 들어간 뒤 공격 상태가 끝나기까지의 시간(틱). 공격이 모두 나가기 전에는 끝나지 않는다. Body는 endTicks 이후가 판정 없는 후딜레이다
         public int durationTicks;
         // 공격력에 곱하는 배율
         public float damageMultiplier;
@@ -29,9 +29,7 @@ namespace TopView.Components
         public float bodyOffset;
         // 내보내는 투사체. Body가 아닌 공격이 쓴다
         public ProjectileComponent projectile;
-        // 투사체가 생기는 위치. 공격하는 쪽의 회전 기준 로컬 위치. BossMissile에서는 짝수 번째 발사 위치다
-        public Vector3 spawnOffset;
-        // BossMissile의 홀수 번째 발사 위치. 공격하는 쪽의 회전 기준 로컬 위치
-        public Vector3 alternateSpawnOffset;
+        // 투사체를 내보내는 발마다의 시점과 위치. startTicks 오름차순으로 둔다. Body가 아닌 공격이 쓴다
+        public ProjectileShotComponent[] shots;
     }
 }

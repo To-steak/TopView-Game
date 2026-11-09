@@ -5,13 +5,13 @@ namespace TopView.Components
     {
         // 진행 단계
         public GamePhase phase;
+        // 일시정지 중인지. 진행 중(Playing)일 때만 true가 된다
+        public bool isPaused;
         // 남은 시간(틱)
         public int remainingTicks;
         // 점수
         public int score;
         // 이번 판에 번 골드
         public int gold;
-        // 다음 스폰까지 남은 시간(틱)
-        public int enemySpawnRemainingTicks;
     }
 }

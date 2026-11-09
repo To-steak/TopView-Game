@@ -14,19 +14,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.WeaponDefinition
   weapon:
     kind: 0
-    damage: 15
+    damage: 85
     maxAmmo: 0
-    currentAmmo: 0
-    reserveAmmo: 0
+    startingCurrentAmmo: 0
+    startingReserveAmmo: 0
     attackStartTicks: 18
     attackEndTicks: 24
     attackDurationTicks: 40
-    attackIntervalTicks: 100
+    attackIntervalTicks: 50
     projectile:
       kind: 0
       speed: 0
       radius: 0
       lifetimeTicks: 0
+      maxThrowDistance: 0
       upwardRatio: 0
       gravity: 0
       fuseTicks: 0
@@ -34,8 +35,8 @@ MonoBehaviour:
       collisionLayer:
         serializedVersion: 2
         m_Bits: 0
-    meleeRadius: 3
-    meleeOffset: 3
+    meleeRadius: 2
+    meleeOffset: 1
   modelPrefab: {fileID: 4377655535536273225, guid: 48b3e48d1e96a0c4490dc61536c17515, type: 3}
   projectilePrefab: {fileID: 0}
   hitEffectPrefab: {fileID: 0}

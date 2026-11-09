@@ -3,7 +3,7 @@ using UnityEditor;
 
 namespace TopView.Editor
 {
-    // ProjectileComponent를 펼쳐 그리면서, 투사체 종류가 쓰지 않는 칸을 숨긴다. Straight는 수류탄 칸, Grenade는 수명 칸이다.
+    // ProjectileComponent를 펼쳐 그리면서, 투사체 종류가 쓰지 않는 칸을 숨긴다. Straight는 수류탄 칸(환경 레이어와 폭발 반지름 제외), Grenade는 속도와 수명 칸이다.
     [CustomPropertyDrawer(typeof(ProjectileComponent))]
     public class ProjectileComponentDrawer : AnimationTicksDrawer
     {
@@ -17,14 +17,14 @@ namespace TopView.Editor
             ProjectileKind kind = (ProjectileKind)property.FindPropertyRelative(nameof(ProjectileComponent.kind)).intValue;
             if (kind == ProjectileKind.Grenade)
             {
-                return childName == nameof(ProjectileComponent.lifetimeTicks);
+                return childName == nameof(ProjectileComponent.speed)
+                    || childName == nameof(ProjectileComponent.lifetimeTicks);
             }
 
-            return childName == nameof(ProjectileComponent.upwardRatio)
-                || childName == nameof(ProjectileComponent.gravity)
-                || childName == nameof(ProjectileComponent.fuseTicks)
-                || childName == nameof(ProjectileComponent.explosionRadius)
-                || childName == nameof(ProjectileComponent.collisionLayer);
+            return childName == nameof(ProjectileComponent.chargePerTick)
+                || childName == nameof(ProjectileComponent.maxThrowDistance)
+                || childName == nameof(ProjectileComponent.flightTicks)
+                || childName == nameof(ProjectileComponent.arcHeight);
         }
     }
 }

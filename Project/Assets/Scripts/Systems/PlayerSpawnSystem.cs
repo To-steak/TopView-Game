@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using TopView.Components;
 using TopView.Entities;
 using TopView.Requests;
+using TopView.Utilities;
 using UnityEngine;
 
 namespace TopView.Systems
@@ -20,7 +21,7 @@ namespace TopView.Systems
             while (playerSpawnRequests.Count > 0)
             {
                 PlayerSpawnRequest request = playerSpawnRequests.Dequeue();
-                if (!SpawnSystem.TryTakeFreeIndex(players.freeIndices, out int index))
+                if (!SpawnUtility.TryTakeFreeIndex(players.freeIndices, out int index))
                 {
                     droppedCount++;
                     continue;
@@ -35,11 +36,11 @@ namespace TopView.Systems
             }
         }
 
-        // 칸 전체를 새 값으로 바꿔 이전 값이 남지 않게 한다. 무기 목록과 탄약 배열만 다시 쓴다.
+        // 칸 전체를 새 값으로 바꿔 이전 값이 남지 않게 한다. 무기 목록과 탄약 배열, 투척 미리보기 점 배열만 다시 쓴다.
         private static void Spawn(ref PlayerEntity entity, in PlayerSpawnRequest request)
         {
             int generation = entity.generation + 1;
-            WeaponComponent[] weapons = SpawnSystem.ReuseArray(entity.weaponList.weapons, request.weapons);
+            WeaponComponent[] weapons = SpawnUtility.ReuseArray(entity.weaponList.weapons, request.weapons);
             int[] currentAmmo = ReuseAmmoArray(entity.weaponSlots.currentAmmo, weapons.Length);
             int[] reserveAmmo = ReuseAmmoArray(entity.weaponSlots.reserveAmmo, weapons.Length);
             for (int weaponIndex = 0; weaponIndex < weapons.Length; weaponIndex++)
@@ -47,6 +48,7 @@ namespace TopView.Systems
                 currentAmmo[weaponIndex] = weapons[weaponIndex].startingCurrentAmmo;
                 reserveAmmo[weaponIndex] = weapons[weaponIndex].startingReserveAmmo;
             }
+            Vector3[] previewPoints = ReusePreviewPointArray(entity.throwPreview.points, GetPreviewPointCapacity(weapons));
 
             entity = new PlayerEntity
             {
@@ -68,8 +70,31 @@ namespace TopView.Systems
                     reserveAmmo = reserveAmmo,
                     currentIndex = 0,
                     pendingIndex = 0
-                }
+                },
+                throwPreview = new PlayerThrowPreviewComponent { points = previewPoints }
             };
+        }
+
+        // 투척 무기 중 가장 긴 비행의 점 수(flightTicks + 1). 투척 무기가 없으면 0이다.
+        private static int GetPreviewPointCapacity(WeaponComponent[] weapons)
+        {
+            int capacity = 0;
+            for (int weaponIndex = 0; weaponIndex < weapons.Length; weaponIndex++)
+            {
+                ref readonly WeaponComponent weapon = ref weapons[weaponIndex];
+                if (weapon.kind == WeaponKind.Throw)
+                {
+                    capacity = Mathf.Max(capacity, weapon.projectile.flightTicks + 1);
+                }
+            }
+
+            return capacity;
+        }
+
+        // 칸이 쓰던 미리보기 점 배열을 길이가 같으면 다시 쓴다. 내용은 PlayerThrowPreviewSystem이 매 틱 채운다.
+        private static Vector3[] ReusePreviewPointArray(Vector3[] slotArray, int length)
+        {
+            return slotArray != null && slotArray.Length == length ? slotArray : new Vector3[length];
         }
 
         // 칸이 쓰던 탄약 배열을 길이가 같으면 다시 쓴다. 내용은 부르는 쪽이 모두 채운다.

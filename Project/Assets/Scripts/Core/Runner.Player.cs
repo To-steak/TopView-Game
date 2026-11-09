@@ -2,31 +2,32 @@ using System.Collections.Generic;
 using TopView.Authoring;
 using TopView.Components;
 using TopView.Definitions;
-using TopView.Entities;
-using TopView.Presentation.Player.Views;
+using TopView.Presentation.Views;
 using TopView.Requests;
-using TopView.Systems;
 using UnityEngine;
 
 namespace TopView.Core
 {
-    // 플레이어: 스포너와 Definition 읽기, 디버그 표시
+    // 플레이어: 스포너와 Definition 읽기
     public partial class Runner
     {
         private GameObject _playerViewPrefab;
         private int _playerCameraPriority;
+        private float _playerCameraYawDegreesPerSecond;
         private int _playerRangedLayerBlendInTicks;
+        private float _playerThrowPreviewCircleHeightOffset;
         private GameObject[] _playerWeaponModelPrefabs;
 
         private const int PLAYER_CAPACITY = 1;
 
-        // 씬의 Player Spawner Authoring을 찾는다. 없으면 판을 하지 않는 씬이라 로그 없이 false, 둘 이상이면 false
+        // 씬의 Player Spawner Authoring을 찾는다. 하나가 아니면 false
         private static bool TryFindPlayerSpawner(out PlayerSpawnerAuthoring playerSpawner)
         {
             PlayerSpawnerAuthoring[] playerSpawners = FindObjectsByType<PlayerSpawnerAuthoring>(FindObjectsSortMode.None);
             playerSpawner = null;
             if (playerSpawners.Length == 0)
             {
+                Debug.LogError("Runner >> 씬에 Player Spawner Authoring이 없어 판을 시작할 수 없다.");
                 return false;
             }
 
@@ -68,6 +69,11 @@ namespace TopView.Core
                 Debug.LogWarning("Runner >> Player Definition의 Camera Priority가 0 이하라 플레이어 카메라로 바뀌지 않을 수 있다.");
             }
 
+            if (playerDefinition.cameraYawDegreesPerSecond <= 0f)
+            {
+                Debug.LogWarning("Runner >> Player Definition의 Camera Yaw Degrees Per Second가 0 이하라 Q/E 회전이 없거나 반대로 돈다.");
+            }
+
             spawnRequest = new PlayerSpawnRequest
             {
                 position = playerSpawner.transform.position,
@@ -105,31 +111,5 @@ namespace TopView.Core
 
             return true;
         }
-
-#if UNITY_EDITOR
-        // 플레이어 이동 충돌에 쓰는 캡슐을 Logic 위치에 그린다. 착지 중이면 초록, 공중이면 노랑
-        private void DrawPlayerGizmos()
-        {
-            PlayerEntity[] entities = _world.players.entities;
-            for (int index = 0; index < entities.Length; index++)
-            {
-                ref readonly PlayerEntity entity = ref entities[index];
-                if (!entity.isAlive)
-                {
-                    continue;
-                }
-
-                PlayerMovementSystem.GetCapsulePoints(in entity.movement, entity.rotation.current, entity.position.current, out Vector3 top, out Vector3 bottom);
-                float radius = entity.movement.capsuleRadius;
-                Gizmos.color = entity.motion.isGrounded ? Color.green : Color.yellow;
-                Gizmos.DrawWireSphere(top, radius);
-                Gizmos.DrawWireSphere(bottom, radius);
-                Gizmos.DrawLine(top + Vector3.forward * radius, bottom + Vector3.forward * radius);
-                Gizmos.DrawLine(top + Vector3.back * radius, bottom + Vector3.back * radius);
-                Gizmos.DrawLine(top + Vector3.right * radius, bottom + Vector3.right * radius);
-                Gizmos.DrawLine(top + Vector3.left * radius, bottom + Vector3.left * radius);
-            }
-        }
-#endif
     }
 }

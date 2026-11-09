@@ -6,16 +6,15 @@ using UnityEngine;
 
 namespace TopView.Systems
 {
-    // 체력이 0이 된 플레이어를 사망 상태로 바꾸고 자기 근접 판정을 없앤다.
+    // 체력이 0이 된 플레이어를 사망 상태로 바꾼다.
     public static class PlayerDeathSystem
     {
         /// <summary>
         /// 체력이 0이고 아직 사망 상태가 아닌 플레이어를 사망 상태로 바꾼다. 움직임을 멈추고 회전을 잠근다.
         /// </summary>
         /// <param name="players">플레이어 저장소</param>
-        /// <param name="melees">근접 판정 저장소</param>
         /// <param name="stateRecords">상태 변경 기록</param>
-        public static void Tick(PlayerStorage players, MeleeStorage melees, List<PlayerStateChangedRecord> stateRecords)
+        public static void Tick(PlayerStorage players, List<PlayerStateChangedRecord> stateRecords)
         {
             for (int index = 0; index < players.entities.Length; index++)
             {
@@ -34,8 +33,6 @@ namespace TopView.Systems
                 });
 
                 Die(ref entity.actionState, ref entity.motion);
-
-                MeleeHitSystem.DespawnOwnedBy(melees, in identifier, Faction.Player);
             }
         }
 

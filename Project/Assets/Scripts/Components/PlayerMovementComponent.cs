@@ -15,8 +15,6 @@ namespace TopView.Components
         public float jumpPower;
         // 회피 속도(유닛/초)
         public float dodgeSpeed;
-        // 점프 중과 착지 동작 중의 이동 속도(유닛/초)
-        public float inAirSpeed;
         // 중력 가속도(유닛/초²). 아래쪽이 음수
         public float gravity;
         // 땅에 닿아 있을 때 아래로 누르는 속도(유닛/초). 음수
@@ -37,7 +35,5 @@ namespace TopView.Components
         public float skinWidth;
         // 이동을 막는 레이어
         public LayerMask collisionLayer;
-        // 투사체가 생기는 위치. 플레이어 회전 기준의 로컬 위치
-        public Vector3 muzzleOffset;
     }
 }
