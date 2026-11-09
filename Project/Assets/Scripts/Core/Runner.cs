@@ -155,7 +155,7 @@ namespace TopView.Core
             WorldInformationViewSystem.Present(_viewContext.camera.mainCamera, _viewContext.worldInformation);
             ProjectileViewSystem.Present(_world.projectiles.entities, _projectilePrefabs, isPaused, _viewContext.projectile);
             LootViewSystem.Present(_world.loots.entities, _lootPrefabs, isPaused, _viewContext.loot);
-            HitEffectViewSystem.Present(_world.projectileHitRecords, _hitEffectPrefabs, isPaused, _viewContext.hitEffect);
+            HitEffectViewSystem.Present(_world.projectileHitRecords, _world.playerAttackCommittedRecords, _hitEffectPrefabs, isPaused, _viewContext.hitEffect);
             DamageTextViewSystem.Present(_world.enemyDamagedRecords, _viewContext.enemy.views, _viewContext.enemy.viewGenerations, _worldTextViewPrefab, _viewContext.camera.mainCamera, _viewContext.worldText.pendingTexts);
             LootTextViewSystem.Present(_world.lootPickedUpRecords, _worldTextViewPrefab, _viewContext.worldText.pendingTexts);
             WorldTextViewSystem.Present(_worldTextViewPrefab, _viewContext.camera.mainCamera, _viewContext.worldText);

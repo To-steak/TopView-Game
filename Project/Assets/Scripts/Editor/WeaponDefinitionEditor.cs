@@ -66,6 +66,10 @@ namespace TopView.Editor
                 EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(WeaponDefinition.projectilePrefab)));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(WeaponDefinition.hitEffectPrefab)));
             }
+            else
+            {
+                EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(WeaponDefinition.impactEffectPrefab)));
+            }
 
             serializedObject.ApplyModifiedProperties();
         }

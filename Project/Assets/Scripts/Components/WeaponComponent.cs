@@ -37,5 +37,7 @@ namespace TopView.Components
         public float meleeOffset;
         // 투사체가 생기는 위치. 플레이어 회전 기준의 로컬 위치. Ranged와 Throw가 쓰며, 조준 평면의 높이는 모든 종류가 이 값의 높이를 쓴다
         public Vector3 muzzleOffset;
+        // 근접 판정이 시작될 때 재생할 피격 이펙트 표의 번호. Melee만 쓴다. 판을 준비할 때 Core가 채우며, 음수면 없음
+        [NonSerialized] public int impactEffectIndex;
     }
 }

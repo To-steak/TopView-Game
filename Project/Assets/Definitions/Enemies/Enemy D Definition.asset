@@ -49,10 +49,10 @@ MonoBehaviour:
         maxThrowDistance: 0
         flightTicks: 0
         arcHeight: 0
-        explosionRadius: 0
+        explosionRadius: 1
         collisionLayer:
           serializedVersion: 2
-          m_Bits: 512
+          m_Bits: 704
       shots:
       - startTicks: 16
         spawnOffset: {x: 1.63, y: 2.1, z: 1.04}

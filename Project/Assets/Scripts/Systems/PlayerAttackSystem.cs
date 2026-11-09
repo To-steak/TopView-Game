@@ -39,18 +39,25 @@ namespace TopView.Systems
                 if (!actionState.isAttackCommitted && actionState.elapsedTicks >= weapon.attackStartTicks)
                 {
                     EntityIdentifier identifier = new EntityIdentifier { index = index, generation = entity.generation };
-                    if (CommitAttack(ref actionState, ref weaponSlot, entity.position.current, entity.rotation.current, in identifier, in weapon, projectileSpawnRequests, meleeSpawnRequests))
+                    if (CommitAttack(ref actionState, ref weaponSlot, entity.position.current, entity.rotation.current, in identifier, in weapon, projectileSpawnRequests, meleeSpawnRequests, out Vector3 meleeCenter))
                     {
-                        attackCommittedRecords.Add(new PlayerAttackCommittedRecord { player = identifier, weaponIndex = weaponSlot.currentIndex });
+                        attackCommittedRecords.Add(new PlayerAttackCommittedRecord
+                        {
+                            player = identifier,
+                            weaponIndex = weaponSlot.currentIndex,
+                            impactPosition = meleeCenter,
+                            impactEffectIndex = weapon.kind == WeaponKind.Melee ? weapon.impactEffectIndex : -1
+                        });
                     }
                 }
             }
         }
 
         // 공격을 내보낸다. 탄약이 없으면 아무것도 하지 않는다. Ranged와 Throw는 투사체 생성 요청을, Melee는 attackEndTicks까지 이어지는 근접 판정 생성 요청을 넣는다.
-        // 공격이 실제로 나갔으면 true를 돌려준다.
-        private static bool CommitAttack(ref PlayerActionStateComponent actionState, ref PlayerWeaponSlotsComponent weaponSlots, Vector3 position, Quaternion rotation, in EntityIdentifier identifier, in WeaponComponent weapon, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
+        // 공격이 실제로 나갔으면 true를 돌려준다. meleeCenter는 Melee일 때 판정 원의 중심이고, 그 밖에는 Vector3.zero다.
+        private static bool CommitAttack(ref PlayerActionStateComponent actionState, ref PlayerWeaponSlotsComponent weaponSlots, Vector3 position, Quaternion rotation, in EntityIdentifier identifier, in WeaponComponent weapon, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, out Vector3 meleeCenter)
         {
+            meleeCenter = Vector3.zero;
             actionState.isAttackCommitted = true;
             int weaponIndex = weaponSlots.currentIndex;
 
@@ -83,11 +90,12 @@ namespace TopView.Systems
                     break;
 
                 case WeaponKind.Melee:
+                    meleeCenter = position + rotation * Vector3.forward * weapon.meleeOffset;
                     meleeSpawnRequests.Enqueue(new MeleeSpawnRequest
                     {
                         owner = identifier,
                         faction = Faction.Player,
-                        center = position + rotation * Vector3.forward * weapon.meleeOffset,
+                        center = meleeCenter,
                         radius = weapon.meleeRadius,
                         damage = weapon.damage,
                         durationTicks = weapon.attackEndTicks - weapon.attackStartTicks

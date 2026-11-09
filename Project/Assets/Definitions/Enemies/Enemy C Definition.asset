@@ -49,7 +49,7 @@ MonoBehaviour:
         maxThrowDistance: 0
         flightTicks: 0
         arcHeight: 0
-        explosionRadius: 0
+        explosionRadius: 0.5
         collisionLayer:
           serializedVersion: 2
           m_Bits: 576

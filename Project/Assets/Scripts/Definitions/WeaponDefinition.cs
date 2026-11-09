@@ -15,5 +15,7 @@ namespace TopView.Definitions
         public GameObject projectilePrefab;
         // 투사체가 맞거나 폭발할 때 재생할 ParticleSystem 프리팹. 없으면 null. 루트에 AudioSource가 있으면 그 소리도 함께 재생한다
         public GameObject hitEffectPrefab;
+        // 근접 판정이 시작될 때 판정 원의 중심에서 재생할 ParticleSystem 프리팹. Melee만 쓰며, 없으면 null. 루트에 AudioSource나 CinemachineImpulseSource가 있으면 소리와 화면 흔들림도 함께 낸다
+        public GameObject impactEffectPrefab;
     }
 }

@@ -88,23 +88,32 @@ namespace TopView.Core
                 }
             }
 
-            if (hitEffectPrefab == null)
+            projectile.hitEffectIndex = IndexHitEffect($"{ownerName}의 피격 이펙트", hitEffectPrefab, hitEffectPrefabs);
+        }
+
+        // 피격 이펙트 표에 프리팹을 올리고(이미 있으면 그 번호를 쓰고) 번호를 돌려준다.
+        // 프리팹이 없으면 -1이다. ParticleSystem이 없으면 경고를 남기고 -1을 돌려주며, 그 이펙트는 나오지 않는다. 표시용이라 판은 시작한다.
+        private static int IndexHitEffect(string effectName, GameObject effectPrefab, List<GameObject> hitEffectPrefabs)
+        {
+            if (effectPrefab == null)
             {
-                return;
+                return -1;
             }
 
-            if (hitEffectPrefab.GetComponent<ParticleSystem>() == null)
+            if (effectPrefab.GetComponent<ParticleSystem>() == null)
             {
-                Debug.LogWarning($"Runner >> {ownerName}의 피격 이펙트 프리팹에 ParticleSystem이 없어 이 피격 이펙트는 나오지 않게 진행한다.");
-                return;
+                Debug.LogWarning($"Runner >> {effectName} 프리팹에 ParticleSystem이 없어 이 이펙트는 나오지 않게 진행한다.");
+                return -1;
             }
 
-            projectile.hitEffectIndex = hitEffectPrefabs.IndexOf(hitEffectPrefab);
-            if (projectile.hitEffectIndex < 0)
+            int effectIndex = hitEffectPrefabs.IndexOf(effectPrefab);
+            if (effectIndex < 0)
             {
-                projectile.hitEffectIndex = hitEffectPrefabs.Count;
-                hitEffectPrefabs.Add(hitEffectPrefab);
+                effectIndex = hitEffectPrefabs.Count;
+                hitEffectPrefabs.Add(effectPrefab);
             }
+
+            return effectIndex;
         }
     }
 }
