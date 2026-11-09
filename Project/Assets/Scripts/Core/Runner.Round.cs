@@ -123,6 +123,7 @@ namespace TopView.Core
             if (_viewContext != null)
             {
                 PauseViewSystem.Release(_viewContext.pause);
+                CursorViewSystem.Release(_viewContext.cursor);
             }
 
             _world = null;
@@ -188,7 +189,8 @@ namespace TopView.Core
                     viewPools = new Stack<LootView>[_lootPrefabs.Length]
                 },
                 music = CreateMusicViewContext(),
-                pause = new PauseViewContext()
+                pause = new PauseViewContext(),
+                cursor = new CursorViewContext()
             };
             for (int kind = 0; kind < enemyKindCount; kind++)
             {
@@ -214,6 +216,10 @@ namespace TopView.Core
             if (viewContext.camera.playerCameraView == null)
             {
                 Debug.LogError("Runner >> 씬에 PlayerCameraView가 없다.");
+            }
+            if (_gameSettingsDefinition.crosshairCursor == null)
+            {
+                Debug.LogError("Runner >> Game Settings Definition에 Crosshair Cursor가 연결되어 있지 않아 플레이 중에도 기본 커서를 쓴다.");
             }
             WorldCanvasView worldCanvasView = FindAnyObjectByType<WorldCanvasView>();
             if (worldCanvasView == null)

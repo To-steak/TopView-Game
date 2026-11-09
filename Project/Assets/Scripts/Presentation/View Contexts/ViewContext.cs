@@ -23,5 +23,7 @@ namespace TopView.Presentation.ViewContexts
         public MusicViewContext music;
         // 일시정지 연출 실행 상태
         public PauseViewContext pause;
+        // 커서 연출 실행 상태
+        public CursorViewContext cursor;
     }
 }

@@ -147,6 +147,7 @@ namespace TopView.Core
             bool isPaused = _world.progress.isPaused;
             // 이번 프레임에 일시정지가 걸리거나 풀리면 소리와 DOTween에 먼저 반영한다
             PauseViewSystem.Present(isPaused, _viewContext.pause);
+            CursorViewSystem.Present(isPaused, _gameSettingsDefinition.crosshairCursor, _viewContext.cursor);
             PlayerViewSystem.Present(_world.players.entities, _world.playerStateChangedRecords, _world.playerAttackCommittedRecords, _playerViewPrefab, _playerWeaponModelPrefabs, _playerRangedLayerBlendInTicks, isPaused, _viewContext.player);
             PlayerThrowPreviewViewSystem.Present(_world.players.entities, _viewContext.player.view, _playerThrowPreviewCircleHeightOffset);
             EnemyViewSystem.Present(_world.enemies.entities, _world.enemyStateChangedRecords, _world.enemyDamagedRecords, _enemyViewPrefabs, isPaused, _viewContext.enemy);
