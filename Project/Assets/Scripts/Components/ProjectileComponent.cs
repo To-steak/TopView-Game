@@ -23,7 +23,7 @@ namespace TopView.Components
         public int flightTicks;
         // 총구와 착탄점을 이은 선분 위로 솟는 최고 높이(유닛). 비행 중간에 가장 높다. Grenade만 쓴다
         public float arcHeight;
-        // 폭발 반지름(유닛, XZ). Grenade만 쓴다
+        // 폭발 반지름(유닛, XZ). Grenade는 멈춘 자리에서 폭발한다. Straight는 0보다 크면 대상이나 환경 레이어에 닿은 자리에서 폭발하고, 0이면 닿은 대상 하나만 맞힌다
         public float explosionRadius;
         // 닿으면 멈추는 환경 레이어. Straight는 닿으면 사라지고, Grenade는 그 자리에서 폭발한다
         public LayerMask collisionLayer;

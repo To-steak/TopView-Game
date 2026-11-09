@@ -103,16 +103,25 @@ namespace TopView.Editor
             }
         }
 
-        // 살아 있는 투사체마다 판정 구를 Logic 위치에 흰색으로 그린다.
+        // 살아 있는 투사체마다 판정 구를 Logic 위치에 흰색으로 그린다. 폭발 반지름이 있는 Straight는 폭발 범위를 빨간색 XZ 원으로 함께 그린다.
+        // 폭발 판정은 여기에 대상 반지름을 더해 비교하므로, 원은 대상 중심이 아니라 가장자리가 닿는 기준이다
         private static void DrawProjectiles(World world)
         {
             ProjectileEntity[] entities = world.projectiles.entities;
-            Gizmos.color = Color.white;
             for (int index = 0; index < entities.Length; index++)
             {
-                if (entities[index].isAlive)
+                ref readonly ProjectileEntity entity = ref entities[index];
+                if (!entity.isAlive)
                 {
-                    Gizmos.DrawWireSphere(entities[index].position.current, entities[index].projectile.radius);
+                    continue;
+                }
+
+                Gizmos.color = Color.white;
+                Gizmos.DrawWireSphere(entity.position.current, entity.projectile.radius);
+                if (entity.projectile.kind == ProjectileKind.Straight && entity.projectile.explosionRadius > 0f)
+                {
+                    Gizmos.color = Color.red;
+                    GizmoShapes.DrawCircle(entity.position.current, entity.projectile.explosionRadius);
                 }
             }
         }
