@@ -3,7 +3,7 @@
 ## 프로젝트 값
 `.claude/rules/`의 규칙은 프로젝트에 묶이지 않은 원칙만 담는다. 이 프로젝트에서의 구체 값은 여기에 둔다.
 
-- 엔진: Unity 6 (6000.3.11f1), URP. 타겟 플랫폼은 PC다.
+- 엔진: Unity 6 (6000.3.27f2), URP. 타겟 플랫폼은 PC다.
 - Unity 프로젝트 루트: `Project/`
 - 스크립트 루트: `Project/Assets/Scripts/`
 - 어셈블리·네임스페이스 접두사: `TopView`
