@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TopView.Commands;
+using TopView.Components;
 using TopView.UserInterface.Views;
 using UnityEngine;
 
@@ -11,15 +12,19 @@ namespace TopView.UserInterface.Presenters
         [SerializeField] private MenuView _view;
 
         private List<MenuCommand> _commands;
+        // 버튼 소리를 넣을 목록
+        private List<UserInterfaceSoundKind> _soundRequests;
         private bool _isShown;
 
         /// <summary>
         /// 명령을 넣을 목록을 받고 View를 보인다. MenuFlow가 시작할 때 부른다.
         /// </summary>
         /// <param name="commands">메뉴 명령 목록</param>
-        public void Initialize(List<MenuCommand> commands)
+        /// <param name="soundRequests">UI 소리 요청 목록</param>
+        public void Initialize(List<MenuCommand> commands, List<UserInterfaceSoundKind> soundRequests)
         {
             _commands = commands;
+            _soundRequests = soundRequests;
             _view.SetVisible(true);
             _isShown = true;
         }
@@ -53,16 +58,19 @@ namespace TopView.UserInterface.Presenters
 
         private void HandleStartClicked()
         {
+            AddSound(UserInterfaceSoundKind.Click);
             AddCommand(MenuCommandType.Start);
         }
 
         private void HandleSettingsClicked()
         {
+            AddSound(UserInterfaceSoundKind.Click);
             AddCommand(MenuCommandType.OpenSettings);
         }
 
         private void HandleExitClicked()
         {
+            AddSound(UserInterfaceSoundKind.Close);
             AddCommand(MenuCommandType.Exit);
         }
 
@@ -75,6 +83,17 @@ namespace TopView.UserInterface.Presenters
             }
 
             _commands.Add(new MenuCommand { type = type });
+        }
+
+        private void AddSound(UserInterfaceSoundKind kind)
+        {
+            if (_soundRequests == null)
+            {
+                Debug.LogWarning($"MenuPresenter >> 소리 요청 목록이 연결되지 않아 {kind} 소리를 내지 않았다.");
+                return;
+            }
+
+            _soundRequests.Add(kind);
         }
     }
 }

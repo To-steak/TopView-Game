@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TopView.Commands;
+using TopView.Components;
 using TopView.UserInterface.Views;
 using UnityEngine;
 
@@ -12,6 +13,8 @@ namespace TopView.UserInterface.Presenters
         [SerializeField] private LoadingView _view;
 
         private List<MenuCommand> _commands;
+        // 버튼 소리를 넣을 목록
+        private List<UserInterfaceSoundKind> _soundRequests;
         private bool _isShown;
         // 같은 값을 매 프레임 다시 쓰지 않도록 마지막으로 보여 준 값을 기억한다
         private float _presentedRatio;
@@ -21,9 +24,11 @@ namespace TopView.UserInterface.Presenters
         /// 명령을 넣을 목록을 받고 View를 숨긴다. MenuFlow가 시작할 때 부른다.
         /// </summary>
         /// <param name="commands">메뉴 명령 목록</param>
-        public void Initialize(List<MenuCommand> commands)
+        /// <param name="soundRequests">UI 소리 요청 목록</param>
+        public void Initialize(List<MenuCommand> commands, List<UserInterfaceSoundKind> soundRequests)
         {
             _commands = commands;
+            _soundRequests = soundRequests;
             _view.SetVisible(false);
             _isShown = false;
         }
@@ -78,6 +83,7 @@ namespace TopView.UserInterface.Presenters
 
         private void HandleEnterClicked()
         {
+            AddSound(UserInterfaceSoundKind.Click);
             if (_commands == null)
             {
                 Debug.LogWarning($"LoadingPresenter >> 명령 목록이 연결되지 않아 {MenuCommandType.EnterWorld} 명령을 버렸다.");
@@ -85,6 +91,17 @@ namespace TopView.UserInterface.Presenters
             }
 
             _commands.Add(new MenuCommand { type = MenuCommandType.EnterWorld });
+        }
+
+        private void AddSound(UserInterfaceSoundKind kind)
+        {
+            if (_soundRequests == null)
+            {
+                Debug.LogWarning($"LoadingPresenter >> 소리 요청 목록이 연결되지 않아 {kind} 소리를 내지 않았다.");
+                return;
+            }
+
+            _soundRequests.Add(kind);
         }
     }
 }

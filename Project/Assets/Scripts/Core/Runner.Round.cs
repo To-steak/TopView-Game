@@ -139,6 +139,7 @@ namespace TopView.Core
             _pausePresenter = null;
             _settingsPresenter = null;
             _isSettingsOpen = false;
+            _userInterfaceSoundRequests.Clear();
         }
 
         // 이번 판의 저장소 크기와 View 표에 맞춰 View 실행 상태를 만들고 씬의 카메라를 찾는다.
@@ -190,7 +191,8 @@ namespace TopView.Core
                 },
                 music = CreateMusicViewContext(),
                 pause = new PauseViewContext(),
-                cursor = new CursorViewContext()
+                cursor = new CursorViewContext(),
+                userInterfaceSound = CreateUserInterfaceSoundViewContext()
             };
             for (int kind = 0; kind < enemyKindCount; kind++)
             {

@@ -22,9 +22,15 @@ namespace TopView.Core
         [SerializeField] private AudioSettingsDefinition _audioSettingsDefinition;
         // 불러올 씬 이름과 최소 로딩 시간
         [SerializeField] private MenuSettingsDefinition _menuSettingsDefinition;
+        // Menu 씬의 배경음악 곡과 재생 값
+        [SerializeField] private MusicDefinition _musicDefinition;
+        // 버튼 소리
+        [SerializeField] private UserInterfaceSoundDefinition _userInterfaceSoundDefinition;
 
         private readonly List<MenuCommand> _commands = new List<MenuCommand>();
         private readonly List<SettingsCommand> _settingsCommands = new List<SettingsCommand>();
+        // Presenter가 이번 프레임에 넣은 버튼 소리 요청. LateUpdate 끝에 비운다
+        private readonly List<UserInterfaceSoundKind> _userInterfaceSoundRequests = new List<UserInterfaceSoundKind>();
         // Start에서 Menu Settings Definition에서 복사한 흐름 값
         private MenuRuleComponent _rule;
         // 흐름 값을 복사했는지. Menu Settings Definition이 없으면 false이고, 이때는 World를 불러오지 않는다
@@ -32,6 +38,10 @@ namespace TopView.Core
         private AudioVolumeComponent _volume;
         // 볼륨 반영 실행 상태. Audio Settings Definition이 없으면 null이고, 이때는 볼륨을 반영하지도 저장하지도 않는다
         private AudioVolumeViewContext _audioVolumeViewContext;
+        // 배경음악 실행 상태. Music Definition이나 평소 곡이 없으면 null이고, 이때는 배경음악을 틀지 않는다
+        private MusicViewContext _musicViewContext;
+        // UI 소리 실행 상태. User Interface Sound Definition이 없으면 null이고, 이때는 버튼 소리를 내지 않는다
+        private UserInterfaceSoundViewContext _userInterfaceSoundViewContext;
         // 슬라이더 값이 0~1 밖이라는 경고를 이미 남겼는지. 슬라이더를 움직이는 동안 매 프레임 쌓이지 않게 한 번만 남긴다
         private bool _hasReportedVolumeOutOfRange;
         private bool _isSettingsOpen;
@@ -46,6 +56,8 @@ namespace TopView.Core
 
         // AsyncOperation.progress는 씬 활성화를 막아 두면 불러오기가 끝났을 때 0.9에서 멈춘다
         private const float LOADED_PROGRESS = 0.9f;
+        private const string MUSIC_OBJECT_NAME = "Music";
+        private const string USER_INTERFACE_SOUND_OBJECT_NAME = "User Interface Sound";
 
         // 씬의 다른 오브젝트가 Awake를 마친 뒤에 연결한다. Audio Mixer는 Awake에서 값을 무시할 수 있어 볼륨도 여기서 반영한다
         private void Start()
@@ -77,13 +89,16 @@ namespace TopView.Core
                 AudioVolumeViewSystem.Present(in _volume, _audioVolumeViewContext);
             }
 
+            _musicViewContext = CreateMusicViewContext();
+            _userInterfaceSoundViewContext = CreateUserInterfaceSoundViewContext();
+
             if (_menuPresenter == null)
             {
                 Debug.LogError("MenuFlow >> Menu Presenter가 연결되어 있지 않다.");
             }
             else
             {
-                _menuPresenter.Initialize(_commands);
+                _menuPresenter.Initialize(_commands, _userInterfaceSoundRequests);
             }
 
             if (_settingsPresenter == null)
@@ -92,7 +107,7 @@ namespace TopView.Core
             }
             else
             {
-                _settingsPresenter.Initialize(_settingsCommands);
+                _settingsPresenter.Initialize(_settingsCommands, _userInterfaceSoundRequests);
             }
 
             if (_loadingPresenter == null)
@@ -101,7 +116,7 @@ namespace TopView.Core
             }
             else
             {
-                _loadingPresenter.Initialize(_commands);
+                _loadingPresenter.Initialize(_commands, _userInterfaceSoundRequests);
             }
         }
 
@@ -142,6 +157,15 @@ namespace TopView.Core
                 float ratio = isLoading ? ReadLoadingRatio() : 0f;
                 _loadingPresenter.Present(isLoading, ratio, ratio >= 1f);
             }
+            if (_musicViewContext != null)
+            {
+                MusicViewSystem.Present(_musicViewContext);
+            }
+            if (_userInterfaceSoundViewContext != null)
+            {
+                UserInterfaceSoundViewSystem.Present(_userInterfaceSoundRequests, _userInterfaceSoundViewContext);
+            }
+            _userInterfaceSoundRequests.Clear();
         }
 
         // 실제 불러온 비율과 최소 시간 중 덜 지난 쪽을 0~1로 돌려준다. 1이면 씬을 바꿔도 된다. 불러오기 전이면 0이다
@@ -274,6 +298,80 @@ namespace TopView.Core
             {
                 AudioVolumeStore.Save(in _volume);
             }
+        }
+
+        // Menu 씬에 배경음악 오브젝트를 만들어 평소 곡의 AudioSource를 둔다. 씬과 함께 사라지므로 World로 넘어가면 곡도 멈춘다.
+        // Music Definition이나 평소 곡이 없으면 null을 돌려준다. Runner.CreateMusicViewContext와 같은 코드다. Runner를 나눌 때 함께 정리한다
+        private MusicViewContext CreateMusicViewContext()
+        {
+            MusicDefinition definition = _musicDefinition;
+            if (definition == null)
+            {
+                Debug.LogError("MenuFlow >> Music Definition이 연결되어 있지 않아 배경음악이 나오지 않는다.");
+                return null;
+            }
+
+            if (definition.normalClip == null)
+            {
+                Debug.LogError("MenuFlow >> Music Definition에 Normal Clip이 연결되어 있지 않아 배경음악이 나오지 않는다.");
+                return null;
+            }
+
+            if (definition.outputGroup == null)
+            {
+                Debug.LogWarning("MenuFlow >> Music Definition에 Output Group이 연결되어 있지 않아 배경음악이 Audio Mixer를 거치지 않는다.");
+            }
+
+            if (definition.fadeTicks < 0)
+            {
+                Debug.LogWarning("MenuFlow >> Music Definition의 Fade Ticks가 0보다 작아 페이드 없이 곡을 튼다.");
+            }
+
+            GameObject musicObject = new GameObject(MUSIC_OBJECT_NAME);
+            AudioSource source = musicObject.AddComponent<AudioSource>();
+            source.clip = definition.normalClip;
+            source.outputAudioMixerGroup = definition.outputGroup;
+            source.loop = true;
+            source.playOnAwake = false;
+            source.spatialBlend = 0f;
+            source.volume = 0f;
+            return new MusicViewContext
+            {
+                normalSource = source,
+                volume = definition.volume,
+                fadeTicks = definition.fadeTicks
+            };
+        }
+
+        // Menu 씬에 UI 소리 오브젝트를 만든다. 일시정지 중에도 버튼 소리가 들리도록 ignoreListenerPause를 켠다.
+        // User Interface Sound Definition이 없으면 null을 돌려준다. Runner.CreateUserInterfaceSoundViewContext와 같은 코드다. Runner를 나눌 때 함께 정리한다
+        private UserInterfaceSoundViewContext CreateUserInterfaceSoundViewContext()
+        {
+            UserInterfaceSoundDefinition definition = _userInterfaceSoundDefinition;
+            if (definition == null)
+            {
+                Debug.LogError("MenuFlow >> User Interface Sound Definition이 연결되어 있지 않아 버튼 소리가 나지 않는다.");
+                return null;
+            }
+
+            if (definition.outputGroup == null)
+            {
+                Debug.LogWarning("MenuFlow >> User Interface Sound Definition에 Output Group이 연결되어 있지 않아 버튼 소리가 Audio Mixer를 거치지 않는다.");
+            }
+
+            GameObject soundObject = new GameObject(USER_INTERFACE_SOUND_OBJECT_NAME);
+            AudioSource source = soundObject.AddComponent<AudioSource>();
+            source.outputAudioMixerGroup = definition.outputGroup;
+            source.playOnAwake = false;
+            source.spatialBlend = 0f;
+            source.ignoreListenerPause = true;
+            return new UserInterfaceSoundViewContext
+            {
+                source = source,
+                clickClips = definition.clickClips,
+                closeClips = definition.closeClips,
+                volume = definition.volume
+            };
         }
 
         // Runner.Quit과 같은 코드다. Runner를 나눌 때 함께 정리한다

@@ -1,5 +1,8 @@
+using System.Collections.Generic;
 using TopView.Components;
+using TopView.Definitions;
 using TopView.Entities;
+using TopView.Presentation.ViewContexts;
 using TopView.UserInterface.Presenters;
 using UnityEngine;
 
@@ -8,6 +11,11 @@ namespace TopView.Core
     // UI: Presenter를 찾아 연결하고, 매 프레임 필요한 데이터만 넘긴다
     public partial class Runner
     {
+        // 버튼 소리
+        [SerializeField] private UserInterfaceSoundDefinition _userInterfaceSoundDefinition;
+
+        // Presenter가 이번 프레임에 넣은 버튼 소리 요청. LateUpdate 끝에 비운다
+        private readonly List<UserInterfaceSoundKind> _userInterfaceSoundRequests = new List<UserInterfaceSoundKind>();
         private GameOverPresenter _gameOverPresenter;
         private RemainingTimePresenter _remainingTimePresenter;
         private ScorePresenter _scorePresenter;
@@ -20,6 +28,8 @@ namespace TopView.Core
         private PausePresenter _pausePresenter;
         private SettingsPresenter _settingsPresenter;
 
+        private const string USER_INTERFACE_SOUND_OBJECT_NAME = "User Interface Sound";
+
         private void BindPresenters()
         {
             _gameOverPresenter = FindAnyObjectByType<GameOverPresenter>();
@@ -29,7 +39,7 @@ namespace TopView.Core
             }
             else
             {
-                _gameOverPresenter.Initialize(_world.commandBuffer);
+                _gameOverPresenter.Initialize(_world.commandBuffer, _userInterfaceSoundRequests);
             }
 
             _remainingTimePresenter = FindAnyObjectByType<RemainingTimePresenter>();
@@ -119,7 +129,7 @@ namespace TopView.Core
             }
             else
             {
-                _pausePresenter.Initialize(_world.commandBuffer);
+                _pausePresenter.Initialize(_world.commandBuffer, _userInterfaceSoundRequests);
             }
 
             _settingsPresenter = FindAnyObjectByType<SettingsPresenter>();
@@ -129,7 +139,7 @@ namespace TopView.Core
             }
             else
             {
-                _settingsPresenter.Initialize(_world.commandBuffer.settingsCommands);
+                _settingsPresenter.Initialize(_world.commandBuffer.settingsCommands, _userInterfaceSoundRequests);
             }
         }
 
@@ -187,6 +197,37 @@ namespace TopView.Core
             }
 
             PresentEnemyInterface();
+        }
+
+        // 판이 있는 씬에 UI 소리 오브젝트를 만든다. 일시정지 중에도 버튼 소리가 들리도록 ignoreListenerPause를 켠다.
+        // User Interface Sound Definition이 없으면 null을 돌려준다. MenuFlow에 같은 코드가 있다. Runner를 나눌 때 함께 정리한다
+        private UserInterfaceSoundViewContext CreateUserInterfaceSoundViewContext()
+        {
+            UserInterfaceSoundDefinition definition = _userInterfaceSoundDefinition;
+            if (definition == null)
+            {
+                Debug.LogError("Runner >> User Interface Sound Definition이 연결되어 있지 않아 버튼 소리가 나지 않는다.");
+                return null;
+            }
+
+            if (definition.outputGroup == null)
+            {
+                Debug.LogWarning("Runner >> User Interface Sound Definition에 Output Group이 연결되어 있지 않아 버튼 소리가 Audio Mixer를 거치지 않는다.");
+            }
+
+            GameObject soundObject = new GameObject(USER_INTERFACE_SOUND_OBJECT_NAME);
+            AudioSource source = soundObject.AddComponent<AudioSource>();
+            source.outputAudioMixerGroup = definition.outputGroup;
+            source.playOnAwake = false;
+            source.spatialBlend = 0f;
+            source.ignoreListenerPause = true;
+            return new UserInterfaceSoundViewContext
+            {
+                source = source,
+                clickClips = definition.clickClips,
+                closeClips = definition.closeClips,
+                volume = definition.volume
+            };
         }
 
         private bool TryFindAlivePlayer(out int playerIndex)

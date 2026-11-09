@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TopView.Commands;
 using TopView.Components;
 using TopView.UserInterface.Views;
@@ -11,15 +12,19 @@ namespace TopView.UserInterface.Presenters
         [SerializeField] private GameOverView _view;
 
         private CommandBuffer _commandBuffer;
+        // 버튼 소리를 넣을 목록
+        private List<UserInterfaceSoundKind> _soundRequests;
         private bool _isShown;
 
         /// <summary>
         /// 명령을 넣을 버퍼를 받고 View를 숨긴다. 판을 준비할 때 Runner가 부른다.
         /// </summary>
         /// <param name="commandBuffer">이번 판의 명령 버퍼</param>
-        public void Initialize(CommandBuffer commandBuffer)
+        /// <param name="soundRequests">UI 소리 요청 목록</param>
+        public void Initialize(CommandBuffer commandBuffer, List<UserInterfaceSoundKind> soundRequests)
         {
             _commandBuffer = commandBuffer;
+            _soundRequests = soundRequests;
             _view.SetVisible(false);
             _isShown = false;
         }
@@ -52,11 +57,13 @@ namespace TopView.UserInterface.Presenters
 
         private void HandleRestartClicked()
         {
+            AddSound(UserInterfaceSoundKind.Click);
             AddCommand(GameFlowCommandType.Restart);
         }
 
         private void HandleExitClicked()
         {
+            AddSound(UserInterfaceSoundKind.Close);
             AddCommand(GameFlowCommandType.Exit);
         }
 
@@ -69,6 +76,17 @@ namespace TopView.UserInterface.Presenters
             }
 
             _commandBuffer.gameFlowCommands.Add(new GameFlowCommand { type = type });
+        }
+
+        private void AddSound(UserInterfaceSoundKind kind)
+        {
+            if (_soundRequests == null)
+            {
+                Debug.LogWarning($"GameOverPresenter >> 소리 요청 목록이 연결되지 않아 {kind} 소리를 내지 않았다.");
+                return;
+            }
+
+            _soundRequests.Add(kind);
         }
     }
 }

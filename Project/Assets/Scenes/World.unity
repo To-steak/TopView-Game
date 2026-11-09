@@ -173709,6 +173709,7 @@ MonoBehaviour:
   _audioSettingsDefinition: {fileID: 11400000, guid: 2547c441975c8a34f9917dc8cd5aee39, type: 2}
   _lootDefinition: {fileID: 11400000, guid: 873a3ca0e8f87cb40b26097d1ee69536, type: 2}
   _musicDefinition: {fileID: 11400000, guid: 53468fd0a3681874a8837ec7cede1694, type: 2}
+  _userInterfaceSoundDefinition: {fileID: 11400000, guid: fce0f671d0d7bd44b8e32bdc7a210a40, type: 2}
   _worldTextPrefab: {fileID: 3997208476704559197, guid: 1f089c5d0fabb624b8e6ed25014ba2a7, type: 3}
   _gameSettingsDefinition: {fileID: 11400000, guid: db90d6ae1cf94cc4a9f5125de6d5fb56, type: 2}
 --- !u!4 &2012257784

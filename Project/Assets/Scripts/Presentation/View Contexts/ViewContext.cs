@@ -25,5 +25,7 @@ namespace TopView.Presentation.ViewContexts
         public PauseViewContext pause;
         // 커서 연출 실행 상태
         public CursorViewContext cursor;
+        // UI 소리 실행 상태. Definition이 없으면 null
+        public UserInterfaceSoundViewContext userInterfaceSound;
     }
 }

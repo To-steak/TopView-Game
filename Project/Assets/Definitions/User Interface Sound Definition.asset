@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7095118efdc00db419cad6952afdf3df, type: 3}
+  m_Name: User Interface Sound Definition
+  m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.UserInterfaceSoundDefinition
+  clickClips:
+  - {fileID: 8300000, guid: bfcbed75863933d498e69412d95b0d9b, type: 3}
+  - {fileID: 8300000, guid: 7a03a50a8a8ad8c45b8d0f8146cac9a1, type: 3}
+  - {fileID: 8300000, guid: 68c1c767de6438249b84f8ff950c2580, type: 3}
+  - {fileID: 8300000, guid: 5565a324921e39441a1dd4a096e2354e, type: 3}
+  - {fileID: 8300000, guid: 038958d507c459642be1d9b45a23bfb0, type: 3}
+  closeClips:
+  - {fileID: 8300000, guid: e843955d2306a2c4089b705917d9c9fa, type: 3}
+  - {fileID: 8300000, guid: f92e9f2a86309c5469118d90aeb39624, type: 3}
+  - {fileID: 8300000, guid: 71c31887e66a04b439a5119980af7a24, type: 3}
+  - {fileID: 8300000, guid: 6bec0ad254100cd48a815ac4e3b0cf25, type: 3}
+  outputGroup: {fileID: 1703689173175708041, guid: 969243a63b7eb6248b0be0c6e7ffabcd, type: 2}
+  volume: 1

@@ -166,6 +166,11 @@ namespace TopView.Core
             }
 
             PresentUserInterface();
+            if (_viewContext.userInterfaceSound != null)
+            {
+                UserInterfaceSoundViewSystem.Present(_userInterfaceSoundRequests, _viewContext.userInterfaceSound);
+            }
+            _userInterfaceSoundRequests.Clear();
 
             _world.playerStateChangedRecords.Clear();
             _world.playerAttackCommittedRecords.Clear();

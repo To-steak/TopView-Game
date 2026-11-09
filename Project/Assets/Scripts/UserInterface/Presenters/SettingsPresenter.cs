@@ -12,6 +12,8 @@ namespace TopView.UserInterface.Presenters
         [SerializeField] private SettingsView _view;
 
         private List<SettingsCommand> _commands;
+        // 버튼 소리를 넣을 목록
+        private List<UserInterfaceSoundKind> _soundRequests;
         private bool _isShown;
         // 같은 값을 매 프레임 다시 쓰지 않도록 마지막으로 보여 준 값을 기억한다
         private float _presentedMusicVolume;
@@ -21,9 +23,11 @@ namespace TopView.UserInterface.Presenters
         /// 명령을 넣을 목록을 받고 View를 숨긴다. 그 씬의 흐름을 맡은 쪽(MenuFlow, Runner)이 시작할 때 부른다.
         /// </summary>
         /// <param name="commands">설정 명령 목록</param>
-        public void Initialize(List<SettingsCommand> commands)
+        /// <param name="soundRequests">UI 소리 요청 목록</param>
+        public void Initialize(List<SettingsCommand> commands, List<UserInterfaceSoundKind> soundRequests)
         {
             _commands = commands;
+            _soundRequests = soundRequests;
             _view.SetVisible(false);
             _isShown = false;
         }
@@ -86,6 +90,7 @@ namespace TopView.UserInterface.Presenters
 
         private void HandleCloseClicked()
         {
+            AddSound(UserInterfaceSoundKind.Close);
             AddCommand(SettingsCommandType.Close, 0f);
         }
 
@@ -98,6 +103,17 @@ namespace TopView.UserInterface.Presenters
             }
 
             _commands.Add(new SettingsCommand { type = type, value = value });
+        }
+
+        private void AddSound(UserInterfaceSoundKind kind)
+        {
+            if (_soundRequests == null)
+            {
+                Debug.LogWarning($"SettingsPresenter >> 소리 요청 목록이 연결되지 않아 {kind} 소리를 내지 않았다.");
+                return;
+            }
+
+            _soundRequests.Add(kind);
         }
     }
 }

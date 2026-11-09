@@ -317,6 +317,8 @@ MonoBehaviour:
   _loadingPresenter: {fileID: 890302479}
   _audioSettingsDefinition: {fileID: 11400000, guid: 2547c441975c8a34f9917dc8cd5aee39, type: 2}
   _menuSettingsDefinition: {fileID: 11400000, guid: 2ff00d6a9a497074c9b37342c53a11e5, type: 2}
+  _musicDefinition: {fileID: 11400000, guid: da02d53f8e6f9b54ab656e4fcc524e8b, type: 2}
+  _userInterfaceSoundDefinition: {fileID: 11400000, guid: fce0f671d0d7bd44b8e32bdc7a210a40, type: 2}
 --- !u!4 &33228061
 Transform:
   m_ObjectHideFlags: 0
