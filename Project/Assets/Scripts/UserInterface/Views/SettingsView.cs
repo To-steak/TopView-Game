@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,10 +18,14 @@ namespace TopView.UserInterface.Views
 
         [SerializeField] private Slider _musicVolumeSlider;
         [SerializeField] private Slider _soundEffectVolumeSlider;
+        // 배경음악 볼륨을 0~100 정수로 보여 준다
+        [SerializeField] private TMP_Text _musicVolumeText;
+        // 효과음 볼륨을 0~100 정수로 보여 준다
+        [SerializeField] private TMP_Text _soundEffectVolumeText;
         [SerializeField] private Button _closeButton;
 
         /// <summary>
-        /// 슬라이더를 볼륨 값으로 맞춘다. 값이 바뀌었다는 이벤트는 내지 않는다.
+        /// 슬라이더와 값 글자를 볼륨 값으로 맞춘다. 값이 바뀌었다는 이벤트는 내지 않는다.
         /// </summary>
         /// <param name="musicVolume">배경음악 볼륨(0~1)</param>
         /// <param name="soundEffectVolume">효과음 볼륨(0~1)</param>
@@ -28,6 +33,9 @@ namespace TopView.UserInterface.Views
         {
             _musicVolumeSlider.SetValueWithoutNotify(musicVolume);
             _soundEffectVolumeSlider.SetValueWithoutNotify(soundEffectVolume);
+            // SetText의 서식 인자는 문자열을 새로 만들지 않아 슬라이더를 움직이는 동안 매 프레임 불러도 할당이 없다
+            _musicVolumeText.SetText("{0}", Mathf.RoundToInt(musicVolume * 100f));
+            _soundEffectVolumeText.SetText("{0}", Mathf.RoundToInt(soundEffectVolume * 100f));
         }
 
         private void OnEnable()
