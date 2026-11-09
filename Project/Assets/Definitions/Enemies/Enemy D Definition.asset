@@ -13,26 +13,77 @@ MonoBehaviour:
   m_Name: Enemy D Definition
   m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.EnemyDefinition
   stats:
-    baseMaxHealth: 0
-    baseAttackDamage: 0
+    baseMaxHealth: 1000
+    baseAttackDamage: 100
     baseSpeed: 0
-    baseScore: 0
-    baseGold: 0
+    baseScore: 500
     maxHealthIncrement: 0
     attackDamageIncrement: 0
     speedIncrement: 0
     scoreIncrement: 0
-    goldIncrement: 0
-    hitRadius: 0
+    hitRadius: 1.5
   behavior:
-    detectionRadius: 0
-    wanderIntervalTicks: 0
-    stopDistance: 0
+    stopDistance: 50
     acceleration: 0
-    angularSpeed: 0
-    dieTicks: 0
-    endsGameOnDeath: 0
-    showsOverlayHealthBar: 0
-  attacks: []
-  viewPrefab: {fileID: 0}
+    angularSpeed: 360
+    dieTicks: 120
+    endsGameOnDeath: 1
+    showsOverlayHealthBar: 1
+  attacks:
+  - attack:
+      kind: 2
+      attackRange: 100
+      cooldownTicks: 500
+      startTicks: 25
+      endTicks: 0
+      durationTicks: 60
+      damageMultiplier: 1
+      bodyRadius: 0
+      bodyOffset: 0
+      projectile:
+        kind: 0
+        speed: 10
+        radius: 0.5
+        lifetimeTicks: 500
+        chargePerTick: 0
+        maxThrowDistance: 0
+        flightTicks: 0
+        arcHeight: 0
+        explosionRadius: 0
+        collisionLayer:
+          serializedVersion: 2
+          m_Bits: 512
+      spawnOffset: {x: 0, y: 1, z: 0}
+      alternateSpawnOffset: {x: 0, y: 2, z: 0}
+    projectilePrefab: {fileID: 5746081768468073432, guid: 36c9ce1b05aa52a41921b504ebcce19e, type: 3}
+    hitEffectPrefab: {fileID: 0}
+  - attack:
+      kind: 3
+      attackRange: 100
+      cooldownTicks: 250
+      startTicks: 88
+      endTicks: 0
+      durationTicks: 110
+      damageMultiplier: 1
+      bodyRadius: 0
+      bodyOffset: 0
+      projectile:
+        kind: 0
+        speed: 10
+        radius: 1.25
+        lifetimeTicks: 500
+        chargePerTick: 0
+        maxThrowDistance: 0
+        flightTicks: 0
+        arcHeight: 0
+        explosionRadius: 0
+        collisionLayer:
+          serializedVersion: 2
+          m_Bits: 512
+      spawnOffset: {x: 0, y: 1, z: 0}
+      alternateSpawnOffset: {x: 0, y: 0, z: 0}
+    projectilePrefab: {fileID: 3605412627769871624, guid: 297f4eb88c308ae4d83672b047e78024, type: 3}
+    hitEffectPrefab: {fileID: 0}
+  loots: []
+  viewPrefab: {fileID: 2811978939204380695, guid: 4799295fa3bc6664c8e0880573210cbe, type: 3}
   healthGaugePrefab: {fileID: 0}

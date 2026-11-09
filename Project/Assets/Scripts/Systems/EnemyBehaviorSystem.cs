@@ -133,7 +133,7 @@ namespace TopView.Systems
                 remainingCount--;
             }
 
-            actionState.isAttackCommitted = false;
+            actionState.committedShotCount = 0;
             stateChangeRequests.Enqueue(new EnemyStateChangeRequest { target = identifier, state = EnemyState.Attack });
             return true;
         }

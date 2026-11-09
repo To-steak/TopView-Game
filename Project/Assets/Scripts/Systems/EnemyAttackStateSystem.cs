@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace TopView.Systems
 {
-    // 공격 상태의 적을 플레이어 쪽으로 돌리고, 시간이 되면 공격을 내보내며, 공격이 끝나면 Idle을 요청한다.
+    // 공격 상태의 적을 첫 발이 나가기 전까지 플레이어 쪽으로 돌리고, 시점마다 공격을 내보내며, 공격이 끝나면 Idle을 요청한다.
     public static class EnemyAttackStateSystem
     {
         /// <summary>
@@ -42,8 +42,8 @@ namespace TopView.Systems
                 ref RotationComponent rotation = ref entity.rotation;
                 Vector3 position = entity.position.current;
 
-                // 공격이 나가기 전까지 플레이어 쪽으로 돈다
-                if (!actionState.isAttackCommitted && hasPlayer)
+                // 첫 발이 나가기 전까지 플레이어 쪽으로 돈다
+                if (actionState.committedShotCount == 0 && hasPlayer)
                 {
                     TargetingUtility.RotateToward(ref rotation.current, position, playerPosition, entity.behavior.angularSpeed * deltaTime);
                 }
@@ -51,13 +51,26 @@ namespace TopView.Systems
                 EnemyAttackComponent[] attacks = entity.attackList.attacks;
                 ref readonly EnemyAttackComponent attack = ref attacks[actionState.attackIndex];
                 EntityIdentifier identifier = new EntityIdentifier { index = index, generation = entity.generation };
-                if (!actionState.isAttackCommitted && actionState.elapsedTicks >= attack.startTicks)
+                float damage = entity.combat.attackDamage * attack.damageMultiplier;
+                if (attack.kind == EnemyAttackKind.Body)
                 {
-                    actionState.isAttackCommitted = true;
-                    CommitAttack(in attack, position, rotation.current, entity.combat.attackDamage, ref actionState.missileShotCount, in identifier, projectileSpawnRequests, meleeSpawnRequests);
+                    if (actionState.committedShotCount == 0 && actionState.elapsedTicks >= attack.startTicks)
+                    {
+                        actionState.committedShotCount = 1;
+                        CommitBody(in attack, position, rotation.current, damage, in identifier, meleeSpawnRequests);
+                    }
+                }
+                else
+                {
+                    // 시점이 지난 발을 차례로 내보낸다. 같은 틱에 시점이 겹친 발은 함께 나간다
+                    while (actionState.committedShotCount < attack.shots.Length && actionState.elapsedTicks >= attack.shots[actionState.committedShotCount].startTicks)
+                    {
+                        CommitShot(in attack, in attack.shots[actionState.committedShotCount], position, rotation.current, damage, projectileSpawnRequests);
+                        actionState.committedShotCount++;
+                    }
                 }
 
-                if (EnemyAttackUtility.IsAttackFinished(in attack, actionState.elapsedTicks, actionState.isAttackCommitted))
+                if (EnemyAttackUtility.IsAttackFinished(in attack, actionState.elapsedTicks, actionState.committedShotCount))
                 {
                     actionState.attackCooldownRemainingTicks[actionState.attackIndex] = attack.cooldownTicks;
                     stateChangeRequests.Enqueue(new EnemyStateChangeRequest { target = identifier, state = EnemyState.Idle });
@@ -65,38 +78,29 @@ namespace TopView.Systems
             }
         }
 
-        // 공격 하나를 내보낸다. Body는 endTicks까지 이어지는 근접 판정 생성 요청을 넣고, 나머지는 투사체 생성 요청을 넣는다. BossMissile은 쏜 횟수의 짝수·홀수로 발사 위치를 고른다.
-        private static void CommitAttack(in EnemyAttackComponent attack, Vector3 position, Quaternion rotation, float attackDamage, ref int missileShotCount, in EntityIdentifier owner, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
+        // Body 공격을 내보낸다. endTicks까지 이어지는 근접 판정 생성 요청을 넣는다.
+        private static void CommitBody(in EnemyAttackComponent attack, Vector3 position, Quaternion rotation, float damage, in EntityIdentifier owner, Queue<MeleeSpawnRequest> meleeSpawnRequests)
         {
-            float damage = attackDamage * attack.damageMultiplier;
-
-            if (attack.kind == EnemyAttackKind.Body)
+            meleeSpawnRequests.Enqueue(new MeleeSpawnRequest
             {
-                meleeSpawnRequests.Enqueue(new MeleeSpawnRequest
-                {
-                    owner = owner,
-                    faction = Faction.Enemy,
-                    center = position + rotation * Vector3.forward * attack.bodyOffset,
-                    radius = attack.bodyRadius,
-                    damage = damage,
-                    durationTicks = attack.endTicks - attack.startTicks
-                });
-                return;
-            }
+                owner = owner,
+                faction = Faction.Enemy,
+                center = position + rotation * Vector3.forward * attack.bodyOffset,
+                radius = attack.bodyRadius,
+                damage = damage,
+                durationTicks = attack.endTicks - attack.startTicks
+            });
+        }
 
-            Vector3 spawnOffset = attack.spawnOffset;
-            if (attack.kind == EnemyAttackKind.BossMissile)
-            {
-                spawnOffset = missileShotCount % 2 == 0 ? attack.spawnOffset : attack.alternateSpawnOffset;
-                missileShotCount++;
-            }
-
+        // 투사체 공격의 한 발을 그 발의 위치에서 내보낸다.
+        private static void CommitShot(in EnemyAttackComponent attack, in ProjectileShotComponent shot, Vector3 position, Quaternion rotation, float damage, Queue<ProjectileSpawnRequest> projectileSpawnRequests)
+        {
             projectileSpawnRequests.Enqueue(new ProjectileSpawnRequest
             {
                 projectile = attack.projectile,
                 faction = Faction.Enemy,
                 damage = damage,
-                position = position + rotation * spawnOffset,
+                position = position + rotation * shot.spawnOffset,
                 rotation = rotation,
                 velocity = rotation * Vector3.forward * attack.projectile.speed
             });

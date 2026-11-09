@@ -45,16 +45,17 @@ MonoBehaviour:
         speed: 5
         radius: 0.25
         lifetimeTicks: 500
+        chargePerTick: 0
         maxThrowDistance: 0
-        upwardRatio: 0
-        gravity: 0
-        fuseTicks: 0
+        flightTicks: 0
+        arcHeight: 0
         explosionRadius: 0
         collisionLayer:
           serializedVersion: 2
           m_Bits: 576
-      spawnOffset: {x: 0, y: 0.5, z: 0}
-      alternateSpawnOffset: {x: 0, y: 0, z: 0}
+      shots:
+      - startTicks: 26
+        spawnOffset: {x: 0, y: 0, z: 0}
     projectilePrefab: {fileID: 1467422185046970197, guid: 94bbe6c225f22584bbed1cfc8a479c95, type: 3}
     hitEffectPrefab: {fileID: 0}
   loots: []

@@ -13,9 +13,7 @@ namespace TopView.Components
         public int attackIndex;
         // 공격별로 다시 고를 수 있을 때까지 남은 시간(틱). 재사용하는 배열이며 번호는 attacks와 같다
         public int[] attackCooldownRemainingTicks;
-        // 지금 공격 상태에서 공격이 이미 나갔는지
-        public bool isAttackCommitted;
-        // BossMissile을 쏜 횟수. 짝수·홀수로 발사 위치를 번갈아 고른다
-        public int missileShotCount;
+        // 지금 공격 상태에서 이미 내보낸 발 수. Body는 판정이 나가면 1이다. 다음에 내보낼 shots 칸 번호이기도 하다
+        public int committedShotCount;
     }
 }
