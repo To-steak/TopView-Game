@@ -55,7 +55,7 @@ MonoBehaviour:
           m_Bits: 576
       shots:
       - startTicks: 26
-        spawnOffset: {x: 0, y: 0, z: 0}
+        spawnOffset: {x: 0, y: 0.192, z: 0.455}
     projectilePrefab: {fileID: 1467422185046970197, guid: 94bbe6c225f22584bbed1cfc8a479c95, type: 3}
     hitEffectPrefab: {fileID: 0}
   loots: []

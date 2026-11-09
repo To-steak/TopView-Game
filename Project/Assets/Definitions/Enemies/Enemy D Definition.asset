@@ -53,8 +53,11 @@ MonoBehaviour:
         collisionLayer:
           serializedVersion: 2
           m_Bits: 512
-      spawnOffset: {x: 0, y: 1, z: 0}
-      alternateSpawnOffset: {x: 0, y: 2, z: 0}
+      shots:
+      - startTicks: 16
+        spawnOffset: {x: 1.63, y: 2.1, z: 1.04}
+      - startTicks: 36
+        spawnOffset: {x: -1.64, y: 2.06, z: 1.04}
     projectilePrefab: {fileID: 5746081768468073432, guid: 36c9ce1b05aa52a41921b504ebcce19e, type: 3}
     hitEffectPrefab: {fileID: 0}
   - attack:
@@ -80,8 +83,9 @@ MonoBehaviour:
         collisionLayer:
           serializedVersion: 2
           m_Bits: 512
-      spawnOffset: {x: 0, y: 1, z: 0}
-      alternateSpawnOffset: {x: 0, y: 0, z: 0}
+      shots:
+      - startTicks: 94
+        spawnOffset: {x: 0, y: 1.26, z: 1.88}
     projectilePrefab: {fileID: 3605412627769871624, guid: 297f4eb88c308ae4d83672b047e78024, type: 3}
     hitEffectPrefab: {fileID: 0}
   loots: []

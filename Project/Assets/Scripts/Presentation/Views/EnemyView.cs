@@ -13,5 +13,7 @@ namespace TopView.Presentation.Views
         public Transform damageAnchor;
         // 피해를 받을 때 재생하는 AudioSource. 여러 소리 중 무작위로 고르려면 Audio Generator 칸에 Audio Random Container를 넣는다. Play On Awake와 Loop는 끈다
         public AudioSource hitSoundSource;
+        // 투사체가 나가는 자리들. 에디터에서 Enemy Definition의 Shots 칸마다 Spawn Offset을 구울 때만 읽고, 게임 중에는 쓰지 않는다
+        public Transform[] muzzles;
     }
 }
