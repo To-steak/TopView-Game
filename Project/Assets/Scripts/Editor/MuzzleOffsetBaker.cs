@@ -4,14 +4,12 @@ using TopView.Presentation.Views;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.Animations;
-using UnityEngine.Playables;
 using UnityEngine.SceneManagement;
 
 namespace TopView.Editor
 {
     // 무기 모델의 WeaponView.muzzle 위치를 플레이어 루트 기준 로컬 위치로 바꿔 muzzleOffset 칸을 채우는 인스펙터 도구.
-    // 플레이어 프리팹을 미리보기 씬에 만들고 게임과 같은 방식으로 무기 모델을 무기 소켓에 붙인 뒤, 공격 클립을 attackStartTicks 시점으로 샘플링해 위치를 잰다.
+    // 플레이어 프리팹을 미리보기 씬에 만들고 게임과 같은 방식으로 무기 모델을 무기 소켓에 붙인 뒤, AnimationPoseSampler로 공격 클립을 attackStartTicks 시점으로 샘플링해 위치를 잰다.
     // 클립은 에셋에 저장하지 않고, 에디터가 켜져 있는 동안만 에셋마다 기억한다.
     public static class MuzzleOffsetBaker
     {
@@ -19,7 +17,6 @@ namespace TopView.Editor
 
         private const string CLIP_LABEL = "Shot Clip";
         private const string BAKE_LABEL = "Bake Muzzle Offset";
-        private const string GRAPH_NAME = "Muzzle Offset Bake";
 
         /// <summary>
         /// 샘플링할 클립 칸과 굽기 버튼을 그린다. 버튼을 누르면 muzzleOffset 칸을 채운다. 클립이 없으면 프리팹의 자세 그대로 잰다.
@@ -64,7 +61,6 @@ namespace TopView.Editor
             }
 
             Scene previewScene = EditorSceneManager.NewPreviewScene();
-            PlayableGraph graph = default;
             try
             {
                 GameObject playerObject = (GameObject)PrefabUtility.InstantiatePrefab(playerViewPrefab, previewScene);
@@ -84,41 +80,10 @@ namespace TopView.Editor
                 model.transform.localRotation = Quaternion.identity;
                 Transform muzzle = model.GetComponentInChildren<WeaponView>(true).muzzle;
 
-                if (clip != null)
-                {
-                    if (playerView.animator == null)
-                    {
-                        Debug.LogWarning($"MuzzleOffsetBaker >> {playerViewPrefab.name}에 Animator가 없어 클립을 샘플링할 수 없어 총구 위치를 굽지 않았다.");
-                        return false;
-                    }
-
-                    float time = attackStartTicks * Time.fixedDeltaTime;
-                    if (time > clip.length)
-                    {
-                        Debug.LogWarning($"MuzzleOffsetBaker >> attackStartTicks({attackStartTicks}) 시점이 {clip.name}의 길이({clip.length}초)보다 길어 클립 끝에서 샘플링했다.");
-                        time = clip.length;
-                    }
-
-                    playerView.animator.applyRootMotion = false;
-                    graph = PlayableGraph.Create(GRAPH_NAME);
-                    graph.SetTimeUpdateMode(DirectorUpdateMode.Manual);
-                    AnimationPlayableOutput output = AnimationPlayableOutput.Create(graph, GRAPH_NAME, playerView.animator);
-                    AnimationClipPlayable playable = AnimationClipPlayable.Create(graph, clip);
-                    output.SetSourcePlayable(playable);
-                    playable.SetTime(time);
-                    graph.Evaluate();
-                }
-
-                // 게임에서 rotation * muzzleOffset으로 되돌리므로 루트의 크기는 반영하지 않는다
-                offset = Quaternion.Inverse(root.rotation) * (muzzle.position - root.position);
-                return true;
+                return AnimationPoseSampler.TryMeasureLocalPosition(root, playerView.animator, clip, attackStartTicks, muzzle, nameof(MuzzleOffsetBaker), playerViewPrefab.name, out offset);
             }
             finally
             {
-                if (graph.IsValid())
-                {
-                    graph.Destroy();
-                }
                 EditorSceneManager.ClosePreviewScene(previewScene);
             }
         }

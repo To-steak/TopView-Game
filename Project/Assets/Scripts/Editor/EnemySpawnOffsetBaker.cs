@@ -5,14 +5,12 @@ using TopView.Presentation.Views;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.Animations;
-using UnityEngine.Playables;
 using UnityEngine.SceneManagement;
 
 namespace TopView.Editor
 {
     // 적 프리팹의 EnemyView.muzzles 중 하나의 위치를 적 루트 기준 로컬 위치로 바꿔 Shots 칸의 Spawn Offset을 채우는 인스펙터 도구.
-    // 적 프리팹을 미리보기 씬에 만들고, 그 칸의 클립을 그 칸의 Start Ticks 시점으로 샘플링해 위치를 잰다.
+    // 적 프리팹을 미리보기 씬에 만들고, AnimationPoseSampler로 그 칸의 클립을 그 칸의 Start Ticks 시점으로 샘플링해 위치를 잰다.
     // 고른 Muzzle 번호는 에셋에 저장하지 않고, 에디터가 켜져 있는 동안만 칸마다 기억한다. 처음에는 칸 번호와 같은 번호다.
     public static class EnemySpawnOffsetBaker
     {
@@ -21,7 +19,6 @@ namespace TopView.Editor
         private const int LINE_COUNT = 2;
         private const string MUZZLE_LABEL = "Muzzle";
         private const string BAKE_LABEL = "Bake Spawn Offset";
-        private const string GRAPH_NAME = "Enemy Spawn Offset Bake";
         private const string MISSING_MUZZLE_NAME = "(None)";
 
         /// <summary>
@@ -94,7 +91,6 @@ namespace TopView.Editor
             }
 
             Scene previewScene = EditorSceneManager.NewPreviewScene();
-            PlayableGraph graph = default;
             try
             {
                 GameObject enemyObject = (GameObject)PrefabUtility.InstantiatePrefab(definition.viewPrefab, previewScene);
@@ -102,43 +98,10 @@ namespace TopView.Editor
                 root.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
 
                 EnemyView enemyView = enemyObject.GetComponent<EnemyView>();
-                Transform muzzle = enemyView.muzzles[muzzleIndex];
-
-                if (clip != null)
-                {
-                    if (enemyView.animator == null)
-                    {
-                        Debug.LogWarning($"EnemySpawnOffsetBaker >> {definition.viewPrefab.name}에 Animator가 없어 클립을 샘플링할 수 없어 발사 위치를 굽지 않았다.");
-                        return false;
-                    }
-
-                    float time = startTicks * Time.fixedDeltaTime;
-                    if (time > clip.length)
-                    {
-                        Debug.LogWarning($"EnemySpawnOffsetBaker >> Start Ticks({startTicks}) 시점이 {clip.name}의 길이({clip.length}초)보다 길어 클립 끝에서 샘플링했다.");
-                        time = clip.length;
-                    }
-
-                    enemyView.animator.applyRootMotion = false;
-                    graph = PlayableGraph.Create(GRAPH_NAME);
-                    graph.SetTimeUpdateMode(DirectorUpdateMode.Manual);
-                    AnimationPlayableOutput output = AnimationPlayableOutput.Create(graph, GRAPH_NAME, enemyView.animator);
-                    AnimationClipPlayable playable = AnimationClipPlayable.Create(graph, clip);
-                    output.SetSourcePlayable(playable);
-                    playable.SetTime(time);
-                    graph.Evaluate();
-                }
-
-                // 게임에서 rotation * spawnOffset으로 되돌리므로 루트의 크기는 반영하지 않는다
-                offset = Quaternion.Inverse(root.rotation) * (muzzle.position - root.position);
-                return true;
+                return AnimationPoseSampler.TryMeasureLocalPosition(root, enemyView.animator, clip, startTicks, enemyView.muzzles[muzzleIndex], nameof(EnemySpawnOffsetBaker), definition.viewPrefab.name, out offset);
             }
             finally
             {
-                if (graph.IsValid())
-                {
-                    graph.Destroy();
-                }
                 EditorSceneManager.ClosePreviewScene(previewScene);
             }
         }
