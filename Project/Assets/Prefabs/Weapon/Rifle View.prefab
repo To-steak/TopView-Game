@@ -47,6 +47,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: TopView.Presentation::TopView.Presentation.Views.WeaponView
   attackClip: {fileID: 8300000, guid: 4310474905e266640852f43bd609a1a4, type: 3}
+  attackImpulseSource: {fileID: 0}
   reloadSounds:
   - clip: {fileID: 8300000, guid: 08edb2bef8ffb1f4a8de1858af2f36fb, type: 3}
     startTicks: 0

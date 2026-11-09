@@ -1,12 +1,11 @@
 using System.Collections.Generic;
 using TopView.Presentation.ViewContexts;
 using TopView.Records;
-using Unity.Cinemachine;
 using UnityEngine;
 
 namespace TopView.Presentation.ViewSystems
 {
-    // 명중·폭발 기록과 근접 공격 기록마다 피격 이펙트(와 이펙트에 붙은 소리, 화면 흔들림)를 풀에서 꺼내 재생하고, 끝난 이펙트를 풀에 돌려놓는다.
+    // 명중·폭발 기록과 근접 공격 기록마다 피격 이펙트(와 이펙트에 붙은 소리)를 풀에서 꺼내 재생하고, 끝난 이펙트를 풀에 돌려놓는다.
     public static class HitEffectViewSystem
     {
         /// <summary>
@@ -76,8 +75,7 @@ namespace TopView.Presentation.ViewSystems
             }
         }
 
-        // 풀에서 꺼낸 이펙트는 스스로 지워지지 않도록 Stop Action을 끈 뒤 재생한다. 이펙트 루트에 AudioSource가 있으면 그 소리도 함께 재생하고,
-        // CinemachineImpulseSource가 있으면 이펙트 위치에서 화면 흔들림을 낸다.
+        // 풀에서 꺼낸 이펙트는 스스로 지워지지 않도록 Stop Action을 끈 뒤 재생한다. 이펙트에 AudioSource가 있으면 그 소리도 함께 재생한다.
         private static void PlayHitEffect(HitEffectViewContext context, int hitEffectIndex, Vector3 position, GameObject[] hitEffectPrefabs)
         {
             Stack<ParticleSystem> pool = context.pools[hitEffectIndex];
@@ -99,10 +97,6 @@ namespace TopView.Presentation.ViewSystems
             if (effect.TryGetComponent(out AudioSource sound))
             {
                 sound.Play();
-            }
-            if (effect.TryGetComponent(out CinemachineImpulseSource impulseSource))
-            {
-                impulseSource.GenerateImpulse();
             }
             context.playingEffects.Add(effect);
             context.playingEffectIndices.Add(hitEffectIndex);

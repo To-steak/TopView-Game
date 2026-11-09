@@ -80,7 +80,7 @@ namespace TopView.Presentation.ViewSystems
             Animator animator = context.view.animator;
             animator.speed = isPaused ? 0f : 1f;
             ApplyStateRecords(in identifier, stateRecords, animator, context.rangedLayerIndex);
-            PlayAttackSounds(in identifier, attackRecords, context.weaponViews, context.view.soundEffectSource);
+            PlayAttackEffects(in identifier, attackRecords, context.weaponViews, context.view.soundEffectSource);
             PlayReloadSounds(in identifier, stateRecords, in actionState, weaponSlot.currentIndex, context);
             ApplyMovementAnimation(in actionState, in entity.motion, animator);
             // 가중치는 프레임 시간만큼 목표로 다가가므로, 일시정지 중에는 Animator와 함께 멈춘다
@@ -176,14 +176,9 @@ namespace TopView.Presentation.ViewSystems
             }
         }
 
-        // 이 플레이어가 공격을 내보낸 기록마다 그 무기의 공격 Clip을 겹쳐 재생한다. 연결이 빠진 경우는 View를 만들 때 이미 알렸다.
-        private static void PlayAttackSounds(in EntityIdentifier identifier, List<PlayerAttackCommittedRecord> attackRecords, WeaponView[] weaponViews, AudioSource soundEffectSource)
+        // 이 플레이어가 공격을 내보낸 기록마다 그 무기의 공격 Clip을 겹쳐 재생하고, Impulse Source가 있으면 화면 흔들림을 낸다. 연결이 빠진 경우는 View를 만들 때 이미 알렸다.
+        private static void PlayAttackEffects(in EntityIdentifier identifier, List<PlayerAttackCommittedRecord> attackRecords, WeaponView[] weaponViews, AudioSource soundEffectSource)
         {
-            if (soundEffectSource == null)
-            {
-                return;
-            }
-
             for (int recordIndex = 0; recordIndex < attackRecords.Count; recordIndex++)
             {
                 PlayerAttackCommittedRecord record = attackRecords[recordIndex];
@@ -199,12 +194,19 @@ namespace TopView.Presentation.ViewSystems
                 }
 
                 WeaponView weaponView = weaponViews[record.weaponIndex];
-                if (weaponView == null || weaponView.attackClip == null)
+                if (weaponView == null)
                 {
                     continue;
                 }
 
-                soundEffectSource.PlayOneShot(weaponView.attackClip);
+                if (soundEffectSource != null && weaponView.attackClip != null)
+                {
+                    soundEffectSource.PlayOneShot(weaponView.attackClip);
+                }
+                if (weaponView.attackImpulseSource != null)
+                {
+                    weaponView.attackImpulseSource.GenerateImpulse();
+                }
             }
         }
 
