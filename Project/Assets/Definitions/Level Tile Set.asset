@@ -281,10 +281,10 @@ MonoBehaviour:
   - {fileID: 3559622512548453873, guid: 473fc781f7584fc49add38f6d7ae3256, type: 3}
   - {fileID: 6489545494425738666, guid: f7b394437a9ee854cb3d455ac8e06bb8, type: 3}
   - {fileID: 7928575122053964336, guid: 1a3b6823e71497b4b8592bf1344edb3a, type: 3}
-  propMinimumScale: 0.5
-  propMaximumScale: 1
+  propMinimumScale: 2
+  propMaximumScale: 2.5
   propSpacing: 1
-  propScatterCount: 3
+  propScatterCount: 1
   propSurfaceLayers:
     serializedVersion: 2
     m_Bits: 576

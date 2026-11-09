@@ -60,7 +60,7 @@ namespace TopView.Core
                 _hasRule = true;
                 if (_rule.minimumLoadingTicks < 0)
                 {
-                    Debug.LogWarning($"MenuFlow >> Menu Settings Definition의 Minimum Loading Ticks가 {_rule.minimumLoadingTicks}라 최소 시간 없이 불러오기가 끝나면 들어가기 버튼을 보인다.");
+                    Debug.LogWarning($"MenuFlow >> Menu Settings Definition의 Minimum Loading Ticks가 {_rule.minimumLoadingTicks}라 최소 시간 없이 불러오기가 끝나면 들어가기 버튼을 누를 수 있게 한다.");
                 }
             }
 

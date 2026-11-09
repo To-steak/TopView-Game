@@ -6,7 +6,7 @@ using UnityEngine;
 namespace TopView.UserInterface.Presenters
 {
     // 씬을 불러오는 동안 LoadingView를 보이고, MenuFlow가 매 프레임 넘기는 진행률을 보여 준다.
-    // 들어갈 준비가 되면 들어가기 버튼을 보이고, 버튼 입력을 메뉴 명령으로 넣는다.
+    // 들어갈 준비가 되면 들어가기 버튼을 누를 수 있게 하고, 버튼 입력을 메뉴 명령으로 넣는다.
     public class LoadingPresenter : MonoBehaviour
     {
         [SerializeField] private LoadingView _view;
@@ -29,7 +29,7 @@ namespace TopView.UserInterface.Presenters
         }
 
         /// <summary>
-        /// 불러오는 중이면 View를 보이고 진행률을 보여 준다. 들어갈 준비가 되면 들어가기 버튼을 보인다.
+        /// 불러오는 중이면 View를 보이고 진행률을 보여 준다. 들어갈 준비가 되면 들어가기 버튼을 누를 수 있게 한다.
         /// </summary>
         /// <param name="isLoading">씬을 불러오는 중인지</param>
         /// <param name="ratio">진행 비율(0~1)</param>
