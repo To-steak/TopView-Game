@@ -61,7 +61,7 @@ namespace TopView.UserInterface.Presenters
 
             if (isFirstFrame || canEnter != _presentedCanEnter)
             {
-                _view.SetEnterButtonVisible(canEnter);
+                _view.SetEnterButtonInteractable(canEnter);
                 _presentedCanEnter = canEnter;
             }
         }

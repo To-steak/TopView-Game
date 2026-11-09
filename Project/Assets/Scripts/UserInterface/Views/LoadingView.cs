@@ -6,7 +6,7 @@ using UnityEngine.UI;
 namespace TopView.UserInterface.Views
 {
     // 로딩 진행을 글자(0~100%)와 게이지로 보여 준다. 게이지는 꽉 찬 크기로 두고, 마스크가 오른쪽을 가려 비율만큼만 보인다.
-    // 불러오기가 끝나면 들어가기 버튼을 보이고, 버튼 입력을 이벤트로 알린다.
+    // 불러오기가 끝나면 들어가기 버튼을 누를 수 있게 하고, 버튼 입력을 이벤트로 알린다.
     public class LoadingView : UserInterfaceView
     {
         // 들어가기 버튼을 눌렀다
@@ -15,7 +15,7 @@ namespace TopView.UserInterface.Views
         [SerializeField] private TMP_Text _progressText;
         // 게이지 Image의 부모에 붙은 마스크. 오른쪽 여백으로 게이지를 가린다
         [SerializeField] private RectMask2D _progressMask;
-        // 불러오기가 끝나면 보이는 들어가기 버튼
+        // 불러오기가 끝나면 누를 수 있게 되는 들어가기 버튼
         [SerializeField] private Button _enterButton;
 
         /// <summary>
@@ -33,12 +33,12 @@ namespace TopView.UserInterface.Views
         }
 
         /// <summary>
-        /// 들어가기 버튼을 켜거나 끈다.
+        /// 들어가기 버튼을 누를 수 있게 하거나 막는다. 버튼은 계속 보이고, 막힌 동안은 Button의 Disabled Color로 보인다.
         /// </summary>
-        /// <param name="isVisible">켜려면 true</param>
-        public void SetEnterButtonVisible(bool isVisible)
+        /// <param name="isInteractable">누를 수 있게 하려면 true</param>
+        public void SetEnterButtonInteractable(bool isInteractable)
         {
-            _enterButton.gameObject.SetActive(isVisible);
+            _enterButton.interactable = isInteractable;
         }
 
         private void OnEnable()
