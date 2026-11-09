@@ -4,6 +4,7 @@ using UnityEngine;
 namespace TopView.Editor
 {
     // 소품 FBX마다 Prefab Variant를 만든다. 막는 소품은 Prop 레이어로, 통과하는 소품은 Collider 없이 저장한다. FBX 머티리얼은 이름별 공용 머티리얼로 바꾼다.
+    // 막는 소품의 Mesh Collider는 메시를 감싸는 Box Collider로 바꿔 NavMesh가 단순한 모양으로 구워지게 한다. 이름에 Tree가 들어간 소품만 Mesh Collider를 둔다.
     public static class PropPrefabGenerator
     {
         // 지나갈 수 있는 소품의 FBX 이름. Collider를 빼고 레이어를 바꾸지 않는다
@@ -24,11 +25,13 @@ namespace TopView.Editor
             "Plant_5",
         };
 
-        private const string MODEL_FOLDER = "Assets/Local Assets/Ultimate Nature Pack by Quaternius/FBX";
+        private const string MODEL_FOLDER = "Assets/CC0/Ultimate Nature Pack by Quaternius/FBX";
         private const string PREFAB_FOLDER = "Assets/Prefabs/Prop";
         private const string MATERIAL_FOLDER = "Assets/Materials/Prop";
         private const string MATERIAL_NAME_PREFIX = "Prop_";
         private const string BLOCKING_LAYER_NAME = "Prop";
+        // 이름에 이 글자가 들어간 소품은 Mesh Collider를 그대로 둔다. 상자로 감싸면 잎 아래까지 막힌다
+        private const string MESH_COLLIDER_NAME_KEYWORD = "Tree";
 
         /// <summary>
         /// 소품 FBX 폴더의 모델마다 프리팹 폴더에 Prefab Variant를 만든다. 같은 이름의 프리팹은 GUID를 유지한 채 덮어쓴다.
@@ -114,6 +117,11 @@ namespace TopView.Editor
                         Debug.LogWarning($"PropPrefabGenerator >> 막는 소품에 Collider가 없다. Generate Colliders를 확인한다: {model.name}");
                     }
 
+                    if (!model.name.Contains(MESH_COLLIDER_NAME_KEYWORD))
+                    {
+                        ReplaceMeshCollidersWithBoxes(instance, model.name);
+                    }
+
                     SetLayer(instance, blockingLayer);
                 }
 
@@ -140,6 +148,30 @@ namespace TopView.Editor
             for (int index = 0; index < colliders.Length; index++)
             {
                 Object.DestroyImmediate(colliders[index]);
+            }
+        }
+
+        // Mesh Collider마다 같은 오브젝트에 그 메시의 로컬 경계를 감싸는 Box Collider를 붙이고 Mesh Collider를 뺀다
+        private static void ReplaceMeshCollidersWithBoxes(GameObject root, string modelName)
+        {
+            MeshCollider[] meshColliders = root.GetComponentsInChildren<MeshCollider>(true);
+            for (int index = 0; index < meshColliders.Length; index++)
+            {
+                MeshCollider meshCollider = meshColliders[index];
+                Mesh mesh = meshCollider.sharedMesh;
+                if (mesh == null)
+                {
+                    Debug.LogWarning($"PropPrefabGenerator >> Mesh Collider에 메시가 없어 Box Collider로 바꾸지 않았다: {modelName}/{meshCollider.name}");
+                    continue;
+                }
+
+                GameObject target = meshCollider.gameObject;
+                Bounds bounds = mesh.bounds;
+                Object.DestroyImmediate(meshCollider);
+
+                BoxCollider boxCollider = target.AddComponent<BoxCollider>();
+                boxCollider.center = bounds.center;
+                boxCollider.size = bounds.size;
             }
         }
 
