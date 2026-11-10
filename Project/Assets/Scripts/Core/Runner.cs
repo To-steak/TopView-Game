@@ -163,7 +163,7 @@ namespace TopView.Core
             CameraViewSystem.Present(_viewContext.camera, _viewContext.player.view, _playerCameraPriority, _world.commandBuffer.playerCommand.cameraYawInput, _playerCameraYawDegreesPerSecond);
             if (_viewContext.music != null)
             {
-                MusicViewSystem.Present(_viewContext.music);
+                MusicViewSystem.Present(_world.enemies.entities, _viewContext.music);
             }
 
             PresentUserInterface();

@@ -5,7 +5,7 @@ using UnityEngine.Audio;
 
 namespace TopView.Core
 {
-    // 배경음악: 판마다 AudioSource를 만들고 Music Definition 값을 담는다
+    // 배경음악: 판마다 평소 곡과 보스 곡의 AudioSource를 만들고 Music Definition 값을 담는다
     public partial class Runner
     {
         // 배경음악 곡과 재생 값
@@ -13,7 +13,7 @@ namespace TopView.Core
 
         private const string MUSIC_OBJECT_NAME = "Music";
 
-        // 활성 씬에 배경음악 오브젝트를 만들어 평소 곡의 AudioSource를 둔다.
+        // 활성 씬에 배경음악 오브젝트를 만들어 평소 곡과 보스 곡의 AudioSource를 둔다. 보스 곡이 없으면 보스 곡 AudioSource는 null이다.
         // 씬에 만들므로 재시작으로 씬을 다시 불러오면 함께 사라지고, 새 판은 곡을 처음부터 튼다.
         // Music Definition이나 평소 곡이 없으면 null을 돌려준다.
         private MusicViewContext CreateMusicViewContext()
@@ -31,6 +31,11 @@ namespace TopView.Core
                 return null;
             }
 
+            if (definition.bossClip == null)
+            {
+                Debug.LogWarning("Runner >> Music Definition에 Boss Clip이 연결되어 있지 않아 보스가 나와도 평소 곡을 계속 튼다.");
+            }
+
             if (definition.outputGroup == null)
             {
                 Debug.LogWarning("Runner >> Music Definition에 Output Group이 연결되어 있지 않아 배경음악이 Audio Mixer를 거치지 않는다.");
@@ -45,6 +50,7 @@ namespace TopView.Core
             return new MusicViewContext
             {
                 normalSource = CreateMusicSource(musicObject, definition.normalClip, definition.outputGroup),
+                bossSource = definition.bossClip != null ? CreateMusicSource(musicObject, definition.bossClip, definition.outputGroup) : null,
                 volume = definition.volume,
                 fadeTicks = definition.fadeTicks
             };

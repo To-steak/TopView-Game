@@ -301,7 +301,7 @@ namespace TopView.Core
         }
 
         // Menu 씬에 배경음악 오브젝트를 만들어 평소 곡의 AudioSource를 둔다. 씬과 함께 사라지므로 World로 넘어가면 곡도 멈춘다.
-        // Music Definition이나 평소 곡이 없으면 null을 돌려준다. Runner.CreateMusicViewContext와 같은 코드다. Runner를 나눌 때 함께 정리한다
+        // Music Definition이나 평소 곡이 없으면 null을 돌려준다. 메뉴에는 보스가 없어 보스 곡 부분을 빼면 Runner.CreateMusicViewContext와 같은 코드다. Runner를 나눌 때 함께 정리한다
         private MusicViewContext CreateMusicViewContext()
         {
             MusicDefinition definition = _musicDefinition;
