@@ -46,6 +46,16 @@ MonoBehaviour:
     swapTicks: 30
     reloadTicks: 140
     dieTicks: 74
+  upgrade:
+    maxLevel: 5
+    startingCost: 100
+    costIncreasePerLevel: 50
+    maxHealthRatioPerLevel: 0.5
+    maxManaRatioPerLevel: 0.5
+    runManaCostRatioPerLevel: 0.1
+    dodgeManaCostRatioPerLevel: 0.15
+    jumpManaCostRatioPerLevel: 0.15
+    damageRatioPerLevel: 0
   weapons:
   - {fileID: 11400000, guid: 1ce7fea57a5a36c42bf8d0de4ca734db, type: 2}
   - {fileID: 11400000, guid: 9e5cd050810c0a8469911b9292b1da62, type: 2}

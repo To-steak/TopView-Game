@@ -27,10 +27,10 @@ MonoBehaviour:
       speed: 35
       radius: 0.1
       lifetimeTicks: 250
+      chargePerTick: 0
       maxThrowDistance: 0
-      upwardRatio: 0
-      gravity: 0
-      fuseTicks: 0
+      flightTicks: 0
+      arcHeight: 0
       explosionRadius: 0
       collisionLayer:
         serializedVersion: 2
@@ -41,3 +41,4 @@ MonoBehaviour:
   modelPrefab: {fileID: 998828717951345184, guid: f7522d3e6a599ee4788cc678ffa343e9, type: 3}
   projectilePrefab: {fileID: 8751706380067456088, guid: 628c7144d78511e419e78c1d4015b800, type: 3}
   hitEffectPrefab: {fileID: 8231580814263889171, guid: ca9f089f18e91e34893dea40be54242c, type: 3}
+  impactEffectPrefab: {fileID: 0}
