@@ -1,5 +1,4 @@
 using TopView.Authoring;
-using TopView.Components;
 using UnityEditor;
 using UnityEngine;
 
@@ -12,23 +11,14 @@ namespace TopView.Editor
         private const float SPAWNER_DIRECTION_LENGTH = 1f;
         private const float SPAWNER_LABEL_HEIGHT = 0.5f;
 
-        // 플레이어 감지기의 감지 범위(XZ 원 또는 사각형)와 연결된 스포너까지의 선을 빨간색으로 그린다.
+        // 플레이어 감지기의 감지 범위(XZ 원)와 연결된 스포너까지의 선을 빨간색으로 그린다.
         [DrawGizmo(GizmoType.Selected | GizmoType.NonSelected)]
         private static void DrawPlayerDetector(PlayerDetectorAuthoring authoring, GizmoType gizmoType)
         {
             Vector3 center = authoring.transform.position;
 
             Gizmos.color = Color.red;
-            switch (authoring.range.shape)
-            {
-                case PlayerDetectorShapeKind.Circle:
-                    GizmoShapes.DrawCircle(center, authoring.range.detectionRadius);
-                    break;
-
-                case PlayerDetectorShapeKind.Rectangle:
-                    GizmoShapes.DrawRectangle(center, authoring.range.detectionSize);
-                    break;
-            }
+            GizmoShapes.DrawCircle(center, authoring.range.detectionRadius);
             DrawSpawnerLinks(authoring, center);
         }
 
