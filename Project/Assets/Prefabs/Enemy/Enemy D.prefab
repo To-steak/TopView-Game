@@ -53,7 +53,12 @@ MonoBehaviour:
   animator: {fileID: 7834020961119801843}
   healthGaugeAnchor: {fileID: 0}
   damageAnchor: {fileID: 3086657558386904005}
-  hitSoundSource: {fileID: 6683782612674894529}
+  soundEffectSource: {fileID: 6683782612674894529}
+  hitClip: {fileID: 8300000, guid: 3d8a9546d00424e44b7e323c6a2b2e5d, type: 3}
+  bodyAttackClip: {fileID: 0}
+  missileAttackClip: {fileID: 0}
+  bossMissileAttackClip: {fileID: 8300000, guid: ae2d2db46850b7c47ab85240cdc448f9, type: 3}
+  bossRockAttackClip: {fileID: 8300000, guid: a42a25bfe713e63498febabb408fceea, type: 3}
   muzzles:
   - {fileID: 1269701918164814888}
   - {fileID: 7261491663835588941}
@@ -69,7 +74,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 1343924546992339250, guid: 969243a63b7eb6248b0be0c6e7ffabcd, type: 2}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 6418180475301049370, guid: 6a9a262f90e4b9e4db8345dea603316b, type: 2}
+  m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
