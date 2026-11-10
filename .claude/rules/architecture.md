@@ -78,7 +78,7 @@ Runner가 World의 데이터를 꺼내 호출 순서대로 넘긴다. 게임 상
 | `Authoring/` | 씬 배치 정보 | `~Authoring` (씬 배치 MonoBehaviour) | `<접두사>.Authoring` | Entity, Definitions |
 | `Persistence/` (필요할 때만) | 설정, 기록 저장 | `~Store` (설정·기록 저장과 불러오기) | `<접두사>.Persistence` | Entity |
 | `Presentation/` | 게임 세계의 연출 | `~ViewSystem`, `~View`, `ViewContext`, `~ViewContext`, 오디오, 오브젝트 풀 | `<접두사>.Presentation` | Entity, Definitions, Persistence |
-| `UserInterface/` | 화면 UI | UI View, Presenter | `<접두사>.UserInterface` | Entity, Persistence |
+| `UserInterface/` | 화면 UI | UI View, View가 소유하는 부품(`~Entry`), Presenter | `<접두사>.UserInterface` | Entity, Persistence |
 | `Core/` | 데이터 보관과 실행 순서 | World, Runner, 판이 없는 씬의 흐름(`~Flow`), 부트스트랩, 로딩, 씬 전환 | `<접두사>.Core` | 전부 |
 | `Editor/` | 에디터 도구 | 에디터 도구 (Gizmo, PropertyDrawer, Custom Editor) | `<접두사>.Editor` (플랫폼: Editor 전용) | 전부 |
 
@@ -240,6 +240,8 @@ Presentation/
   - 이유: 게임 데이터를 아는 쪽은 Presenter뿐이라 화면을 바꿔도 로직이 안전하다. 매 프레임 넘기므로 변경 알림 이벤트가 필요 없다.
 - View와 Presenter는 일대일이다.
   - 이유: Presenter 하나가 View 하나만 알면 데이터가 어디로 가는지 한 줄로 따라간다.
+- 목록의 한 칸처럼 반복되는 표시 단위는 View가 소유하는 부품(`~Entry`)으로 두고 `Views/`에 둔다. 부품은 그 View만 만들고 다루며, 버튼 입력은 C# 이벤트 없이 소유한 View의 메서드를 불러 알린다. Presenter는 부품을 모른다.
+  - 이유: 데이터가 Presenter → View → 부품 한 줄로만 흐르고, 입력도 View 한 곳의 이벤트로 모인다.
 
 #### UI 계층 (uGUI)
 - 모든 UI는 같은 계층을 가진다.
