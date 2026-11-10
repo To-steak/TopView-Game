@@ -23,15 +23,14 @@ MonoBehaviour:
     groundCheckRadius: 0.2
     groundLayer:
       serializedVersion: 2
-      m_Bits: 1088
+      m_Bits: 64
     capsuleRadius: 0.26
     capsuleHeight: 1
     capsuleCenter: {x: 0, y: 0.18, z: 0.06}
     skinWidth: 0.08
     collisionLayer:
       serializedVersion: 2
-      m_Bits: 1600
-    muzzleOffset: {x: 0, y: 0, z: 0.5}
+      m_Bits: 576
   vitals:
     maxHealth: 100
     maxMana: 100
@@ -56,3 +55,4 @@ MonoBehaviour:
   cameraPriority: 2
   cameraYawDegreesPerSecond: 90
   rangedLayerBlendInTicks: 10
+  throwPreviewCircleHeightOffset: 0.02
