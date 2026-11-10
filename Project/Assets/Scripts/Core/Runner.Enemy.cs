@@ -197,9 +197,14 @@ namespace TopView.Core
                     continue;
                 }
                 // 체력 게이지는 표시용이라 빠져 있어도 판은 시작하고, 그 종류는 게이지 없이 둔다
-                if (definition.healthGaugePrefab == null || definition.healthGaugePrefab.GetComponent<EnemyHealthGaugeView>() == null)
+                EnemyHealthGaugeView gaugeView = definition.healthGaugePrefab != null ? definition.healthGaugePrefab.GetComponent<EnemyHealthGaugeView>() : null;
+                if (gaugeView == null)
                 {
                     Debug.LogWarning($"Runner >> {definition.name}의 Health Gauge Prefab이 없거나 EnemyHealthGaugeView가 붙어 있지 않아 이 적 종류는 체력 게이지 없이 진행한다.");
+                }
+                else if (!EnemyHealthGaugeViewSystem.HasAllReferences(gaugeView))
+                {
+                    Debug.LogWarning($"Runner >> {definition.name}의 Health Gauge Prefab에 Gauge Front, Health Text, Level Text 중 연결되지 않은 칸이 있어 이 적 종류는 체력 게이지 없이 진행한다.");
                 }
                 else if (enemyView != null && enemyView.healthGaugeAnchor == null)
                 {
