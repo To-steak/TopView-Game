@@ -14,7 +14,7 @@ namespace TopView.Systems
         private const float MIN_TURN_SPEED_SQUARED = 0.0001f;
 
         /// <summary>
-        /// 목적지가 바뀐 적은 경로를 다시 구한 뒤 경로를 따라 옮긴다. 마지막에 걷는 적을 NavMesh 안으로 되돌린다.
+        /// 목적지가 바뀐 적은 경로를 다시 구한 뒤 경로를 따라 옮긴다.
         /// </summary>
         /// <param name="enemies">적 저장소</param>
         /// <param name="path">경로 계산에 다시 쓰는 NavMeshPath</param>
@@ -44,15 +44,6 @@ namespace TopView.Systems
             if (failedPathCount > 0)
             {
                 Debug.LogWarning($"EnemyNavigationSystem >> 경로를 찾지 못해 바로 도착한 것으로 본 적 {failedPathCount}마리가 있다.");
-            }
-
-            for (int index = 0; index < entities.Length; index++)
-            {
-                ref EnemyEntity entity = ref entities[index];
-                if (entity.isAlive && entity.agent.hasDestination && NavMesh.Raycast(entity.position.previous, entity.position.current, out NavMeshHit hit, NavMesh.AllAreas))
-                {
-                    entity.position.current = hit.position;
-                }
             }
         }
 
