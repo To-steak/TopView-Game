@@ -158,6 +158,7 @@ namespace TopView.Core
             HitEffectViewSystem.Present(_world.projectileHitRecords, _world.playerAttackCommittedRecords, _hitEffectPrefabs, isPaused, _viewContext.hitEffect);
             DamageTextViewSystem.Present(_world.enemyDamagedRecords, _viewContext.enemy.views, _viewContext.enemy.viewGenerations, _worldTextViewPrefab, _viewContext.camera.mainCamera, _viewContext.worldText.pendingTexts);
             LootTextViewSystem.Present(_world.lootPickedUpRecords, _worldTextViewPrefab, _viewContext.worldText.pendingTexts);
+            LootSoundViewSystem.Present(_world.lootPickedUpRecords, _lootPrefabs, _viewContext.player.view != null ? _viewContext.player.view.soundEffectSource : null);
             WorldTextViewSystem.Present(_worldTextViewPrefab, _viewContext.camera.mainCamera, _viewContext.worldText);
             CameraViewSystem.Present(_viewContext.camera, _viewContext.player.view, _playerCameraPriority, _world.commandBuffer.playerCommand.cameraYawInput, _playerCameraYawDegreesPerSecond);
             if (_viewContext.music != null)

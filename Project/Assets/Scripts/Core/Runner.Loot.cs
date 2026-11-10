@@ -24,13 +24,19 @@ namespace TopView.Core
             return prefabs;
         }
 
-        // View는 표시용이라 빠져 있어도 판은 시작하고, 그 종류는 보이지 않게 둔다.
+        // View는 표시용이라 빠져 있어도 판은 시작하고, 그 종류는 보이지 않게 둔다. 획득 소리가 없으면 소리 없이 진행한다.
         private static void AssignLootPrefab(GameObject[] prefabs, LootKind kind, GameObject prefab)
         {
-            if (prefab == null || prefab.GetComponent<LootView>() == null)
+            LootView view = prefab != null ? prefab.GetComponent<LootView>() : null;
+            if (view == null)
             {
                 Debug.LogWarning($"Runner >> Loot Definition의 {kind} 프리팹이 없거나 LootView가 붙어 있지 않아 이 전리품은 보이지 않게 진행한다.");
                 return;
+            }
+
+            if (view.pickupClip == null)
+            {
+                Debug.LogWarning($"Runner >> Loot Definition의 {kind} 프리팹 LootView에 Pickup Clip이 없어 이 전리품은 획득 소리 없이 진행한다.");
             }
 
             prefabs[(int)kind] = prefab;
