@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Enemy D Definition
   m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.EnemyDefinition
   stats:
-    baseMaxHealth: 1000
+    baseMaxHealth: 10000
     baseAttackDamage: 100
     baseSpeed: 0
     baseScore: 500
@@ -88,6 +88,10 @@ MonoBehaviour:
         spawnOffset: {x: 0, y: 1.26, z: 1.88}
     projectilePrefab: {fileID: 3605412627769871624, guid: 297f4eb88c308ae4d83672b047e78024, type: 3}
     hitEffectPrefab: {fileID: 0}
-  loots: []
+  loots:
+  - kind: 0
+    weight: 10
+    baseAmount: 0
+    amountIncrement: 0
   viewPrefab: {fileID: 2811978939204380695, guid: 4799295fa3bc6664c8e0880573210cbe, type: 3}
   healthGaugePrefab: {fileID: 0}
