@@ -36,11 +36,13 @@ namespace TopView.Editor
             if (kind != WeaponKind.Throw)
             {
                 DrawRelative(weapon, nameof(WeaponComponent.attackIntervalTicks));
+                DrawRelative(weapon, nameof(WeaponComponent.attackIntervalRatioPerLevel));
             }
 
             if (kind == WeaponKind.Ranged)
             {
                 DrawRelative(weapon, nameof(WeaponComponent.maxAmmo));
+                DrawRelative(weapon, nameof(WeaponComponent.maxAmmoRatioPerLevel));
                 DrawRelative(weapon, nameof(WeaponComponent.startingCurrentAmmo));
             }
 
@@ -48,11 +50,13 @@ namespace TopView.Editor
             {
                 DrawRelative(weapon, nameof(WeaponComponent.startingReserveAmmo));
                 DrawRelative(weapon, nameof(WeaponComponent.projectile));
+                DrawRelative(weapon, nameof(WeaponComponent.explosionRadiusIncreasePerLevel));
             }
             else
             {
                 DrawRelative(weapon, nameof(WeaponComponent.meleeRadius));
                 DrawRelative(weapon, nameof(WeaponComponent.meleeOffset));
+                DrawRelative(weapon, nameof(WeaponComponent.meleeRangeRatioPerLevel));
             }
             // 조준 평면의 높이에 모든 종류가 쓴다
             SerializedProperty muzzleOffset = weapon.FindPropertyRelative(nameof(WeaponComponent.muzzleOffset));

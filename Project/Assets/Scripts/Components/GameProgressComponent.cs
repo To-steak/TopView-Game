@@ -7,6 +7,8 @@ namespace TopView.Components
         public GamePhase phase;
         // 일시정지 중인지. 진행 중(Playing)일 때만 true가 된다
         public bool isPaused;
+        // 강화 화면이 열려 있는지. 열려 있는 동안 isPaused도 true다
+        public bool isUpgradeOpen;
         // 남은 시간(틱)
         public int remainingTicks;
         // 점수

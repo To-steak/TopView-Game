@@ -26,7 +26,7 @@ namespace TopView.Presentation.ViewSystems
                 ProjectileHitRecord record = hitRecords[recordIndex];
                 if (record.hitEffectIndex >= 0)
                 {
-                    PlayHitEffect(context, record.hitEffectIndex, record.position, hitEffectPrefabs);
+                    PlayHitEffect(context, record.hitEffectIndex, record.position, 1f, hitEffectPrefabs);
                 }
             }
 
@@ -35,7 +35,7 @@ namespace TopView.Presentation.ViewSystems
                 PlayerAttackCommittedRecord record = attackRecords[recordIndex];
                 if (record.impactEffectIndex >= 0)
                 {
-                    PlayHitEffect(context, record.impactEffectIndex, record.impactPosition, hitEffectPrefabs);
+                    PlayHitEffect(context, record.impactEffectIndex, record.impactPosition, record.impactScale, hitEffectPrefabs);
                 }
             }
         }
@@ -76,7 +76,8 @@ namespace TopView.Presentation.ViewSystems
         }
 
         // 풀에서 꺼낸 이펙트는 스스로 지워지지 않도록 Stop Action을 끈 뒤 재생한다. 이펙트에 AudioSource가 있으면 그 소리도 함께 재생한다.
-        private static void PlayHitEffect(HitEffectViewContext context, int hitEffectIndex, Vector3 position, GameObject[] hitEffectPrefabs)
+        // 크기는 루트 Transform의 배율로 정한다. 파티클이 배율을 따르려면 프리팹의 모든 Particle System에서 Scaling Mode가 Hierarchy여야 한다
+        private static void PlayHitEffect(HitEffectViewContext context, int hitEffectIndex, Vector3 position, float scale, GameObject[] hitEffectPrefabs)
         {
             Stack<ParticleSystem> pool = context.pools[hitEffectIndex];
             ParticleSystem effect;
@@ -92,6 +93,8 @@ namespace TopView.Presentation.ViewSystems
             }
 
             effect.transform.SetPositionAndRotation(position, Quaternion.identity);
+            // 풀의 이펙트를 다시 쓰므로 배율도 매번 정한다
+            effect.transform.localScale = Vector3.one * scale;
             effect.gameObject.SetActive(true);
             effect.Play(true);
             if (effect.TryGetComponent(out AudioSource sound))

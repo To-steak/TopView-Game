@@ -128,8 +128,9 @@ namespace TopView.Utilities
         /// </summary>
         /// <param name="weapons">무기 목록</param>
         /// <param name="weaponSlots">든 무기와 무기별 탄약</param>
+        /// <param name="upgradeLevels">강화 레벨. 최대 탄약 수에 반영한다</param>
         /// <returns>Ranged이고 탄창이 덜 찼으며 예비 탄약이 있으면 true</returns>
-        public static bool CanReload(WeaponComponent[] weapons, in PlayerWeaponSlotsComponent weaponSlots)
+        public static bool CanReload(WeaponComponent[] weapons, in PlayerWeaponSlotsComponent weaponSlots, in PlayerUpgradeLevelsComponent upgradeLevels)
         {
             if (!IsValidWeaponIndex(weapons, weaponSlots.currentIndex))
             {
@@ -138,7 +139,8 @@ namespace TopView.Utilities
 
             int weaponIndex = weaponSlots.currentIndex;
             ref readonly WeaponComponent weapon = ref weapons[weaponIndex];
-            return weapon.kind == WeaponKind.Ranged && weaponSlots.currentAmmo[weaponIndex] < weapon.maxAmmo && weaponSlots.reserveAmmo[weaponIndex] > 0;
+            int maxAmmo = PlayerUpgradeUtility.GetMaxAmmo(in weapon, PlayerUpgradeUtility.GetWeaponLevel(in upgradeLevels, weaponIndex));
+            return weapon.kind == WeaponKind.Ranged && weaponSlots.currentAmmo[weaponIndex] < maxAmmo && weaponSlots.reserveAmmo[weaponIndex] > 0;
         }
 
         /// <summary>
@@ -146,10 +148,12 @@ namespace TopView.Utilities
         /// </summary>
         /// <param name="weapons">무기 목록</param>
         /// <param name="weaponSlots">든 무기와 무기별 탄약</param>
-        public static void Reload(WeaponComponent[] weapons, ref PlayerWeaponSlotsComponent weaponSlots)
+        /// <param name="upgradeLevels">강화 레벨. 최대 탄약 수에 반영한다</param>
+        public static void Reload(WeaponComponent[] weapons, ref PlayerWeaponSlotsComponent weaponSlots, in PlayerUpgradeLevelsComponent upgradeLevels)
         {
             int weaponIndex = weaponSlots.currentIndex;
-            int loadAmmo = Mathf.Min(weapons[weaponIndex].maxAmmo - weaponSlots.currentAmmo[weaponIndex], weaponSlots.reserveAmmo[weaponIndex]);
+            int maxAmmo = PlayerUpgradeUtility.GetMaxAmmo(in weapons[weaponIndex], PlayerUpgradeUtility.GetWeaponLevel(in upgradeLevels, weaponIndex));
+            int loadAmmo = Mathf.Min(maxAmmo - weaponSlots.currentAmmo[weaponIndex], weaponSlots.reserveAmmo[weaponIndex]);
             weaponSlots.currentAmmo[weaponIndex] += loadAmmo;
             weaponSlots.reserveAmmo[weaponIndex] -= loadAmmo;
         }

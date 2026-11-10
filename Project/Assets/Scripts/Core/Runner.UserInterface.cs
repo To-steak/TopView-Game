@@ -1,9 +1,11 @@
 using System.Collections.Generic;
+using TopView.Commands;
 using TopView.Components;
 using TopView.Definitions;
 using TopView.Entities;
 using TopView.Presentation.ViewContexts;
 using TopView.UserInterface.Presenters;
+using TopView.Utilities;
 using UnityEngine;
 
 namespace TopView.Core
@@ -27,6 +29,7 @@ namespace TopView.Core
         private BossHealthPresenter _bossHealthPresenter;
         private PausePresenter _pausePresenter;
         private SettingsPresenter _settingsPresenter;
+        private UpgradePresenter _upgradePresenter;
 
         private const string USER_INTERFACE_SOUND_OBJECT_NAME = "User Interface Sound";
 
@@ -141,6 +144,16 @@ namespace TopView.Core
             {
                 _settingsPresenter.Initialize(_world.commandBuffer.settingsCommands, _userInterfaceSoundRequests);
             }
+
+            _upgradePresenter = FindAnyObjectByType<UpgradePresenter>();
+            if (_upgradePresenter == null)
+            {
+                Debug.LogError("Runner >> 씬에 UpgradePresenter가 없다.");
+            }
+            else
+            {
+                _upgradePresenter.Initialize(_world.commandBuffer);
+            }
         }
 
         private void PresentUserInterface()
@@ -162,10 +175,14 @@ namespace TopView.Core
             {
                 _goldPresenter.Present(_world.progress.gold);
             }
-            // 설정 화면이 열려 있으면 그 뒤의 일시정지 버튼을 누르지 않도록 일시정지 화면을 숨긴다
+            // 설정 화면이 열려 있으면 그 뒤의 일시정지 버튼을 누르지 않도록 일시정지 화면을 숨긴다. 강화 화면도 같은 일시정지라 그동안 숨긴다
             if (_pausePresenter != null)
             {
-                _pausePresenter.Present(_world.progress.isPaused && !_isSettingsOpen);
+                _pausePresenter.Present(_world.progress.isPaused && !_isSettingsOpen && !_world.progress.isUpgradeOpen);
+            }
+            if (_upgradePresenter != null)
+            {
+                _upgradePresenter.Present(_world.progress.isUpgradeOpen && phase == GamePhase.Playing);
             }
             if (_settingsPresenter != null)
             {
@@ -271,13 +288,47 @@ namespace TopView.Core
 
             if (_playerManaPresenter != null)
             {
-                _playerManaPresenter.Present(true, entity.mana.current, entity.vitals.maxMana);
+                _playerManaPresenter.Present(true, entity.mana.current, entity.mana.max);
+            }
+
+            if (_upgradePresenter != null && _world.progress.isUpgradeOpen)
+            {
+                PresentUpgradeInterface(in entity.upgrade, in entity.upgradeLevels, _world.progress.gold);
             }
 
             if (_reloadPresenter != null)
             {
                 _reloadPresenter.Present(entity.actionState.state == PlayerState.Reload, entity.actionState.elapsedTicks, entity.action.reloadTicks);
             }
+        }
+
+        // 항목별 레벨과 비용을 넘긴다. 최대 레벨이 아니고 골드가 비용 이상일 때만 버튼을 누를 수 있다
+        private void PresentUpgradeInterface(in PlayerUpgradeComponent upgrade, in PlayerUpgradeLevelsComponent levels, int gold)
+        {
+            PresentUpgradeStat(PlayerUpgradeCommandType.MaxHealth, levels.maxHealthLevel, in upgrade, gold);
+            PresentUpgradeStat(PlayerUpgradeCommandType.MaxMana, levels.maxManaLevel, in upgrade, gold);
+            PresentUpgradeStat(PlayerUpgradeCommandType.RunManaCost, levels.runManaCostLevel, in upgrade, gold);
+            PresentUpgradeStat(PlayerUpgradeCommandType.DodgeManaCost, levels.dodgeManaCostLevel, in upgrade, gold);
+            PresentUpgradeStat(PlayerUpgradeCommandType.JumpManaCost, levels.jumpManaCostLevel, in upgrade, gold);
+
+            int[] weaponLevels = levels.weaponLevels;
+            for (int weaponIndex = 0; weaponIndex < weaponLevels.Length; weaponIndex++)
+            {
+                int level = weaponLevels[weaponIndex];
+                int cost = PlayerUpgradeUtility.GetCost(in upgrade, level);
+                _upgradePresenter.PresentWeapon(weaponIndex, level, upgrade.maxLevel, cost, CanUpgrade(level, cost, in upgrade, gold));
+            }
+        }
+
+        private void PresentUpgradeStat(PlayerUpgradeCommandType type, int level, in PlayerUpgradeComponent upgrade, int gold)
+        {
+            int cost = PlayerUpgradeUtility.GetCost(in upgrade, level);
+            _upgradePresenter.PresentStat(type, level, upgrade.maxLevel, cost, CanUpgrade(level, cost, in upgrade, gold));
+        }
+
+        private static bool CanUpgrade(int level, int cost, in PlayerUpgradeComponent upgrade, int gold)
+        {
+            return level < upgrade.maxLevel && gold >= cost;
         }
 
         private void PresentEnemyInterface()

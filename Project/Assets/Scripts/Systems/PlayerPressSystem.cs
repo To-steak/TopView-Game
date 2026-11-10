@@ -34,13 +34,13 @@ namespace TopView.Systems
                 WeaponComponent[] weapons = entity.weaponList.weapons;
                 EntityIdentifier identifier = new EntityIdentifier { index = index, generation = entity.generation };
 
-                if (command.isJumpPressed && motion.isGrounded && PlayerStaminaUtility.HasEnoughMana(in mana, vital.jumpManaCost))
+                if (command.isJumpPressed && motion.isGrounded && PlayerStaminaUtility.HasEnoughMana(in mana, PlayerUpgradeUtility.GetJumpManaCost(in vital, in entity.upgrade, in entity.upgradeLevels)))
                 {
                     stateChangeRequests.Enqueue(new PlayerStateChangeRequest { target = identifier, state = PlayerState.Jump, moveInput = command.moveDirection });
                     continue;
                 }
 
-                if (command.isDodgePressed && motion.isGrounded && PlayerStaminaUtility.HasEnoughMana(in mana, vital.dodgeManaCost))
+                if (command.isDodgePressed && motion.isGrounded && PlayerStaminaUtility.HasEnoughMana(in mana, PlayerUpgradeUtility.GetDodgeManaCost(in vital, in entity.upgrade, in entity.upgradeLevels)))
                 {
                     stateChangeRequests.Enqueue(new PlayerStateChangeRequest { target = identifier, state = PlayerState.Dodge, moveInput = command.moveDirection });
                     continue;
@@ -53,7 +53,7 @@ namespace TopView.Systems
                     continue;
                 }
 
-                if (command.isReloadPressed && PlayerWeaponUtility.CanReload(weapons, in weaponSlot))
+                if (command.isReloadPressed && PlayerWeaponUtility.CanReload(weapons, in weaponSlot, in entity.upgradeLevels))
                 {
                     stateChangeRequests.Enqueue(new PlayerStateChangeRequest { target = identifier, state = PlayerState.Reload, moveInput = command.moveDirection });
                     continue;

@@ -14,5 +14,7 @@ namespace TopView.Records
         public Vector3 impactPosition;
         // 임팩트 이펙트의 피격 이펙트 표 번호. 음수면 없음. Melee가 아니면 항상 음수다
         public int impactEffectIndex;
+        // 임팩트 이펙트 크기 배율. 근접 범위 강화가 반영된다. Melee가 아니면 1이다
+        public float impactScale;
     }
 }

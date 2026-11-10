@@ -16,6 +16,8 @@ namespace TopView.Requests
         public PlayerVitalsComponent vitals;
         // 행동 상태의 길이
         public PlayerActionComponent action;
+        // 강화 값
+        public PlayerUpgradeComponent upgrade;
         // 무기 목록. PlayerSpawnSystem이 엔티티의 배열로 복사한다
         public WeaponComponent[] weapons;
     }

@@ -81,6 +81,7 @@ namespace TopView.Core
                 movement = playerDefinition.movement,
                 vitals = playerDefinition.vitals,
                 action = playerDefinition.action,
+                upgrade = playerDefinition.upgrade,
                 weapons = weapons
             };
             return true;
