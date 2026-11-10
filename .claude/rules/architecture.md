@@ -238,7 +238,7 @@ Presentation/
   - 이유: 타입의 접미사만 알면 그 파일의 위치를 안다.
 - UI View는 버튼 입력을 이벤트로 발행하고 표시 메서드(`SetHealth` 등)를 가진다. Presenter는 MonoBehaviour이며, View의 이벤트를 구독해 명령 버퍼에 넣고, Runner(판이 없는 씬에서는 그 씬의 `~Flow`)에게 필요한 데이터만 받아 View의 표시 메서드를 부른다. Model 변경 알림은 없고 Runner나 `~Flow`가 매 프레임 데이터를 넘긴다.
   - 이유: 게임 데이터를 아는 쪽은 Presenter뿐이라 화면을 바꿔도 로직이 안전하다. 매 프레임 넘기므로 변경 알림 이벤트가 필요 없다.
-- View와 Presenter는 일대일이다. View 안에 View를 넣지 않는다.
+- View와 Presenter는 일대일이다.
   - 이유: Presenter 하나가 View 하나만 알면 데이터가 어디로 가는지 한 줄로 따라간다.
 
 #### UI 계층 (uGUI)
