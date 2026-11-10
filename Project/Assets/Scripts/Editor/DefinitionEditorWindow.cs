@@ -7,7 +7,7 @@ namespace TopView.Editor
     public class DefinitionEditorWindow : EditorWindow
     {
         private DefinitionEditorTab _currentTab = DefinitionEditorTab.Settings;
-        // 현재 탭의 묶음별 에셋. 번호가 TAB_GROUP_FILTERS의 묶음 번호와 같다
+        // 현재 탭의 묶음별 에셋. 번호가 TAB_GROUPS의 묶음 번호와 같다
         private ScriptableObject[][] _groupAssets;
         private ScriptableObject _selectedAsset;
         private UnityEditor.Editor _assetEditor;
@@ -15,23 +15,21 @@ namespace TopView.Editor
         private Vector2 _detailScrollPosition;
         // 번호가 DefinitionEditorTab과 같다
         private static readonly string[] TAB_LABELS = { "Settings", "Weapons", "Player", "Enemy", "Loot" };
-        // 탭마다 묶음별 검색 필터. 바깥 번호가 DefinitionEditorTab과 같다
-        private static readonly string[][] TAB_GROUP_FILTERS =
+        // 탭마다 목록을 나누는 묶음. 바깥 번호가 DefinitionEditorTab과 같다. 묶음이 하나뿐인 탭은 머리글을 두지 않는다
+        private static readonly DefinitionEditorGroup[][] TAB_GROUPS =
         {
-            new string[] { "t:GameSettingsDefinition", "t:MenuSettingsDefinition", "t:AudioSettingsDefinition", "t:MusicDefinition", "t:UserInterfaceSoundDefinition" },
-            new string[] { "t:WeaponDefinition" },
-            new string[] { "t:PlayerDefinition" },
-            new string[] { "t:EnemyDefinition" },
-            new string[] { "t:LootDefinition" }
-        };
-        // 묶음 머리글. 번호가 TAB_GROUP_FILTERS와 같고, 묶음이 둘 이상인 탭에서만 그린다
-        private static readonly string[][] TAB_GROUP_LABELS =
-        {
-            new string[] { "Game Settings", "Menu Settings", "Audio Settings", "Music", "User Interface Sound" },
-            new string[] { "Weapons" },
-            new string[] { "Player" },
-            new string[] { "Enemy" },
-            new string[] { "Loot" }
+            new DefinitionEditorGroup[]
+            {
+                new DefinitionEditorGroup { label = "Game Settings", filter = "t:GameSettingsDefinition" },
+                new DefinitionEditorGroup { label = "Menu Settings", filter = "t:MenuSettingsDefinition" },
+                new DefinitionEditorGroup { label = "Audio Settings", filter = "t:AudioSettingsDefinition" },
+                new DefinitionEditorGroup { label = "Music", filter = "t:MusicDefinition" },
+                new DefinitionEditorGroup { label = "User Interface Sound", filter = "t:UserInterfaceSoundDefinition" }
+            },
+            new DefinitionEditorGroup[] { new DefinitionEditorGroup { filter = "t:WeaponDefinition" } },
+            new DefinitionEditorGroup[] { new DefinitionEditorGroup { filter = "t:PlayerDefinition" } },
+            new DefinitionEditorGroup[] { new DefinitionEditorGroup { filter = "t:EnemyDefinition" } },
+            new DefinitionEditorGroup[] { new DefinitionEditorGroup { filter = "t:LootDefinition" } }
         };
 
         private const string WINDOW_TITLE = "Definition Editor";
@@ -56,12 +54,12 @@ namespace TopView.Editor
 
         private void LoadAssets()
         {
-            string[] groupFilters = TAB_GROUP_FILTERS[(int)_currentTab];
-            _groupAssets = new ScriptableObject[groupFilters.Length][];
+            DefinitionEditorGroup[] groups = TAB_GROUPS[(int)_currentTab];
+            _groupAssets = new ScriptableObject[groups.Length][];
 
-            for (int groupIndex = 0; groupIndex < groupFilters.Length; groupIndex++)
+            for (int groupIndex = 0; groupIndex < groups.Length; groupIndex++)
             {
-                string[] assetIdentifiers = AssetDatabase.FindAssets(groupFilters[groupIndex]);
+                string[] assetIdentifiers = AssetDatabase.FindAssets(groups[groupIndex].filter);
                 ScriptableObject[] assets = new ScriptableObject[assetIdentifiers.Length];
 
                 for (int assetIndex = 0; assetIndex < assetIdentifiers.Length; assetIndex++)
@@ -112,18 +110,18 @@ namespace TopView.Editor
 
             if (_groupAssets != null)
             {
-                string[] groupLabels = TAB_GROUP_LABELS[(int)_currentTab];
-                bool isGrouped = _groupAssets.Length > 1;
+                DefinitionEditorGroup[] groups = TAB_GROUPS[(int)_currentTab];
 
                 for (int groupIndex = 0; groupIndex < _groupAssets.Length; groupIndex++)
                 {
-                    if (isGrouped)
+                    string label = groups[groupIndex].label;
+                    if (label != null)
                     {
                         if (groupIndex > 0)
                         {
                             EditorGUILayout.Space();
                         }
-                        EditorGUILayout.LabelField(groupLabels[groupIndex], EditorStyles.boldLabel);
+                        EditorGUILayout.LabelField(label, EditorStyles.boldLabel);
                     }
 
                     DrawAssetButtons(_groupAssets[groupIndex]);
