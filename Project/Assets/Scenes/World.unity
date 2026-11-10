@@ -52821,7 +52821,7 @@ Transform:
   m_GameObject: {fileID: 657470568}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 16.54, y: 0, z: 1.4}
+  m_LocalPosition: {x: 32.2, y: 0, z: 0.73}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -73500,7 +73500,7 @@ Transform:
   m_GameObject: {fileID: 931902179}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 16.45, y: 0, z: -9.93}
+  m_LocalPosition: {x: 30.59, y: 0, z: -12.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -111909,7 +111909,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: TopView.Authoring::TopView.Authoring.EnemySpawnerAuthoring
   definition: {fileID: 11400000, guid: 5bc1f2883afbca94a96dc37769c8c69a, type: 2}
   rule:
-    spawnIntervalTicks: 1000
+    spawnIntervalTicks: 1500
     maxSpawnCount: 0
     isInfinite: 1
 --- !u!1001 &1352901163
@@ -115131,7 +115131,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: TopView.Authoring::TopView.Authoring.EnemySpawnerAuthoring
   definition: {fileID: 11400000, guid: 5c5cbd46eaead144ca431125be8ed13c, type: 2}
   rule:
-    spawnIntervalTicks: 1000
+    spawnIntervalTicks: 2000
     maxSpawnCount: 0
     isInfinite: 1
 --- !u!4 &1395189411
@@ -118694,7 +118694,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: TopView.Authoring::TopView.Authoring.EnemySpawnerAuthoring
   definition: {fileID: 11400000, guid: 5c5cbd46eaead144ca431125be8ed13c, type: 2}
   rule:
-    spawnIntervalTicks: 1000
+    spawnIntervalTicks: 2000
     maxSpawnCount: 0
     isInfinite: 1
 --- !u!4 &1431750998
@@ -123745,7 +123745,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: TopView.Authoring::TopView.Authoring.EnemySpawnerAuthoring
   definition: {fileID: 11400000, guid: 5bc1f2883afbca94a96dc37769c8c69a, type: 2}
   rule:
-    spawnIntervalTicks: 1000
+    spawnIntervalTicks: 1500
     maxSpawnCount: 0
     isInfinite: 1
 --- !u!4 &1487593996
@@ -132554,7 +132554,7 @@ Transform:
   m_GameObject: {fileID: 1599869948}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 15.25, y: 0, z: 13.41}
+  m_LocalPosition: {x: 30.93, y: 0, z: 15.1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -136523,7 +136523,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: TopView.Authoring::TopView.Authoring.EnemySpawnerAuthoring
   definition: {fileID: 11400000, guid: 5c5cbd46eaead144ca431125be8ed13c, type: 2}
   rule:
-    spawnIntervalTicks: 1000
+    spawnIntervalTicks: 2000
     maxSpawnCount: 0
     isInfinite: 1
 --- !u!4 &1657220648
