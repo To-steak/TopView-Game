@@ -13,5 +13,9 @@ namespace TopView.Components
         public int score;
         // 이번 판에 번 골드
         public int gold;
+        // 스포너에서 생기는 적의 레벨
+        public int enemyLevel;
+        // 다음 적 레벨 상승까지 남은 시간(틱)
+        public int enemyLevelUpRemainingTicks;
     }
 }

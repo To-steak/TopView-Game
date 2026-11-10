@@ -10,13 +10,13 @@ namespace TopView.Systems
         /// <summary>
         /// 발동 요청을 처리한 뒤, 작동 중인 스포너의 타이머를 1틱 줄이고 0이 되면 적 생성 요청을 넣는다.
         /// </summary>
-        /// <param name="rule">게임 규칙 값</param>
+        /// <param name="enemyLevel">생성할 적의 레벨</param>
         /// <param name="spawners">적 스포너 목록</param>
         /// <param name="states">적 스포너 상태 목록. 번호가 spawners와 같다</param>
         /// <param name="enemySpawnTemplates">판을 준비할 때 Core가 종류별로 Definition 값을 채워 둔 적 생성 요청</param>
         /// <param name="enemySpawnerActivationRequests">적 스포너 발동 요청 큐</param>
         /// <param name="enemySpawnRequests">적 생성 요청 큐</param>
-        public static void Tick(in GameRuleComponent rule, EnemySpawnerComponent[] spawners, EnemySpawnerStateComponent[] states, EnemySpawnRequest[] enemySpawnTemplates, Queue<EnemySpawnerActivationRequest> enemySpawnerActivationRequests, Queue<EnemySpawnRequest> enemySpawnRequests)
+        public static void Tick(int enemyLevel, EnemySpawnerComponent[] spawners, EnemySpawnerStateComponent[] states, EnemySpawnRequest[] enemySpawnTemplates, Queue<EnemySpawnerActivationRequest> enemySpawnerActivationRequests, Queue<EnemySpawnRequest> enemySpawnRequests)
         {
             while (enemySpawnerActivationRequests.Count > 0)
             {
@@ -42,7 +42,7 @@ namespace TopView.Systems
                 EnemySpawnRequest enemySpawnRequest = enemySpawnTemplates[spawner.enemyKindIndex];
                 enemySpawnRequest.position = spawner.position;
                 enemySpawnRequest.rotation = spawner.rotation;
-                enemySpawnRequest.level = rule.enemyLevel;
+                enemySpawnRequest.level = enemyLevel;
                 enemySpawnRequests.Enqueue(enemySpawnRequest);
 
                 state.spawnedCount++;

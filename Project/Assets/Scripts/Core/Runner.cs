@@ -105,7 +105,9 @@ namespace TopView.Core
             if (isPlaying)
             {
                 PlayerDetectorSystem.Tick(_world.playerDetectors, _world.playerDetectorStates, in _world.playerLocation, _world.enemySpawnerActivationRequests);
-                EnemySpawnerSystem.Tick(in _world.rule, _world.enemySpawners, _world.enemySpawnerStates, _world.enemySpawnTemplates, _world.enemySpawnerActivationRequests, _world.enemySpawnRequests);
+                // 레벨이 오른 틱에 생기는 적도 새 레벨로 나오도록 스포너보다 먼저 둔다
+                EnemyLevelSystem.Tick(_world.rule.enemyLevelUpIntervalTicks, ref _world.progress);
+                EnemySpawnerSystem.Tick(_world.progress.enemyLevel, _world.enemySpawners, _world.enemySpawnerStates, _world.enemySpawnTemplates, _world.enemySpawnerActivationRequests, _world.enemySpawnRequests);
                 PlayerSpawnSystem.Tick(_world.players, _world.playerSpawnRequests);
                 EnemySpawnSystem.Tick(_world.enemies, _world.enemySpawnRequests, _world.rule.navMeshSampleDistance);
                 ProjectileSpawnSystem.Tick(_world.projectiles, _world.projectileSpawnRequests);
