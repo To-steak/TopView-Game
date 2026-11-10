@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace TopView.Presentation.ViewSystems
 {
-    // 살아 있는 적마다 View를 풀에서 꺼내 붙이고, 위치·회전 보간과 Animator 파라미터를 엔티티에 맞춘다. 피해를 받은 적은 피격 소리를 재생한다.
+    // 살아 있는 적마다 View를 풀에서 꺼내 붙이고, 위치·회전 보간과 Animator 파라미터를 엔티티에 맞춘다. 공격을 내보낸 적은 공격 소리를, 피해를 받은 적은 피격 소리를 재생한다.
     public static class EnemyViewSystem
     {
         private static readonly int IS_WALK_HASH = Animator.StringToHash("isWalk");
@@ -21,15 +21,16 @@ namespace TopView.Presentation.ViewSystems
         private const int BASE_LAYER_INDEX = 0;
 
         /// <summary>
-        /// 저장소의 칸마다 살아 있는 적과 View를 맞추고, 이번 프레임의 상태 변경 기록을 Animator에 반영하고, 피해 기록마다 피격 소리를 재생한다.
+        /// 저장소의 칸마다 살아 있는 적과 View를 맞추고, 이번 프레임의 상태 변경 기록을 Animator에 반영하고, 공격 기록마다 공격 소리를, 피해 기록마다 피격 소리를 재생한다.
         /// </summary>
         /// <param name="entities">적 엔티티 배열</param>
         /// <param name="stateRecords">이번 프레임의 적 상태 변경 기록</param>
+        /// <param name="attackRecords">이번 프레임에 적이 공격을 내보낸 기록</param>
         /// <param name="damagedRecords">이번 프레임의 적 피해 기록</param>
         /// <param name="viewPrefabsByKind">적 종류별 EnemyView 프리팹</param>
         /// <param name="isPaused">판이 일시정지 중이면 true. Animator를 멈춘다</param>
         /// <param name="context">적 View 실행 상태</param>
-        public static void Present(EnemyEntity[] entities, List<EnemyStateChangedRecord> stateRecords, List<EnemyDamagedRecord> damagedRecords, GameObject[] viewPrefabsByKind, bool isPaused, EnemyViewContext context)
+        public static void Present(EnemyEntity[] entities, List<EnemyStateChangedRecord> stateRecords, List<EnemyAttackCommittedRecord> attackRecords, List<EnemyDamagedRecord> damagedRecords, GameObject[] viewPrefabsByKind, bool isPaused, EnemyViewContext context)
         {
             float alpha = Mathf.Clamp01((Time.time - Time.fixedTime) / Time.fixedDeltaTime);
             float animatorSpeed = isPaused ? 0f : 1f;
@@ -74,24 +75,70 @@ namespace TopView.Presentation.ViewSystems
                 ApplyStateRecord(in record, view.animator, context.triggerHashesByKind[entities[record.enemy.index].kind.kind]);
             }
 
-            for (int recordIndex = 0; recordIndex < damagedRecords.Count; recordIndex++)
+            for (int recordIndex = 0; recordIndex < attackRecords.Count; recordIndex++)
             {
-                EnemyDamagedRecord record = damagedRecords[recordIndex];
+                EnemyAttackCommittedRecord record = attackRecords[recordIndex];
                 EnemyView view = context.views[record.enemy.index];
-                // View가 없거나 다른 적으로 바뀌었거나 소리가 연결되지 않았으면 건너뛴다. 연결 누락은 View를 만들 때 남겼다
-                if (view == null || context.viewGenerations[record.enemy.index] != record.enemy.generation || view.hitSoundSource == null)
+                // View가 없거나 다른 적으로 바뀌었거나 소리가 연결되지 않았으면 건너뛴다. 연결 누락과 소리 칸이 없는 종류는 판을 준비할 때 남겼다
+                if (view == null || context.viewGenerations[record.enemy.index] != record.enemy.generation || view.soundEffectSource == null
+                    || !TryGetAttackClip(view, record.attackKind, out AudioClip clip))
                 {
                     continue;
                 }
 
-                view.hitSoundSource.Play();
+                if (clip != null)
+                {
+                    view.soundEffectSource.PlayOneShot(clip);
+                }
+            }
+
+            for (int recordIndex = 0; recordIndex < damagedRecords.Count; recordIndex++)
+            {
+                EnemyDamagedRecord record = damagedRecords[recordIndex];
+                EnemyView view = context.views[record.enemy.index];
+                // View가 없거나 다른 적으로 바뀌었거나 소리가 연결되지 않았으면 건너뛴다. 연결 누락은 판을 준비할 때 남겼다
+                if (view == null || context.viewGenerations[record.enemy.index] != record.enemy.generation || view.soundEffectSource == null || view.hitClip == null)
+                {
+                    continue;
+                }
+
+                view.soundEffectSource.PlayOneShot(view.hitClip);
+            }
+        }
+
+        /// <summary>
+        /// 공격 종류에 맞는 EnemyView의 공격 소리 칸을 읽는다. 로그는 남기지 않으며, Runner가 판을 준비할 때 이 결과로 빠진 소리를 알린다.
+        /// </summary>
+        /// <param name="view">소리를 읽을 EnemyView</param>
+        /// <param name="attackKind">공격 종류</param>
+        /// <param name="clip">그 종류의 공격 소리. 칸이 비었거나 칸이 없는 종류면 null</param>
+        /// <returns>그 종류의 소리 칸이 EnemyView에 있으면 true</returns>
+        public static bool TryGetAttackClip(EnemyView view, EnemyAttackKind attackKind, out AudioClip clip)
+        {
+            switch (attackKind)
+            {
+                case EnemyAttackKind.Body:
+                    clip = view.bodyAttackClip;
+                    return true;
+                case EnemyAttackKind.Missile:
+                    clip = view.missileAttackClip;
+                    return true;
+                case EnemyAttackKind.BossMissile:
+                    clip = view.bossMissileAttackClip;
+                    return true;
+                case EnemyAttackKind.BossRock:
+                    clip = view.bossRockAttackClip;
+                    return true;
+                default:
+                    clip = null;
+                    return false;
             }
         }
 
         private static EnemyView Acquire(EnemyViewContext context, int index, int kind, int generation, GameObject[] viewPrefabsByKind)
         {
             Stack<EnemyView> pool = context.viewPools[kind];
-            EnemyView view = pool.Count > 0 ? pool.Pop() : Create(viewPrefabsByKind[kind]);
+            EnemyView view = pool.Count > 0 ? pool.Pop() : Object.Instantiate(viewPrefabsByKind[kind]).GetComponent<EnemyView>();
             view.gameObject.SetActive(true);
 
             if (context.triggerHashesByKind[kind] == null)
@@ -103,17 +150,6 @@ namespace TopView.Presentation.ViewSystems
             context.viewGenerations[index] = generation;
 
             PlayIdle(view.animator, context.triggerHashesByKind[kind]);
-            return view;
-        }
-
-        private static EnemyView Create(GameObject viewPrefab)
-        {
-            EnemyView view = Object.Instantiate(viewPrefab).GetComponent<EnemyView>();
-            if (view.hitSoundSource == null)
-            {
-                Debug.LogWarning($"EnemyViewSystem >> {viewPrefab.name}의 EnemyView에 Hit Sound Source가 연결되어 있지 않아 피격 소리가 나오지 않는다.");
-            }
-
             return view;
         }
 

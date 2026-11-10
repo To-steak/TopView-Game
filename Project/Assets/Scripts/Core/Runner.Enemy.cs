@@ -3,6 +3,7 @@ using TopView.Authoring;
 using TopView.Components;
 using TopView.Definitions;
 using TopView.Presentation.Views;
+using TopView.Presentation.ViewSystems;
 using TopView.Requests;
 using UnityEngine;
 
@@ -188,6 +189,7 @@ namespace TopView.Core
                     {
                         Debug.LogWarning($"Runner >> {definition.name}의 View Prefab에 Damage Anchor가 연결되어 있지 않아 이 적 종류의 피해량 글자는 적의 발밑에 뜬다.");
                     }
+                    WarnMissingSounds(definition.name, enemyView, attacks);
                 }
                 // 오버레이 체력 바로 체력을 보여 주는 종류는 게이지를 두지 않아도 된다
                 if (definition.healthGaugePrefab == null && definition.behavior.showsOverlayHealthBar)
@@ -206,6 +208,49 @@ namespace TopView.Core
                 else
                 {
                     gaugePrefabs[kind] = definition.healthGaugePrefab;
+                }
+            }
+        }
+
+        // 효과음 AudioSource가 없거나, 피격 소리가 비어 있거나, 이 적 종류가 쓰는 공격 종류의 소리가 비어 있거나 소리 칸이 없으면 한 번씩 경고를 남긴다.
+        // 소리 칸이 없는 공격 종류는 코드를 고쳐야 하는 문제라 AudioSource가 없어도 알린다. 빈 소리는 AudioSource가 있을 때만 알린다.
+        private static void WarnMissingSounds(string definitionName, EnemyView enemyView, EnemyAttackComponent[] attacks)
+        {
+            bool hasSource = enemyView.soundEffectSource != null;
+            if (!hasSource)
+            {
+                Debug.LogWarning($"Runner >> {definitionName}의 View Prefab에 Sound Effect Source가 연결되어 있지 않아 이 적 종류는 효과음 없이 진행한다.");
+            }
+            else if (enemyView.hitClip == null)
+            {
+                Debug.LogWarning($"Runner >> {definitionName}의 View Prefab에 Hit Clip이 없어 이 적 종류는 피격 소리 없이 진행한다.");
+            }
+
+            for (int attackIndex = 0; attackIndex < attacks.Length; attackIndex++)
+            {
+                EnemyAttackKind kind = attacks[attackIndex].kind;
+                bool isKindChecked = false;
+                for (int previousIndex = 0; previousIndex < attackIndex; previousIndex++)
+                {
+                    if (attacks[previousIndex].kind == kind)
+                    {
+                        isKindChecked = true;
+                        break;
+                    }
+                }
+
+                if (isKindChecked)
+                {
+                    continue;
+                }
+
+                if (!EnemyViewSystem.TryGetAttackClip(enemyView, kind, out AudioClip clip))
+                {
+                    Debug.LogError($"Runner >> EnemyView에 {kind} 공격 소리 칸이 정해지지 않아 {definitionName}의 이 공격은 소리 없이 진행한다.");
+                }
+                else if (hasSource && clip == null)
+                {
+                    Debug.LogWarning($"Runner >> {definitionName}의 View Prefab에 {kind} 공격 소리가 없어 이 공격은 소리 없이 진행한다.");
                 }
             }
         }
