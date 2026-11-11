@@ -40,7 +40,7 @@ MonoBehaviour:
     explosionRadiusIncreasePerLevel: 0
     meleeRadius: 2
     meleeOffset: 1
-    meleeRangeRatioPerLevel: 0.2
+    meleeRangeRatioPerLevel: 0
     muzzleOffset: {x: 0, y: 0, z: 0}
   modelPrefab: {fileID: 4377655535536273225, guid: 48b3e48d1e96a0c4490dc61536c17515, type: 3}
   projectilePrefab: {fileID: 0}
