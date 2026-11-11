@@ -16,8 +16,8 @@ namespace TopView.Editor
             "platform_",
         };
 
-        private const string MODEL_FOLDER = "Assets/Local Assets/Nature Kit (2.1)/Models";
-        private const string PREFAB_FOLDER = "Assets/Prefabs/Tiles";
+        private const string MODEL_FOLDER = "Assets/CC0/Nature Kit (2.1)/Models";
+        private const string PREFAB_FOLDER = "Assets/Prefabs/Tile";
         private const string MATERIAL_FOLDER = "Assets/Materials";
         private const string MATERIAL_NAME_PREFIX = "Tile_";
         private const string TILE_LAYER_NAME = "Ground";
