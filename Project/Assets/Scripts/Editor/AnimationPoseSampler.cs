@@ -11,6 +11,26 @@ namespace TopView.Editor
         private const string GRAPH_NAME = "Animation Pose Sample";
 
         /// <summary>
+        /// animator를 클립의 seconds 시점 자세로 멈춘다. 루트 모션은 끈다. 자세는 돌려준 그래프를 없앨 때까지 유지되므로, 부르는 쪽이 다 쓴 뒤 Destroy한다.
+        /// </summary>
+        /// <param name="animator">클립을 재생할 Animator</param>
+        /// <param name="clip">샘플링할 클립</param>
+        /// <param name="seconds">샘플링 시점(초)</param>
+        /// <returns>샘플링에 쓴 그래프</returns>
+        public static PlayableGraph SamplePose(Animator animator, AnimationClip clip, float seconds)
+        {
+            animator.applyRootMotion = false;
+            PlayableGraph graph = PlayableGraph.Create(GRAPH_NAME);
+            graph.SetTimeUpdateMode(DirectorUpdateMode.Manual);
+            AnimationPlayableOutput output = AnimationPlayableOutput.Create(graph, GRAPH_NAME, animator);
+            AnimationClipPlayable playable = AnimationClipPlayable.Create(graph, clip);
+            output.SetSourcePlayable(playable);
+            playable.SetTime(seconds);
+            graph.Evaluate();
+            return graph;
+        }
+
+        /// <summary>
         /// 클립을 sampleTicks 시점으로 샘플링한 자세에서 target의 위치를 root의 회전 기준 로컬 위치로 잰다. 클립이 없으면 지금 자세 그대로 잰다.
         /// 루트의 크기는 반영하지 않는다. 게임에서 rotation * offset으로 되돌리기 때문이다.
         /// </summary>
@@ -44,14 +64,7 @@ namespace TopView.Editor
                         time = clip.length;
                     }
 
-                    animator.applyRootMotion = false;
-                    graph = PlayableGraph.Create(GRAPH_NAME);
-                    graph.SetTimeUpdateMode(DirectorUpdateMode.Manual);
-                    AnimationPlayableOutput output = AnimationPlayableOutput.Create(graph, GRAPH_NAME, animator);
-                    AnimationClipPlayable playable = AnimationClipPlayable.Create(graph, clip);
-                    output.SetSourcePlayable(playable);
-                    playable.SetTime(time);
-                    graph.Evaluate();
+                    graph = SamplePose(animator, clip, time);
                 }
 
                 offset = Quaternion.Inverse(root.rotation) * (target.position - root.position);
