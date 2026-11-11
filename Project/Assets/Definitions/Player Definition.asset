@@ -48,8 +48,8 @@ MonoBehaviour:
     dieTicks: 74
   upgrade:
     maxLevel: 5
-    startingCost: 100
-    costIncreasePerLevel: 50
+    startingCost: 50
+    costIncreasePerLevel: 35
     maxHealthRatioPerLevel: 0.5
     maxManaRatioPerLevel: 0.5
     runManaCostRatioPerLevel: 0.1

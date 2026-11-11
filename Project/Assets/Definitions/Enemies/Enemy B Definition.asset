@@ -66,7 +66,7 @@ MonoBehaviour:
     baseAmount: 20
     amountIncrement: 5
   - kind: 1
-    weight: 3
+    weight: 4
     baseAmount: 30
     amountIncrement: 5
   viewPrefab: {fileID: 7807188980422851779, guid: 18e5d55b96933154baff3d6e8926d048, type: 3}

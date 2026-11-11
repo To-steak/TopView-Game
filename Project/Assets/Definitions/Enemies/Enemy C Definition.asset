@@ -64,8 +64,12 @@ MonoBehaviour:
     baseAmount: 0
     amountIncrement: 0
   - kind: 1
-    weight: 1
+    weight: 4
     baseAmount: 100
     amountIncrement: 50
+  - kind: 3
+    weight: 2
+    baseAmount: 35
+    amountIncrement: 35
   viewPrefab: {fileID: 3745814735767933518, guid: 15ce2362c6dc61145a1e9d46e36f1a8c, type: 3}
   healthGaugePrefab: {fileID: 7240100042028206097, guid: 3f976bcd53dc80f47a8de602438c974c, type: 3}
