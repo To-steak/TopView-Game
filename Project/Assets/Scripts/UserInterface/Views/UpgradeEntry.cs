@@ -3,7 +3,6 @@ using TMPro;
 using TopView.Commands;
 using TopView.Components;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace TopView.UserInterface.Views
@@ -16,7 +15,6 @@ namespace TopView.UserInterface.Views
         [SerializeField] private PlayerUpgradeCommandType _type;
         // Weapon일 때 강화할 무기 번호. Player Definition의 무기 목록 번호(교체 키 - 1)다. 다른 항목은 쓰지 않는다
         [SerializeField] private int _weaponIndex;
-        [FormerlySerializedAs("_text")]
         [SerializeField] private TMP_Text _levelText;
         [SerializeField] private TMP_Text _costText;
         [SerializeField] private TMP_Text _descriptionText;
