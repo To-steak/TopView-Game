@@ -136,6 +136,8 @@ Runner가 World의 데이터를 꺼내 호출 순서대로 넘긴다. 게임 상
   - 이유: Logic은 입력이 어디서 왔는지 모르고 명령만 본다.
 - 판이 없는 씬에서는 그 씬의 `~Flow`가 명령 목록(`List<~Command>`)을 가지고, Presenter가 넣은 명령을 Update에서 소비한다.
   - 이유: 틱이 없는 씬에는 Logic이 없어, 그 씬의 흐름을 맡은 `~Flow` 한 곳에서 명령을 소비하면 된다.
+- 테스트용 디버그 명령(`DebugCommand`)은 Runner의 에디터 전용 Context Menu(`Runner.Debug.cs`, 파일 전체를 `#if UNITY_EDITOR`로 감쌈)가 Update 밖에서 넣고, `DebugCommandSystem`이 다음 틱에 소비한다. 넣는 양 같은 디버그 값은 Definition이 아니라 `Runner.Debug.cs`의 상수로 둔다.
+  - 이유: 디버그 명령은 한 번 넣으면 소비될 때까지 목록에 남아 프레임과 틱이 어긋나도 놓치거나 두 번 읽지 않는다. 상태는 여전히 System만 바꾸고, 디버그 값이 Definition에 섞이면 게임 수치로 오해한다.
 
 ### Systems/
 게임 상태를 바꾸는 유일한 곳이다.
