@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace TopView.Presentation.ViewSystems
 {
-    // 플레이어 View를 만들고, 위치·회전 보간, Animator 파라미터, 무기 모델, 공격 효과음을 엔티티에 맞춘다.
+    // 플레이어 View를 만들고, 위치·회전 보간, Animator 파라미터, 무기 모델, 공격·점프·회피 효과음을 엔티티에 맞춘다.
     public static class PlayerViewSystem
     {
         private static readonly int MOVEMENT_SPEED_HASH = Animator.StringToHash("MovementSpeed");
@@ -80,7 +80,8 @@ namespace TopView.Presentation.ViewSystems
             Animator animator = context.view.animator;
             animator.speed = isPaused ? 0f : 1f;
             ApplyStateRecords(in identifier, stateRecords, animator, context.rangedLayerIndex);
-            PlayAttackSounds(in identifier, attackRecords, context.weaponViews, context.view.soundEffectSource);
+            PlayAttackEffects(in identifier, attackRecords, context.weaponViews, context.view.soundEffectSource);
+            PlayStateSounds(in identifier, stateRecords, context.view);
             PlayReloadSounds(in identifier, stateRecords, in actionState, weaponSlot.currentIndex, context);
             ApplyMovementAnimation(in actionState, in entity.motion, animator);
             // 가중치는 프레임 시간만큼 목표로 다가가므로, 일시정지 중에는 Animator와 함께 멈춘다
@@ -117,6 +118,14 @@ namespace TopView.Presentation.ViewSystems
             if (context.view.soundEffectSource == null)
             {
                 Debug.LogError("PlayerViewSystem >> PlayerView에 Sound Effect Source가 연결되어 있지 않아 공격 효과음이 나오지 않는다.");
+            }
+            if (context.view.jumpClip == null)
+            {
+                Debug.LogWarning("PlayerViewSystem >> PlayerView에 Jump Clip이 없어 점프 효과음이 나오지 않는다.");
+            }
+            if (context.view.dodgeClip == null)
+            {
+                Debug.LogWarning("PlayerViewSystem >> PlayerView에 Dodge Clip이 없어 회피 효과음이 나오지 않는다.");
             }
             if (context.view.throwPreviewLine == null || context.view.throwPreviewCircle == null)
             {
@@ -176,14 +185,9 @@ namespace TopView.Presentation.ViewSystems
             }
         }
 
-        // 이 플레이어가 공격을 내보낸 기록마다 그 무기의 공격 Clip을 겹쳐 재생한다. 연결이 빠진 경우는 View를 만들 때 이미 알렸다.
-        private static void PlayAttackSounds(in EntityIdentifier identifier, List<PlayerAttackCommittedRecord> attackRecords, WeaponView[] weaponViews, AudioSource soundEffectSource)
+        // 이 플레이어가 공격을 내보낸 기록마다 그 무기의 공격 Clip을 겹쳐 재생하고, Impulse Source가 있으면 화면 흔들림을 낸다. 연결이 빠진 경우는 View를 만들 때 이미 알렸다.
+        private static void PlayAttackEffects(in EntityIdentifier identifier, List<PlayerAttackCommittedRecord> attackRecords, WeaponView[] weaponViews, AudioSource soundEffectSource)
         {
-            if (soundEffectSource == null)
-            {
-                return;
-            }
-
             for (int recordIndex = 0; recordIndex < attackRecords.Count; recordIndex++)
             {
                 PlayerAttackCommittedRecord record = attackRecords[recordIndex];
@@ -199,12 +203,56 @@ namespace TopView.Presentation.ViewSystems
                 }
 
                 WeaponView weaponView = weaponViews[record.weaponIndex];
-                if (weaponView == null || weaponView.attackClip == null)
+                if (weaponView == null)
                 {
                     continue;
                 }
 
-                soundEffectSource.PlayOneShot(weaponView.attackClip);
+                if (soundEffectSource != null && weaponView.attackClip != null)
+                {
+                    soundEffectSource.PlayOneShot(weaponView.attackClip);
+                }
+                if (weaponView.attackImpulseSource != null)
+                {
+                    weaponView.attackImpulseSource.GenerateImpulse();
+                }
+            }
+        }
+
+        // 이 플레이어가 점프나 회피 상태에 들어간 기록마다 그 소리를 겹쳐 재생한다. 연결이 빠진 경우는 View를 만들 때 이미 알렸다.
+        private static void PlayStateSounds(in EntityIdentifier identifier, List<PlayerStateChangedRecord> stateRecords, PlayerView view)
+        {
+            AudioSource soundEffectSource = view.soundEffectSource;
+            if (soundEffectSource == null)
+            {
+                return;
+            }
+
+            for (int recordIndex = 0; recordIndex < stateRecords.Count; recordIndex++)
+            {
+                PlayerStateChangedRecord record = stateRecords[recordIndex];
+                if (record.player.index != identifier.index || record.player.generation != identifier.generation)
+                {
+                    continue;
+                }
+
+                AudioClip clip;
+                switch (record.state)
+                {
+                    case PlayerState.Jump:
+                        clip = view.jumpClip;
+                        break;
+                    case PlayerState.Dodge:
+                        clip = view.dodgeClip;
+                        break;
+                    default:
+                        continue;
+                }
+
+                if (clip != null)
+                {
+                    soundEffectSource.PlayOneShot(clip);
+                }
             }
         }
 

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace TopView.UserInterface.Views
 {
-    // 판이 끝난 화면. 승패를 표시하고, 재시작과 종료 버튼 입력을 이벤트로 알린다.
+    // 판이 끝난 화면. 승패와 점수를 표시하고, 재시작과 종료 버튼 입력을 이벤트로 알린다.
     public class GameOverView : UserInterfaceView
     {
         // 재시작 버튼을 눌렀다
@@ -16,6 +16,7 @@ namespace TopView.UserInterface.Views
         [SerializeField] private Button _restartButton;
         [SerializeField] private Button _exitButton;
         [SerializeField] private TMP_Text _resultText;
+        [SerializeField] private TMP_Text _scoreText;
         [SerializeField] private string _victoryText = "Victory";
         [SerializeField] private string _defeatText = "Defeat";
 
@@ -26,6 +27,15 @@ namespace TopView.UserInterface.Views
         public void SetResult(bool isVictory)
         {
             _resultText.text = isVictory ? _victoryText : _defeatText;
+        }
+
+        /// <summary>
+        /// 이번 판의 점수를 표시한다.
+        /// </summary>
+        /// <param name="score">점수</param>
+        public void SetScore(int score)
+        {
+            _scoreText.text = score.ToString("N0");
         }
 
         private void OnEnable()

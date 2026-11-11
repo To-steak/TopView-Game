@@ -62,6 +62,18 @@ namespace TopView.Core
                 return;
             }
 
+            if (gameSettings.rule.unstuckSampleDistance <= 0f)
+            {
+                Debug.LogError("Runner >> Game Settings Definition의 Unstuck Sample Distance가 0 이하라 판을 시작할 수 없다.");
+                return;
+            }
+
+            if (gameSettings.rule.enemyLevelUpIntervalTicks <= 0)
+            {
+                Debug.LogError("Runner >> Game Settings Definition의 Enemy Level Up Interval Ticks가 0 이하라 판을 시작할 수 없다.");
+                return;
+            }
+
             ReadEnemySpawners(out EnemyDefinition[] enemyDefinitions, out EnemySpawnerComponent[] enemySpawners, out EnemySpawnerAuthoring[] enemySpawnerAuthorings);
             PlayerDetectorComponent[] playerDetectors = ReadPlayerDetectors(enemySpawnerAuthorings);
 
@@ -95,7 +107,9 @@ namespace TopView.Core
                 phase = GamePhase.Playing,
                 remainingTicks = world.rule.timeLimitTicks,
                 score = 0,
-                gold = 0
+                gold = 0,
+                enemyLevel = world.rule.startingEnemyLevel,
+                enemyLevelUpRemainingTicks = world.rule.enemyLevelUpIntervalTicks
             };
 
             Application.targetFrameRate = gameSettings.targetFrameRate;

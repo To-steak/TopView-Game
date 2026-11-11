@@ -16,27 +16,33 @@ MonoBehaviour:
     kind: 0
     damage: 85
     maxAmmo: 0
+    maxAmmoRatioPerLevel: 0
     startingCurrentAmmo: 0
     startingReserveAmmo: 0
     attackStartTicks: 18
     attackEndTicks: 24
     attackDurationTicks: 40
-    attackIntervalTicks: 50
+    attackIntervalTicks: 40
+    attackIntervalRatioPerLevel: 0
     projectile:
       kind: 0
       speed: 0
       radius: 0
       lifetimeTicks: 0
+      chargePerTick: 0
       maxThrowDistance: 0
-      upwardRatio: 0
-      gravity: 0
-      fuseTicks: 0
+      flightTicks: 0
+      arcHeight: 0
       explosionRadius: 0
       collisionLayer:
         serializedVersion: 2
         m_Bits: 0
+    explosionRadiusIncreasePerLevel: 0
     meleeRadius: 2
     meleeOffset: 1
+    meleeRangeRatioPerLevel: 0.25
+    muzzleOffset: {x: 0, y: 0, z: 0}
   modelPrefab: {fileID: 4377655535536273225, guid: 48b3e48d1e96a0c4490dc61536c17515, type: 3}
   projectilePrefab: {fileID: 0}
   hitEffectPrefab: {fileID: 0}
+  impactEffectPrefab: {fileID: 5984810661567882713, guid: ae498d9c26b521c4e9a009492457a39f, type: 3}

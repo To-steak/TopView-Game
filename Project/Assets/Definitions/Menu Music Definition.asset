@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Menu Music Definition
   m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.MusicDefinition
   normalClip: {fileID: 8300000, guid: bc91338dd68d541de92e6c857cef3550, type: 3}
+  bossClip: {fileID: 0}
   outputGroup: {fileID: 520015226325868983, guid: 969243a63b7eb6248b0be0c6e7ffabcd, type: 2}
   volume: 1
   fadeTicks: 50

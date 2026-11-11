@@ -16,6 +16,8 @@ namespace TopView.Entities
         public PlayerVitalsComponent vitals;
         // 행동 상태의 길이. 생성 때 Definition에서 복사한다
         public PlayerActionComponent action;
+        // 강화 값. 생성 때 Definition에서 복사한다
+        public PlayerUpgradeComponent upgrade;
 
         // 위치
         public PositionComponent position;
@@ -38,5 +40,7 @@ namespace TopView.Entities
         public PlayerWeaponSlotsComponent weaponSlots;
         // 투척 충전 중의 궤도 미리보기
         public PlayerThrowPreviewComponent throwPreview;
+        // 항목별 강화 레벨
+        public PlayerUpgradeLevelsComponent upgradeLevels;
     }
 }

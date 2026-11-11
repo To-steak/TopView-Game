@@ -30,9 +30,9 @@ namespace TopView.Systems
                 mana.recoveryElapsedTicks++;
             }
 
-            if (mana.current < vital.maxMana && mana.recoveryElapsedTicks >= vital.manaRecoveryDelayTicks)
+            if (mana.current < mana.max && mana.recoveryElapsedTicks >= vital.manaRecoveryDelayTicks)
             {
-                mana.current = Mathf.Min(mana.current + vital.manaRecoveryPerTick, vital.maxMana);
+                mana.current = Mathf.Min(mana.current + vital.manaRecoveryPerTick, mana.max);
             }
         }
     }

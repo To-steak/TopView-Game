@@ -13,20 +13,16 @@ MonoBehaviour:
   m_Name: Enemy B Definition
   m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.EnemyDefinition
   stats:
-    baseMaxHealth: 200
+    baseMaxHealth: 300
     baseAttackDamage: 15
-    baseSpeed: 0.8
+    baseSpeed: 1
     baseScore: 15
-    baseGold: 15
     maxHealthIncrement: 20
     attackDamageIncrement: 3
     speedIncrement: 0.1
     scoreIncrement: 15
-    goldIncrement: 15
     hitRadius: 1.1
   behavior:
-    detectionRadius: 25
-    wanderIntervalTicks: 100
     stopDistance: 2
     acceleration: 6
     angularSpeed: 360
@@ -49,16 +45,29 @@ MonoBehaviour:
         speed: 0
         radius: 0
         lifetimeTicks: 0
-        upwardRatio: 0
-        gravity: 0
-        fuseTicks: 0
+        chargePerTick: 0
+        maxThrowDistance: 0
+        flightTicks: 0
+        arcHeight: 0
         explosionRadius: 0
         collisionLayer:
           serializedVersion: 2
           m_Bits: 0
-      spawnOffset: {x: 0, y: 0, z: 0}
-      alternateSpawnOffset: {x: 0, y: 0, z: 0}
+      shots: []
     projectilePrefab: {fileID: 0}
     hitEffectPrefab: {fileID: 0}
+  loots:
+  - kind: 0
+    weight: 10
+    baseAmount: 0
+    amountIncrement: 0
+  - kind: 2
+    weight: 2
+    baseAmount: 20
+    amountIncrement: 5
+  - kind: 1
+    weight: 4
+    baseAmount: 30
+    amountIncrement: 5
   viewPrefab: {fileID: 7807188980422851779, guid: 18e5d55b96933154baff3d6e8926d048, type: 3}
   healthGaugePrefab: {fileID: 7240100042028206097, guid: bf39a87b00bea9b45875c9f2d4077307, type: 3}

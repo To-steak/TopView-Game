@@ -11,7 +11,7 @@ namespace TopView.Systems
     public static class LootPickupSystem
     {
         /// <summary>
-        /// 살아 있는 플레이어의 획득 반경 안에 있는 전리품의 효과를 적용하고 소멸을 요청한다. 효과를 받을 수 없는 전리품은 바닥에 남긴다.
+        /// 살아 있는 플레이어의 획득 반경 안에 있는 전리품의 효과를 적용하고 소멸을 요청한다. 효과를 받을 수 없는 전리품(원거리 무기가 없을 때의 탄약)은 바닥에 남긴다.
         /// </summary>
         /// <param name="loots">전리품 저장소</param>
         /// <param name="players">플레이어 저장소</param>
@@ -67,7 +67,9 @@ namespace TopView.Systems
                     progress.gold += loot.amount;
                     return true;
                 case LootKind.Health:
-                    return TryHeal(ref health, loot.amount);
+                    // 체력이 가득 차 있어도 획득한다. 남기면 처음 하는 사람이 못 줍는 버그로 오해한다
+                    health.current = Mathf.Min(health.max, health.current + loot.amount);
+                    return true;
                 case LootKind.Ammo:
                     return TryAddAmmo(in weaponList, ref weaponSlots, loot.amount);
                 default:
@@ -75,18 +77,6 @@ namespace TopView.Systems
                     Debug.LogError($"LootPickupSystem >> 효과가 없는 전리품 종류 {loot.kind}를 효과 없이 없앤다.");
                     return true;
             }
-        }
-
-        // 체력이 가득 차 있으면 회복하지 않고 false를 돌려준다.
-        private static bool TryHeal(ref HealthComponent health, int amount)
-        {
-            if (health.current >= health.max)
-            {
-                return false;
-            }
-
-            health.current = Mathf.Min(health.max, health.current + amount);
-            return true;
         }
 
         // 원거리 무기 전부의 예비 탄약을 더한다. 원거리 무기가 없으면 false를 돌려준다.

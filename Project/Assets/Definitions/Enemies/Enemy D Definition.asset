@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Enemy D Definition
   m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.EnemyDefinition
   stats:
-    baseMaxHealth: 1000
+    baseMaxHealth: 10000
     baseAttackDamage: 100
     baseSpeed: 0
     baseScore: 500
@@ -49,17 +49,17 @@ MonoBehaviour:
         maxThrowDistance: 0
         flightTicks: 0
         arcHeight: 0
-        explosionRadius: 0
+        explosionRadius: 1
         collisionLayer:
           serializedVersion: 2
-          m_Bits: 512
+          m_Bits: 704
       shots:
       - startTicks: 16
         spawnOffset: {x: 1.63, y: 2.1, z: 1.04}
       - startTicks: 36
         spawnOffset: {x: -1.64, y: 2.06, z: 1.04}
     projectilePrefab: {fileID: 5746081768468073432, guid: 36c9ce1b05aa52a41921b504ebcce19e, type: 3}
-    hitEffectPrefab: {fileID: 0}
+    hitEffectPrefab: {fileID: 8142776624367745201, guid: be16a2ead503d12418c1f228fcee2f7c, type: 3}
   - attack:
       kind: 3
       attackRange: 100
@@ -87,7 +87,11 @@ MonoBehaviour:
       - startTicks: 94
         spawnOffset: {x: 0, y: 1.26, z: 1.88}
     projectilePrefab: {fileID: 3605412627769871624, guid: 297f4eb88c308ae4d83672b047e78024, type: 3}
-    hitEffectPrefab: {fileID: 0}
-  loots: []
+    hitEffectPrefab: {fileID: 8142776624367745201, guid: cf5302637a5478848be4ea59d93ed266, type: 3}
+  loots:
+  - kind: 0
+    weight: 10
+    baseAmount: 0
+    amountIncrement: 0
   viewPrefab: {fileID: 2811978939204380695, guid: 4799295fa3bc6664c8e0880573210cbe, type: 3}
   healthGaugePrefab: {fileID: 0}

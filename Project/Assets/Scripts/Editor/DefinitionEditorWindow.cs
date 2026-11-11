@@ -6,21 +6,41 @@ namespace TopView.Editor
     // Definition 에셋을 탭별로 모아 보여 주고, 고른 에셋의 인스펙터를 오른쪽에 그리는 편집 창
     public class DefinitionEditorWindow : EditorWindow
     {
-        private DefinitionEditorTab _currentTab = DefinitionEditorTab.GameSettings;
-        private ScriptableObject[] _assets;
+        private DefinitionEditorTab _currentTab = DefinitionEditorTab.Settings;
+        // 현재 탭의 묶음별 에셋. 번호가 TAB_GROUPS의 묶음 번호와 같다
+        private ScriptableObject[][] _groupAssets;
         private ScriptableObject _selectedAsset;
         private UnityEditor.Editor _assetEditor;
         private Vector2 _listScrollPosition;
         private Vector2 _detailScrollPosition;
         // 번호가 DefinitionEditorTab과 같다
-        private static readonly string[] TAB_LABELS = { "Game Settings", "Weapons", "Player", "Enemy" };
-        private static readonly string[] TAB_FILTERS = { "t:GameSettingsDefinition", "t:WeaponDefinition", "t:PlayerDefinition", "t:EnemyDefinition" };
+        private static readonly string[] TAB_LABELS = { "Settings", "Weapons", "Player", "Enemy", "Loot" };
+        // 탭마다 목록을 나누는 묶음. 바깥 번호가 DefinitionEditorTab과 같다. 묶음이 하나뿐인 탭은 머리글을 두지 않는다
+        private static readonly DefinitionEditorGroup[][] TAB_GROUPS =
+        {
+            new DefinitionEditorGroup[]
+            {
+                new DefinitionEditorGroup { label = "Game Settings", filter = "t:GameSettingsDefinition" },
+                new DefinitionEditorGroup { label = "Menu Settings", filter = "t:MenuSettingsDefinition" },
+                new DefinitionEditorGroup { label = "Audio Settings", filter = "t:AudioSettingsDefinition" },
+                new DefinitionEditorGroup { label = "Music", filter = "t:MusicDefinition" },
+                new DefinitionEditorGroup { label = "User Interface Sound", filter = "t:UserInterfaceSoundDefinition" }
+            },
+            new DefinitionEditorGroup[] { new DefinitionEditorGroup { filter = "t:WeaponDefinition" } },
+            new DefinitionEditorGroup[] { new DefinitionEditorGroup { filter = "t:PlayerDefinition" } },
+            new DefinitionEditorGroup[] { new DefinitionEditorGroup { filter = "t:EnemyDefinition" } },
+            new DefinitionEditorGroup[] { new DefinitionEditorGroup { filter = "t:LootDefinition" } }
+        };
 
         private const string WINDOW_TITLE = "Definition Editor";
         private const string BOX_STYLE = "box";
         private const float TAB_HEIGHT = 30f;
         private const float LIST_WIDTH = 250f;
         private const float BUTTON_HEIGHT = 25f;
+        // 오른쪽 패널 너비 중 라벨이 차지하는 비율
+        private const float LABEL_WIDTH_RATIO = 0.45f;
+        // 라벨 너비의 최솟값. Unity 기본 라벨 너비와 같다
+        private const float MIN_LABEL_WIDTH = 150f;
 
         /// <summary>
         /// 편집 창을 연다.
@@ -38,13 +58,21 @@ namespace TopView.Editor
 
         private void LoadAssets()
         {
-            string[] assetIdentifiers = AssetDatabase.FindAssets(TAB_FILTERS[(int)_currentTab]);
-            _assets = new ScriptableObject[assetIdentifiers.Length];
+            DefinitionEditorGroup[] groups = TAB_GROUPS[(int)_currentTab];
+            _groupAssets = new ScriptableObject[groups.Length][];
 
-            for (int assetIndex = 0; assetIndex < assetIdentifiers.Length; assetIndex++)
+            for (int groupIndex = 0; groupIndex < groups.Length; groupIndex++)
             {
-                string path = AssetDatabase.GUIDToAssetPath(assetIdentifiers[assetIndex]);
-                _assets[assetIndex] = AssetDatabase.LoadAssetAtPath<ScriptableObject>(path);
+                string[] assetIdentifiers = AssetDatabase.FindAssets(groups[groupIndex].filter);
+                ScriptableObject[] assets = new ScriptableObject[assetIdentifiers.Length];
+
+                for (int assetIndex = 0; assetIndex < assetIdentifiers.Length; assetIndex++)
+                {
+                    string path = AssetDatabase.GUIDToAssetPath(assetIdentifiers[assetIndex]);
+                    assets[assetIndex] = AssetDatabase.LoadAssetAtPath<ScriptableObject>(path);
+                }
+
+                _groupAssets[groupIndex] = assets;
             }
         }
 
@@ -84,33 +112,53 @@ namespace TopView.Editor
 
             EditorGUILayout.Space();
 
-            if (_assets != null)
+            if (_groupAssets != null)
             {
-                foreach (ScriptableObject asset in _assets)
+                DefinitionEditorGroup[] groups = TAB_GROUPS[(int)_currentTab];
+
+                for (int groupIndex = 0; groupIndex < _groupAssets.Length; groupIndex++)
                 {
-                    if (asset == null)
+                    string label = groups[groupIndex].label;
+                    if (label != null)
                     {
-                        continue;
-                    }
-
-                    GUI.backgroundColor = (_selectedAsset == asset) ? Color.cyan : Color.white;
-
-                    if (GUILayout.Button(asset.name, GUILayout.Height(BUTTON_HEIGHT)))
-                    {
-                        _selectedAsset = asset;
-
-                        if (_assetEditor != null)
+                        if (groupIndex > 0)
                         {
-                            DestroyImmediate(_assetEditor);
+                            EditorGUILayout.Space();
                         }
-                        _assetEditor = UnityEditor.Editor.CreateEditor(_selectedAsset);
+                        EditorGUILayout.LabelField(label, EditorStyles.boldLabel);
                     }
-                    GUI.backgroundColor = Color.white;
+
+                    DrawAssetButtons(_groupAssets[groupIndex]);
                 }
             }
 
             EditorGUILayout.EndScrollView();
             EditorGUILayout.EndVertical();
+        }
+
+        private void DrawAssetButtons(ScriptableObject[] assets)
+        {
+            foreach (ScriptableObject asset in assets)
+            {
+                if (asset == null)
+                {
+                    continue;
+                }
+
+                GUI.backgroundColor = (_selectedAsset == asset) ? Color.cyan : Color.white;
+
+                if (GUILayout.Button(asset.name, GUILayout.Height(BUTTON_HEIGHT)))
+                {
+                    _selectedAsset = asset;
+
+                    if (_assetEditor != null)
+                    {
+                        DestroyImmediate(_assetEditor);
+                    }
+                    _assetEditor = UnityEditor.Editor.CreateEditor(_selectedAsset);
+                }
+                GUI.backgroundColor = Color.white;
+            }
         }
 
         private void DrawDetailPanel()
@@ -123,7 +171,11 @@ namespace TopView.Editor
                 EditorGUILayout.LabelField($"{_selectedAsset.name}", EditorStyles.boldLabel);
                 EditorGUILayout.Space();
 
+                // 직접 만든 창에서는 라벨 너비가 기본값에 고정되어 긴 필드 이름이 잘리므로, 오른쪽 패널 너비에 맞춘 뒤 되돌린다
+                float previousLabelWidth = EditorGUIUtility.labelWidth;
+                EditorGUIUtility.labelWidth = Mathf.Max(MIN_LABEL_WIDTH, (position.width - LIST_WIDTH) * LABEL_WIDTH_RATIO);
                 _assetEditor.OnInspectorGUI();
+                EditorGUIUtility.labelWidth = previousLabelWidth;
             }
             else
             {

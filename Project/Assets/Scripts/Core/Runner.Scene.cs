@@ -10,7 +10,7 @@ namespace TopView.Core
     public partial class Runner
     {
         // Restart, Exit, ReturnToMenu, OpenSettings 명령을 소비한다. 씬과 앱의 전환이고 설정은 표시 설정이라 Tick이 아닌 여기서 처리한다.
-        // Pause와 Resume은 PauseSystem이 소비하도록 남겨 두고, 처리하는 곳이 없는 명령은 경고하고 버린다.
+        // Pause, Resume, OpenUpgrade, CloseUpgrade는 PauseSystem이, Unstuck은 PlayerUnstuckSystem이 소비하도록 남겨 두고, 처리하는 곳이 없는 명령은 경고하고 버린다.
         private void HandleSceneCommands(List<GameFlowCommand> gameFlowCommands, in GameProgressComponent progress)
         {
             for (int commandIndex = gameFlowCommands.Count - 1; commandIndex >= 0; commandIndex--)
@@ -20,7 +20,10 @@ namespace TopView.Core
                 {
                     case GameFlowCommandType.Pause:
                     case GameFlowCommandType.Resume:
-                        // PauseSystem이 다음 틱에 소비한다
+                    case GameFlowCommandType.OpenUpgrade:
+                    case GameFlowCommandType.CloseUpgrade:
+                    case GameFlowCommandType.Unstuck:
+                        // PauseSystem과 PlayerUnstuckSystem이 다음 틱에 소비한다
                         break;
                     case GameFlowCommandType.Restart:
                         gameFlowCommands.RemoveAt(commandIndex);

@@ -114,6 +114,8 @@ MonoBehaviour:
   animator: {fileID: 1063391364816775739}
   weaponSocket: {fileID: 2367066787638100850}
   soundEffectSource: {fileID: 3535493239501132470}
+  jumpClip: {fileID: 8300000, guid: d12c314cd5804b041a6eeb9db17dc5e3, type: 3}
+  dodgeClip: {fileID: 8300000, guid: 7d70fc9849afe424586a8a0fcf7af416, type: 3}
   throwPreviewLine: {fileID: 8494737511600537109}
   throwPreviewCircle: {fileID: 6562224357763396051}
 --- !u!82 &3535493239501132470

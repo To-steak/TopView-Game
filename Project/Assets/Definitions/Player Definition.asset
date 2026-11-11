@@ -23,18 +23,17 @@ MonoBehaviour:
     groundCheckRadius: 0.2
     groundLayer:
       serializedVersion: 2
-      m_Bits: 1088
+      m_Bits: 64
     capsuleRadius: 0.26
     capsuleHeight: 1
-    capsuleCenter: {x: 0, y: 0.18, z: 0.06}
+    capsuleCenter: {x: 0, y: 0.18, z: 0}
     skinWidth: 0.08
     collisionLayer:
       serializedVersion: 2
-      m_Bits: 1600
-    muzzleOffset: {x: 0, y: 0, z: 0.5}
+      m_Bits: 576
   vitals:
-    maxHealth: 100
-    maxMana: 100
+    startingMaxHealth: 100
+    startingMaxMana: 100
     manaRecoveryPerTick: 0.5
     manaRecoveryDelayTicks: 150
     runManaCostPerTick: 0.1
@@ -47,6 +46,17 @@ MonoBehaviour:
     swapTicks: 30
     reloadTicks: 140
     dieTicks: 74
+  upgrade:
+    maxLevel: 5
+    startingCost: 50
+    costIncreasePerLevel: 35
+    maxHealthRatioPerLevel: 0.5
+    maxManaRatioPerLevel: 0.5
+    runManaCostRatioPerLevel: 0.1
+    dodgeManaCostRatioPerLevel: 0.15
+    jumpManaCostRatioPerLevel: 0.15
+    damageRatioPerLevel: 0.5
+    minAttackIntervalTicks: 4
   weapons:
   - {fileID: 11400000, guid: 1ce7fea57a5a36c42bf8d0de4ca734db, type: 2}
   - {fileID: 11400000, guid: 9e5cd050810c0a8469911b9292b1da62, type: 2}
@@ -56,3 +66,4 @@ MonoBehaviour:
   cameraPriority: 2
   cameraYawDegreesPerSecond: 90
   rangedLayerBlendInTicks: 10
+  throwPreviewCircleHeightOffset: 0.02

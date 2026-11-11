@@ -81,12 +81,13 @@ namespace TopView.Core
                 movement = playerDefinition.movement,
                 vitals = playerDefinition.vitals,
                 action = playerDefinition.action,
+                upgrade = playerDefinition.upgrade,
                 weapons = weapons
             };
             return true;
         }
 
-        // Player Definition의 무기 목록에서 엔티티에 담을 값과 View가 쓸 모델 프리팹을 꺼내고, 투사체 View와 피격 이펙트를 표에 올린다. 빈 칸이 있으면 false
+        // Player Definition의 무기 목록에서 엔티티에 담을 값과 View가 쓸 모델 프리팹을 꺼내고, 투사체 View와 피격 이펙트, 근접 임팩트 이펙트를 표에 올린다. 빈 칸이 있으면 false
         private static bool TryReadWeapons(PlayerDefinition playerDefinition, List<GameObject> projectilePrefabs, List<GameObject> hitEffectPrefabs, out WeaponComponent[] weapons, out GameObject[] weaponModelPrefabs)
         {
             WeaponDefinition[] weaponDefinitions = playerDefinition.weapons;
@@ -107,6 +108,7 @@ namespace TopView.Core
 
                 bool hasProjectile = definition.weapon.kind != WeaponKind.Melee;
                 AssignProjectileViews(definition.name, hasProjectile, definition.projectilePrefab, definition.hitEffectPrefab, ref weapons[weaponIndex].projectile, projectilePrefabs, hitEffectPrefabs);
+                weapons[weaponIndex].impactEffectIndex = hasProjectile ? -1 : IndexHitEffect($"{definition.name}의 임팩트 이펙트", definition.impactEffectPrefab, hitEffectPrefabs);
             }
 
             return true;

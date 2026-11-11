@@ -5,18 +5,16 @@ using UnityEngine.AI;
 
 namespace TopView.Systems
 {
-    // 길찾기로 움직이는 엔티티를 NavMesh 경로를 따라 옮기고, 서로 겹치지 않게 밀어낸다. NavMesh는 질의로만 쓴다.
+    // 길찾기로 움직이는 엔티티를 NavMesh 경로를 따라 옮긴다. 적끼리는 겹쳐도 밀어내지 않는다. NavMesh는 질의로만 쓴다.
     public static class EnemyNavigationSystem
     {
         // 꺾이는 점에 이만큼 가까워지면 다음 점으로 넘어간다(유닛)
         private const float CORNER_REACH_DISTANCE = 0.1f;
         // 이보다 느리면 도는 방향을 정하지 않는다(유닛²/초²)
         private const float MIN_TURN_SPEED_SQUARED = 0.0001f;
-        // 두 엔티티가 이보다 가까우면 밀어낼 방향을 정할 수 없어 건너뛴다(유닛)
-        private const float MIN_SEPARATION_DISTANCE = 0.00001f;
 
         /// <summary>
-        /// 목적지가 바뀐 적은 경로를 다시 구한 뒤 경로를 따라 옮긴다. 마지막에 걷는 적끼리 겹친 만큼 밀어내고 NavMesh 안으로 되돌린다.
+        /// 목적지가 바뀐 적은 경로를 다시 구한 뒤 경로를 따라 옮긴다.
         /// </summary>
         /// <param name="enemies">적 저장소</param>
         /// <param name="path">경로 계산에 다시 쓰는 NavMeshPath</param>
@@ -46,17 +44,6 @@ namespace TopView.Systems
             if (failedPathCount > 0)
             {
                 Debug.LogWarning($"EnemyNavigationSystem >> 경로를 찾지 못해 바로 도착한 것으로 본 적 {failedPathCount}마리가 있다.");
-            }
-
-            Separate(entities);
-
-            for (int index = 0; index < entities.Length; index++)
-            {
-                ref EnemyEntity entity = ref entities[index];
-                if (entity.isAlive && entity.agent.hasDestination && NavMesh.Raycast(entity.position.previous, entity.position.current, out NavMeshHit hit, NavMesh.AllAreas))
-                {
-                    entity.position.current = hit.position;
-                }
             }
         }
 
@@ -144,59 +131,6 @@ namespace TopView.Systems
             }
 
             return distance;
-        }
-
-        // 두 엔티티가 반지름 합보다 가까우면 겹친 만큼 XZ로 밀어낸다. 목적지가 있는(걷는) 쪽만 밀려나며, 둘 다 걸으면 반씩 나눈다.
-        private static void Separate(EnemyEntity[] entities)
-        {
-            for (int firstIndex = 0; firstIndex < entities.Length; firstIndex++)
-            {
-                ref EnemyEntity first = ref entities[firstIndex];
-                if (!first.isAlive)
-                {
-                    continue;
-                }
-
-                bool isFirstWalking = first.agent.hasDestination;
-                for (int secondIndex = firstIndex + 1; secondIndex < entities.Length; secondIndex++)
-                {
-                    ref EnemyEntity second = ref entities[secondIndex];
-                    if (!second.isAlive)
-                    {
-                        continue;
-                    }
-
-                    bool isSecondWalking = second.agent.hasDestination;
-                    if (!isFirstWalking && !isSecondWalking)
-                    {
-                        continue;
-                    }
-
-                    Vector3 delta = second.position.current - first.position.current;
-                    delta.y = 0f;
-                    float distance = delta.magnitude;
-                    float minimumDistance = first.stats.hitRadius + second.stats.hitRadius;
-                    if (distance >= minimumDistance || distance < MIN_SEPARATION_DISTANCE)
-                    {
-                        continue;
-                    }
-
-                    Vector3 push = delta / distance * (minimumDistance - distance);
-                    if (isFirstWalking && isSecondWalking)
-                    {
-                        first.position.current -= push * 0.5f;
-                        second.position.current += push * 0.5f;
-                    }
-                    else if (isFirstWalking)
-                    {
-                        first.position.current -= push;
-                    }
-                    else
-                    {
-                        second.position.current += push;
-                    }
-                }
-            }
         }
     }
 }

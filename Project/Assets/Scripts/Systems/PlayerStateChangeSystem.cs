@@ -25,13 +25,13 @@ namespace TopView.Systems
                 ref PlayerEntity entity = ref players.entities[request.target.index];
                 if (entity.isAlive && entity.generation == request.target.generation)
                 {
-                    ChangeState(ref entity.actionState, ref entity.motion, ref entity.rotation, ref entity.mana, in entity.weaponSlots, in entity.movement, in entity.vitals, entity.weaponList.weapons, in request, stateRecords);
+                    ChangeState(ref entity.actionState, ref entity.motion, ref entity.rotation, ref entity.mana, in entity.weaponSlots, in entity.movement, in entity.vitals, in entity.upgrade, in entity.upgradeLevels, entity.weaponList.weapons, in request, stateRecords);
                 }
             }
         }
 
         // 지금 상태에서 나가고 새 상태에 들어가 상태 변경을 기록한다. Die 상태에서는 바꾸지 않는다.
-        private static void ChangeState(ref PlayerActionStateComponent actionState, ref PlayerMotionComponent motion, ref RotationComponent rotation, ref ManaComponent mana, in PlayerWeaponSlotsComponent weaponSlot, in PlayerMovementComponent movement, in PlayerVitalsComponent vital, WeaponComponent[] weapons, in PlayerStateChangeRequest request, List<PlayerStateChangedRecord> stateRecords)
+        private static void ChangeState(ref PlayerActionStateComponent actionState, ref PlayerMotionComponent motion, ref RotationComponent rotation, ref ManaComponent mana, in PlayerWeaponSlotsComponent weaponSlot, in PlayerMovementComponent movement, in PlayerVitalsComponent vital, in PlayerUpgradeComponent upgrade, in PlayerUpgradeLevelsComponent upgradeLevels, WeaponComponent[] weapons, in PlayerStateChangeRequest request, List<PlayerStateChangedRecord> stateRecords)
         {
             if (actionState.state == PlayerState.Die)
             {
@@ -51,10 +51,10 @@ namespace TopView.Systems
             actionState.elapsedTicks = 0;
             actionState.isAttackCommitted = false;
 
-            EnterState(ref actionState, ref motion, ref rotation, ref mana, in weaponSlot, in movement, in vital, weapons, request.moveInput);
+            EnterState(ref actionState, ref motion, ref rotation, ref mana, in weaponSlot, in movement, in vital, in upgrade, in upgradeLevels, weapons, request.moveInput);
         }
 
-        private static void EnterState(ref PlayerActionStateComponent actionState, ref PlayerMotionComponent motion, ref RotationComponent rotation, ref ManaComponent mana, in PlayerWeaponSlotsComponent weaponSlot, in PlayerMovementComponent movement, in PlayerVitalsComponent vital, WeaponComponent[] weapons, Vector3 moveInput)
+        private static void EnterState(ref PlayerActionStateComponent actionState, ref PlayerMotionComponent motion, ref RotationComponent rotation, ref ManaComponent mana, in PlayerWeaponSlotsComponent weaponSlot, in PlayerMovementComponent movement, in PlayerVitalsComponent vital, in PlayerUpgradeComponent upgrade, in PlayerUpgradeLevelsComponent upgradeLevels, WeaponComponent[] weapons, Vector3 moveInput)
         {
             switch (actionState.state)
             {
@@ -64,7 +64,7 @@ namespace TopView.Systems
 
                 case PlayerState.Jump:
                     motion.verticalVelocity = movement.jumpPower;
-                    PlayerStaminaUtility.UseMana(ref mana, vital.jumpManaCost);
+                    PlayerStaminaUtility.UseMana(ref mana, PlayerUpgradeUtility.GetJumpManaCost(in vital, in upgrade, in upgradeLevels));
                     break;
 
                 case PlayerState.Dodge:
@@ -87,16 +87,16 @@ namespace TopView.Systems
                     {
                         rotation.current = Quaternion.LookRotation(motion.moveDirection);
                     }
-                    PlayerStaminaUtility.UseMana(ref mana, vital.dodgeManaCost);
+                    PlayerStaminaUtility.UseMana(ref mana, PlayerUpgradeUtility.GetDodgeManaCost(in vital, in upgrade, in upgradeLevels));
                     break;
 
                 case PlayerState.Shot:
-                    actionState.attackCooldownTicks = weapons[weaponSlot.currentIndex].attackIntervalTicks;
+                    actionState.attackCooldownTicks = PlayerUpgradeUtility.GetAttackIntervalTicks(in weapons[weaponSlot.currentIndex], in upgrade, PlayerUpgradeUtility.GetWeaponLevel(in upgradeLevels, weaponSlot.currentIndex));
                     break;
 
                 case PlayerState.Swing:
                     motion.isRotationLocked = true;
-                    actionState.attackCooldownTicks = weapons[weaponSlot.currentIndex].attackIntervalTicks;
+                    actionState.attackCooldownTicks = PlayerUpgradeUtility.GetAttackIntervalTicks(in weapons[weaponSlot.currentIndex], in upgrade, PlayerUpgradeUtility.GetWeaponLevel(in upgradeLevels, weaponSlot.currentIndex));
                     break;
 
                 case PlayerState.Throw:

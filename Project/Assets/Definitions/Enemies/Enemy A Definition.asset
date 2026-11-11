@@ -15,7 +15,7 @@ MonoBehaviour:
   stats:
     baseMaxHealth: 100
     baseAttackDamage: 20
-    baseSpeed: 1
+    baseSpeed: 3
     baseScore: 10
     maxHealthIncrement: 20
     attackDamageIncrement: 2
@@ -45,21 +45,33 @@ MonoBehaviour:
         speed: 0
         radius: 0
         lifetimeTicks: 0
-        upwardRatio: 0
-        gravity: 0
-        fuseTicks: 0
+        chargePerTick: 0
+        maxThrowDistance: 0
+        flightTicks: 0
+        arcHeight: 0
         explosionRadius: 0
         collisionLayer:
           serializedVersion: 2
           m_Bits: 0
-      spawnOffset: {x: 0, y: 0, z: 0}
-      alternateSpawnOffset: {x: 0, y: 0, z: 0}
+      shots: []
     projectilePrefab: {fileID: 0}
     hitEffectPrefab: {fileID: 0}
   loots:
+  - kind: 0
+    weight: 10
+    baseAmount: 0
+    amountIncrement: 0
   - kind: 3
-    weight: 100
+    weight: 1
+    baseAmount: 5
+    amountIncrement: 5
+  - kind: 2
+    weight: 2
     baseAmount: 10
-    amountIncrement: 10
+    amountIncrement: 5
+  - kind: 1
+    weight: 3
+    baseAmount: 30
+    amountIncrement: 5
   viewPrefab: {fileID: 7360897978464151965, guid: 3b02148a60e7b3f4189f63f9ca2715b8, type: 3}
   healthGaugePrefab: {fileID: 7240100042028206097, guid: 61bf5277b80621842967d75ffba1dcbe, type: 3}

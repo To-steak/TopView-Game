@@ -35,14 +35,14 @@ namespace TopView.Systems
                     case PlayerState.Reload:
                     case PlayerState.Jump:
                     case PlayerState.Land:
-                        ApplyMoveInput(ref entity.motion, ref entity.mana, in entity.movement, in entity.vitals, in command);
+                        ApplyMoveInput(ref entity.motion, ref entity.mana, in entity.movement, in entity.vitals, in entity.upgrade, in entity.upgradeLevels, in command);
                         break;
                 }
             }
         }
 
         // 입력이 없으면 서 있고, 달리기 마나도 쓰지 않는다.
-        private static void ApplyMoveInput(ref PlayerMotionComponent motion, ref ManaComponent mana, in PlayerMovementComponent movement, in PlayerVitalsComponent vital, in PlayerCommand command)
+        private static void ApplyMoveInput(ref PlayerMotionComponent motion, ref ManaComponent mana, in PlayerMovementComponent movement, in PlayerVitalsComponent vital, in PlayerUpgradeComponent upgrade, in PlayerUpgradeLevelsComponent upgradeLevels, in PlayerCommand command)
         {
             if (command.moveDirection == Vector3.zero)
             {
@@ -53,7 +53,7 @@ namespace TopView.Systems
             bool isRunning = command.isRunning;
             if (isRunning)
             {
-                float requiredMana = vital.runManaCostPerTick;
+                float requiredMana = PlayerUpgradeUtility.GetRunManaCost(in vital, in upgrade, in upgradeLevels);
                 if (PlayerStaminaUtility.HasEnoughMana(in mana, requiredMana))
                 {
                     PlayerStaminaUtility.UseMana(ref mana, requiredMana);

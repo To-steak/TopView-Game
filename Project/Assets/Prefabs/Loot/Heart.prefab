@@ -49,6 +49,7 @@ MonoBehaviour:
   pitchSpeed: 0
   yawSpeed: 180
   rollSpeed: 0
+  pickupClip: {fileID: 8300000, guid: bb438c014fddb8a4bb8d43764483e252, type: 3}
 --- !u!1001 &3574298760618678558
 PrefabInstance:
   m_ObjectHideFlags: 0

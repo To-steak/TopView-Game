@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TopView.Components;
 using TopView.Entities;
+using TopView.Records;
 using TopView.Requests;
 using TopView.Utilities;
 using UnityEngine;
@@ -21,7 +22,8 @@ namespace TopView.Systems
         /// <param name="stateChangeRequests">적 상태 변경 요청 큐</param>
         /// <param name="projectileSpawnRequests">투사체 생성 요청 큐</param>
         /// <param name="meleeSpawnRequests">근접 판정 생성 요청 큐</param>
-        public static void Tick(EnemyStorage enemies, in PlayerLocationComponent playerLocation, Queue<EnemyStateChangeRequest> stateChangeRequests, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
+        /// <param name="attackCommittedRecords">이번 프레임에 적이 공격을 내보낸 기록</param>
+        public static void Tick(EnemyStorage enemies, in PlayerLocationComponent playerLocation, Queue<EnemyStateChangeRequest> stateChangeRequests, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, List<EnemyAttackCommittedRecord> attackCommittedRecords)
         {
             bool hasPlayer = playerLocation.hasPlayer;
             Vector3 playerPosition = playerLocation.position;
@@ -61,6 +63,7 @@ namespace TopView.Systems
                     {
                         actionState.committedShotCount = 1;
                         CommitBody(in attack, position, rotation.current, damage, in identifier, meleeSpawnRequests);
+                        attackCommittedRecords.Add(new EnemyAttackCommittedRecord { enemy = identifier, attackKind = attack.kind });
                     }
                 }
                 else
@@ -69,6 +72,7 @@ namespace TopView.Systems
                     while (actionState.committedShotCount < attack.shots.Length && actionState.elapsedTicks >= attack.shots[actionState.committedShotCount].startTicks)
                     {
                         CommitShot(in attack, in attack.shots[actionState.committedShotCount], position, rotation.current, hasPlayer, playerPosition, damage, projectileSpawnRequests);
+                        attackCommittedRecords.Add(new EnemyAttackCommittedRecord { enemy = identifier, attackKind = attack.kind });
                         actionState.committedShotCount++;
                     }
                 }

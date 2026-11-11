@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace TopView.Presentation.ViewSystems
 {
-    // 적 View가 있는 칸마다 체력 게이지를 풀에서 꺼내 붙이고, 적 위에 띄워 카메라를 바라보게 하고 체력 비율까지 너비를 부드럽게 옮기고 체력을 글자로 보여 준다.
+    // 적 View가 있는 칸마다 체력 게이지를 풀에서 꺼내 붙이고, 적 위에 띄워 카메라를 바라보게 하고 체력 비율까지 너비를 부드럽게 옮기고 체력과 레벨을 글자로 보여 준다.
     public static class EnemyHealthGaugeViewSystem
     {
         /// <summary>
@@ -50,6 +50,12 @@ namespace TopView.Presentation.ViewSystems
                 }
                 context.healthGaugeGenerations[index] = entities[index].generation;
 
+                // 적의 레벨은 생성 때 정해져 바뀌지 않으므로 새 적일 때만 맞춘다
+                if (isNewEnemy)
+                {
+                    gauge.levelText.text = $"Lv. {entities[index].combat.level:F0}";
+                }
+
                 Vector3 position = enemyView.healthGaugeAnchor.position;
                 Quaternion rotation = mainCamera != null
                     ? Quaternion.LookRotation(position - mainCamera.transform.position)
@@ -80,6 +86,16 @@ namespace TopView.Presentation.ViewSystems
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// 게이지가 표시에 쓰는 칸이 모두 연결되어 있는지 본다. 로그는 남기지 않으며, Runner가 판을 준비할 때 이 결과로 빠진 칸을 알린다.
+        /// </summary>
+        /// <param name="gauge">검사할 EnemyHealthGaugeView</param>
+        /// <returns>Gauge Front, Health Text, Level Text가 모두 연결되어 있으면 true</returns>
+        public static bool HasAllReferences(EnemyHealthGaugeView gauge)
+        {
+            return gauge.gaugeFront != null && gauge.healthText != null && gauge.levelText != null;
         }
 
         private static EnemyHealthGaugeView Acquire(EnemyViewContext context, int enemyIndex, int kind, GameObject[] gaugePrefabsByKind)

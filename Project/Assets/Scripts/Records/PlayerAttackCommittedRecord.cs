@@ -1,4 +1,5 @@
 using TopView.Entities;
+using UnityEngine;
 
 namespace TopView.Records
 {
@@ -9,5 +10,11 @@ namespace TopView.Records
         public EntityIdentifier player;
         // 공격에 쓴 무기 번호
         public int weaponIndex;
+        // 임팩트 이펙트를 재생할 위치(월드). 근접 판정 원의 중심이다. Melee만 쓴다
+        public Vector3 impactPosition;
+        // 임팩트 이펙트의 피격 이펙트 표 번호. 음수면 없음. Melee가 아니면 항상 음수다
+        public int impactEffectIndex;
+        // 임팩트 이펙트 크기 배율. 근접 범위 강화가 반영된다. Melee가 아니면 1이다
+        public float impactScale;
     }
 }

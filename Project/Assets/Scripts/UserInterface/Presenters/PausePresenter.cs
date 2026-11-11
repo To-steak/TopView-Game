@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace TopView.UserInterface.Presenters
 {
-    // 일시정지 중이면 PauseView를 보이고, 계속·설정·나가기 버튼 입력을 판 흐름 명령으로 넣는다.
+    // 일시정지 중이면 PauseView를 보이고, 계속·탈출·설정·나가기 버튼 입력을 판 흐름 명령으로 넣는다.
     public class PausePresenter : MonoBehaviour
     {
         [SerializeField] private PauseView _view;
@@ -45,6 +45,7 @@ namespace TopView.UserInterface.Presenters
         private void OnEnable()
         {
             _view.ResumeClicked += HandleResumeClicked;
+            _view.UnstuckClicked += HandleUnstuckClicked;
             _view.SettingsClicked += HandleSettingsClicked;
             _view.ExitClicked += HandleExitClicked;
         }
@@ -52,6 +53,7 @@ namespace TopView.UserInterface.Presenters
         private void OnDisable()
         {
             _view.ResumeClicked -= HandleResumeClicked;
+            _view.UnstuckClicked -= HandleUnstuckClicked;
             _view.SettingsClicked -= HandleSettingsClicked;
             _view.ExitClicked -= HandleExitClicked;
         }
@@ -59,6 +61,14 @@ namespace TopView.UserInterface.Presenters
         private void HandleResumeClicked()
         {
             AddSound(UserInterfaceSoundKind.Click);
+            AddCommand(GameFlowCommandType.Resume);
+        }
+
+        // 플레이어를 옮긴 뒤 바로 게임으로 돌아가도록 일시정지도 푼다
+        private void HandleUnstuckClicked()
+        {
+            AddSound(UserInterfaceSoundKind.Click);
+            AddCommand(GameFlowCommandType.Unstuck);
             AddCommand(GameFlowCommandType.Resume);
         }
 

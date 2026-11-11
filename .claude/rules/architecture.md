@@ -78,7 +78,7 @@ Runner가 World의 데이터를 꺼내 호출 순서대로 넘긴다. 게임 상
 | `Authoring/` | 씬 배치 정보 | `~Authoring` (씬 배치 MonoBehaviour) | `<접두사>.Authoring` | Entity, Definitions |
 | `Persistence/` (필요할 때만) | 설정, 기록 저장 | `~Store` (설정·기록 저장과 불러오기) | `<접두사>.Persistence` | Entity |
 | `Presentation/` | 게임 세계의 연출 | `~ViewSystem`, `~View`, `ViewContext`, `~ViewContext`, 오디오, 오브젝트 풀 | `<접두사>.Presentation` | Entity, Definitions, Persistence |
-| `UserInterface/` | 화면 UI | UI View, Presenter | `<접두사>.UserInterface` | Entity, Persistence |
+| `UserInterface/` | 화면 UI | UI View, View가 소유하는 부품(`~Entry`), Presenter | `<접두사>.UserInterface` | Entity, Persistence |
 | `Core/` | 데이터 보관과 실행 순서 | World, Runner, 판이 없는 씬의 흐름(`~Flow`), 부트스트랩, 로딩, 씬 전환 | `<접두사>.Core` | 전부 |
 | `Editor/` | 에디터 도구 | 에디터 도구 (Gizmo, PropertyDrawer, Custom Editor) | `<접두사>.Editor` (플랫폼: Editor 전용) | 전부 |
 
@@ -136,6 +136,8 @@ Runner가 World의 데이터를 꺼내 호출 순서대로 넘긴다. 게임 상
   - 이유: Logic은 입력이 어디서 왔는지 모르고 명령만 본다.
 - 판이 없는 씬에서는 그 씬의 `~Flow`가 명령 목록(`List<~Command>`)을 가지고, Presenter가 넣은 명령을 Update에서 소비한다.
   - 이유: 틱이 없는 씬에는 Logic이 없어, 그 씬의 흐름을 맡은 `~Flow` 한 곳에서 명령을 소비하면 된다.
+- 테스트용 디버그 명령(`DebugCommand`)은 Runner의 에디터 전용 Context Menu(`Runner.Debug.cs`, 파일 전체를 `#if UNITY_EDITOR`로 감쌈)가 Update 밖에서 넣고, `DebugCommandSystem`이 다음 틱에 소비한다. 넣는 양 같은 디버그 값은 Definition이 아니라 `Runner.Debug.cs`의 상수로 둔다.
+  - 이유: 디버그 명령은 한 번 넣으면 소비될 때까지 목록에 남아 프레임과 틱이 어긋나도 놓치거나 두 번 읽지 않는다. 상태는 여전히 System만 바꾸고, 디버그 값이 Definition에 섞이면 게임 수치로 오해한다.
 
 ### Systems/
 게임 상태를 바꾸는 유일한 곳이다.
@@ -238,8 +240,10 @@ Presentation/
   - 이유: 타입의 접미사만 알면 그 파일의 위치를 안다.
 - UI View는 버튼 입력을 이벤트로 발행하고 표시 메서드(`SetHealth` 등)를 가진다. Presenter는 MonoBehaviour이며, View의 이벤트를 구독해 명령 버퍼에 넣고, Runner(판이 없는 씬에서는 그 씬의 `~Flow`)에게 필요한 데이터만 받아 View의 표시 메서드를 부른다. Model 변경 알림은 없고 Runner나 `~Flow`가 매 프레임 데이터를 넘긴다.
   - 이유: 게임 데이터를 아는 쪽은 Presenter뿐이라 화면을 바꿔도 로직이 안전하다. 매 프레임 넘기므로 변경 알림 이벤트가 필요 없다.
-- View와 Presenter는 일대일이다. View 안에 View를 넣지 않는다.
+- View와 Presenter는 일대일이다.
   - 이유: Presenter 하나가 View 하나만 알면 데이터가 어디로 가는지 한 줄로 따라간다.
+- 목록의 한 칸처럼 반복되는 표시 단위는 View가 소유하는 부품(`~Entry`)으로 두고 `Views/`에 둔다. 부품은 그 View만 만들고 다루며, 버튼 입력은 C# 이벤트 없이 소유한 View의 메서드를 불러 알린다. Presenter는 부품을 모른다.
+  - 이유: 데이터가 Presenter → View → 부품 한 줄로만 흐르고, 입력도 View 한 곳의 이벤트로 모인다.
 
 #### UI 계층 (uGUI)
 - 모든 UI는 같은 계층을 가진다.

@@ -54,6 +54,12 @@ namespace TopView.Core
 
             // 이번 틱이 돌지 말지를 정하므로 맨 앞에 둔다
             PauseSystem.Tick(ref _world.progress, _world.commandBuffer.gameFlowCommands);
+            // 탈출 버튼은 일시정지 화면에 있어 isPlaying과 상관없이 돈다. 같은 버튼이 넣은 Resume을 PauseSystem이 먼저 처리한다
+            PlayerUnstuckSystem.Tick(_world.players, in _world.progress, in _world.rule, _world.commandBuffer.gameFlowCommands);
+            // 강화 화면은 일시정지 중에 열리므로 isPlaying과 상관없이 돈다. 연 틱의 명령도 처리하도록 PauseSystem 뒤에 둔다
+            PlayerUpgradeSystem.Tick(_world.players, ref _world.progress, _world.commandBuffer.playerUpgradeCommands);
+            // 강화 화면에서 바로 쓸 수 있도록 일시정지 중에도 돈다
+            DebugCommandSystem.Tick(ref _world.progress, _world.commandBuffer.debugCommands);
             bool isPlaying = _world.progress.phase == GamePhase.Playing && !_world.progress.isPaused;
             DamageSystem.Tick(ref _world.progress, _world.players, _world.enemies, _world.playerDamageRequests, _world.enemyDamageRequests, _world.enemyDamagedRecords);
             if (isPlaying)
@@ -88,7 +94,7 @@ namespace TopView.Core
                 // 공격 상태는 상태 시간이 0이면 건너뛰므로, 공격이 끝나 Idle이 된 적과 막 공격에 들어온 적 모두 다음 틱부터 움직이도록 이 순서를 지킨다
                 EnemyBehaviorSystem.Tick(_world.enemies, in _world.playerLocation, _world.random, _world.enemyStateChangeRequests);
                 EnemyStateChangeSystem.Tick(_world.enemies, _world.enemyStateChangeRequests, _world.enemyStateChangedRecords);
-                EnemyAttackStateSystem.Tick(_world.enemies, in _world.playerLocation, _world.enemyStateChangeRequests, _world.projectileSpawnRequests, _world.meleeSpawnRequests);
+                EnemyAttackStateSystem.Tick(_world.enemies, in _world.playerLocation, _world.enemyStateChangeRequests, _world.projectileSpawnRequests, _world.meleeSpawnRequests, _world.enemyAttackCommittedRecords);
                 EnemyStateChangeSystem.Tick(_world.enemies, _world.enemyStateChangeRequests, _world.enemyStateChangedRecords);
                 EnemyDespawnSystem.Tick(_world.enemies, _world.gameOverRequests, _world.random, _world.lootSpawnRequests);
                 EnemyNavigationSystem.Tick(_world.enemies, _world.navigationPath, _world.rule.navMeshSampleDistance);
@@ -105,7 +111,9 @@ namespace TopView.Core
             if (isPlaying)
             {
                 PlayerDetectorSystem.Tick(_world.playerDetectors, _world.playerDetectorStates, in _world.playerLocation, _world.enemySpawnerActivationRequests);
-                EnemySpawnerSystem.Tick(in _world.rule, _world.enemySpawners, _world.enemySpawnerStates, _world.enemySpawnTemplates, _world.enemySpawnerActivationRequests, _world.enemySpawnRequests);
+                // 레벨이 오른 틱에 생기는 적도 새 레벨로 나오도록 스포너보다 먼저 둔다
+                EnemyLevelSystem.Tick(_world.rule.enemyLevelUpIntervalTicks, ref _world.progress);
+                EnemySpawnerSystem.Tick(_world.progress.enemyLevel, _world.enemySpawners, _world.enemySpawnerStates, _world.enemySpawnTemplates, _world.enemySpawnerActivationRequests, _world.enemySpawnRequests);
                 PlayerSpawnSystem.Tick(_world.players, _world.playerSpawnRequests);
                 EnemySpawnSystem.Tick(_world.enemies, _world.enemySpawnRequests, _world.rule.navMeshSampleDistance);
                 ProjectileSpawnSystem.Tick(_world.projectiles, _world.projectileSpawnRequests);
@@ -124,6 +132,7 @@ namespace TopView.Core
             }
 
             ReadEscapeInput(_world.commandBuffer, in _world.progress);
+            ReadUpgradeInput(_world.commandBuffer, in _world.progress);
             if (_world.progress.isPaused)
             {
                 ClearHeldPlayerInput(ref _world.commandBuffer.playerCommand);
@@ -150,19 +159,20 @@ namespace TopView.Core
             CursorViewSystem.Present(isPaused, _gameSettingsDefinition.crosshairCursor, _viewContext.cursor);
             PlayerViewSystem.Present(_world.players.entities, _world.playerStateChangedRecords, _world.playerAttackCommittedRecords, _playerViewPrefab, _playerWeaponModelPrefabs, _playerRangedLayerBlendInTicks, isPaused, _viewContext.player);
             PlayerThrowPreviewViewSystem.Present(_world.players.entities, _viewContext.player.view, _playerThrowPreviewCircleHeightOffset);
-            EnemyViewSystem.Present(_world.enemies.entities, _world.enemyStateChangedRecords, _world.enemyDamagedRecords, _enemyViewPrefabs, isPaused, _viewContext.enemy);
+            EnemyViewSystem.Present(_world.enemies.entities, _world.enemyStateChangedRecords, _world.enemyAttackCommittedRecords, _world.enemyDamagedRecords, _enemyViewPrefabs, isPaused, _viewContext.enemy);
             EnemyHealthGaugeViewSystem.Present(_world.enemies.entities, _enemyHealthGaugePrefabs, _viewContext.camera.mainCamera, _viewContext.enemy);
             WorldInformationViewSystem.Present(_viewContext.camera.mainCamera, _viewContext.worldInformation);
             ProjectileViewSystem.Present(_world.projectiles.entities, _projectilePrefabs, isPaused, _viewContext.projectile);
             LootViewSystem.Present(_world.loots.entities, _lootPrefabs, isPaused, _viewContext.loot);
-            HitEffectViewSystem.Present(_world.projectileHitRecords, _hitEffectPrefabs, isPaused, _viewContext.hitEffect);
+            HitEffectViewSystem.Present(_world.projectileHitRecords, _world.playerAttackCommittedRecords, _hitEffectPrefabs, isPaused, _viewContext.hitEffect);
             DamageTextViewSystem.Present(_world.enemyDamagedRecords, _viewContext.enemy.views, _viewContext.enemy.viewGenerations, _worldTextViewPrefab, _viewContext.camera.mainCamera, _viewContext.worldText.pendingTexts);
             LootTextViewSystem.Present(_world.lootPickedUpRecords, _worldTextViewPrefab, _viewContext.worldText.pendingTexts);
+            LootSoundViewSystem.Present(_world.lootPickedUpRecords, _lootPrefabs, _viewContext.player.view != null ? _viewContext.player.view.soundEffectSource : null);
             WorldTextViewSystem.Present(_worldTextViewPrefab, _viewContext.camera.mainCamera, _viewContext.worldText);
             CameraViewSystem.Present(_viewContext.camera, _viewContext.player.view, _playerCameraPriority, _world.commandBuffer.playerCommand.cameraYawInput, _playerCameraYawDegreesPerSecond);
             if (_viewContext.music != null)
             {
-                MusicViewSystem.Present(_viewContext.music);
+                MusicViewSystem.Present(_world.enemies.entities, _viewContext.music);
             }
 
             PresentUserInterface();
@@ -175,6 +185,7 @@ namespace TopView.Core
             _world.playerStateChangedRecords.Clear();
             _world.playerAttackCommittedRecords.Clear();
             _world.enemyStateChangedRecords.Clear();
+            _world.enemyAttackCommittedRecords.Clear();
             _world.projectileHitRecords.Clear();
             _world.enemyDamagedRecords.Clear();
             _world.lootPickedUpRecords.Clear();

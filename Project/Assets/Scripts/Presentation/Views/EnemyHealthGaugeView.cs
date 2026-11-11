@@ -13,5 +13,7 @@ namespace TopView.Presentation.Views
         public int tweenTicks = 15;
         // 체력을 "현재 / 최대"로 보여 주는 글자
         public TMP_Text healthText;
+        // 적의 레벨을 "Lv. 레벨"로 보여 주는 글자
+        public TMP_Text levelText;
     }
 }

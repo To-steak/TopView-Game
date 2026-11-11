@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.LootDefinition
   rule:
     pickupRadius: 0.5
-    lifetimeTicks: 500
+    lifetimeTicks: 15000
   goldViewPrefab: {fileID: 1683778930073365211, guid: 2fedd60ce483ab642bb05ab69f0921ee, type: 3}
   healthViewPrefab: {fileID: 2052901862786956559, guid: 2588f57643b85ff479b5f76c212afce4, type: 3}
   ammoViewPrefab: {fileID: 704432037672015330, guid: 94fd69fa06d9a024ba769dc70e228863, type: 3}

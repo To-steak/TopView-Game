@@ -15,6 +15,8 @@ namespace TopView.Editor
         // 길이 틱 칸 옆에 붙는 클립 칸의 너비 비율
         private const float CLIP_FIELD_WIDTH_RATIO = 0.4f;
         private const float FIELD_GAP = 2f;
+        // 나란히 둔 백분율 칸에서 라벨 글자와 입력칸 사이의 여백
+        private const float LABEL_PADDING = 6f;
         private const float MAX_PERCENT = 100f;
         private const int RANGE_LINE_COUNT = 3;
         private const string CLIP_LABEL = "Clip";
@@ -97,10 +99,18 @@ namespace TopView.Editor
             }
             else
             {
-                Rect startRect = new Rect(line.x, line.y, (line.width - FIELD_GAP) * 0.5f, line.height);
+                // 반쪽 칸이 한 줄용 라벨 너비를 쓰면 입력칸이 거의 남지 않으므로, 들여쓰기를 줄 앞에만 두고 두 칸의 라벨은 글자 길이에 맞춘다
+                Rect indentedLine = EditorGUI.IndentedRect(line);
+                Rect startRect = new Rect(indentedLine.x, line.y, (indentedLine.width - FIELD_GAP) * 0.5f, line.height);
                 Rect endRect = new Rect(startRect.xMax + FIELD_GAP, line.y, startRect.width, line.height);
+                int indentLevel = EditorGUI.indentLevel;
+                float labelWidth = EditorGUIUtility.labelWidth;
+                EditorGUI.indentLevel = 0;
+                EditorGUIUtility.labelWidth = EditorStyles.label.CalcSize(new GUIContent(START_PERCENT_LABEL)).x + LABEL_PADDING;
                 startPercent = Mathf.Clamp(EditorGUI.FloatField(startRect, START_PERCENT_LABEL, startPercent), 0f, MAX_PERCENT);
                 endPercent = Mathf.Clamp(EditorGUI.FloatField(endRect, END_PERCENT_LABEL, endPercent), startPercent, MAX_PERCENT);
+                EditorGUIUtility.labelWidth = labelWidth;
+                EditorGUI.indentLevel = indentLevel;
             }
             START_PERCENTS[key] = startPercent;
             END_PERCENTS[key] = endPercent;

@@ -15,7 +15,7 @@ MonoBehaviour:
   stats:
     baseMaxHealth: 50
     baseAttackDamage: 30
-    baseSpeed: 0.3
+    baseSpeed: 1
     baseScore: 25
     maxHealthIncrement: 5
     attackDamageIncrement: 20
@@ -23,7 +23,7 @@ MonoBehaviour:
     scoreIncrement: 20
     hitRadius: 0.5
   behavior:
-    stopDistance: 45
+    stopDistance: 5
     acceleration: 4
     angularSpeed: 360
     dieTicks: 36
@@ -32,7 +32,7 @@ MonoBehaviour:
   attacks:
   - attack:
       kind: 1
-      attackRange: 50
+      attackRange: 25
       cooldownTicks: 500
       startTicks: 30
       endTicks: 0
@@ -42,14 +42,14 @@ MonoBehaviour:
       bodyOffset: 0
       projectile:
         kind: 0
-        speed: 5
+        speed: 15
         radius: 0.25
         lifetimeTicks: 500
         chargePerTick: 0
         maxThrowDistance: 0
         flightTicks: 0
         arcHeight: 0
-        explosionRadius: 0
+        explosionRadius: 0.5
         collisionLayer:
           serializedVersion: 2
           m_Bits: 576
@@ -57,7 +57,19 @@ MonoBehaviour:
       - startTicks: 26
         spawnOffset: {x: 0, y: 0.192, z: 0.455}
     projectilePrefab: {fileID: 1467422185046970197, guid: 94bbe6c225f22584bbed1cfc8a479c95, type: 3}
-    hitEffectPrefab: {fileID: 0}
-  loots: []
+    hitEffectPrefab: {fileID: 8142776624367745201, guid: be16a2ead503d12418c1f228fcee2f7c, type: 3}
+  loots:
+  - kind: 0
+    weight: 10
+    baseAmount: 0
+    amountIncrement: 0
+  - kind: 1
+    weight: 4
+    baseAmount: 100
+    amountIncrement: 50
+  - kind: 3
+    weight: 2
+    baseAmount: 35
+    amountIncrement: 35
   viewPrefab: {fileID: 3745814735767933518, guid: 15ce2362c6dc61145a1e9d46e36f1a8c, type: 3}
   healthGaugePrefab: {fileID: 7240100042028206097, guid: 3f976bcd53dc80f47a8de602438c974c, type: 3}

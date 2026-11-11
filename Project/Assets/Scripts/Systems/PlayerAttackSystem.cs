@@ -39,18 +39,29 @@ namespace TopView.Systems
                 if (!actionState.isAttackCommitted && actionState.elapsedTicks >= weapon.attackStartTicks)
                 {
                     EntityIdentifier identifier = new EntityIdentifier { index = index, generation = entity.generation };
-                    if (CommitAttack(ref actionState, ref weaponSlot, entity.position.current, entity.rotation.current, in identifier, in weapon, projectileSpawnRequests, meleeSpawnRequests))
+                    int weaponLevel = PlayerUpgradeUtility.GetWeaponLevel(in entity.upgradeLevels, weaponSlot.currentIndex);
+                    if (CommitAttack(ref actionState, ref weaponSlot, entity.position.current, entity.rotation.current, in identifier, in weapon, in entity.upgrade, weaponLevel, projectileSpawnRequests, meleeSpawnRequests, out Vector3 meleeCenter))
                     {
-                        attackCommittedRecords.Add(new PlayerAttackCommittedRecord { player = identifier, weaponIndex = weaponSlot.currentIndex });
+                        attackCommittedRecords.Add(new PlayerAttackCommittedRecord
+                        {
+                            player = identifier,
+                            weaponIndex = weaponSlot.currentIndex,
+                            impactPosition = meleeCenter,
+                            impactEffectIndex = weapon.kind == WeaponKind.Melee ? weapon.impactEffectIndex : -1,
+                            impactScale = weapon.kind == WeaponKind.Melee ? PlayerUpgradeUtility.GetMeleeRangeScale(in weapon, weaponLevel) : 1f
+                        });
                     }
                 }
             }
         }
 
         // 공격을 내보낸다. 탄약이 없으면 아무것도 하지 않는다. Ranged와 Throw는 투사체 생성 요청을, Melee는 attackEndTicks까지 이어지는 근접 판정 생성 요청을 넣는다.
-        // 공격이 실제로 나갔으면 true를 돌려준다.
-        private static bool CommitAttack(ref PlayerActionStateComponent actionState, ref PlayerWeaponSlotsComponent weaponSlots, Vector3 position, Quaternion rotation, in EntityIdentifier identifier, in WeaponComponent weapon, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests)
+        // 공격이 실제로 나갔으면 true를 돌려준다. meleeCenter는 Melee일 때 판정 원의 중심이고, 그 밖에는 Vector3.zero다. 피해량, 근접 범위, 폭발 반지름은 무기 강화 레벨을 반영한다.
+        private static bool CommitAttack(ref PlayerActionStateComponent actionState, ref PlayerWeaponSlotsComponent weaponSlots, Vector3 position, Quaternion rotation, in EntityIdentifier identifier, in WeaponComponent weapon, in PlayerUpgradeComponent upgrade, int weaponLevel, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, out Vector3 meleeCenter)
         {
+            meleeCenter = Vector3.zero;
+            float damage = PlayerUpgradeUtility.GetDamage(in weapon, in upgrade, weaponLevel);
+            float explosionRadius = PlayerUpgradeUtility.GetExplosionRadius(in weapon, weaponLevel);
             actionState.isAttackCommitted = true;
             int weaponIndex = weaponSlots.currentIndex;
 
@@ -63,7 +74,7 @@ namespace TopView.Systems
                         return false;
                     }
                     weaponSlots.currentAmmo[weaponIndex]--;
-                    RequestProjectile(position, rotation, in weapon, rotation * Vector3.forward * weapon.projectile.speed, Vector3.zero, projectileSpawnRequests);
+                    RequestProjectile(position, rotation, in weapon, damage, explosionRadius, rotation * Vector3.forward * weapon.projectile.speed, Vector3.zero, projectileSpawnRequests);
                     break;
 
                 case WeaponKind.Throw:
@@ -79,17 +90,19 @@ namespace TopView.Systems
                     }
                     weaponSlots.reserveAmmo[weaponIndex]--;
                     Vector3 targetPosition = PlayerWeaponUtility.GetThrowTargetPosition(in weapon.projectile, position, rotation, actionState.throwCharge);
-                    RequestProjectile(position, rotation, in weapon, Vector3.zero, targetPosition, projectileSpawnRequests);
+                    RequestProjectile(position, rotation, in weapon, damage, explosionRadius, Vector3.zero, targetPosition, projectileSpawnRequests);
                     break;
 
                 case WeaponKind.Melee:
+                    float meleeRangeScale = PlayerUpgradeUtility.GetMeleeRangeScale(in weapon, weaponLevel);
+                    meleeCenter = position + rotation * Vector3.forward * (weapon.meleeOffset * meleeRangeScale);
                     meleeSpawnRequests.Enqueue(new MeleeSpawnRequest
                     {
                         owner = identifier,
                         faction = Faction.Player,
-                        center = position + rotation * Vector3.forward * weapon.meleeOffset,
-                        radius = weapon.meleeRadius,
-                        damage = weapon.damage,
+                        center = meleeCenter,
+                        radius = weapon.meleeRadius * meleeRangeScale,
+                        damage = damage,
                         durationTicks = weapon.attackEndTicks - weapon.attackStartTicks
                     });
                     break;
@@ -102,14 +115,16 @@ namespace TopView.Systems
             return true;
         }
 
-        // 무기의 총구 위치에서 플레이어 회전으로 투사체를 내보낸다. Straight는 velocity로, Grenade는 targetPosition을 향해 날아간다.
-        private static void RequestProjectile(Vector3 position, Quaternion rotation, in WeaponComponent weapon, Vector3 velocity, Vector3 targetPosition, Queue<ProjectileSpawnRequest> projectileSpawnRequests)
+        // 무기의 총구 위치에서 플레이어 회전으로 투사체를 내보낸다. Straight는 velocity로, Grenade는 targetPosition을 향해 날아간다. 폭발 반지름은 강화가 반영된 값으로 바꿔 담는다.
+        private static void RequestProjectile(Vector3 position, Quaternion rotation, in WeaponComponent weapon, float damage, float explosionRadius, Vector3 velocity, Vector3 targetPosition, Queue<ProjectileSpawnRequest> projectileSpawnRequests)
         {
+            ProjectileComponent projectile = weapon.projectile;
+            projectile.explosionRadius = explosionRadius;
             projectileSpawnRequests.Enqueue(new ProjectileSpawnRequest
             {
-                projectile = weapon.projectile,
+                projectile = projectile,
                 faction = Faction.Player,
-                damage = weapon.damage,
+                damage = damage,
                 position = position + rotation * weapon.muzzleOffset,
                 rotation = rotation,
                 velocity = velocity,
