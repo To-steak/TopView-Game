@@ -1,4 +1,5 @@
 using TopView.Commands;
+using TopView.Components;
 using TopView.UserInterface.Views;
 using UnityEngine;
 
@@ -46,9 +47,11 @@ namespace TopView.UserInterface.Presenters
         /// <param name="maxLevel">최대 레벨</param>
         /// <param name="cost">다음 레벨로 강화하는 비용</param>
         /// <param name="canUpgrade">버튼을 누를 수 있는지</param>
-        public void PresentStat(PlayerUpgradeCommandType type, int level, int maxLevel, int cost, bool canUpgrade)
+        /// <param name="value">지금 레벨의 수치</param>
+        /// <param name="nextValue">다음 레벨의 수치</param>
+        public void PresentStat(PlayerUpgradeCommandType type, int level, int maxLevel, int cost, bool canUpgrade, float value, float nextValue)
         {
-            _view.SetStat(type, level, maxLevel, cost, canUpgrade);
+            _view.SetStat(type, level, maxLevel, cost, canUpgrade, value, nextValue);
         }
 
         /// <summary>
@@ -59,9 +62,10 @@ namespace TopView.UserInterface.Presenters
         /// <param name="maxLevel">최대 레벨</param>
         /// <param name="cost">다음 레벨로 강화하는 비용</param>
         /// <param name="canUpgrade">버튼을 누를 수 있는지</param>
-        public void PresentWeapon(int weaponIndex, int level, int maxLevel, int cost, bool canUpgrade)
+        /// <param name="effect">지금과 다음 레벨의 무기 수치</param>
+        public void PresentWeapon(int weaponIndex, int level, int maxLevel, int cost, bool canUpgrade, in WeaponUpgradeEffectComponent effect)
         {
-            _view.SetWeapon(weaponIndex, level, maxLevel, cost, canUpgrade);
+            _view.SetWeapon(weaponIndex, level, maxLevel, cost, canUpgrade, in effect);
         }
 
         private void OnEnable()

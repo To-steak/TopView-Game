@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using TopView.Commands;
+using TopView.Components;
 using UnityEngine;
 
 namespace TopView.UserInterface.Views
@@ -48,41 +49,44 @@ namespace TopView.UserInterface.Views
         }
 
         /// <summary>
-        /// Weapon이 아닌 항목의 현재 레벨과 강화 비용, 버튼을 누를 수 있는지를 보여 준다. 그 항목의 Entry가 없으면 보여 주지 않는다.
+        /// Weapon이 아닌 항목의 레벨, 강화 비용, 버튼을 누를 수 있는지, 지금과 다음 레벨의 수치를 보여 준다. 그 항목의 Entry가 없으면 보여 주지 않는다.
         /// </summary>
         /// <param name="type">강화 항목</param>
         /// <param name="level">현재 레벨</param>
         /// <param name="maxLevel">최대 레벨</param>
         /// <param name="cost">다음 레벨로 강화하는 비용</param>
         /// <param name="canUpgrade">버튼을 누를 수 있는지</param>
-        public void SetStat(PlayerUpgradeCommandType type, int level, int maxLevel, int cost, bool canUpgrade)
+        /// <param name="value">지금 레벨의 수치</param>
+        /// <param name="nextValue">다음 레벨의 수치</param>
+        public void SetStat(PlayerUpgradeCommandType type, int level, int maxLevel, int cost, bool canUpgrade, float value, float nextValue)
         {
             for (int entryIndex = 0; entryIndex < _entries.Count; entryIndex++)
             {
                 UpgradeEntry entry = _entries[entryIndex];
                 if (entry.Type == type)
                 {
-                    entry.Set(level, maxLevel, cost, canUpgrade);
+                    entry.SetStat(level, maxLevel, cost, canUpgrade, value, nextValue);
                 }
             }
         }
 
         /// <summary>
-        /// 무기 하나의 현재 레벨과 강화 비용, 버튼을 누를 수 있는지를 보여 준다. 그 무기의 Entry가 없으면 보여 주지 않는다.
+        /// 무기 하나의 레벨, 강화 비용, 버튼을 누를 수 있는지, 지금과 다음 레벨의 무기 수치를 보여 준다. 그 무기의 Entry가 없으면 보여 주지 않는다.
         /// </summary>
         /// <param name="weaponIndex">무기 번호</param>
         /// <param name="level">현재 레벨</param>
         /// <param name="maxLevel">최대 레벨</param>
         /// <param name="cost">다음 레벨로 강화하는 비용</param>
         /// <param name="canUpgrade">버튼을 누를 수 있는지</param>
-        public void SetWeapon(int weaponIndex, int level, int maxLevel, int cost, bool canUpgrade)
+        /// <param name="effect">지금과 다음 레벨의 무기 수치</param>
+        public void SetWeapon(int weaponIndex, int level, int maxLevel, int cost, bool canUpgrade, in WeaponUpgradeEffectComponent effect)
         {
             for (int entryIndex = 0; entryIndex < _entries.Count; entryIndex++)
             {
                 UpgradeEntry entry = _entries[entryIndex];
                 if (entry.Type == PlayerUpgradeCommandType.Weapon && entry.WeaponIndex == weaponIndex)
                 {
-                    entry.Set(level, maxLevel, cost, canUpgrade);
+                    entry.SetWeapon(level, maxLevel, cost, canUpgrade, in effect);
                 }
             }
         }
