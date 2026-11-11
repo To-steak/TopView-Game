@@ -26,7 +26,7 @@ MonoBehaviour:
       m_Bits: 64
     capsuleRadius: 0.26
     capsuleHeight: 1
-    capsuleCenter: {x: 0, y: 0.18, z: 0.06}
+    capsuleCenter: {x: 0, y: 0.18, z: 0}
     skinWidth: 0.08
     collisionLayer:
       serializedVersion: 2
