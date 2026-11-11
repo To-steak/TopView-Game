@@ -55,6 +55,10 @@ namespace TopView.UserInterface.Views
         private const string METERS_UNIT = "m";
         private const string VALUE_FORMAT = "0.##";
         private const string COLOR_END_TAG = "</color>";
+        private const string NO_BREAK_START_TAG = "<nobr>";
+        private const string NO_BREAK_END_TAG = "</nobr>";
+        // 설명에서 이름을 따로 한 줄에 두는 이름 길이(공백 포함). 이보다 짧은 이름은 수치와 한 줄에 붙인다
+        private const int LABEL_OWN_LINE_LENGTH = 5;
 
         /// <summary>
         /// 강화 항목.
@@ -179,17 +183,32 @@ namespace TopView.UserInterface.Views
             _hasPresented = true;
         }
 
-        // 한 줄을 "이름 지금 > 다음"으로 붙이고, 다음 수치(단위 포함)에만 색을 입힌다. 최대 레벨이면 다음 수치 없이 지금 수치만 붙인다
+        // 효과 하나를 붙이고, 다음 수치(단위 포함)에만 색을 입힌다. 최대 레벨이면 다음 수치 없이 지금 수치만 붙인다.
+        // 이름이 LABEL_OWN_LINE_LENGTH자(공백 포함) 이상이면 "이름" 줄과 "지금 > 다음" 줄로 나누고,
+        // 짧으면 "이름 지금 > 다음"을 한 줄로 붙여 nobr로 감싼다. nobr 안에서는 자동 줄바꿈이 일어나지 않는다
         private void AppendLine(string label, float value, float nextValue, string unit, bool isMaxLevel)
         {
+            bool isLabelOnOwnLine = label.Length >= LABEL_OWN_LINE_LENGTH;
             if (_descriptionBuilder.Length > 0)
             {
                 _descriptionBuilder.Append('\n');
             }
-            _descriptionBuilder.Append(label).Append(' ').Append(value.ToString(VALUE_FORMAT)).Append(unit);
+            if (isLabelOnOwnLine)
+            {
+                _descriptionBuilder.Append(label).Append('\n');
+            }
+            else
+            {
+                _descriptionBuilder.Append(NO_BREAK_START_TAG).Append(label).Append(' ');
+            }
+            _descriptionBuilder.Append(value.ToString(VALUE_FORMAT)).Append(unit);
             if (!isMaxLevel)
             {
                 _descriptionBuilder.Append(ARROW).Append(_nextValueColorTag).Append(nextValue.ToString(VALUE_FORMAT)).Append(unit).Append(COLOR_END_TAG);
+            }
+            if (!isLabelOnOwnLine)
+            {
+                _descriptionBuilder.Append(NO_BREAK_END_TAG);
             }
         }
 
