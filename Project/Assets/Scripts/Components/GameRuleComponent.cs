@@ -18,5 +18,9 @@ namespace TopView.Components
         public int randomSeed;
         // 적의 목적지와 생성 위치를 NavMesh 위로 맞출 때 찾는 최대 거리(유닛)
         public float navMeshSampleDistance;
+        // 탈출할 때 NavMesh를 찾는 가장 낮은 높이(월드 Y). 플레이어가 이보다 아래로 빠졌으면 같은 XZ의 이 높이에서 찾는다
+        public float unstuckSampleMinimumHeight;
+        // 탈출할 때 NavMesh를 찾는 최대 거리(유닛)
+        public float unstuckSampleDistance;
     }
 }

@@ -54,6 +54,8 @@ namespace TopView.Core
 
             // 이번 틱이 돌지 말지를 정하므로 맨 앞에 둔다
             PauseSystem.Tick(ref _world.progress, _world.commandBuffer.gameFlowCommands);
+            // 탈출 버튼은 일시정지 화면에 있어 isPlaying과 상관없이 돈다. 같은 버튼이 넣은 Resume을 PauseSystem이 먼저 처리한다
+            PlayerUnstuckSystem.Tick(_world.players, in _world.progress, in _world.rule, _world.commandBuffer.gameFlowCommands);
             // 강화 화면은 일시정지 중에 열리므로 isPlaying과 상관없이 돈다. 연 틱의 명령도 처리하도록 PauseSystem 뒤에 둔다
             PlayerUpgradeSystem.Tick(_world.players, ref _world.progress, _world.commandBuffer.playerUpgradeCommands);
             // 강화 화면에서 바로 쓸 수 있도록 일시정지 중에도 돈다

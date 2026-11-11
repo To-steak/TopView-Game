@@ -18,6 +18,8 @@ namespace TopView.Commands
         // 강화 화면을 열고 판을 일시정지한다. PauseSystem이 소비한다
         OpenUpgrade,
         // 강화 화면을 닫고 일시정지를 푼다. PauseSystem이 소비한다
-        CloseUpgrade
+        CloseUpgrade,
+        // 플레이어를 가까운 NavMesh 위로 옮긴다. PlayerUnstuckSystem이 소비한다
+        Unstuck
     }
 }
