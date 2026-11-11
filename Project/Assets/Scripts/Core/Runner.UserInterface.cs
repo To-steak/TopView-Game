@@ -152,7 +152,7 @@ namespace TopView.Core
             }
             else
             {
-                _upgradePresenter.Initialize(_world.commandBuffer);
+                _upgradePresenter.Initialize(_world.commandBuffer, _userInterfaceSoundRequests);
             }
         }
 

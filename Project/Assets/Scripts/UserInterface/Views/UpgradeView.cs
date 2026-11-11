@@ -3,16 +3,20 @@ using System.Collections.Generic;
 using TopView.Commands;
 using TopView.Components;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace TopView.UserInterface.Views
 {
-    // 강화 화면. 강화 항목(UpgradeEntry) 프리팹을 배열 순서대로 만들어 담고, 항목의 버튼 입력을 이벤트로 알린다.
+    // 강화 화면. 강화 항목(UpgradeEntry) 프리팹을 배열 순서대로 만들어 담고, 항목의 버튼과 닫기 버튼 입력을 이벤트로 알린다.
     // 각 항목이 무엇을 강화하는지는 프리팹이 정한다. 배열에 없는 항목(예: 수류탄)은 화면에 없고 강화할 수 없다.
     public class UpgradeView : UserInterfaceView
     {
         // 강화 버튼을 눌렀다. 두 번째 값은 Weapon일 때의 무기 번호이며, 다른 항목은 -1이다
         public event Action<PlayerUpgradeCommandType, int> UpgradeClicked;
+        // 닫기 버튼을 눌렀다
+        public event Action CloseClicked;
 
+        [SerializeField] private Button _closeButton;
         // 항목을 담을 부모. Content 안의 Layout Group이 붙은 오브젝트(또는 Scroll View의 Content)를 연결한다. Content 밖이면 화면을 닫아도 항목이 남아 보인다
         [SerializeField] private RectTransform _entryParent;
         // 화면에 둘 항목 프리팹. 배열 순서가 화면 순서다
@@ -99,6 +103,21 @@ namespace TopView.UserInterface.Views
         public void ClickEntry(PlayerUpgradeCommandType type, int weaponIndex)
         {
             UpgradeClicked?.Invoke(type, type == PlayerUpgradeCommandType.Weapon ? weaponIndex : -1);
+        }
+
+        private void OnEnable()
+        {
+            _closeButton.onClick.AddListener(HandleCloseButtonClicked);
+        }
+
+        private void OnDisable()
+        {
+            _closeButton.onClick.RemoveListener(HandleCloseButtonClicked);
+        }
+
+        private void HandleCloseButtonClicked()
+        {
+            CloseClicked?.Invoke();
         }
 
         // 같은 항목(Weapon은 같은 무기 번호)을 강화하는 Entry가 둘 이상이면 프리팹 설정 실수로 보고 한 번 경고한다.
