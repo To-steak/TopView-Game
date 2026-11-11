@@ -161,7 +161,7 @@ namespace TopView.Core
             GamePhase phase = _world.progress.phase;
             if (_gameOverPresenter != null)
             {
-                _gameOverPresenter.Present(phase);
+                _gameOverPresenter.Present(phase, _world.progress.score);
             }
             if (_remainingTimePresenter != null)
             {
