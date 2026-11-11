@@ -55,8 +55,8 @@ MonoBehaviour:
     runManaCostRatioPerLevel: 0.1
     dodgeManaCostRatioPerLevel: 0.15
     jumpManaCostRatioPerLevel: 0.15
-    damageRatioPerLevel: 0
-    minAttackIntervalTicks: 0
+    damageRatioPerLevel: 0.5
+    minAttackIntervalTicks: 4
   weapons:
   - {fileID: 11400000, guid: 1ce7fea57a5a36c42bf8d0de4ca734db, type: 2}
   - {fileID: 11400000, guid: 9e5cd050810c0a8469911b9292b1da62, type: 2}

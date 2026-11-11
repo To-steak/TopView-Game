@@ -23,7 +23,7 @@ MonoBehaviour:
     attackEndTicks: 0
     attackDurationTicks: 0
     attackIntervalTicks: 40
-    attackIntervalRatioPerLevel: 0
+    attackIntervalRatioPerLevel: 0.1
     projectile:
       kind: 0
       speed: 35
@@ -33,11 +33,11 @@ MonoBehaviour:
       maxThrowDistance: 0
       flightTicks: 0
       arcHeight: 0
-      explosionRadius: 0.1
+      explosionRadius: 0
       collisionLayer:
         serializedVersion: 2
         m_Bits: 576
-    explosionRadiusIncreasePerLevel: 5
+    explosionRadiusIncreasePerLevel: 0.5
     meleeRadius: 0
     meleeOffset: 0
     meleeRangeRatioPerLevel: 0
