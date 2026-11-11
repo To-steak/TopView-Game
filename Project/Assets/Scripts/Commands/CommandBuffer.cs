@@ -11,6 +11,8 @@ namespace TopView.Commands
         public List<SettingsCommand> settingsCommands = new List<SettingsCommand>();
         // 플레이어 강화 명령. PlayerUpgradeSystem이 소비한다
         public List<PlayerUpgradeCommand> playerUpgradeCommands = new List<PlayerUpgradeCommand>();
+        // 디버그 명령. DebugCommandSystem이 소비한다
+        public List<DebugCommand> debugCommands = new List<DebugCommand>();
         // 플레이어 입력
         public PlayerCommand playerCommand = new PlayerCommand { swapWeaponIndex = -1 };
     }

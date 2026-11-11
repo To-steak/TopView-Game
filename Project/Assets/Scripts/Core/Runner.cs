@@ -56,6 +56,8 @@ namespace TopView.Core
             PauseSystem.Tick(ref _world.progress, _world.commandBuffer.gameFlowCommands);
             // 강화 화면은 일시정지 중에 열리므로 isPlaying과 상관없이 돈다. 연 틱의 명령도 처리하도록 PauseSystem 뒤에 둔다
             PlayerUpgradeSystem.Tick(_world.players, ref _world.progress, _world.commandBuffer.playerUpgradeCommands);
+            // 강화 화면에서 바로 쓸 수 있도록 일시정지 중에도 돈다
+            DebugCommandSystem.Tick(ref _world.progress, _world.commandBuffer.debugCommands);
             bool isPlaying = _world.progress.phase == GamePhase.Playing && !_world.progress.isPaused;
             DamageSystem.Tick(ref _world.progress, _world.players, _world.enemies, _world.playerDamageRequests, _world.enemyDamageRequests, _world.enemyDamagedRecords);
             if (isPlaying)
