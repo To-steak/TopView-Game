@@ -37,6 +37,10 @@ namespace TopView.Editor
         private const float TAB_HEIGHT = 30f;
         private const float LIST_WIDTH = 250f;
         private const float BUTTON_HEIGHT = 25f;
+        // 오른쪽 패널 너비 중 라벨이 차지하는 비율
+        private const float LABEL_WIDTH_RATIO = 0.45f;
+        // 라벨 너비의 최솟값. Unity 기본 라벨 너비와 같다
+        private const float MIN_LABEL_WIDTH = 150f;
 
         /// <summary>
         /// 편집 창을 연다.
@@ -167,7 +171,11 @@ namespace TopView.Editor
                 EditorGUILayout.LabelField($"{_selectedAsset.name}", EditorStyles.boldLabel);
                 EditorGUILayout.Space();
 
+                // 직접 만든 창에서는 라벨 너비가 기본값에 고정되어 긴 필드 이름이 잘리므로, 오른쪽 패널 너비에 맞춘 뒤 되돌린다
+                float previousLabelWidth = EditorGUIUtility.labelWidth;
+                EditorGUIUtility.labelWidth = Mathf.Max(MIN_LABEL_WIDTH, (position.width - LIST_WIDTH) * LABEL_WIDTH_RATIO);
                 _assetEditor.OnInspectorGUI();
+                EditorGUIUtility.labelWidth = previousLabelWidth;
             }
             else
             {
