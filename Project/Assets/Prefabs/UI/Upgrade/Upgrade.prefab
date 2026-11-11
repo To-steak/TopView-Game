@@ -358,7 +358,7 @@ MonoBehaviour:
   m_ChildAlignment: 1
   m_StartCorner: 0
   m_StartAxis: 0
-  m_CellSize: {x: 280, y: 280}
+  m_CellSize: {x: 280, y: 560}
   m_Spacing: {x: 20, y: 20}
   m_Constraint: 1
   m_ConstraintCount: 4
@@ -433,13 +433,13 @@ MonoBehaviour:
   _entryParent: {fileID: 5954970555633171198}
   _entryPrefabs:
   - {fileID: 3000976891937040348, guid: 53ab47795154cbc4682319d722428f45, type: 3}
-  - {fileID: 3000976891937040348, guid: 86187790587c01b41a24024adc41cc9b, type: 3}
   - {fileID: 3000976891937040348, guid: 9b712ef0b3a747546bd1f9f28cd1cbed, type: 3}
+  - {fileID: 3000976891937040348, guid: c48221fb69c15c644942a674a3f1de44, type: 3}
   - {fileID: 3000976891937040348, guid: 70ad2fecf09ea044fb0cdae61eb05849, type: 3}
   - {fileID: 3000976891937040348, guid: 609f4e20e35633e478b0d5c4fc4154d6, type: 3}
   - {fileID: 3000976891937040348, guid: 503a4fe0766373140b782db8bc2d88df, type: 3}
   - {fileID: 3000976891937040348, guid: 00bd0520320e99147a1068d0af38aa84, type: 3}
-  - {fileID: 3000976891937040348, guid: c48221fb69c15c644942a674a3f1de44, type: 3}
+  - {fileID: 3000976891937040348, guid: 86187790587c01b41a24024adc41cc9b, type: 3}
 --- !u!114 &1762365136298938359
 MonoBehaviour:
   m_ObjectHideFlags: 0
