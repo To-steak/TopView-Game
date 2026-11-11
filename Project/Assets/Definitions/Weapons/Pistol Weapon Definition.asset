@@ -23,7 +23,7 @@ MonoBehaviour:
     attackEndTicks: 0
     attackDurationTicks: 0
     attackIntervalTicks: 40
-    attackIntervalRatioPerLevel: 0.1
+    attackIntervalRatioPerLevel: 0
     projectile:
       kind: 0
       speed: 35

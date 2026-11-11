@@ -570,13 +570,13 @@ MonoBehaviour:
   _entryParent: {fileID: 5954970555633171198}
   _entryPrefabs:
   - {fileID: 7794503631756060319, guid: f1abd476a3f923f42bfbc4ae6480c2c4, type: 3}
-  - {fileID: 7794503631756060319, guid: d1c622edcb7035448a9d39bd3979fcbd, type: 3}
+  - {fileID: 7794503631756060319, guid: 4600c9f0a8208a845b1370be99f8f1b2, type: 3}
   - {fileID: 7794503631756060319, guid: 9b9e38d44502a2642b2e0d0cd51b9338, type: 3}
-  - {fileID: 7794503631756060319, guid: 981bcab54eef76c47bfc6f0550d625bc, type: 3}
-  - {fileID: 7794503631756060319, guid: 1fdddb079ac1801498e39e1f6a4585c7, type: 3}
+  - {fileID: 7794503631756060319, guid: d1c622edcb7035448a9d39bd3979fcbd, type: 3}
   - {fileID: 7794503631756060319, guid: c08e7aba7077dc34f99a8b74b67a34e0, type: 3}
   - {fileID: 7794503631756060319, guid: 05bc9a499e2550c48a12ac7ff18966b0, type: 3}
-  - {fileID: 7794503631756060319, guid: 4600c9f0a8208a845b1370be99f8f1b2, type: 3}
+  - {fileID: 7794503631756060319, guid: 981bcab54eef76c47bfc6f0550d625bc, type: 3}
+  - {fileID: 7794503631756060319, guid: 1fdddb079ac1801498e39e1f6a4585c7, type: 3}
 --- !u!114 &1762365136298938359
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -762,7 +762,7 @@ MonoBehaviour:
   m_Elasticity: 0.1
   m_Inertia: 1
   m_DecelerationRate: 0.135
-  m_ScrollSensitivity: 1
+  m_ScrollSensitivity: 10
   m_Viewport: {fileID: 3688867385555077810}
   m_HorizontalScrollbar: {fileID: 0}
   m_VerticalScrollbar: {fileID: 8306700876524424191}
