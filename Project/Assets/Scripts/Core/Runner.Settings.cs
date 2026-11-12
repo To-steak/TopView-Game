@@ -1,11 +1,12 @@
 using System.Collections.Generic;
 using TopView.Commands;
+using TopView.Components;
 using TopView.Utilities;
 using UnityEngine;
 
 namespace TopView.Core
 {
-    // 설정: 일시정지 화면에서 연 설정 화면의 명령을 소비한다. 볼륨은 판의 결과와 상관없는 표시 설정이라 Tick이 아닌 여기서 처리한다
+    // 설정: 일시정지 화면에서 설정 화면을 열고, 연 설정 화면의 명령을 소비한다. 볼륨은 판의 결과와 상관없는 표시 설정이라 Tick이 아닌 여기서 처리한다
     public partial class Runner
     {
         // 설정 화면이 열려 있는지. 일시정지 중에만 열린다
@@ -13,17 +14,27 @@ namespace TopView.Core
         // 슬라이더 값이 0~1 밖이라는 경고를 이미 남겼는지. 슬라이더를 움직이는 동안 매 프레임 쌓이지 않게 한 번만 남긴다
         private bool _hasReportedVolumeOutOfRange;
 
-        private void HandleSettingsCommands(List<SettingsCommand> settingsCommands)
+        private void HandleSettingsCommands(List<SettingsCommand> settingsCommands, in GameProgressComponent progress)
         {
             for (int commandIndex = 0; commandIndex < settingsCommands.Count; commandIndex++)
             {
-                HandleSettingsCommand(settingsCommands[commandIndex]);
+                HandleSettingsCommand(settingsCommands[commandIndex], in progress);
             }
             settingsCommands.Clear();
         }
 
-        private void HandleSettingsCommand(in SettingsCommand command)
+        private void HandleSettingsCommand(in SettingsCommand command, in GameProgressComponent progress)
         {
+            if (command.type == SettingsCommandType.Open)
+            {
+                // 설정 버튼은 일시정지 화면에만 있어, 일시정지가 풀린 뒤에 남은 명령은 정상적으로 무시한다
+                if (progress.isPaused)
+                {
+                    _isSettingsOpen = true;
+                }
+                return;
+            }
+
             // 설정 화면이 닫힌 뒤에 남은 명령은 정상적으로 무시한다
             if (!_isSettingsOpen)
             {

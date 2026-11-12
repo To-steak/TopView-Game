@@ -27,12 +27,12 @@ namespace TopView.Core
 
             if (progress.isUpgradeOpen)
             {
-                commandBuffer.gameFlowCommands.Add(new GameFlowCommand { type = GameFlowCommandType.CloseUpgrade });
+                commandBuffer.pauseCommands.Add(new PauseCommand { type = PauseCommandType.CloseUpgrade });
                 return;
             }
 
-            GameFlowCommandType type = progress.isPaused ? GameFlowCommandType.Resume : GameFlowCommandType.Pause;
-            commandBuffer.gameFlowCommands.Add(new GameFlowCommand { type = type });
+            PauseCommandType type = progress.isPaused ? PauseCommandType.Resume : PauseCommandType.Pause;
+            commandBuffer.pauseCommands.Add(new PauseCommand { type = type });
         }
 
         // Tab을 누르면 강화 화면이 열려 있으면 닫고, 일시정지 중이 아니면 연다. ESC로 일시정지한 중이나 판이 끝난 뒤에는 정상적으로 무시한다
@@ -45,11 +45,11 @@ namespace TopView.Core
 
             if (progress.isUpgradeOpen)
             {
-                commandBuffer.gameFlowCommands.Add(new GameFlowCommand { type = GameFlowCommandType.CloseUpgrade });
+                commandBuffer.pauseCommands.Add(new PauseCommand { type = PauseCommandType.CloseUpgrade });
             }
             else if (!progress.isPaused)
             {
-                commandBuffer.gameFlowCommands.Add(new GameFlowCommand { type = GameFlowCommandType.OpenUpgrade });
+                commandBuffer.pauseCommands.Add(new PauseCommand { type = PauseCommandType.OpenUpgrade });
             }
         }
 

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace TopView.UserInterface.Presenters
 {
-    // 강화 화면이 열려 있으면 UpgradeView를 보이고, 강화 버튼 입력을 강화 명령으로, 닫기 버튼 입력을 판 흐름 명령으로 넣는다.
+    // 강화 화면이 열려 있으면 UpgradeView를 보이고, 강화 버튼 입력을 강화 명령으로, 닫기 버튼 입력을 일시정지 명령으로 넣는다.
     // 같은 값을 다시 그리지 않는 일은 항목(UpgradeEntry)이 맡는다.
     public class UpgradePresenter : MonoBehaviour
     {
@@ -98,11 +98,11 @@ namespace TopView.UserInterface.Presenters
 
             if (_commandBuffer == null)
             {
-                Debug.LogWarning($"UpgradePresenter >> 명령 버퍼가 연결되지 않아 {GameFlowCommandType.CloseUpgrade} 명령을 버렸다.");
+                Debug.LogWarning($"UpgradePresenter >> 명령 버퍼가 연결되지 않아 {PauseCommandType.CloseUpgrade} 명령을 버렸다.");
                 return;
             }
 
-            _commandBuffer.gameFlowCommands.Add(new GameFlowCommand { type = GameFlowCommandType.CloseUpgrade });
+            _commandBuffer.pauseCommands.Add(new PauseCommand { type = PauseCommandType.CloseUpgrade });
         }
 
         private void HandleUpgradeClicked(PlayerUpgradeCommandType type, int weaponIndex)

@@ -98,7 +98,7 @@ namespace TopView.Core
             }
             else
             {
-                _menuPresenter.Initialize(_commands, _userInterfaceSoundRequests);
+                _menuPresenter.Initialize(_commands, _settingsCommands, _userInterfaceSoundRequests);
             }
 
             if (_settingsPresenter == null)
@@ -203,9 +203,6 @@ namespace TopView.Core
                 case MenuCommandType.EnterWorld:
                     EnterWorld();
                     break;
-                case MenuCommandType.OpenSettings:
-                    _isSettingsOpen = true;
-                    break;
                 case MenuCommandType.Exit:
                     SaveVolume();
                     Quit();
@@ -264,6 +261,12 @@ namespace TopView.Core
             // 로딩을 요청하면 설정 화면이 숨겨지므로, 그 뒤에 남은 설정 명령은 정상적으로 무시한다
             if (_isLoadingRequested)
             {
+                return;
+            }
+
+            if (command.type == SettingsCommandType.Open)
+            {
+                _isSettingsOpen = true;
                 return;
             }
 

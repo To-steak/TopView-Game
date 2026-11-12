@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace TopView.UserInterface.Presenters
 {
-    // 판이 끝나면 승패와 점수를 담아 GameOverView를 보이고, 재시작과 종료 버튼 입력을 판 흐름 명령으로 넣는다.
+    // 판이 끝나면 승패와 점수를 담아 GameOverView를 보이고, 재시작과 종료 버튼 입력을 씬 명령으로 넣는다.
     public class GameOverPresenter : MonoBehaviour
     {
         [SerializeField] private GameOverView _view;
@@ -60,16 +60,16 @@ namespace TopView.UserInterface.Presenters
         private void HandleRestartClicked()
         {
             AddSound(UserInterfaceSoundKind.Click);
-            AddCommand(GameFlowCommandType.Restart);
+            AddCommand(SceneCommandType.Restart);
         }
 
         private void HandleExitClicked()
         {
             AddSound(UserInterfaceSoundKind.Close);
-            AddCommand(GameFlowCommandType.Exit);
+            AddCommand(SceneCommandType.Exit);
         }
 
-        private void AddCommand(GameFlowCommandType type)
+        private void AddCommand(SceneCommandType type)
         {
             if (_commandBuffer == null)
             {
@@ -77,7 +77,7 @@ namespace TopView.UserInterface.Presenters
                 return;
             }
 
-            _commandBuffer.gameFlowCommands.Add(new GameFlowCommand { type = type });
+            _commandBuffer.sceneCommands.Add(new SceneCommand { type = type });
         }
 
         private void AddSound(UserInterfaceSoundKind kind)

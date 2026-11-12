@@ -8,6 +8,8 @@ namespace TopView.Commands
         // 배경음악 볼륨을 바꾼다
         SetMusicVolume,
         // 효과음 볼륨을 바꾼다
-        SetSoundEffectVolume
+        SetSoundEffectVolume,
+        // 설정 화면을 연다
+        Open
     }
 }
