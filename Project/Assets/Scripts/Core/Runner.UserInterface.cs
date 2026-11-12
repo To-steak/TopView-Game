@@ -356,8 +356,8 @@ namespace TopView.Core
                 nextMaxAmmo = PlayerUpgradeUtility.GetMaxAmmo(in weapon, nextLevel),
                 currentExplosionRadius = PlayerUpgradeUtility.GetExplosionRadius(in weapon, level),
                 nextExplosionRadius = PlayerUpgradeUtility.GetExplosionRadius(in weapon, nextLevel),
-                currentMeleeRadius = weapon.meleeRadius * PlayerUpgradeUtility.GetMeleeRangeScale(in weapon, level),
-                nextMeleeRadius = weapon.meleeRadius * PlayerUpgradeUtility.GetMeleeRangeScale(in weapon, nextLevel)
+                currentMeleeRadius = weapon.meleeShape.radius * PlayerUpgradeUtility.GetMeleeRangeScale(in weapon, level),
+                nextMeleeRadius = weapon.meleeShape.radius * PlayerUpgradeUtility.GetMeleeRangeScale(in weapon, nextLevel)
             };
         }
 

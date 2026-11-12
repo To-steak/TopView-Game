@@ -16,10 +16,8 @@ namespace TopView.Components
         public AttackTimingComponent timing;
         // 공격력에 곱하는 배율
         public float damageMultiplier;
-        // Body 판정 구의 반지름(유닛). Body만 쓴다
-        public float bodyRadius;
-        // Body 판정 구 중심을 적 앞쪽으로 띄우는 거리(유닛). Body만 쓴다
-        public float bodyOffset;
+        // Body 판정 구의 크기와 위치. Body만 쓴다
+        public MeleeShapeComponent meleeShape;
         // 내보내는 투사체. Body가 아닌 공격이 쓴다
         public ProjectileComponent projectile;
         // 투사체를 내보내는 발마다의 시점과 위치. 칸의 startTicks 오름차순으로 둔다. Body가 아닌 공격이 쓴다

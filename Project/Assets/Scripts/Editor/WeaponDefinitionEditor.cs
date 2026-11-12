@@ -54,8 +54,7 @@ namespace TopView.Editor
             }
             else
             {
-                DrawRelative(weapon, nameof(WeaponComponent.meleeRadius));
-                DrawRelative(weapon, nameof(WeaponComponent.meleeOffset));
+                DrawRelative(weapon, nameof(WeaponComponent.meleeShape));
                 DrawRelative(weapon, nameof(WeaponComponent.meleeRangeRatioPerLevel));
             }
             // 조준 평면의 높이에 모든 종류가 쓴다

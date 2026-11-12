@@ -92,8 +92,8 @@ namespace TopView.Systems
             {
                 owner = owner,
                 faction = Faction.Enemy,
-                center = position + rotation * Vector3.forward * attack.bodyOffset,
-                radius = attack.bodyRadius,
+                center = position + rotation * Vector3.forward * attack.meleeShape.offset,
+                radius = attack.meleeShape.radius,
                 damage = damage,
                 durationTicks = attack.timing.endTicks - attack.timing.startTicks
             });

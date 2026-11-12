@@ -25,8 +25,7 @@ namespace TopView.Editor
 
             // 투사체 공격의 Duration Ticks는 아래 변환 칸에서 클립 칸과 함께 그린다
             return childName == nameof(EnemyAttackComponent.timing)
-                || childName == nameof(EnemyAttackComponent.bodyRadius)
-                || childName == nameof(EnemyAttackComponent.bodyOffset);
+                || childName == nameof(EnemyAttackComponent.meleeShape);
         }
 
         protected override float GetExtraHeight(SerializedProperty property)

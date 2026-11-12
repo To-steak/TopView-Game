@@ -29,10 +29,8 @@ namespace TopView.Components
         public ProjectileComponent projectile;
         // 강화 레벨마다 투사체 폭발 반지름이 늘어나는 양(유닛). 0이면 늘지 않는다. Straight는 0레벨 폭발 반지름이 0이어도 1레벨부터 폭발한다. Ranged와 Throw가 쓴다
         public float explosionRadiusIncreasePerLevel;
-        // 근접 판정 구의 반지름(유닛, XZ). Melee만 쓴다
-        public float meleeRadius;
-        // 근접 판정 구 중심을 플레이어 앞쪽으로 띄우는 거리(유닛). Melee만 쓴다
-        public float meleeOffset;
+        // 근접 판정 구의 크기와 위치. Melee만 쓴다
+        public MeleeShapeComponent meleeShape;
         // 강화 레벨마다 근접 판정 반지름, 앞쪽으로 띄우는 거리, 임팩트 이펙트 크기가 함께 오르는 비율. 0이면 오르지 않는다. Melee만 쓴다
         public float meleeRangeRatioPerLevel;
         // 투사체가 생기는 위치. 플레이어 회전 기준의 로컬 위치. Ranged와 Throw가 쓰며, 조준 평면의 높이는 모든 종류가 이 값의 높이를 쓴다

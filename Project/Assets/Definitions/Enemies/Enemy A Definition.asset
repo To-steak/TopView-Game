@@ -39,8 +39,9 @@ MonoBehaviour:
         endTicks: 27
         durationTicks: 50
       damageMultiplier: 1
-      bodyRadius: 1
-      bodyOffset: 0.5
+      meleeShape:
+        radius: 1
+        offset: 0.5
       projectile:
         kind: 0
         speed: 0

@@ -95,13 +95,13 @@ namespace TopView.Systems
 
                 case WeaponKind.Melee:
                     float meleeRangeScale = PlayerUpgradeUtility.GetMeleeRangeScale(in weapon, weaponLevel);
-                    meleeCenter = position + rotation * Vector3.forward * (weapon.meleeOffset * meleeRangeScale);
+                    meleeCenter = position + rotation * Vector3.forward * (weapon.meleeShape.offset * meleeRangeScale);
                     meleeSpawnRequests.Enqueue(new MeleeSpawnRequest
                     {
                         owner = identifier,
                         faction = Faction.Player,
                         center = meleeCenter,
-                        radius = weapon.meleeRadius * meleeRangeScale,
+                        radius = weapon.meleeShape.radius * meleeRangeScale,
                         damage = damage,
                         durationTicks = weapon.timing.endTicks - weapon.timing.startTicks
                     });
