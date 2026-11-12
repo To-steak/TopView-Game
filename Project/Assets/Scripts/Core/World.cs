@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using TopView.Commands;
 using TopView.Components;
 using TopView.Definitions;
 using TopView.Presentation.ViewContexts;
@@ -8,13 +10,33 @@ using UnityEngine;
 namespace TopView.Core
 {
     // 판이 있는 씬에 하나 배치해 그 판의 틱 순서와 호출 순서를 관리한다. 씬과 함께 생기고 사라진다.
+    // Unity의 실행 함수는 App이 받고, App이 Tick, ReadInput, Present를 부른다.
     // 요소별 상태와 처리는 World.<요소>.cs에, 한 판의 데이터는 World.Data.cs에 나눠 두고, 이 파일에는 호출 순서만 둔다.
     public partial class World : MonoBehaviour
     {
         // 한 판의 규칙과 저장소 용량
         [SerializeField] private GameSettingsDefinition _gameSettingsDefinition;
+        // 이 씬의 배경음악 곡과 재생 값. App에 등록할 때 넘긴다
+        [SerializeField] private MusicDefinition _musicDefinition;
 
         private ViewContext _viewContext;
+
+        // 설정 화면을 열 수 있는지. 설정 버튼은 일시정지 화면에만 있어 일시정지 중에만 연다. App이 설정 명령을 소비할 때 읽는다
+        public bool CanOpenSettings => _isRoundReady && _progress.isPaused;
+
+        /// <summary>
+        /// App의 명령 목록을 받아 판을 준비한다. App이 World를 등록할 때 부른다.
+        /// </summary>
+        /// <param name="sceneCommands">씬과 앱 전환 명령 목록. App이 소비한다</param>
+        /// <param name="settingsCommands">설정 명령 목록. App이 소비한다</param>
+        /// <param name="userInterfaceSoundRequests">UI 소리 요청 목록. App이 소비한다</param>
+        public void Initialize(List<SceneCommand> sceneCommands, List<SettingsCommand> settingsCommands, List<UserInterfaceSoundKind> userInterfaceSoundRequests)
+        {
+            _sceneCommands = sceneCommands;
+            _settingsCommands = settingsCommands;
+            _userInterfaceSoundRequests = userInterfaceSoundRequests;
+            StartRound();
+        }
 
         private void Awake()
         {
@@ -23,15 +45,26 @@ namespace TopView.Core
             _playerActions.UserInterface.Enable();
         }
 
-        // 씬의 다른 오브젝트가 Awake를 마친 뒤에 판을 준비한다. Audio Mixer는 Awake에서 값을 무시할 수 있어 볼륨도 여기서 반영한다
+        // 씬의 다른 오브젝트가 Awake를 마친 뒤에 App에 등록한다. App이 Initialize를 불러 판을 준비한다
         private void Start()
         {
-            PresentSavedAudioVolume();
-            StartRound();
+            App app = App.Instance;
+            if (app == null)
+            {
+                Debug.LogError("World >> App이 없어 판을 준비하지 않았다. 에디터라면 App 프리팹이 있는지 확인한다.");
+                return;
+            }
+
+            app.RegisterWorld(this, _musicDefinition);
         }
 
         private void OnDestroy()
         {
+            App app = App.Instance;
+            if (app != null)
+            {
+                app.UnregisterWorld(this);
+            }
             // 일시정지 중에 씬이 사라져도 소리와 DOTween의 일시정지가 다음 씬에 남지 않게 한다
             ClearRound();
             _playerActions.Global.Disable();
@@ -39,7 +72,10 @@ namespace TopView.Core
             _playerActions.Dispose();
         }
 
-        private void FixedUpdate()
+        /// <summary>
+        /// 한 틱의 System을 정해진 순서로 부른다. App이 FixedUpdate에서 부른다.
+        /// </summary>
+        public void Tick()
         {
             if (!_isRoundReady)
             {
@@ -121,14 +157,19 @@ namespace TopView.Core
             CommandSystem.ClearPlayerPresses(ref _commandBuffer.playerCommand);
         }
 
-        private void Update()
+        /// <summary>
+        /// 프레임 단위 입력을 읽어 명령 버퍼에 쌓는다. App이 Update에서 부른다.
+        /// </summary>
+        /// <param name="isSettingsOpen">설정 화면이 열려 있는지. 열려 있으면 ESC가 설정 화면을 닫는다</param>
+        /// <param name="settingsCommands">ESC로 설정 화면을 닫는 명령을 넣을 목록</param>
+        public void ReadInput(bool isSettingsOpen, List<SettingsCommand> settingsCommands)
         {
             if (!_isRoundReady)
             {
                 return;
             }
 
-            ReadEscapeInput(_commandBuffer, in _progress);
+            ReadEscapeInput(_commandBuffer, settingsCommands, isSettingsOpen, in _progress);
             ReadUpgradeInput(_commandBuffer, in _progress);
             if (_progress.isPaused)
             {
@@ -138,12 +179,14 @@ namespace TopView.Core
             {
                 ReadPlayerInput(ref _commandBuffer.playerCommand);
             }
-            HandleSettingsCommands(_commandBuffer.settingsCommands, in _progress);
-            // 씬을 바꾸면 판을 비우므로 마지막에 둔다
-            HandleSceneCommands(_commandBuffer.sceneCommands);
         }
 
-        private void LateUpdate()
+        /// <summary>
+        /// 판의 View와 UI를 정해진 순서로 그리고 프레임 기록을 비운다. App이 LateUpdate에서 부른다.
+        /// </summary>
+        /// <param name="isSettingsOpen">설정 화면이 열려 있는지. 열려 있으면 일시정지 화면을 숨긴다</param>
+        /// <param name="music">App이 이 씬에 만든 배경음악 실행 상태. 없으면 null</param>
+        public void Present(bool isSettingsOpen, MusicViewContext music)
         {
             if (!_isRoundReady)
             {
@@ -167,17 +210,12 @@ namespace TopView.Core
             LootSoundViewSystem.Present(_lootPickedUpRecords, _lootPrefabs, _viewContext.player.view != null ? _viewContext.player.view.soundEffectSource : null);
             WorldTextViewSystem.Present(_worldTextViewPrefab, _viewContext.camera.mainCamera, _viewContext.worldText);
             CameraViewSystem.Present(_viewContext.camera, _viewContext.player.view, _playerCameraPriority, _commandBuffer.playerCommand.cameraYawInput, _playerCameraYawDegreesPerSecond);
-            if (_viewContext.music != null)
+            if (music != null)
             {
-                MusicViewSystem.Present(_enemies.entities, _enemyShowsOverlayHealthBar, _viewContext.music);
+                MusicViewSystem.Present(_enemies.entities, _enemyShowsOverlayHealthBar, music);
             }
 
-            PresentUserInterface();
-            if (_viewContext.userInterfaceSound != null)
-            {
-                UserInterfaceSoundViewSystem.Present(_userInterfaceSoundRequests, _viewContext.userInterfaceSound);
-            }
-            _userInterfaceSoundRequests.Clear();
+            PresentUserInterface(isSettingsOpen);
 
             _playerStateChangedRecords.Clear();
             _playerAttackCommittedRecords.Clear();

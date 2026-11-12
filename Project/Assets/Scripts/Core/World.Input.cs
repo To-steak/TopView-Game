@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TopView.Commands;
 using TopView.Components;
 using TopView.Entities;
@@ -12,16 +13,16 @@ namespace TopView.Core
         private PlayerActions _playerActions;
 
         // ESC를 누르면 설정 화면이 열려 있으면 닫고, 강화 화면이 열려 있으면 닫고, 일시정지 중이면 풀고, 아니면 일시정지한다. 판이 끝난 뒤에는 정상적으로 무시한다
-        private void ReadEscapeInput(CommandBuffer commandBuffer, in GameProgressComponent progress)
+        private void ReadEscapeInput(CommandBuffer commandBuffer, List<SettingsCommand> settingsCommands, bool isSettingsOpen, in GameProgressComponent progress)
         {
             if (!_playerActions.UserInterface.Escape.WasPerformedThisFrame() || progress.phase != GamePhase.Playing)
             {
                 return;
             }
 
-            if (_isSettingsOpen)
+            if (isSettingsOpen)
             {
-                commandBuffer.settingsCommands.Add(new SettingsCommand { type = SettingsCommandType.Close });
+                settingsCommands.Add(new SettingsCommand { type = SettingsCommandType.Close });
                 return;
             }
 

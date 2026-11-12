@@ -19,13 +19,9 @@ namespace TopView.Presentation.ViewContexts
         public WorldInformationViewContext worldInformation;
         // 전리품 View 실행 상태
         public LootViewContext loot;
-        // 배경음악 실행 상태. Definition이 없으면 null
-        public MusicViewContext music;
         // 일시정지 연출 실행 상태
         public PauseViewContext pause;
         // 커서 연출 실행 상태
         public CursorViewContext cursor;
-        // UI 소리 실행 상태. Definition이 없으면 null
-        public UserInterfaceSoundViewContext userInterfaceSound;
     }
 }

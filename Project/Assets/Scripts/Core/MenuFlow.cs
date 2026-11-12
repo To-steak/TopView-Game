@@ -2,112 +2,35 @@ using System.Collections.Generic;
 using TopView.Commands;
 using TopView.Components;
 using TopView.Definitions;
-using TopView.Persistence;
-using TopView.Presentation.ViewContexts;
-using TopView.Presentation.ViewSystems;
 using TopView.UserInterface.Presenters;
-using TopView.Utilities;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace TopView.Core
 {
-    // Menu 씬에 하나 배치해 메뉴의 흐름을 맡는다. 메뉴 Presenter를 연결하고, 메뉴 명령을 소비하고, World 씬을 비동기로 불러온다.
+    // Menu 씬에 하나 배치해 메뉴의 화면을 맡는다. App에 등록되면 메뉴 Presenter를 연결하고, App이 부를 때 표시한다.
+    // 씬 전환과 로딩, 설정 화면, 배경음악 재생은 App이 한다.
     public class MenuFlow : MonoBehaviour
     {
         [SerializeField] private MenuPresenter _menuPresenter;
-        [SerializeField] private SettingsPresenter _settingsPresenter;
         [SerializeField] private LoadingPresenter _loadingPresenter;
-        // 볼륨을 조절할 Audio Mixer와 볼륨 시작값
-        [SerializeField] private AudioSettingsDefinition _audioSettingsDefinition;
-        // 불러올 씬 이름과 최소 로딩 시간
-        [SerializeField] private MenuSettingsDefinition _menuSettingsDefinition;
-        // Menu 씬의 배경음악 곡과 재생 값
+        // Menu 씬의 배경음악 곡과 재생 값. App에 등록할 때 넘긴다
         [SerializeField] private MusicDefinition _musicDefinition;
-        // 버튼 소리
-        [SerializeField] private UserInterfaceSoundDefinition _userInterfaceSoundDefinition;
 
-        private readonly List<MenuCommand> _commands = new List<MenuCommand>();
-        private readonly List<SettingsCommand> _settingsCommands = new List<SettingsCommand>();
-        // Presenter가 이번 프레임에 넣은 버튼 소리 요청. LateUpdate 끝에 비운다
-        private readonly List<UserInterfaceSoundKind> _userInterfaceSoundRequests = new List<UserInterfaceSoundKind>();
-        // Start에서 Menu Settings Definition에서 복사한 흐름 값
-        private MenuRuleComponent _rule;
-        // 흐름 값을 복사했는지. Menu Settings Definition이 없으면 false이고, 이때는 World를 불러오지 않는다
-        private bool _hasRule;
-        private AudioVolumeComponent _volume;
-        // 볼륨 반영 실행 상태. Audio Settings Definition이 없으면 null이고, 이때는 볼륨을 반영하지도 저장하지도 않는다
-        private AudioVolumeViewContext _audioVolumeViewContext;
-        // 배경음악 실행 상태. Music Definition이나 평소 곡이 없으면 null이고, 이때는 배경음악을 틀지 않는다
-        private MusicViewContext _musicViewContext;
-        // UI 소리 실행 상태. User Interface Sound Definition이 없으면 null이고, 이때는 버튼 소리를 내지 않는다
-        private UserInterfaceSoundViewContext _userInterfaceSoundViewContext;
-        // 슬라이더 값이 0~1 밖이라는 경고를 이미 남겼는지. 슬라이더를 움직이는 동안 매 프레임 쌓이지 않게 한 번만 남긴다
-        private bool _hasReportedVolumeOutOfRange;
-        private bool _isSettingsOpen;
-        // 시작 버튼으로 로딩을 요청했다. 이때부터 로딩 화면을 보인다
-        private bool _isLoadingRequested;
-        // 로딩을 요청한 프레임(Time.frameCount). 이 프레임에 로딩 화면이 그려진 뒤 불러오기를 시작한다
-        private int _loadingRequestedFrame;
-        // 불러오는 중인 씬. 불러오기 전에는 null이다
-        private AsyncOperation _loading;
-        // 로딩을 요청한 시각(Time.unscaledTime, 초). 최소 시간은 로딩 화면이 보인 때부터 잰다
-        private float _loadingStartTime;
-
-        // AsyncOperation.progress는 씬 활성화를 막아 두면 불러오기가 끝났을 때 0.9에서 멈춘다
-        private const float LOADED_PROGRESS = 0.9f;
-        private const string MUSIC_OBJECT_NAME = "Music";
-        private const string USER_INTERFACE_SOUND_OBJECT_NAME = "User Interface Sound";
-
-        // 씬의 다른 오브젝트가 Awake를 마친 뒤에 연결한다. Audio Mixer는 Awake에서 값을 무시할 수 있어 볼륨도 여기서 반영한다
-        private void Start()
+        /// <summary>
+        /// App의 명령 목록을 받아 메뉴 Presenter를 연결한다. App이 MenuFlow를 등록할 때 부른다.
+        /// </summary>
+        /// <param name="sceneCommands">씬과 앱 전환 명령 목록. App이 소비한다</param>
+        /// <param name="settingsCommands">설정 명령 목록. App이 소비한다</param>
+        /// <param name="userInterfaceSoundRequests">UI 소리 요청 목록. App이 소비한다</param>
+        public void Initialize(List<SceneCommand> sceneCommands, List<SettingsCommand> settingsCommands, List<UserInterfaceSoundKind> userInterfaceSoundRequests)
         {
-            if (_menuSettingsDefinition == null)
-            {
-                Debug.LogError("MenuFlow >> Menu Settings Definition이 연결되어 있지 않아 시작 버튼을 눌러도 World를 불러오지 않는다.");
-            }
-            else
-            {
-                _rule = _menuSettingsDefinition.rule;
-                _hasRule = true;
-                if (_rule.minimumLoadingTicks < 0)
-                {
-                    Debug.LogWarning($"MenuFlow >> Menu Settings Definition의 Minimum Loading Ticks가 {_rule.minimumLoadingTicks}라 최소 시간 없이 불러오기가 끝나면 들어가기 버튼을 누를 수 있게 한다.");
-                }
-            }
-
-            if (_audioSettingsDefinition == null)
-            {
-                // 저장된 볼륨을 1로 덮어쓰지 않도록 저장도 하지 않는다
-                Debug.LogWarning("MenuFlow >> Audio Settings Definition이 연결되어 있지 않아 설정 화면의 볼륨을 1로 보이고, Audio Mixer 반영과 저장을 하지 않는다.");
-                _volume = new AudioVolumeComponent { musicVolume = 1f, soundEffectVolume = 1f };
-            }
-            else
-            {
-                _volume = AudioVolumeStore.Load(in _audioSettingsDefinition.settings);
-                _audioVolumeViewContext = new AudioVolumeViewContext { mixer = _audioSettingsDefinition.mixer };
-                AudioVolumeViewSystem.Present(in _volume, _audioVolumeViewContext);
-            }
-
-            _musicViewContext = CreateMusicViewContext();
-            _userInterfaceSoundViewContext = CreateUserInterfaceSoundViewContext();
-
             if (_menuPresenter == null)
             {
                 Debug.LogError("MenuFlow >> Menu Presenter가 연결되어 있지 않다.");
             }
             else
             {
-                _menuPresenter.Initialize(_commands, _settingsCommands, _userInterfaceSoundRequests);
-            }
-
-            if (_settingsPresenter == null)
-            {
-                Debug.LogError("MenuFlow >> Settings Presenter가 연결되어 있지 않다.");
-            }
-            else
-            {
-                _settingsPresenter.Initialize(_settingsCommands, _userInterfaceSoundRequests);
+                _menuPresenter.Initialize(sceneCommands, settingsCommands, userInterfaceSoundRequests);
             }
 
             if (_loadingPresenter == null)
@@ -116,275 +39,48 @@ namespace TopView.Core
             }
             else
             {
-                _loadingPresenter.Initialize(_commands, _userInterfaceSoundRequests);
+                _loadingPresenter.Initialize(sceneCommands, userInterfaceSoundRequests);
             }
         }
 
-        private void Update()
+        /// <summary>
+        /// 로딩 중이 아니면 메뉴를, 로딩 중이면 로딩 화면과 진행률을 보인다. App이 LateUpdate에서 부른다.
+        /// </summary>
+        /// <param name="isLoading">World 불러오기를 요청했는지</param>
+        /// <param name="loadingRatio">진행 비율(0~1)</param>
+        /// <param name="canEnter">불러오기와 최소 시간이 끝나 들어갈 수 있는지</param>
+        public void Present(bool isLoading, float loadingRatio, bool canEnter)
         {
-            for (int commandIndex = 0; commandIndex < _commands.Count; commandIndex++)
-            {
-                HandleCommand(_commands[commandIndex]);
-            }
-            _commands.Clear();
-
-            for (int commandIndex = 0; commandIndex < _settingsCommands.Count; commandIndex++)
-            {
-                HandleSettingsCommand(_settingsCommands[commandIndex]);
-            }
-            _settingsCommands.Clear();
-
-            // LoadSceneAsync는 부른 프레임에 메인 스레드를 멈출 수 있어, 로딩 화면이 한 번 그려진 다음 프레임에 부른다
-            if (_isLoadingRequested && _loading == null && Time.frameCount > _loadingRequestedFrame)
-            {
-                BeginLoadingWorld();
-            }
-        }
-
-        private void LateUpdate()
-        {
-            bool isLoading = _isLoadingRequested;
             if (_menuPresenter != null)
             {
                 _menuPresenter.Present(!isLoading);
             }
-            if (_settingsPresenter != null)
-            {
-                _settingsPresenter.Present(_isSettingsOpen && !isLoading, in _volume);
-            }
             if (_loadingPresenter != null)
             {
-                float ratio = isLoading ? ReadLoadingRatio() : 0f;
-                _loadingPresenter.Present(isLoading, ratio, ratio >= 1f);
+                _loadingPresenter.Present(isLoading, loadingRatio, canEnter);
             }
-            if (_musicViewContext != null)
-            {
-                MusicViewSystem.Present(_musicViewContext);
-            }
-            if (_userInterfaceSoundViewContext != null)
-            {
-                UserInterfaceSoundViewSystem.Present(_userInterfaceSoundRequests, _userInterfaceSoundViewContext);
-            }
-            _userInterfaceSoundRequests.Clear();
         }
 
-        // 실제 불러온 비율과 최소 시간 중 덜 지난 쪽을 0~1로 돌려준다. 1이면 씬을 바꿔도 된다. 불러오기 전이면 0이다
-        private float ReadLoadingRatio()
+        // 씬의 다른 오브젝트가 Awake를 마친 뒤에 App에 등록한다. App이 Initialize를 불러 Presenter를 연결한다
+        private void Start()
         {
-            if (_loading == null)
+            App app = App.Instance;
+            if (app == null)
             {
-                return 0f;
-            }
-
-            float loadedRatio = Mathf.Clamp01(_loading.progress / LOADED_PROGRESS);
-            if (_rule.minimumLoadingTicks <= 0)
-            {
-                return loadedRatio;
-            }
-
-            float minimumSeconds = _rule.minimumLoadingTicks * Time.fixedDeltaTime;
-            float timeRatio = Mathf.Clamp01((Time.unscaledTime - _loadingStartTime) / minimumSeconds);
-            return Mathf.Min(loadedRatio, timeRatio);
-        }
-
-        private void HandleCommand(in MenuCommand command)
-        {
-            // 로딩을 요청하면 메뉴가 숨겨지므로, 그 뒤에 남은 메뉴 명령은 정상적으로 무시한다. 로딩 화면의 들어가기만 받는다
-            if (_isLoadingRequested && command.type != MenuCommandType.EnterWorld)
-            {
+                Debug.LogError("MenuFlow >> App이 없어 메뉴를 연결하지 않았다. Menu 씬에 App 프리팹이 배치되어 있는지 확인한다.");
                 return;
             }
 
-            switch (command.type)
-            {
-                case MenuCommandType.Start:
-                    RequestLoadingWorld();
-                    break;
-                case MenuCommandType.EnterWorld:
-                    EnterWorld();
-                    break;
-                case MenuCommandType.Exit:
-                    SaveVolume();
-                    Quit();
-                    break;
-                default:
-                    Debug.LogWarning($"MenuFlow >> 처리하지 않는 메뉴 명령 {command.type}을 버렸다.");
-                    break;
-            }
+            app.RegisterMenuFlow(this, _musicDefinition);
         }
 
-        // 로딩 화면을 보이도록 요청만 한다. 불러오기는 다음 프레임의 BeginLoadingWorld가 시작한다.
-        private void RequestLoadingWorld()
+        private void OnDestroy()
         {
-            if (!_hasRule)
+            App app = App.Instance;
+            if (app != null)
             {
-                Debug.LogError("MenuFlow >> Menu Settings Definition이 연결되어 있지 않아 시작 명령을 버렸다.");
-                return;
+                app.UnregisterMenuFlow(this);
             }
-
-            if (!Application.CanStreamedLevelBeLoaded(_rule.worldSceneName))
-            {
-                Debug.LogError($"MenuFlow >> 씬 {_rule.worldSceneName}이 Build Settings에 없어 불러올 수 없다.");
-                return;
-            }
-
-            // World 씬의 World가 저장된 볼륨을 다시 읽으므로, 설정을 닫지 않고 시작해도 바꾼 볼륨이 남도록 먼저 저장한다
-            SaveVolume();
-            _isSettingsOpen = false;
-            _isLoadingRequested = true;
-            _loadingRequestedFrame = Time.frameCount;
-            _loadingStartTime = Time.unscaledTime;
-        }
-
-        private void BeginLoadingWorld()
-        {
-            _loading = SceneManager.LoadSceneAsync(_rule.worldSceneName);
-            // 들어가기 버튼을 누를 때까지 씬 활성화를 막아 둔다
-            _loading.allowSceneActivation = false;
-        }
-
-        // 불러오기와 최소 시간이 끝났으면 막아 둔 씬 활성화를 풀어 World로 넘어간다.
-        private void EnterWorld()
-        {
-            if (_loading == null || ReadLoadingRatio() < 1f)
-            {
-                Debug.LogWarning("MenuFlow >> 아직 불러오기가 끝나지 않아 들어가기 명령을 버렸다.");
-                return;
-            }
-
-            // 버튼을 여러 번 눌러도 이미 true라 결과가 같다
-            _loading.allowSceneActivation = true;
-        }
-
-        private void HandleSettingsCommand(in SettingsCommand command)
-        {
-            // 로딩을 요청하면 설정 화면이 숨겨지므로, 그 뒤에 남은 설정 명령은 정상적으로 무시한다
-            if (_isLoadingRequested)
-            {
-                return;
-            }
-
-            if (command.type == SettingsCommandType.Open)
-            {
-                _isSettingsOpen = true;
-                return;
-            }
-
-            if (command.type == SettingsCommandType.Close)
-            {
-                _isSettingsOpen = false;
-                SaveVolume();
-                return;
-            }
-
-            if (!AudioVolumeUtility.Apply(ref _volume, in command) && !_hasReportedVolumeOutOfRange)
-            {
-                Debug.LogWarning($"MenuFlow >> {command.type} 볼륨 {command.value}이 0~1 밖이라 범위 안으로 맞췄다. 슬라이더의 Min/Max Value를 확인한다. 이 경고는 한 번만 남긴다.");
-                _hasReportedVolumeOutOfRange = true;
-            }
-            PresentVolume();
-        }
-
-        // Audio Settings Definition이 없으면 Start에서 경고했으므로 로그 없이 건너뛴다
-        private void PresentVolume()
-        {
-            if (_audioVolumeViewContext != null)
-            {
-                AudioVolumeViewSystem.Present(in _volume, _audioVolumeViewContext);
-            }
-        }
-
-        // Audio Settings Definition이 없으면 저장된 볼륨을 시작값 1로 덮어쓰지 않도록 저장하지 않는다. Start에서 경고했다
-        private void SaveVolume()
-        {
-            if (_audioVolumeViewContext != null)
-            {
-                AudioVolumeStore.Save(in _volume);
-            }
-        }
-
-        // Menu 씬에 배경음악 오브젝트를 만들어 평소 곡의 AudioSource를 둔다. 씬과 함께 사라지므로 World로 넘어가면 곡도 멈춘다.
-        // Music Definition이나 평소 곡이 없으면 null을 돌려준다. 메뉴에는 보스가 없어 보스 곡 부분을 빼면 World.CreateMusicViewContext와 같은 코드다. World를 나눌 때 함께 정리한다
-        private MusicViewContext CreateMusicViewContext()
-        {
-            MusicDefinition definition = _musicDefinition;
-            if (definition == null)
-            {
-                Debug.LogError("MenuFlow >> Music Definition이 연결되어 있지 않아 배경음악이 나오지 않는다.");
-                return null;
-            }
-
-            if (definition.normalClip == null)
-            {
-                Debug.LogError("MenuFlow >> Music Definition에 Normal Clip이 연결되어 있지 않아 배경음악이 나오지 않는다.");
-                return null;
-            }
-
-            if (definition.outputGroup == null)
-            {
-                Debug.LogWarning("MenuFlow >> Music Definition에 Output Group이 연결되어 있지 않아 배경음악이 Audio Mixer를 거치지 않는다.");
-            }
-
-            if (definition.fadeTicks < 0)
-            {
-                Debug.LogWarning("MenuFlow >> Music Definition의 Fade Ticks가 0보다 작아 페이드 없이 곡을 튼다.");
-            }
-
-            GameObject musicObject = new GameObject(MUSIC_OBJECT_NAME);
-            AudioSource source = musicObject.AddComponent<AudioSource>();
-            source.clip = definition.normalClip;
-            source.outputAudioMixerGroup = definition.outputGroup;
-            source.loop = true;
-            source.playOnAwake = false;
-            source.spatialBlend = 0f;
-            source.volume = 0f;
-            return new MusicViewContext
-            {
-                normalSource = source,
-                volume = definition.volume,
-                fadeTicks = definition.fadeTicks
-            };
-        }
-
-        // Menu 씬에 UI 소리 오브젝트를 만든다. 일시정지 중에도 버튼 소리가 들리도록 ignoreListenerPause를 켠다.
-        // User Interface Sound Definition이 없으면 null을 돌려준다. World.CreateUserInterfaceSoundViewContext와 같은 코드다. World를 나눌 때 함께 정리한다
-        private UserInterfaceSoundViewContext CreateUserInterfaceSoundViewContext()
-        {
-            UserInterfaceSoundDefinition definition = _userInterfaceSoundDefinition;
-            if (definition == null)
-            {
-                Debug.LogError("MenuFlow >> User Interface Sound Definition이 연결되어 있지 않아 버튼 소리가 나지 않는다.");
-                return null;
-            }
-
-            if (definition.outputGroup == null)
-            {
-                Debug.LogWarning("MenuFlow >> User Interface Sound Definition에 Output Group이 연결되어 있지 않아 버튼 소리가 Audio Mixer를 거치지 않는다.");
-            }
-
-            GameObject soundObject = new GameObject(USER_INTERFACE_SOUND_OBJECT_NAME);
-            AudioSource source = soundObject.AddComponent<AudioSource>();
-            source.outputAudioMixerGroup = definition.outputGroup;
-            source.playOnAwake = false;
-            source.spatialBlend = 0f;
-            source.ignoreListenerPause = true;
-            return new UserInterfaceSoundViewContext
-            {
-                source = source,
-                clickClips = definition.clickClips,
-                closeClips = definition.closeClips,
-                volume = definition.volume
-            };
-        }
-
-        // World.Quit과 같은 코드다. World를 나눌 때 함께 정리한다
-        private static void Quit()
-        {
-#if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-#else
-            Application.Quit();
-#endif
         }
     }
 }

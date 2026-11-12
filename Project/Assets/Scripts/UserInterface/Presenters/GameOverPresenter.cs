@@ -11,19 +11,19 @@ namespace TopView.UserInterface.Presenters
     {
         [SerializeField] private GameOverView _view;
 
-        private CommandBuffer _commandBuffer;
+        private List<SceneCommand> _sceneCommands;
         // 버튼 소리를 넣을 목록
         private List<UserInterfaceSoundKind> _soundRequests;
         private bool _isShown;
 
         /// <summary>
-        /// 명령을 넣을 버퍼를 받고 View를 숨긴다. 판을 준비할 때 World가 부른다.
+        /// 명령을 넣을 목록을 받고 View를 숨긴다. 판을 준비할 때 World가 부른다.
         /// </summary>
-        /// <param name="commandBuffer">이번 판의 명령 버퍼</param>
+        /// <param name="sceneCommands">씬과 앱 전환 명령 목록</param>
         /// <param name="soundRequests">UI 소리 요청 목록</param>
-        public void Initialize(CommandBuffer commandBuffer, List<UserInterfaceSoundKind> soundRequests)
+        public void Initialize(List<SceneCommand> sceneCommands, List<UserInterfaceSoundKind> soundRequests)
         {
-            _commandBuffer = commandBuffer;
+            _sceneCommands = sceneCommands;
             _soundRequests = soundRequests;
             _view.SetVisible(false);
             _isShown = false;
@@ -71,13 +71,13 @@ namespace TopView.UserInterface.Presenters
 
         private void AddCommand(SceneCommandType type)
         {
-            if (_commandBuffer == null)
+            if (_sceneCommands == null)
             {
-                Debug.LogWarning($"GameOverPresenter >> 명령 버퍼가 연결되지 않아 {type} 명령을 버렸다.");
+                Debug.LogWarning($"GameOverPresenter >> 씬 명령 목록이 연결되지 않아 {type} 명령을 버렸다.");
                 return;
             }
 
-            _commandBuffer.sceneCommands.Add(new SceneCommand { type = type });
+            _sceneCommands.Add(new SceneCommand { type = type });
         }
 
         private void AddSound(UserInterfaceSoundKind kind)

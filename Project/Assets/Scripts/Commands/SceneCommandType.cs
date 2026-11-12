@@ -8,6 +8,10 @@ namespace TopView.Commands
         // 게임을 끝낸다
         Exit,
         // 판을 끝내고 Menu 씬으로 돌아간다
-        ReturnToMenu
+        ReturnToMenu,
+        // 로딩 화면을 보이고 World 씬을 비동기로 불러온다
+        LoadWorld,
+        // 불러오기가 끝난 World 씬으로 넘어간다
+        EnterWorld
     }
 }

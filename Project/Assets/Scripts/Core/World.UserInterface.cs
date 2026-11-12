@@ -13,11 +13,12 @@ namespace TopView.Core
     // UI: Presenter를 찾아 연결하고, 매 프레임 필요한 데이터만 넘긴다
     public partial class World
     {
-        // 버튼 소리
-        [SerializeField] private UserInterfaceSoundDefinition _userInterfaceSoundDefinition;
-
-        // Presenter가 이번 프레임에 넣은 버튼 소리 요청. LateUpdate 끝에 비운다
-        private readonly List<UserInterfaceSoundKind> _userInterfaceSoundRequests = new List<UserInterfaceSoundKind>();
+        // App의 씬과 앱 전환 명령 목록. App이 World를 등록할 때 넘긴다
+        private List<SceneCommand> _sceneCommands;
+        // App의 설정 명령 목록. App이 World를 등록할 때 넘긴다
+        private List<SettingsCommand> _settingsCommands;
+        // App의 UI 소리 요청 목록. App이 World를 등록할 때 넘긴다
+        private List<UserInterfaceSoundKind> _userInterfaceSoundRequests;
         private GameOverPresenter _gameOverPresenter;
         private RemainingTimePresenter _remainingTimePresenter;
         private ScorePresenter _scorePresenter;
@@ -28,10 +29,7 @@ namespace TopView.Core
         private ReloadPresenter _reloadPresenter;
         private BossHealthPresenter _bossHealthPresenter;
         private PausePresenter _pausePresenter;
-        private SettingsPresenter _settingsPresenter;
         private UpgradePresenter _upgradePresenter;
-
-        private const string USER_INTERFACE_SOUND_OBJECT_NAME = "User Interface Sound";
 
         private void BindPresenters()
         {
@@ -42,7 +40,7 @@ namespace TopView.Core
             }
             else
             {
-                _gameOverPresenter.Initialize(_commandBuffer, _userInterfaceSoundRequests);
+                _gameOverPresenter.Initialize(_sceneCommands, _userInterfaceSoundRequests);
             }
 
             _remainingTimePresenter = FindAnyObjectByType<RemainingTimePresenter>();
@@ -132,17 +130,7 @@ namespace TopView.Core
             }
             else
             {
-                _pausePresenter.Initialize(_commandBuffer, _userInterfaceSoundRequests);
-            }
-
-            _settingsPresenter = FindAnyObjectByType<SettingsPresenter>();
-            if (_settingsPresenter == null)
-            {
-                Debug.LogError("World >> 씬에 SettingsPresenter가 없다.");
-            }
-            else
-            {
-                _settingsPresenter.Initialize(_commandBuffer.settingsCommands, _userInterfaceSoundRequests);
+                _pausePresenter.Initialize(_commandBuffer, _sceneCommands, _settingsCommands, _userInterfaceSoundRequests);
             }
 
             _upgradePresenter = FindAnyObjectByType<UpgradePresenter>();
@@ -156,7 +144,7 @@ namespace TopView.Core
             }
         }
 
-        private void PresentUserInterface()
+        private void PresentUserInterface(bool isSettingsOpen)
         {
             GamePhase phase = _progress.phase;
             if (_gameOverPresenter != null)
@@ -178,15 +166,11 @@ namespace TopView.Core
             // 설정 화면이 열려 있으면 그 뒤의 일시정지 버튼을 누르지 않도록 일시정지 화면을 숨긴다. 강화 화면도 같은 일시정지라 그동안 숨긴다
             if (_pausePresenter != null)
             {
-                _pausePresenter.Present(_progress.isPaused && !_isSettingsOpen && !_progress.isUpgradeOpen);
+                _pausePresenter.Present(_progress.isPaused && !isSettingsOpen && !_progress.isUpgradeOpen);
             }
             if (_upgradePresenter != null)
             {
                 _upgradePresenter.Present(_progress.isUpgradeOpen && phase == GamePhase.Playing);
-            }
-            if (_settingsPresenter != null)
-            {
-                _settingsPresenter.Present(_isSettingsOpen, in _volume);
             }
 
             if (!TryFindAlivePlayer(out int playerIndex))
@@ -214,37 +198,6 @@ namespace TopView.Core
             }
 
             PresentEnemyInterface();
-        }
-
-        // 판이 있는 씬에 UI 소리 오브젝트를 만든다. 일시정지 중에도 버튼 소리가 들리도록 ignoreListenerPause를 켠다.
-        // User Interface Sound Definition이 없으면 null을 돌려준다. MenuFlow에 같은 코드가 있다. World를 나눌 때 함께 정리한다
-        private UserInterfaceSoundViewContext CreateUserInterfaceSoundViewContext()
-        {
-            UserInterfaceSoundDefinition definition = _userInterfaceSoundDefinition;
-            if (definition == null)
-            {
-                Debug.LogError("World >> User Interface Sound Definition이 연결되어 있지 않아 버튼 소리가 나지 않는다.");
-                return null;
-            }
-
-            if (definition.outputGroup == null)
-            {
-                Debug.LogWarning("World >> User Interface Sound Definition에 Output Group이 연결되어 있지 않아 버튼 소리가 Audio Mixer를 거치지 않는다.");
-            }
-
-            GameObject soundObject = new GameObject(USER_INTERFACE_SOUND_OBJECT_NAME);
-            AudioSource source = soundObject.AddComponent<AudioSource>();
-            source.outputAudioMixerGroup = definition.outputGroup;
-            source.playOnAwake = false;
-            source.spatialBlend = 0f;
-            source.ignoreListenerPause = true;
-            return new UserInterfaceSoundViewContext
-            {
-                source = source,
-                clickClips = definition.clickClips,
-                closeClips = definition.closeClips,
-                volume = definition.volume
-            };
         }
 
         private bool TryFindAlivePlayer(out int playerIndex)

@@ -20,7 +20,7 @@ namespace TopView.UserInterface.Presenters
         private float _presentedSoundEffectVolume;
 
         /// <summary>
-        /// 명령을 넣을 목록을 받고 View를 숨긴다. 그 씬의 흐름을 맡은 쪽(MenuFlow, World)이 시작할 때 부른다.
+        /// 명령을 넣을 목록을 받고 View를 숨긴다. App이 씬을 등록할 때 부른다.
         /// </summary>
         /// <param name="commands">설정 명령 목록</param>
         /// <param name="soundRequests">UI 소리 요청 목록</param>

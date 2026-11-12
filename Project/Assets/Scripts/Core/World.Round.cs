@@ -83,7 +83,6 @@ namespace TopView.Core
 
             _rule = gameSettings.rule;
             _lootRule = lootDefinition.rule;
-            _flowRule = gameSettings.flowRule;
             _enemySpawners = enemySpawners;
             _enemySpawnerStates = new EnemySpawnerStateComponent[enemySpawners.Length];
             _playerDetectors = playerDetectors;
@@ -157,9 +156,6 @@ namespace TopView.Core
             _playerManaPresenter = null;
             _bossHealthPresenter = null;
             _pausePresenter = null;
-            _settingsPresenter = null;
-            _isSettingsOpen = false;
-            _userInterfaceSoundRequests.Clear();
         }
 
         // 이번 판의 저장소 크기와 View 표에 맞춰 View 실행 상태를 만들고 씬의 카메라를 찾는다.
@@ -209,10 +205,8 @@ namespace TopView.Core
                     viewKinds = new int[_loots.entities.Length],
                     viewPools = new Stack<LootView>[_lootPrefabs.Length]
                 },
-                music = CreateMusicViewContext(),
                 pause = new PauseViewContext(),
-                cursor = new CursorViewContext(),
-                userInterfaceSound = CreateUserInterfaceSoundViewContext()
+                cursor = new CursorViewContext()
             };
             for (int kind = 0; kind < enemyKindCount; kind++)
             {

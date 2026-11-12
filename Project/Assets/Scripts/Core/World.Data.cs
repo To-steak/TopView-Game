@@ -34,8 +34,6 @@ namespace TopView.Core
         private GameRuleComponent _rule;
         // 전리품 규칙 값. 판 시작 때 Definition에서 복사한다
         private LootRuleComponent _lootRule;
-        // 판이 있는 씬의 흐름 값. 판 시작 때 Definition에서 복사한다. Logic은 쓰지 않는다
-        private GameFlowRuleComponent _flowRule;
         // 적 스포너 목록. 판 시작 때 켜진 Enemy Spawner Authoring에서 채운다
         private EnemySpawnerComponent[] _enemySpawners;
         // 적 스포너 상태 목록. 번호가 enemySpawners와 같다
