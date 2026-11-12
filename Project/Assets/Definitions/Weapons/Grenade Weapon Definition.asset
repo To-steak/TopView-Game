@@ -30,17 +30,19 @@ MonoBehaviour:
       speed: 10
       radius: 0.15
       lifetimeTicks: 0
-      chargePerTick: 3
-      maxThrowDistance: 10
       flightTicks: 50
       arcHeight: 2
       explosionRadius: 3
       collisionLayer:
         serializedVersion: 2
         m_Bits: 4294966856
+    throwing:
+      chargePerTick: 3
+      maxThrowDistance: 10
     explosionRadiusIncreasePerLevel: 0
-    meleeRadius: 0
-    meleeOffset: 0
+    meleeShape:
+      radius: 0
+      offset: 0
     meleeRangeRatioPerLevel: 0
     muzzleOffset: {x: 0, y: 0, z: 0}
   modelPrefab: {fileID: 3006573835764851770, guid: 88eec3c3ac7a9b54c966aeba2bec804e, type: 3}

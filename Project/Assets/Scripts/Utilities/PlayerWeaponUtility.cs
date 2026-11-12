@@ -81,18 +81,18 @@ namespace TopView.Utilities
         /// <summary>
         /// 충전량에 비례한 거리로 착탄점을 구한다. 던지는 쪽의 앞 방향(XZ)으로 거리만큼 떨어진 곳이며, 높이는 던지는 쪽의 발 높이다.
         /// </summary>
-        /// <param name="projectile">던질 투사체</param>
+        /// <param name="throwing">던지는 무기의 조준 값</param>
         /// <param name="position">던지는 쪽의 위치(발)</param>
         /// <param name="rotation">던지는 쪽의 회전</param>
         /// <param name="throwCharge">투척 충전량(0~100)</param>
         /// <returns>착탄점(월드)</returns>
-        public static Vector3 GetThrowTargetPosition(in ProjectileComponent projectile, Vector3 position, Quaternion rotation, int throwCharge)
+        public static Vector3 GetThrowTargetPosition(in ThrowComponent throwing, Vector3 position, Quaternion rotation, int throwCharge)
         {
             Vector3 forward = rotation * Vector3.forward;
             forward.y = 0f;
             forward.Normalize();
 
-            float distance = Mathf.Max(0f, projectile.maxThrowDistance) * Mathf.Clamp(throwCharge, 0, MAX_THROW_CHARGE) / MAX_THROW_CHARGE;
+            float distance = Mathf.Max(0f, throwing.maxThrowDistance) * Mathf.Clamp(throwCharge, 0, MAX_THROW_CHARGE) / MAX_THROW_CHARGE;
             return position + forward * distance;
         }
 

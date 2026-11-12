@@ -50,6 +50,10 @@ namespace TopView.Editor
             {
                 DrawRelative(weapon, nameof(WeaponComponent.startingReserveAmmo));
                 DrawRelative(weapon, nameof(WeaponComponent.projectile));
+                if (kind == WeaponKind.Throw)
+                {
+                    DrawRelative(weapon, nameof(WeaponComponent.throwing));
+                }
                 DrawRelative(weapon, nameof(WeaponComponent.explosionRadiusIncreasePerLevel));
             }
             else

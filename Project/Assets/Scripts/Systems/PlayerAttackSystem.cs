@@ -89,7 +89,7 @@ namespace TopView.Systems
                         return false;
                     }
                     weaponSlots.reserveAmmo[weaponIndex]--;
-                    Vector3 targetPosition = PlayerWeaponUtility.GetThrowTargetPosition(in weapon.projectile, position, rotation, actionState.throwCharge);
+                    Vector3 targetPosition = PlayerWeaponUtility.GetThrowTargetPosition(in weapon.throwing, position, rotation, actionState.throwCharge);
                     RequestProjectile(position, rotation, in weapon, damage, explosionRadius, Vector3.zero, targetPosition, projectileSpawnRequests);
                     break;
 

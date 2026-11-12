@@ -27,6 +27,8 @@ namespace TopView.Components
         public float attackIntervalRatioPerLevel;
         // 내보내는 투사체. Ranged와 Throw가 쓴다
         public ProjectileComponent projectile;
+        // 던지기 전에 착탄점을 정하는 값. Throw만 쓴다
+        public ThrowComponent throwing;
         // 강화 레벨마다 투사체 폭발 반지름이 늘어나는 양(유닛). 0이면 늘지 않는다. Straight는 0레벨 폭발 반지름이 0이어도 1레벨부터 폭발한다. Ranged와 Throw가 쓴다
         public float explosionRadiusIncreasePerLevel;
         // 근접 판정 구의 크기와 위치. Melee만 쓴다

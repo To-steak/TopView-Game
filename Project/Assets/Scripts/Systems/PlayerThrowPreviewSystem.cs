@@ -72,7 +72,7 @@ namespace TopView.Systems
             }
 
             Vector3 launchPosition = position + rotation * weapon.muzzleOffset;
-            Vector3 targetPosition = PlayerWeaponUtility.GetThrowTargetPosition(in projectile, position, rotation, throwCharge);
+            Vector3 targetPosition = PlayerWeaponUtility.GetThrowTargetPosition(in weapon.throwing, position, rotation, throwCharge);
 
             preview.points[0] = launchPosition;
             int pointCount = 1;

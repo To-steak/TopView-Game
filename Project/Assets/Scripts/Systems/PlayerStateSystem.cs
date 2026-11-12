@@ -63,7 +63,7 @@ namespace TopView.Systems
 
                     case PlayerState.ThrowCharge:
                         // 취소하면 탄약을 쓰지 않고 Idle이나 Move로, 공격 키를 떼면 그때의 충전량으로 Throw에 들어간다
-                        float chargePerTick = weapons[weaponSlot.currentIndex].projectile.chargePerTick;
+                        float chargePerTick = weapons[weaponSlot.currentIndex].throwing.chargePerTick;
                         if (actionState.elapsedTicks == 0 && chargePerTick <= 0f)
                         {
                             Debug.LogWarning($"PlayerStateSystem >> chargePerTick({chargePerTick})이 0 이하라 투척 충전량이 0에 머문다. chargePerTick은 0보다 커야 한다.");
