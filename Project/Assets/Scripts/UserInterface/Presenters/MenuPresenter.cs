@@ -18,7 +18,7 @@ namespace TopView.UserInterface.Presenters
         private bool _isShown;
 
         /// <summary>
-        /// 명령을 넣을 목록을 받고 View를 보인다. MenuFlow가 App에 등록될 때 부른다.
+        /// 명령을 넣을 목록을 받고 View를 보인다. Menu가 App에 등록될 때 부른다.
         /// </summary>
         /// <param name="sceneCommands">씬과 앱 전환 명령 목록</param>
         /// <param name="settingsCommands">설정 명령 목록</param>

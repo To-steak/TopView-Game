@@ -9,7 +9,7 @@ namespace TopView.Core
 {
     // Menu 씬에 하나 배치해 메뉴의 화면을 맡는다. App에 등록되면 메뉴 Presenter를 연결하고, App이 부를 때 표시한다.
     // 씬 전환과 로딩, 설정 화면, 배경음악 재생은 App이 한다.
-    public class MenuFlow : MonoBehaviour
+    public class Menu : MonoBehaviour
     {
         [SerializeField] private MenuPresenter _menuPresenter;
         [SerializeField] private LoadingPresenter _loadingPresenter;
@@ -17,7 +17,7 @@ namespace TopView.Core
         [SerializeField] private MusicDefinition _musicDefinition;
 
         /// <summary>
-        /// App의 명령 목록을 받아 메뉴 Presenter를 연결한다. App이 MenuFlow를 등록할 때 부른다.
+        /// App의 명령 목록을 받아 메뉴 Presenter를 연결한다. App이 Menu를 등록할 때 부른다.
         /// </summary>
         /// <param name="sceneCommands">씬과 앱 전환 명령 목록. App이 소비한다</param>
         /// <param name="settingsCommands">설정 명령 목록. App이 소비한다</param>
@@ -26,7 +26,7 @@ namespace TopView.Core
         {
             if (_menuPresenter == null)
             {
-                Debug.LogError("MenuFlow >> Menu Presenter가 연결되어 있지 않다.");
+                Debug.LogError("Menu >> Menu Presenter가 연결되어 있지 않다.");
             }
             else
             {
@@ -35,7 +35,7 @@ namespace TopView.Core
 
             if (_loadingPresenter == null)
             {
-                Debug.LogError("MenuFlow >> Loading Presenter가 연결되어 있지 않다.");
+                Debug.LogError("Menu >> Loading Presenter가 연결되어 있지 않다.");
             }
             else
             {
@@ -67,11 +67,11 @@ namespace TopView.Core
             App app = App.Instance;
             if (app == null)
             {
-                Debug.LogError("MenuFlow >> App이 없어 메뉴를 연결하지 않았다. Menu 씬에 App 프리팹이 배치되어 있는지 확인한다.");
+                Debug.LogError("Menu >> App이 없어 메뉴를 연결하지 않았다. Menu 씬에 App 프리팹이 배치되어 있는지 확인한다.");
                 return;
             }
 
-            app.RegisterMenuFlow(this, _musicDefinition);
+            app.RegisterMenu(this, _musicDefinition);
         }
 
         private void OnDestroy()
@@ -79,7 +79,7 @@ namespace TopView.Core
             App app = App.Instance;
             if (app != null)
             {
-                app.UnregisterMenuFlow(this);
+                app.UnregisterMenu(this);
             }
         }
     }

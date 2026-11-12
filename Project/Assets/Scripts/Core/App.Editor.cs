@@ -11,7 +11,7 @@ namespace TopView.Core
         // App 프리팹을 찾을 때 쓰는 검색어. 프리팹 파일 이름에 이 글자가 들어 있어야 한다
         private const string EDITOR_PREFAB_SEARCH_FILTER = "App t:Prefab";
 
-        // 씬 오브젝트의 Awake 뒤, Start 전에 불린다. World와 MenuFlow는 Start에서 등록하므로 여기서 만든 App에도 등록된다
+        // 씬 오브젝트의 Awake 뒤, Start 전에 불린다. World와 Menu는 Start에서 등록하므로 여기서 만든 App에도 등록된다
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void CreateForEditor()
         {

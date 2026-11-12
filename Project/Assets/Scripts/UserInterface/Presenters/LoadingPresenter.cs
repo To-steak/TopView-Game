@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace TopView.UserInterface.Presenters
 {
-    // 씬을 불러오는 동안 LoadingView를 보이고, MenuFlow가 매 프레임 넘기는 진행률을 보여 준다.
+    // 씬을 불러오는 동안 LoadingView를 보이고, Menu가 매 프레임 넘기는 진행률을 보여 준다.
     // 들어갈 준비가 되면 들어가기 버튼을 누를 수 있게 하고, 버튼 입력을 씬 명령으로 넣는다.
     public class LoadingPresenter : MonoBehaviour
     {
@@ -21,7 +21,7 @@ namespace TopView.UserInterface.Presenters
         private bool _presentedCanEnter;
 
         /// <summary>
-        /// 명령을 넣을 목록을 받고 View를 숨긴다. MenuFlow가 App에 등록될 때 부른다.
+        /// 명령을 넣을 목록을 받고 View를 숨긴다. Menu가 App에 등록될 때 부른다.
         /// </summary>
         /// <param name="sceneCommands">씬과 앱 전환 명령 목록</param>
         /// <param name="soundRequests">UI 소리 요청 목록</param>
