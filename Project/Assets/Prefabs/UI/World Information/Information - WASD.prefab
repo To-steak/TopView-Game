@@ -340,7 +340,7 @@ GameObject:
   - component: {fileID: 8453159493740156079}
   - component: {fileID: 837134907866245230}
   m_Layer: 5
-  m_Name: Text (TMP) - Jump
+  m_Name: Text (TMP) - Run
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -396,14 +396,14 @@ MonoBehaviour:
   m_text: "\uB2EC\uB9AC\uAE30"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f681d8e0020a607458e83a31b94c7bde, type: 2}
-  m_sharedMaterial: {fileID: 6052687970377488732, guid: f681d8e0020a607458e83a31b94c7bde, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: 19f97977b498f8a44b4c34d8e060df6e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4281479730
+  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -533,14 +533,14 @@ MonoBehaviour:
   m_text: "\uC774\uB3D9"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f681d8e0020a607458e83a31b94c7bde, type: 2}
-  m_sharedMaterial: {fileID: 6052687970377488732, guid: f681d8e0020a607458e83a31b94c7bde, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: 19f97977b498f8a44b4c34d8e060df6e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4281479730
+  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -1225,14 +1225,14 @@ MonoBehaviour:
   m_text: "\uC810\uD504"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: f681d8e0020a607458e83a31b94c7bde, type: 2}
-  m_sharedMaterial: {fileID: 6052687970377488732, guid: f681d8e0020a607458e83a31b94c7bde, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: 19f97977b498f8a44b4c34d8e060df6e, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4281479730
+  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
