@@ -77,7 +77,7 @@ namespace TopView.Systems
                 return false;
             }
 
-            PlayerMovementUtility.GetCapsulePoints(in movement, rotation, Vector3.zero, out Vector3 top, out Vector3 bottom);
+            PlayerMovementUtility.GetCapsulePoints(in movement, rotation, Vector3.zero, out _, out Vector3 bottom);
             float capsuleLowestHeight = bottom.y - movement.capsuleRadius;
             destination = hit.position + Vector3.up * (movement.skinWidth - capsuleLowestHeight);
             return true;

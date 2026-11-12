@@ -1,5 +1,4 @@
 using System;
-using UnityEngine.Serialization;
 
 namespace TopView.Components
 {
@@ -8,10 +7,8 @@ namespace TopView.Components
     public struct PlayerVitalsComponent
     {
         // 시작할 때의 최대 체력. 게임 중의 최대 체력은 HealthComponent.max이며 강화로 오른다
-        [FormerlySerializedAs("maxHealth")]
         public float startingMaxHealth;
         // 시작할 때의 최대 마나. 게임 중의 최대 마나는 ManaComponent.max이며 강화로 오른다
-        [FormerlySerializedAs("maxMana")]
         public float startingMaxMana;
         // 마나 회복량(틱당)
         public float manaRecoveryPerTick;

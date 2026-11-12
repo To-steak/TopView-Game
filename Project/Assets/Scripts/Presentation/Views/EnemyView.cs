@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace TopView.Presentation.Views
 {
@@ -13,7 +12,6 @@ namespace TopView.Presentation.Views
         // 피해량 글자를 띄울 위치. 루트 바로 아래에 두어 애니메이션을 따라 흔들리지 않게 한다
         public Transform damageAnchor;
         // 적의 효과음(피격, 공격)을 재생하는 AudioSource. 적의 자리에서 들리도록 Spatial Blend를 3D로 두고, Play On Awake와 Loop는 끈다. Output은 Audio Mixer의 효과음 그룹으로 둔다
-        [FormerlySerializedAs("hitSoundSource")]
         public AudioSource soundEffectSource;
         // 피해를 받을 때 재생할 소리. 없으면 null
         public AudioClip hitClip;

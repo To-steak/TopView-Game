@@ -1,6 +1,4 @@
 using System;
-using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace TopView.Components
 {
@@ -15,7 +13,6 @@ namespace TopView.Components
         // 공격 상태가 끝난 뒤 이 공격을 다시 고를 수 있을 때까지의 시간(틱). 0이면 바로 고를 수 있다
         public int cooldownTicks;
         // 공격 상태에 들어간 뒤 Body 판정이 시작되기까지의 시간(틱). Body만 쓴다. 투사체 공격은 shots의 칸마다 정한다
-        [FormerlySerializedAs("commitTicks")]
         public int startTicks;
         // 공격 상태에 들어간 뒤 Body 판정이 끝나기까지의 시간(틱). startTicks보다 커야 한다. Body만 쓴다
         public int endTicks;

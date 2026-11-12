@@ -8,8 +8,6 @@ namespace TopView.Records
     {
         // 상태가 바뀐 적
         public EntityIdentifier enemy;
-        // 바뀌기 전 상태
-        public EnemyState previousState;
         // 바뀐 상태
         public EnemyState state;
         // state가 Attack일 때 쓰는 공격 종류

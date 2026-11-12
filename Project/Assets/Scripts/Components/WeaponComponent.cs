@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace TopView.Components
 {
@@ -17,13 +16,10 @@ namespace TopView.Components
         // 강화 레벨마다 최대 탄약 수가 오르는 비율. 반올림하며, 늘어난 만큼 탄창에도 바로 넣는다. 0이면 오르지 않는다. Ranged만 쓴다
         public float maxAmmoRatioPerLevel;
         // 시작할 때 장전된 탄약 수. Ranged만 쓴다
-        [FormerlySerializedAs("currentAmmo")]
         public int startingCurrentAmmo;
         // 시작할 때 예비 탄약 수. Ranged와 Throw가 쓴다
-        [FormerlySerializedAs("reserveAmmo")]
         public int startingReserveAmmo;
         // 공격 상태에 들어간 뒤 공격이 나가기까지의 시간(틱). Melee는 판정이 시작되고, Ranged와 Throw는 투사체를 내보낸다
-        [FormerlySerializedAs("attackCommitTicks")]
         public int attackStartTicks;
         // 공격 상태에 들어간 뒤 근접 판정이 끝나기까지의 시간(틱). attackStartTicks보다 커야 한다. Melee만 쓴다
         public int attackEndTicks;

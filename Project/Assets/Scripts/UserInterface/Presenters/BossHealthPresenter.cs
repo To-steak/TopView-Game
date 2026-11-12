@@ -1,6 +1,5 @@
 using TopView.UserInterface.Views;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace TopView.UserInterface.Presenters
 {
