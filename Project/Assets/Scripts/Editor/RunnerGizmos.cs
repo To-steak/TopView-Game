@@ -70,7 +70,7 @@ namespace TopView.Editor
                 Gizmos.color = new Color(1f, 0.5f, 0f);
                 GizmoShapes.DrawCircle(position, entity.behavior.stopDistance);
                 Gizmos.color = Color.cyan;
-                GizmoShapes.DrawCircle(position, entity.stats.hitRadius);
+                GizmoShapes.DrawCircle(position, entity.body.radius);
                 DrawBodyAttacks(entity.attackList.attacks, position, entity.rotation.current);
             }
         }

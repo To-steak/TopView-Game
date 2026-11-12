@@ -40,7 +40,7 @@ namespace TopView.Systems
                 ref readonly EnemyEntity enemy = ref enemies.entities[index];
                 if (enemy.isAlive && enemy.health.current > 0f)
                 {
-                    Add(enemyHitTargets, ref enemyHitTargetCount, index, enemy.generation, enemy.position.current, enemy.stats.hitRadius, float.NegativeInfinity, float.PositiveInfinity);
+                    Add(enemyHitTargets, ref enemyHitTargetCount, index, enemy.generation, enemy.position.current, enemy.body.radius, float.NegativeInfinity, float.PositiveInfinity);
                 }
             }
         }

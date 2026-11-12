@@ -12,16 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7faa2b326f566114093ce464b5910fc0, type: 3}
   m_Name: Enemy A Definition
   m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.EnemyDefinition
-  stats:
-    baseMaxHealth: 100
-    baseAttackDamage: 20
-    baseSpeed: 3
-    baseScore: 10
-    maxHealthIncrement: 20
-    attackDamageIncrement: 2
-    speedIncrement: 0.2
-    scoreIncrement: 3
-    hitRadius: 0.75
+  maxHealth:
+    baseValue: 100
+    incrementPerLevel: 20
+  attackDamage:
+    baseValue: 20
+    incrementPerLevel: 2
+  speed:
+    baseValue: 3
+    incrementPerLevel: 0.2
+  score:
+    baseValue: 10
+    incrementPerLevel: 3
+  body:
+    radius: 0.75
   behavior:
     stopDistance: 1
     acceleration: 8
@@ -47,8 +51,6 @@ MonoBehaviour:
         speed: 0
         radius: 0
         lifetimeTicks: 0
-        chargePerTick: 0
-        maxThrowDistance: 0
         flightTicks: 0
         arcHeight: 0
         explosionRadius: 0

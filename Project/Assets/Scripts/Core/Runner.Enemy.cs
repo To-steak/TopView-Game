@@ -176,7 +176,11 @@ namespace TopView.Core
                 spawnTemplates[kind] = new EnemySpawnRequest
                 {
                     enemyKindIndex = kind,
-                    stats = definition.stats,
+                    maxHealth = definition.maxHealth,
+                    attackDamage = definition.attackDamage,
+                    speed = definition.speed,
+                    score = definition.score,
+                    body = definition.body,
                     behavior = definition.behavior,
                     attacks = attacks,
                     loots = ReadLoots(definition.name, definition.loots)

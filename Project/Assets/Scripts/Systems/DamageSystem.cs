@@ -3,6 +3,7 @@ using TopView.Components;
 using TopView.Entities;
 using TopView.Records;
 using TopView.Requests;
+using TopView.Utilities;
 using UnityEngine;
 
 namespace TopView.Systems
@@ -65,7 +66,7 @@ namespace TopView.Systems
 
                 if (Apply(ref enemy.health, in request))
                 {
-                    AddKillScore(ref progress, in enemy.stats, enemy.combat.level);
+                    AddKillScore(ref progress, in enemy.score, enemy.combat.level);
                 }
             }
 
@@ -101,10 +102,10 @@ namespace TopView.Systems
             return health.current <= 0f;
         }
 
-        // 처치한 대상의 레벨에 맞는 점수를 더한다.
-        private static void AddKillScore(ref GameProgressComponent progress, in EnemyStatsComponent stats, int level)
+        // 처치한 대상의 레벨에 맞는 점수를 반올림해 더한다.
+        private static void AddKillScore(ref GameProgressComponent progress, in LevelScalingComponent score, int level)
         {
-            progress.score += stats.baseScore + level * stats.scoreIncrement;
+            progress.score += Mathf.RoundToInt(LevelScalingUtility.GetValue(in score, level));
         }
     }
 }

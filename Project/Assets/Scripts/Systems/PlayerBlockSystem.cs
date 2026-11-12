@@ -34,7 +34,7 @@ namespace TopView.Systems
                 ref readonly EnemyEntity enemy = ref enemies[index];
                 if (enemy.isAlive)
                 {
-                    BlockByCircle(ref position, enemy.position.current, capsuleRadius + enemy.stats.hitRadius);
+                    BlockByCircle(ref position, enemy.position.current, capsuleRadius + enemy.body.radius);
                 }
             }
         }

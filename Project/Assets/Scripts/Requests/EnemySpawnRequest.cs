@@ -14,8 +14,16 @@ namespace TopView.Requests
         public Quaternion rotation;
         // 레벨
         public int level;
-        // 체력·공격력·점수 값
-        public EnemyStatsComponent stats;
+        // 최대 체력
+        public LevelScalingComponent maxHealth;
+        // 공격력
+        public LevelScalingComponent attackDamage;
+        // 최고 이동 속도(유닛/초)
+        public LevelScalingComponent speed;
+        // 처치 점수
+        public LevelScalingComponent score;
+        // 몸체 크기
+        public BodyComponent body;
         // 행동 값
         public EnemyBehaviorComponent behavior;
         // 공격 목록. EnemySpawnSystem이 엔티티의 배열로 복사한다
