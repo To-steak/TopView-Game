@@ -19,9 +19,10 @@ MonoBehaviour:
     maxAmmoRatioPerLevel: 0.5
     startingCurrentAmmo: 8
     startingReserveAmmo: 32
-    attackStartTicks: 3
-    attackEndTicks: 0
-    attackDurationTicks: 0
+    timing:
+      startTicks: 3
+      endTicks: 0
+      durationTicks: 0
     attackIntervalTicks: 40
     attackIntervalRatioPerLevel: 0
     projectile:

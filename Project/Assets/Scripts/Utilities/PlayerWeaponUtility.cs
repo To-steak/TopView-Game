@@ -11,7 +11,7 @@ namespace TopView.Utilities
         private const int MAX_THROW_CHARGE = 100;
 
         /// <summary>
-        /// 공격 상태를 끝낼 때인지 판정한다. Ranged는 투사체를 내보내면 바로 끝나고, Melee와 Throw는 공격이 나간 뒤 attackDurationTicks까지 기다린다.
+        /// 공격 상태를 끝낼 때인지 판정한다. Ranged는 투사체를 내보내면 바로 끝나고, Melee와 Throw는 공격이 나간 뒤 timing.durationTicks까지 기다린다.
         /// </summary>
         /// <param name="actionState">행동 상태와 공격 진행</param>
         /// <param name="weapon">들고 있는 무기</param>
@@ -23,7 +23,7 @@ namespace TopView.Utilities
                 return false;
             }
 
-            return weapon.kind == WeaponKind.Ranged || actionState.elapsedTicks >= weapon.attackDurationTicks;
+            return weapon.kind == WeaponKind.Ranged || actionState.elapsedTicks >= weapon.timing.durationTicks;
         }
 
         /// <summary>

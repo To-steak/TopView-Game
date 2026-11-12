@@ -61,7 +61,8 @@ namespace TopView.Editor
             // 조준 평면의 높이에 모든 종류가 쓴다
             SerializedProperty muzzleOffset = weapon.FindPropertyRelative(nameof(WeaponComponent.muzzleOffset));
             EditorGUILayout.PropertyField(muzzleOffset);
-            MuzzleOffsetBaker.Draw((WeaponDefinition)target, muzzleOffset, weapon.FindPropertyRelative(nameof(WeaponComponent.attackStartTicks)).intValue);
+            SerializedProperty timing = weapon.FindPropertyRelative(nameof(WeaponComponent.timing));
+            MuzzleOffsetBaker.Draw((WeaponDefinition)target, muzzleOffset, timing.FindPropertyRelative(nameof(AttackTimingComponent.startTicks)).intValue);
             EditorGUI.indentLevel--;
 
             EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(WeaponDefinition.modelPrefab)));
@@ -81,7 +82,8 @@ namespace TopView.Editor
         // 공격 시간 칸과 클립 구간 변환 칸을 그린다. Melee는 Start/End/Duration, Throw는 Start/Duration, Ranged는 발사하면 끝나므로 Start만 쓴다.
         private static void DrawAttackTicks(SerializedProperty weapon, WeaponKind kind)
         {
-            SerializedProperty startTicks = weapon.FindPropertyRelative(nameof(WeaponComponent.attackStartTicks));
+            SerializedProperty timing = weapon.FindPropertyRelative(nameof(WeaponComponent.timing));
+            SerializedProperty startTicks = timing.FindPropertyRelative(nameof(AttackTimingComponent.startTicks));
             EditorGUILayout.PropertyField(startTicks);
             if (kind == WeaponKind.Ranged)
             {
@@ -89,7 +91,7 @@ namespace TopView.Editor
                 return;
             }
 
-            SerializedProperty durationTicks = weapon.FindPropertyRelative(nameof(WeaponComponent.attackDurationTicks));
+            SerializedProperty durationTicks = timing.FindPropertyRelative(nameof(AttackTimingComponent.durationTicks));
             if (kind == WeaponKind.Throw)
             {
                 EditorGUILayout.PropertyField(durationTicks);
@@ -97,7 +99,7 @@ namespace TopView.Editor
                 return;
             }
 
-            SerializedProperty endTicks = weapon.FindPropertyRelative(nameof(WeaponComponent.attackEndTicks));
+            SerializedProperty endTicks = timing.FindPropertyRelative(nameof(AttackTimingComponent.endTicks));
             EditorGUILayout.PropertyField(endTicks);
             EditorGUILayout.PropertyField(durationTicks);
             AnimationTickConverter.DrawRange(EditorGUILayout.GetControlRect(false, AnimationTickConverter.RangeHeight), startTicks, endTicks, durationTicks);

@@ -22,7 +22,7 @@ namespace TopView.Core
                 ref readonly EnemyAttackEntry entry = ref entries[attackIndex];
                 string ownerName = $"{definitionName} 공격 {attackIndex}번";
                 bool hasProjectile = entry.attack.kind != EnemyAttackKind.Body;
-                if (hasProjectile && !IsValidShots(ownerName, entry.attack.shots, entry.attack.durationTicks))
+                if (hasProjectile && !IsValidShots(ownerName, entry.attack.shots, entry.attack.timing.durationTicks))
                 {
                     continue;
                 }

@@ -34,9 +34,10 @@ MonoBehaviour:
       kind: 0
       attackRange: 2
       cooldownTicks: 200
-      startTicks: 15
-      endTicks: 27
-      durationTicks: 50
+      timing:
+        startTicks: 15
+        endTicks: 27
+        durationTicks: 50
       damageMultiplier: 1
       bodyRadius: 2
       bodyOffset: 1

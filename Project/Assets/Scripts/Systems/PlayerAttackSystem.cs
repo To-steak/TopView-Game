@@ -12,7 +12,7 @@ namespace TopView.Systems
     public static class PlayerAttackSystem
     {
         /// <summary>
-        /// Shot, Swing, Throw 상태에서 attackStartTicks가 지났고 아직 공격이 나가지 않았으면 공격을 내보낸다. PlayerMoveInputSystem 다음에 부른다.
+        /// Shot, Swing, Throw 상태에서 timing.startTicks가 지났고 아직 공격이 나가지 않았으면 공격을 내보낸다. PlayerMoveInputSystem 다음에 부른다.
         /// </summary>
         /// <param name="players">플레이어 저장소</param>
         /// <param name="projectileSpawnRequests">투사체 생성 요청 큐</param>
@@ -36,7 +36,7 @@ namespace TopView.Systems
 
                 ref PlayerWeaponSlotsComponent weaponSlot = ref entity.weaponSlots;
                 ref readonly WeaponComponent weapon = ref entity.weaponList.weapons[weaponSlot.currentIndex];
-                if (!actionState.isAttackCommitted && actionState.elapsedTicks >= weapon.attackStartTicks)
+                if (!actionState.isAttackCommitted && actionState.elapsedTicks >= weapon.timing.startTicks)
                 {
                     EntityIdentifier identifier = new EntityIdentifier { index = index, generation = entity.generation };
                     int weaponLevel = PlayerUpgradeUtility.GetWeaponLevel(in entity.upgradeLevels, weaponSlot.currentIndex);
@@ -55,7 +55,7 @@ namespace TopView.Systems
             }
         }
 
-        // 공격을 내보낸다. 탄약이 없으면 아무것도 하지 않는다. Ranged와 Throw는 투사체 생성 요청을, Melee는 attackEndTicks까지 이어지는 근접 판정 생성 요청을 넣는다.
+        // 공격을 내보낸다. 탄약이 없으면 아무것도 하지 않는다. Ranged와 Throw는 투사체 생성 요청을, Melee는 timing.endTicks까지 이어지는 근접 판정 생성 요청을 넣는다.
         // 공격이 실제로 나갔으면 true를 돌려준다. meleeCenter는 Melee일 때 판정 원의 중심이고, 그 밖에는 Vector3.zero다. 피해량, 근접 범위, 폭발 반지름은 무기 강화 레벨을 반영한다.
         private static bool CommitAttack(ref PlayerActionStateComponent actionState, ref PlayerWeaponSlotsComponent weaponSlots, Vector3 position, Quaternion rotation, in EntityIdentifier identifier, in WeaponComponent weapon, in PlayerUpgradeComponent upgrade, int weaponLevel, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, out Vector3 meleeCenter)
         {
@@ -103,7 +103,7 @@ namespace TopView.Systems
                         center = meleeCenter,
                         radius = weapon.meleeRadius * meleeRangeScale,
                         damage = damage,
-                        durationTicks = weapon.attackEndTicks - weapon.attackStartTicks
+                        durationTicks = weapon.timing.endTicks - weapon.timing.startTicks
                     });
                     break;
 

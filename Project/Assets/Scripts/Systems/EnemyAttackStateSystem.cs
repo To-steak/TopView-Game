@@ -59,7 +59,7 @@ namespace TopView.Systems
                 float damage = entity.combat.attackDamage * attack.damageMultiplier;
                 if (attack.kind == EnemyAttackKind.Body)
                 {
-                    if (actionState.committedShotCount == 0 && actionState.elapsedTicks >= attack.startTicks)
+                    if (actionState.committedShotCount == 0 && actionState.elapsedTicks >= attack.timing.startTicks)
                     {
                         actionState.committedShotCount = 1;
                         CommitBody(in attack, position, rotation.current, damage, in identifier, meleeSpawnRequests);
@@ -85,7 +85,7 @@ namespace TopView.Systems
             }
         }
 
-        // Body 공격을 내보낸다. endTicks까지 이어지는 근접 판정 생성 요청을 넣는다.
+        // Body 공격을 내보낸다. timing.endTicks까지 이어지는 근접 판정 생성 요청을 넣는다.
         private static void CommitBody(in EnemyAttackComponent attack, Vector3 position, Quaternion rotation, float damage, in EntityIdentifier owner, Queue<MeleeSpawnRequest> meleeSpawnRequests)
         {
             meleeSpawnRequests.Enqueue(new MeleeSpawnRequest
@@ -95,7 +95,7 @@ namespace TopView.Systems
                 center = position + rotation * Vector3.forward * attack.bodyOffset,
                 radius = attack.bodyRadius,
                 damage = damage,
-                durationTicks = attack.endTicks - attack.startTicks
+                durationTicks = attack.timing.endTicks - attack.timing.startTicks
             });
         }
 

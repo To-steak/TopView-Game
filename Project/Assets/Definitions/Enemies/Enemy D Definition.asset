@@ -34,9 +34,10 @@ MonoBehaviour:
       kind: 2
       attackRange: 100
       cooldownTicks: 500
-      startTicks: 25
-      endTicks: 0
-      durationTicks: 60
+      timing:
+        startTicks: 0
+        endTicks: 0
+        durationTicks: 60
       damageMultiplier: 1
       bodyRadius: 0
       bodyOffset: 0
@@ -64,9 +65,10 @@ MonoBehaviour:
       kind: 3
       attackRange: 100
       cooldownTicks: 250
-      startTicks: 88
-      endTicks: 0
-      durationTicks: 110
+      timing:
+        startTicks: 0
+        endTicks: 0
+        durationTicks: 110
       damageMultiplier: 1
       bodyRadius: 0
       bodyOffset: 0
