@@ -45,8 +45,8 @@ namespace TopView.Systems
             int[] reserveAmmo = ReuseIntArray(entity.weaponSlots.reserveAmmo, weapons.Length);
             for (int weaponIndex = 0; weaponIndex < weapons.Length; weaponIndex++)
             {
-                currentAmmo[weaponIndex] = weapons[weaponIndex].startingCurrentAmmo;
-                reserveAmmo[weaponIndex] = weapons[weaponIndex].startingReserveAmmo;
+                currentAmmo[weaponIndex] = weapons[weaponIndex].ammo.startingCurrent;
+                reserveAmmo[weaponIndex] = weapons[weaponIndex].ammo.startingReserve;
             }
             Vector3[] previewPoints = ReusePreviewPointArray(entity.throwPreview.points, GetPreviewPointCapacity(weapons));
             int[] weaponLevels = ReuseIntArray(entity.upgradeLevels.weaponLevels, weapons.Length);

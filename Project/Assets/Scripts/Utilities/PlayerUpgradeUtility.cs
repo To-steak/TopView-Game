@@ -110,7 +110,7 @@ namespace TopView.Utilities
         /// <returns>공격 간격(틱)</returns>
         public static int GetAttackIntervalTicks(in WeaponComponent weapon, in PlayerUpgradeComponent upgrade, int weaponLevel)
         {
-            int intervalTicks = Mathf.RoundToInt(Decrease(weapon.attackIntervalTicks, weapon.attackIntervalRatioPerLevel, weaponLevel));
+            int intervalTicks = Mathf.RoundToInt(Decrease(weapon.attackIntervalTicks, weapon.upgrade.attackIntervalRatioPerLevel, weaponLevel));
             return Mathf.Max(intervalTicks, Mathf.Min(weapon.attackIntervalTicks, upgrade.minAttackIntervalTicks));
         }
 
@@ -122,7 +122,7 @@ namespace TopView.Utilities
         /// <returns>장전할 수 있는 최대 탄약 수</returns>
         public static int GetMaxAmmo(in WeaponComponent weapon, int weaponLevel)
         {
-            return Mathf.RoundToInt(Increase(weapon.maxAmmo, weapon.maxAmmoRatioPerLevel, weaponLevel));
+            return Mathf.RoundToInt(Increase(weapon.ammo.max, weapon.upgrade.maxAmmoRatioPerLevel, weaponLevel));
         }
 
         /// <summary>
@@ -133,7 +133,7 @@ namespace TopView.Utilities
         /// <returns>폭발 반지름(유닛, XZ). 0이면 폭발하지 않는다</returns>
         public static float GetExplosionRadius(in WeaponComponent weapon, int weaponLevel)
         {
-            return weapon.projectile.explosionRadius + weapon.explosionRadiusIncreasePerLevel * weaponLevel;
+            return weapon.projectile.explosionRadius + weapon.upgrade.explosionRadiusIncreasePerLevel * weaponLevel;
         }
 
         /// <summary>
@@ -144,7 +144,7 @@ namespace TopView.Utilities
         /// <returns>1 + meleeRangeRatioPerLevel × weaponLevel</returns>
         public static float GetMeleeRangeScale(in WeaponComponent weapon, int weaponLevel)
         {
-            return Increase(1f, weapon.meleeRangeRatioPerLevel, weaponLevel);
+            return Increase(1f, weapon.upgrade.meleeRangeRatioPerLevel, weaponLevel);
         }
     }
 }

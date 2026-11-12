@@ -15,16 +15,15 @@ MonoBehaviour:
   weapon:
     kind: 2
     damage: 150
-    maxAmmo: 0
-    maxAmmoRatioPerLevel: 0
-    startingCurrentAmmo: 0
-    startingReserveAmmo: 5
+    ammo:
+      max: 0
+      startingCurrent: 0
+      startingReserve: 5
     timing:
       startTicks: 15
       endTicks: 0
       durationTicks: 30
     attackIntervalTicks: 0
-    attackIntervalRatioPerLevel: 0
     projectile:
       kind: 1
       speed: 10
@@ -39,11 +38,14 @@ MonoBehaviour:
     throwing:
       chargePerTick: 3
       maxThrowDistance: 10
-    explosionRadiusIncreasePerLevel: 0
     meleeShape:
       radius: 0
       offset: 0
-    meleeRangeRatioPerLevel: 0
+    upgrade:
+      maxAmmoRatioPerLevel: 0
+      attackIntervalRatioPerLevel: 0
+      explosionRadiusIncreasePerLevel: 0
+      meleeRangeRatioPerLevel: 0
     muzzleOffset: {x: 0, y: 0, z: 0}
   modelPrefab: {fileID: 3006573835764851770, guid: 88eec3c3ac7a9b54c966aeba2bec804e, type: 3}
   projectilePrefab: {fileID: 3006573835764851770, guid: c8836d5c1f9260a41aafb72573635c50, type: 3}

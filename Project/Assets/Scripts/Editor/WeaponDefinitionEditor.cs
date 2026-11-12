@@ -1,6 +1,7 @@
 using TopView.Components;
 using TopView.Definitions;
 using UnityEditor;
+using UnityEngine;
 
 namespace TopView.Editor
 {
@@ -10,6 +11,10 @@ namespace TopView.Editor
     public class WeaponDefinitionEditor : UnityEditor.Editor
     {
         private const string SCRIPT_PROPERTY_NAME = "m_Script";
+        // 묶음 안으로 들어가 이름이 짧아진 탄약 칸에 붙이는 이름
+        private const string MAX_AMMO_LABEL = "Max Ammo";
+        private const string STARTING_CURRENT_AMMO_LABEL = "Starting Current Ammo";
+        private const string STARTING_RESERVE_AMMO_LABEL = "Starting Reserve Ammo";
 
         /// <summary>
         /// 공통 칸을 그리고, 무기 종류에 맞는 칸만 이어서 그린다.
@@ -28,6 +33,9 @@ namespace TopView.Editor
             WeaponKind kind = (WeaponKind)kindProperty.intValue;
             bool usesProjectile = kind != WeaponKind.Melee;
 
+            SerializedProperty ammo = weapon.FindPropertyRelative(nameof(WeaponComponent.ammo));
+            SerializedProperty upgrade = weapon.FindPropertyRelative(nameof(WeaponComponent.upgrade));
+
             EditorGUILayout.LabelField(weapon.displayName, EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
             EditorGUILayout.PropertyField(kindProperty);
@@ -36,30 +44,30 @@ namespace TopView.Editor
             if (kind != WeaponKind.Throw)
             {
                 DrawRelative(weapon, nameof(WeaponComponent.attackIntervalTicks));
-                DrawRelative(weapon, nameof(WeaponComponent.attackIntervalRatioPerLevel));
+                DrawRelative(upgrade, nameof(WeaponUpgradeRuleComponent.attackIntervalRatioPerLevel));
             }
 
             if (kind == WeaponKind.Ranged)
             {
-                DrawRelative(weapon, nameof(WeaponComponent.maxAmmo));
-                DrawRelative(weapon, nameof(WeaponComponent.maxAmmoRatioPerLevel));
-                DrawRelative(weapon, nameof(WeaponComponent.startingCurrentAmmo));
+                DrawRelative(ammo, nameof(AmmoComponent.max), MAX_AMMO_LABEL);
+                DrawRelative(upgrade, nameof(WeaponUpgradeRuleComponent.maxAmmoRatioPerLevel));
+                DrawRelative(ammo, nameof(AmmoComponent.startingCurrent), STARTING_CURRENT_AMMO_LABEL);
             }
 
             if (usesProjectile)
             {
-                DrawRelative(weapon, nameof(WeaponComponent.startingReserveAmmo));
+                DrawRelative(ammo, nameof(AmmoComponent.startingReserve), STARTING_RESERVE_AMMO_LABEL);
                 DrawRelative(weapon, nameof(WeaponComponent.projectile));
                 if (kind == WeaponKind.Throw)
                 {
                     DrawRelative(weapon, nameof(WeaponComponent.throwing));
                 }
-                DrawRelative(weapon, nameof(WeaponComponent.explosionRadiusIncreasePerLevel));
+                DrawRelative(upgrade, nameof(WeaponUpgradeRuleComponent.explosionRadiusIncreasePerLevel));
             }
             else
             {
                 DrawRelative(weapon, nameof(WeaponComponent.meleeShape));
-                DrawRelative(weapon, nameof(WeaponComponent.meleeRangeRatioPerLevel));
+                DrawRelative(upgrade, nameof(WeaponUpgradeRuleComponent.meleeRangeRatioPerLevel));
             }
             // 조준 평면의 높이에 모든 종류가 쓴다
             SerializedProperty muzzleOffset = weapon.FindPropertyRelative(nameof(WeaponComponent.muzzleOffset));
@@ -112,6 +120,12 @@ namespace TopView.Editor
         private static void DrawRelative(SerializedProperty parent, string propertyName)
         {
             EditorGUILayout.PropertyField(parent.FindPropertyRelative(propertyName), true);
+        }
+
+        // 부모 칸 안의 자식 칸 하나를 주어진 이름으로 그린다.
+        private static void DrawRelative(SerializedProperty parent, string propertyName, string label)
+        {
+            EditorGUILayout.PropertyField(parent.FindPropertyRelative(propertyName), new GUIContent(label), true);
         }
     }
 }
