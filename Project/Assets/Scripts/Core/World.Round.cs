@@ -15,6 +15,8 @@ namespace TopView.Core
     // 판 준비: 한 판의 데이터와 View 실행 상태를 만들고, 판을 끝낼 때 비운다
     public partial class World
     {
+        // 화면을 그리는 메인 카메라. 조준점, 이동 방향, 월드 UI가 기준으로 쓴다
+        [SerializeField] private UnityEngine.Camera _mainCamera;
         // 플레이어를 따라가는 시네머신 카메라
         [SerializeField] private PlayerCameraView _playerCameraView;
         // 적 체력 게이지, 월드 글자, 월드 정보 UI를 담는 월드 캔버스
@@ -162,7 +164,7 @@ namespace TopView.Core
             {
                 camera = new CameraViewContext
                 {
-                    mainCamera = UnityEngine.Camera.main,
+                    mainCamera = _mainCamera,
                     playerCameraView = _playerCameraView
                 },
                 player = new PlayerViewContext(),
@@ -223,7 +225,7 @@ namespace TopView.Core
             }
             if (viewContext.camera.mainCamera == null)
             {
-                Debug.LogError("World >> 씬에 MainCamera 태그를 가진 카메라가 없다.");
+                Debug.LogError("World >> Main Camera가 연결되어 있지 않아 조준과 카메라 기준 이동, 월드 UI가 동작하지 않는다.");
             }
             if (viewContext.camera.playerCameraView == null)
             {
