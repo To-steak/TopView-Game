@@ -68,6 +68,8 @@ namespace TopView.Core
                 PlayerDeathSystem.Tick(_world.players, _world.playerStateChangedRecords);
                 MeleeOwnerDeathSystem.Tick(_world.melees, _world.players, _world.meleeDespawnRequests);
                 MeleeDespawnSystem.Tick(_world.melees, _world.meleeDespawnRequests);
+                WeaponOwnerDeathSystem.Tick(_world.weapons, _world.players, _world.weaponDespawnRequests);
+                WeaponDespawnSystem.Tick(_world.weapons, _world.weaponDespawnRequests);
                 PlayerStateTimerSystem.Tick(_world.players);
                 // 누름 입력으로 정해진 상태를 뒤의 셋이 함께 읽는다. 이동 입력과 공격을 반영한 뒤에 상태를 넘기므로 이 순서를 지킨다
                 PlayerPressSystem.Tick(_world.players, in _world.commandBuffer.playerCommand, _world.playerStateChangeRequests);
@@ -114,7 +116,8 @@ namespace TopView.Core
                 // 레벨이 오른 틱에 생기는 적도 새 레벨로 나오도록 스포너보다 먼저 둔다
                 EnemyLevelSystem.Tick(_world.rule.enemyLevelUpIntervalTicks, ref _world.progress);
                 EnemySpawnerSystem.Tick(_world.progress.enemyLevel, _world.enemySpawners, _world.enemySpawnerStates, _world.enemySpawnTemplates, _world.enemySpawnerActivationRequests, _world.enemySpawnRequests);
-                PlayerSpawnSystem.Tick(_world.players, _world.playerSpawnRequests);
+                PlayerSpawnSystem.Tick(_world.players, _world.playerSpawnRequests, _world.weaponSpawnRequests);
+                WeaponSpawnSystem.Tick(_world.weapons, _world.players, _world.weaponSpawnRequests);
                 EnemySpawnSystem.Tick(_world.enemies, _world.enemySpawnRequests, _world.rule.navMeshSampleDistance);
                 ProjectileSpawnSystem.Tick(_world.projectiles, _world.projectileSpawnRequests);
                 MeleeSpawnSystem.Tick(_world.melees, _world.meleeSpawnRequests);

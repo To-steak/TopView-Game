@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace TopView.Systems
 {
-    // 플레이어 생성 요청을 받아 저장소의 빈 칸을 채운다. 틱 마지막에 부른다.
+    // 플레이어 생성 요청을 받아 저장소의 빈 칸을 채우고, 플레이어가 들 무기마다 무기 생성 요청을 넣는다. 틱 마지막에 WeaponSpawnSystem 앞에 부른다.
     public static class PlayerSpawnSystem
     {
         /// <summary>
@@ -15,7 +15,7 @@ namespace TopView.Systems
         /// </summary>
         /// <param name="players">플레이어 저장소</param>
         /// <param name="playerSpawnRequests">플레이어 생성 요청 큐</param>
-        public static void Tick(PlayerStorage players, Queue<PlayerSpawnRequest> playerSpawnRequests)
+        public static void Tick(PlayerStorage players, Queue<PlayerSpawnRequest> playerSpawnRequests, Queue<WeaponSpawnRequest> weaponSpawnRequests)
         {
             int droppedCount = 0;
             while (playerSpawnRequests.Count > 0)
@@ -27,7 +27,13 @@ namespace TopView.Systems
                     continue;
                 }
 
-                Spawn(ref players.entities[index], in request);
+                ref PlayerEntity entity = ref players.entities[index];
+                Spawn(ref entity, in request);
+                EntityIdentifier owner = new EntityIdentifier { index = index, generation = entity.generation };
+                for (int weaponIndex = 0; weaponIndex < request.weapons.Length; weaponIndex++)
+                {
+                    weaponSpawnRequests.Enqueue(new WeaponSpawnRequest { owner = owner, slotIndex = weaponIndex, weapon = request.weapons[weaponIndex] });
+                }
             }
 
             if (droppedCount > 0)
@@ -36,11 +42,17 @@ namespace TopView.Systems
             }
         }
 
-        // 칸 전체를 새 값으로 바꿔 이전 값이 남지 않게 한다. 무기 목록과 탄약 배열, 투척 미리보기 점 배열, 무기별 강화 레벨 배열만 다시 쓴다.
+        // 칸 전체를 새 값으로 바꿔 이전 값이 남지 않게 한다. 무기 목록과 무기 식별자 배열, 탄약 배열, 투척 미리보기 점 배열, 무기별 강화 레벨 배열만 다시 쓴다.
         private static void Spawn(ref PlayerEntity entity, in PlayerSpawnRequest request)
         {
             int generation = entity.generation + 1;
             WeaponComponent[] weapons = SpawnUtility.ReuseArray(entity.weaponList.weapons, request.weapons);
+            EntityIdentifier[] weaponIdentifiers = entity.weaponSlots.weapons;
+            if (weaponIdentifiers == null || weaponIdentifiers.Length != weapons.Length)
+            {
+                weaponIdentifiers = new EntityIdentifier[weapons.Length];
+            }
+            System.Array.Clear(weaponIdentifiers, 0, weaponIdentifiers.Length);
             int[] currentAmmo = ReuseIntArray(entity.weaponSlots.currentAmmo, weapons.Length);
             int[] reserveAmmo = ReuseIntArray(entity.weaponSlots.reserveAmmo, weapons.Length);
             for (int weaponIndex = 0; weaponIndex < weapons.Length; weaponIndex++)
@@ -69,6 +81,7 @@ namespace TopView.Systems
                 weaponList = new WeaponListComponent { weapons = weapons },
                 weaponSlots = new PlayerWeaponSlotsComponent
                 {
+                    weapons = weaponIdentifiers,
                     currentAmmo = currentAmmo,
                     reserveAmmo = reserveAmmo,
                     currentIndex = 0,

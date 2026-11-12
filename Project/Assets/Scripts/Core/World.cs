@@ -40,6 +40,8 @@ namespace TopView.Core
         public PlayerStorage players;
         // 적 저장소
         public EnemyStorage enemies;
+        // 무기 저장소
+        public WeaponStorage weapons;
         // 근접 판정 저장소
         public MeleeStorage melees;
         // 투사체 저장소
@@ -60,6 +62,8 @@ namespace TopView.Core
 
         // 플레이어 생성 요청 큐
         public Queue<PlayerSpawnRequest> playerSpawnRequests = new Queue<PlayerSpawnRequest>();
+        // 무기 생성 요청 큐
+        public Queue<WeaponSpawnRequest> weaponSpawnRequests = new Queue<WeaponSpawnRequest>();
         // 적 생성 요청 큐
         public Queue<EnemySpawnRequest> enemySpawnRequests = new Queue<EnemySpawnRequest>();
         // 적 스포너 발동 요청 큐
@@ -76,6 +80,8 @@ namespace TopView.Core
         public Queue<EnemyStateChangeRequest> enemyStateChangeRequests = new Queue<EnemyStateChangeRequest>();
         // 투사체 소멸 요청 큐
         public Queue<ProjectileDespawnRequest> projectileDespawnRequests = new Queue<ProjectileDespawnRequest>();
+        // 무기 소멸 요청 큐
+        public Queue<WeaponDespawnRequest> weaponDespawnRequests = new Queue<WeaponDespawnRequest>();
         // 근접 판정 소멸 요청 큐
         public Queue<MeleeDespawnRequest> meleeDespawnRequests = new Queue<MeleeDespawnRequest>();
         // 전리품 소멸 요청 큐
