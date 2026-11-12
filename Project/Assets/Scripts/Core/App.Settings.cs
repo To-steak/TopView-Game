@@ -5,23 +5,23 @@ using UnityEngine;
 
 namespace TopView.Core
 {
-    // 설정: 씬마다 설정 화면 Presenter를 찾아 연결하고, 설정 명령을 소비한다. 볼륨은 판의 결과와 상관없는 표시 설정이라 Tick이 아닌 여기서 처리한다
+    // 설정: 씬의 대표가 등록할 때 넘긴 설정 화면 Presenter를 연결하고, 설정 명령을 소비한다. 볼륨은 판의 결과와 상관없는 표시 설정이라 Tick이 아닌 여기서 처리한다
     public partial class App
     {
-        // 지금 씬의 설정 화면. 씬을 등록할 때 찾는다. 없으면 null
+        // 지금 씬의 설정 화면. 씬의 대표가 등록할 때 넘긴다. 없으면 null
         private SettingsPresenter _settingsPresenter;
         // 설정 화면이 열려 있는지
         private bool _isSettingsOpen;
         // 슬라이더 값이 0~1 밖이라는 경고를 이미 남겼는지. 슬라이더를 움직이는 동안 매 프레임 쌓이지 않게 한 번만 남긴다
         private bool _hasReportedVolumeOutOfRange;
 
-        private void BindSettingsPresenter()
+        private void BindSettingsPresenter(SettingsPresenter settingsPresenter)
         {
             _isSettingsOpen = false;
-            _settingsPresenter = FindAnyObjectByType<SettingsPresenter>();
+            _settingsPresenter = settingsPresenter;
             if (_settingsPresenter == null)
             {
-                Debug.LogError("App >> 씬에 SettingsPresenter가 없다.");
+                Debug.LogError("App >> 씬의 대표(World, Menu)에 Settings Presenter가 연결되어 있지 않아 설정 화면이 열리지 않는다.");
                 return;
             }
 

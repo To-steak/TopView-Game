@@ -10,133 +10,125 @@ using UnityEngine;
 
 namespace TopView.Core
 {
-    // UI: Presenter를 찾아 연결하고, 매 프레임 필요한 데이터만 넘긴다
+    // UI: 인스펙터에서 연결한 Presenter에 명령 목록을 넘기고, 매 프레임 필요한 데이터만 넘긴다
     public partial class World
     {
+        [SerializeField] private GameOverPresenter _gameOverPresenter;
+        [SerializeField] private RemainingTimePresenter _remainingTimePresenter;
+        [SerializeField] private ScorePresenter _scorePresenter;
+        [SerializeField] private GoldPresenter _goldPresenter;
+        [SerializeField] private PlayerHealthPresenter _playerHealthPresenter;
+        [SerializeField] private AmmoPresenter _ammoPresenter;
+        [SerializeField] private PlayerManaPresenter _playerManaPresenter;
+        [SerializeField] private ReloadPresenter _reloadPresenter;
+        [SerializeField] private BossHealthPresenter _bossHealthPresenter;
+        [SerializeField] private PausePresenter _pausePresenter;
+        [SerializeField] private UpgradePresenter _upgradePresenter;
+        // 설정 화면. 앱 수명의 UI라 World는 연결하지 않고, App에 등록할 때 넘긴다
+        [SerializeField] private SettingsPresenter _settingsPresenter;
+
         // App의 씬과 앱 전환 명령 목록. App이 World를 등록할 때 넘긴다
         private List<SceneCommand> _sceneCommands;
         // App의 설정 명령 목록. App이 World를 등록할 때 넘긴다
         private List<SettingsCommand> _settingsCommands;
         // App의 UI 소리 요청 목록. App이 World를 등록할 때 넘긴다
         private List<UserInterfaceSoundKind> _userInterfaceSoundRequests;
-        private GameOverPresenter _gameOverPresenter;
-        private RemainingTimePresenter _remainingTimePresenter;
-        private ScorePresenter _scorePresenter;
-        private GoldPresenter _goldPresenter;
-        private PlayerHealthPresenter _playerHealthPresenter;
-        private AmmoPresenter _ammoPresenter;
-        private PlayerManaPresenter _playerManaPresenter;
-        private ReloadPresenter _reloadPresenter;
-        private BossHealthPresenter _bossHealthPresenter;
-        private PausePresenter _pausePresenter;
-        private UpgradePresenter _upgradePresenter;
 
         private void BindPresenters()
         {
-            _gameOverPresenter = FindAnyObjectByType<GameOverPresenter>();
             if (_gameOverPresenter == null)
             {
-                Debug.LogError("World >> 씬에 GameOverPresenter가 없다.");
+                Debug.LogError("World >> Game Over Presenter가 연결되어 있지 않다.");
             }
             else
             {
                 _gameOverPresenter.Initialize(_sceneCommands, _userInterfaceSoundRequests);
             }
 
-            _remainingTimePresenter = FindAnyObjectByType<RemainingTimePresenter>();
             if (_remainingTimePresenter == null)
             {
-                Debug.LogError("World >> 씬에 RemainingTimePresenter가 없다.");
+                Debug.LogError("World >> Remaining Time Presenter가 연결되어 있지 않다.");
             }
             else
             {
                 _remainingTimePresenter.Initialize();
             }
 
-            _scorePresenter = FindAnyObjectByType<ScorePresenter>();
             if (_scorePresenter == null)
             {
-                Debug.LogError("World >> 씬에 ScorePresenter가 없다.");
+                Debug.LogError("World >> Score Presenter가 연결되어 있지 않다.");
             }
             else
             {
                 _scorePresenter.Initialize();
             }
 
-            _goldPresenter = FindAnyObjectByType<GoldPresenter>();
             if (_goldPresenter == null)
             {
-                Debug.LogError("World >> 씬에 GoldPresenter가 없다.");
+                Debug.LogError("World >> Gold Presenter가 연결되어 있지 않다.");
             }
             else
             {
                 _goldPresenter.Initialize();
             }
 
-            _playerHealthPresenter = FindAnyObjectByType<PlayerHealthPresenter>();
             if (_playerHealthPresenter == null)
             {
-                Debug.LogError("World >> 씬에 PlayerHealthPresenter가 없다.");
+                Debug.LogError("World >> Player Health Presenter가 연결되어 있지 않다.");
             }
             else
             {
                 _playerHealthPresenter.Initialize();
             }
 
-            _ammoPresenter = FindAnyObjectByType<AmmoPresenter>();
             if (_ammoPresenter == null)
             {
-                Debug.LogError("World >> 씬에 AmmoPresenter가 없다.");
+                Debug.LogError("World >> Ammo Presenter가 연결되어 있지 않다.");
             }
             else
             {
                 _ammoPresenter.Initialize();
             }
 
-            _playerManaPresenter = FindAnyObjectByType<PlayerManaPresenter>();
             if (_playerManaPresenter == null)
             {
-                Debug.LogError("World >> 씬에 PlayerManaPresenter가 없다.");
+                Debug.LogError("World >> Player Mana Presenter가 연결되어 있지 않다.");
             }
             else
             {
                 _playerManaPresenter.Initialize();
             }
 
-            _reloadPresenter = FindAnyObjectByType<ReloadPresenter>();
             if (_reloadPresenter == null)
             {
-                Debug.LogError("World >> 씬에 ReloadPresenter가 없다.");
+                Debug.LogError("World >> Reload Presenter가 연결되어 있지 않다.");
             }
             else
             {
                 _reloadPresenter.Initialize();
             }
 
-            _bossHealthPresenter = FindAnyObjectByType<BossHealthPresenter>();
             if (_bossHealthPresenter == null)
             {
-                Debug.LogError("World >> 씬에 BossHealthPresenter가 없다.");
+                Debug.LogError("World >> Boss Health Presenter가 연결되어 있지 않다.");
             }
             else
             {
                 _bossHealthPresenter.Initialize();
             }
 
-            _pausePresenter = FindAnyObjectByType<PausePresenter>();
             if (_pausePresenter == null)
             {
-                Debug.LogError("World >> 씬에 PausePresenter가 없다.");
+                Debug.LogError("World >> Pause Presenter가 연결되어 있지 않다.");
             }
             else
             {
                 _pausePresenter.Initialize(_commandBuffer, _sceneCommands, _settingsCommands, _userInterfaceSoundRequests);
             }
 
-            _upgradePresenter = FindAnyObjectByType<UpgradePresenter>();
             if (_upgradePresenter == null)
             {
-                Debug.LogError("World >> 씬에 UpgradePresenter가 없다.");
+                Debug.LogError("World >> Upgrade Presenter가 연결되어 있지 않다.");
             }
             else
             {

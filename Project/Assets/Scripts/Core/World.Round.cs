@@ -136,7 +136,7 @@ namespace TopView.Core
             BindPresenters();
         }
 
-        // 판을 멈추고 View 실행 상태와 Presenter 연결을 비운다. 씬을 다시 불러오기 전에 불러, 씬이 바뀌기까지 남은 프레임에 판이 돌지 않게 한다.
+        // 판을 멈추고 View 실행 상태를 비운다. 씬을 다시 불러오기 전에 불러, 씬이 바뀌기까지 남은 프레임에 판이 돌지 않게 한다.
         private void ClearRound()
         {
             if (_viewContext != null)
@@ -147,15 +147,6 @@ namespace TopView.Core
 
             _isRoundReady = false;
             _viewContext = null;
-            _gameOverPresenter = null;
-            _remainingTimePresenter = null;
-            _scorePresenter = null;
-            _goldPresenter = null;
-            _playerHealthPresenter = null;
-            _ammoPresenter = null;
-            _playerManaPresenter = null;
-            _bossHealthPresenter = null;
-            _pausePresenter = null;
         }
 
         // 이번 판의 저장소 크기와 View 표에 맞춰 View 실행 상태를 만들고 씬의 카메라를 찾는다.

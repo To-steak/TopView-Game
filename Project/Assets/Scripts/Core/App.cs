@@ -3,6 +3,7 @@ using TopView.Commands;
 using TopView.Components;
 using TopView.Definitions;
 using TopView.Presentation.ViewSystems;
+using TopView.UserInterface.Presenters;
 using UnityEngine;
 
 namespace TopView.Core
@@ -31,7 +32,8 @@ namespace TopView.Core
         /// </summary>
         /// <param name="world">등록할 World</param>
         /// <param name="musicDefinition">그 씬의 배경음악. 없으면 null</param>
-        public void RegisterWorld(World world, MusicDefinition musicDefinition)
+        /// <param name="settingsPresenter">그 씬의 설정 화면. 없으면 null</param>
+        public void RegisterWorld(World world, MusicDefinition musicDefinition, SettingsPresenter settingsPresenter)
         {
             if (world == null)
             {
@@ -41,7 +43,7 @@ namespace TopView.Core
 
             ReportRemainingScene();
             _world = world;
-            BindScene(musicDefinition, true);
+            BindScene(musicDefinition, true, settingsPresenter);
             world.Initialize(_sceneCommands, _settingsCommands, _userInterfaceSoundRequests);
         }
 
@@ -65,7 +67,8 @@ namespace TopView.Core
         /// </summary>
         /// <param name="menu">등록할 Menu</param>
         /// <param name="musicDefinition">그 씬의 배경음악. 없으면 null</param>
-        public void RegisterMenu(Menu menu, MusicDefinition musicDefinition)
+        /// <param name="settingsPresenter">그 씬의 설정 화면. 없으면 null</param>
+        public void RegisterMenu(Menu menu, MusicDefinition musicDefinition, SettingsPresenter settingsPresenter)
         {
             if (menu == null)
             {
@@ -75,7 +78,7 @@ namespace TopView.Core
 
             ReportRemainingScene();
             _menu = menu;
-            BindScene(musicDefinition, false);
+            BindScene(musicDefinition, false, settingsPresenter);
             menu.Initialize(_sceneCommands, _settingsCommands, _userInterfaceSoundRequests);
         }
 
@@ -221,10 +224,10 @@ namespace TopView.Core
         }
 
         // 새 씬의 배경음악을 만들고 설정 화면을 연결한다. 배경음악 오브젝트는 지금 씬에 만들어 씬과 함께 사라진다
-        private void BindScene(MusicDefinition musicDefinition, bool usesBossClip)
+        private void BindScene(MusicDefinition musicDefinition, bool usesBossClip, SettingsPresenter settingsPresenter)
         {
             _musicViewContext = CreateMusicViewContext(musicDefinition, usesBossClip);
-            BindSettingsPresenter();
+            BindSettingsPresenter(settingsPresenter);
         }
 
         // 지금 씬의 등록과 씬에 묶인 상태를 비운다. 남은 명령은 이전 씬의 것이라 버린다

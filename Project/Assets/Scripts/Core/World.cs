@@ -55,7 +55,7 @@ namespace TopView.Core
                 return;
             }
 
-            app.RegisterWorld(this, _musicDefinition);
+            app.RegisterWorld(this, _musicDefinition, _settingsPresenter);
         }
 
         private void OnDestroy()

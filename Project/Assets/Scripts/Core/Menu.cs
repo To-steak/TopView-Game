@@ -13,6 +13,8 @@ namespace TopView.Core
     {
         [SerializeField] private MenuPresenter _menuPresenter;
         [SerializeField] private LoadingPresenter _loadingPresenter;
+        // 설정 화면. 앱 수명의 UI라 Menu는 연결하지 않고, App에 등록할 때 넘긴다
+        [SerializeField] private SettingsPresenter _settingsPresenter;
         // Menu 씬의 배경음악 곡과 재생 값. App에 등록할 때 넘긴다
         [SerializeField] private MusicDefinition _musicDefinition;
 
@@ -71,7 +73,7 @@ namespace TopView.Core
                 return;
             }
 
-            app.RegisterMenu(this, _musicDefinition);
+            app.RegisterMenu(this, _musicDefinition, _settingsPresenter);
         }
 
         private void OnDestroy()
