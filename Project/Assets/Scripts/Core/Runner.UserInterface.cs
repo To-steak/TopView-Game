@@ -328,12 +328,13 @@ namespace TopView.Core
                 PlayerUpgradeUtility.Decrease(vitals.jumpManaCost, upgrade.jumpManaCostRatioPerLevel, level),
                 PlayerUpgradeUtility.Decrease(vitals.jumpManaCost, upgrade.jumpManaCostRatioPerLevel, level + 1));
 
-            int[] weaponLevels = levels.weaponLevels;
-            for (int weaponIndex = 0; weaponIndex < weaponLevels.Length; weaponIndex++)
+            EntityIdentifier[] weaponIdentifiers = weaponSlots.weapons;
+            for (int weaponIndex = 0; weaponIndex < weaponIdentifiers.Length; weaponIndex++)
             {
-                int weaponLevel = weaponLevels[weaponIndex];
+                ref readonly WeaponEntity weaponEntity = ref weapons[weaponIdentifiers[weaponIndex].index];
+                int weaponLevel = weaponEntity.upgradeLevel.level;
                 int cost = PlayerUpgradeUtility.GetCost(in upgrade, weaponLevel);
-                WeaponUpgradeEffectComponent effect = GetWeaponUpgradeEffect(in weapons[weaponSlots.weapons[weaponIndex].index].weapon, in upgrade, weaponLevel);
+                WeaponUpgradeEffectComponent effect = GetWeaponUpgradeEffect(in weaponEntity.weapon, in upgrade, weaponLevel);
                 _upgradePresenter.PresentWeapon(weaponIndex, weaponLevel, upgrade.maxLevel, cost, CanUpgrade(weaponLevel, cost, in upgrade, gold), in effect);
             }
         }

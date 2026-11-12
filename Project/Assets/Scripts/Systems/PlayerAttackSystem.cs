@@ -41,7 +41,7 @@ namespace TopView.Systems
                 if (!actionState.isAttackCommitted && actionState.elapsedTicks >= weapon.timing.startTicks)
                 {
                     EntityIdentifier identifier = new EntityIdentifier { index = index, generation = entity.generation };
-                    int weaponLevel = PlayerUpgradeUtility.GetWeaponLevel(in entity.upgradeLevels, weaponSlot.currentIndex);
+                    int weaponLevel = weaponEntity.upgradeLevel.level;
                     if (CommitAttack(ref actionState, ref weaponEntity.ammoState, entity.position.current, entity.rotation.current, in identifier, in weapon, in entity.upgrade, weaponLevel, projectileSpawnRequests, meleeSpawnRequests, out Vector3 meleeCenter))
                     {
                         attackCommittedRecords.Add(new PlayerAttackCommittedRecord

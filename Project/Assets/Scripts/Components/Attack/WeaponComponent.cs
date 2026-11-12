@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace TopView.Components
 {
-    // 무기 하나의 값. 생성 때 Definition에서 복사하며, 게임 중의 탄약은 무기 엔티티에, 강화 레벨은 플레이어 엔티티에 있다.
+    // 무기 하나의 값. 생성 때 Definition에서 복사하며, 게임 중의 탄약과 강화 레벨은 무기 엔티티에 있다.
     [Serializable]
     public struct WeaponComponent
     {

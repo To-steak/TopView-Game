@@ -16,5 +16,7 @@ namespace TopView.Entities
         public WeaponComponent weapon;
         // 지금 탄약 수
         public AmmoStateComponent ammoState;
+        // 강화 레벨
+        public UpgradeLevelComponent upgradeLevel;
     }
 }

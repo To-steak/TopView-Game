@@ -102,7 +102,7 @@ namespace TopView.Systems
                         isFinished = actionState.elapsedTicks >= action.reloadTicks;
                         if (isFinished)
                         {
-                            PlayerWeaponUtility.Reload(in weapon, ref weaponEntity.ammoState, PlayerUpgradeUtility.GetWeaponLevel(in entity.upgradeLevels, weaponSlot.currentIndex));
+                            PlayerWeaponUtility.Reload(in weapon, ref weaponEntity.ammoState, weaponEntity.upgradeLevel.level);
                         }
                         break;
 

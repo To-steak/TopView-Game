@@ -55,7 +55,7 @@ namespace TopView.Systems
                     continue;
                 }
 
-                if (command.isReloadPressed && PlayerWeaponUtility.CanReload(in weapon, in weaponEntity.ammoState, PlayerUpgradeUtility.GetWeaponLevel(in entity.upgradeLevels, weaponSlot.currentIndex)))
+                if (command.isReloadPressed && PlayerWeaponUtility.CanReload(in weapon, in weaponEntity.ammoState, weaponEntity.upgradeLevel.level))
                 {
                     stateChangeRequests.Enqueue(new PlayerStateChangeRequest { target = identifier, state = PlayerState.Reload, moveInput = command.moveDirection });
                     continue;

@@ -78,18 +78,6 @@ namespace TopView.Utilities
         }
 
         /// <summary>
-        /// 무기 하나의 강화 레벨을 돌려준다. 무기 번호는 무기 목록과 같은 번호여야 한다.
-        /// </summary>
-        /// <param name="levels">강화 레벨</param>
-        /// <param name="weaponIndex">무기 번호</param>
-        /// <returns>무기 강화 레벨</returns>
-        public static int GetWeaponLevel(in PlayerUpgradeLevelsComponent levels, int weaponIndex)
-        {
-            // 레벨 배열은 생성 때 무기 목록과 길이를 맞춘다. 번호가 배열 밖이면 0으로 대신하지 않고 예외로 드러낸다
-            return levels.weaponLevels[weaponIndex];
-        }
-
-        /// <summary>
         /// 강화가 반영된 무기 피해량을 돌려준다.
         /// </summary>
         /// <param name="weapon">무기</param>

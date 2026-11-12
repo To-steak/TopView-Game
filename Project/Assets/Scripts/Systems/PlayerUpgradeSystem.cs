@@ -49,7 +49,7 @@ namespace TopView.Systems
         // 버튼은 최대 레벨이거나 골드가 모자라면 눌리지 않으므로, 여기서 막히는 명령은 경고하고 버린다
         private static void Apply(ref PlayerUpgradeLevelsComponent levels, ref HealthComponent health, ref ManaComponent mana, in PlayerWeaponSlotsComponent weaponSlots, ref GameProgressComponent progress, in PlayerVitalsComponent vitals, in PlayerUpgradeComponent upgrade, WeaponEntity[] weaponEntities, in PlayerUpgradeCommand command)
         {
-            if (!TryGetLevel(in levels, in command, out int level))
+            if (!TryGetLevel(in levels, in weaponSlots, weaponEntities, in command, out int level))
             {
                 Debug.LogWarning($"PlayerUpgradeSystem >> 처리하지 않는 항목이거나 무기 번호 {command.weaponIndex}가 무기 목록 밖이라 {command.type} 강화 명령을 버렸다.");
                 return;
@@ -88,8 +88,8 @@ namespace TopView.Systems
                     levels.jumpManaCostLevel = nextLevel;
                     break;
                 case PlayerUpgradeCommandType.Weapon:
-                    levels.weaponLevels[command.weaponIndex] = nextLevel;
                     ref WeaponEntity weaponEntity = ref weaponEntities[weaponSlots.weapons[command.weaponIndex].index];
+                    weaponEntity.upgradeLevel.level = nextLevel;
                     FillAddedAmmo(ref weaponEntity.ammoState, in weaponEntity.weapon, level, nextLevel);
                     break;
             }
@@ -117,8 +117,8 @@ namespace TopView.Systems
             ammo.current += PlayerUpgradeUtility.GetMaxAmmo(in weapon, nextLevel) - PlayerUpgradeUtility.GetMaxAmmo(in weapon, previousLevel);
         }
 
-        // 항목의 지금 레벨을 꺼낸다. Weapon의 무기 번호가 레벨 배열 밖이거나 처리하지 않는 항목이면 false를 돌려준다
-        private static bool TryGetLevel(in PlayerUpgradeLevelsComponent levels, in PlayerUpgradeCommand command, out int level)
+        // 항목의 지금 레벨을 꺼낸다. Weapon은 그 무기 엔티티의 레벨이다. Weapon의 무기 번호가 무기 칸 밖이거나 처리하지 않는 항목이면 false를 돌려준다
+        private static bool TryGetLevel(in PlayerUpgradeLevelsComponent levels, in PlayerWeaponSlotsComponent weaponSlots, WeaponEntity[] weaponEntities, in PlayerUpgradeCommand command, out int level)
         {
             switch (command.type)
             {
@@ -138,13 +138,13 @@ namespace TopView.Systems
                     level = levels.jumpManaCostLevel;
                     return true;
                 case PlayerUpgradeCommandType.Weapon:
-                    int[] damageLevels = levels.weaponLevels;
-                    if (damageLevels == null || command.weaponIndex < 0 || command.weaponIndex >= damageLevels.Length)
+                    EntityIdentifier[] weaponIdentifiers = weaponSlots.weapons;
+                    if (weaponIdentifiers == null || command.weaponIndex < 0 || command.weaponIndex >= weaponIdentifiers.Length)
                     {
                         level = 0;
                         return false;
                     }
-                    level = damageLevels[command.weaponIndex];
+                    level = weaponEntities[weaponIdentifiers[command.weaponIndex].index].upgradeLevel.level;
                     return true;
                 default:
                     level = 0;
