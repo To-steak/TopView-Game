@@ -278,7 +278,8 @@ namespace TopView.Core
                 int weaponIndex = weaponSlot.currentIndex;
                 if (weaponIndex >= 0 && weaponIndex < weaponSlot.weapons.Length)
                 {
-                    _ammoPresenter.Present(true, true, weapons[weaponSlot.weapons[weaponIndex].index].weapon.kind, weaponSlot.currentAmmo[weaponIndex], weaponSlot.reserveAmmo[weaponIndex]);
+                    ref readonly WeaponEntity weaponEntity = ref weapons[weaponSlot.weapons[weaponIndex].index];
+                    _ammoPresenter.Present(true, true, weaponEntity.weapon.kind, weaponEntity.ammoState.current, weaponEntity.ammoState.reserve);
                 }
                 else
                 {

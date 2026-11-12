@@ -36,12 +36,13 @@ namespace TopView.Systems
                 }
 
                 ref PlayerWeaponSlotsComponent weaponSlot = ref entity.weaponSlots;
-                ref readonly WeaponComponent weapon = ref weapons.entities[weaponSlot.weapons[weaponSlot.currentIndex].index].weapon;
+                ref WeaponEntity weaponEntity = ref weapons.entities[weaponSlot.weapons[weaponSlot.currentIndex].index];
+                ref readonly WeaponComponent weapon = ref weaponEntity.weapon;
                 if (!actionState.isAttackCommitted && actionState.elapsedTicks >= weapon.timing.startTicks)
                 {
                     EntityIdentifier identifier = new EntityIdentifier { index = index, generation = entity.generation };
                     int weaponLevel = PlayerUpgradeUtility.GetWeaponLevel(in entity.upgradeLevels, weaponSlot.currentIndex);
-                    if (CommitAttack(ref actionState, ref weaponSlot, entity.position.current, entity.rotation.current, in identifier, in weapon, in entity.upgrade, weaponLevel, projectileSpawnRequests, meleeSpawnRequests, out Vector3 meleeCenter))
+                    if (CommitAttack(ref actionState, ref weaponEntity.ammoState, entity.position.current, entity.rotation.current, in identifier, in weapon, in entity.upgrade, weaponLevel, projectileSpawnRequests, meleeSpawnRequests, out Vector3 meleeCenter))
                     {
                         attackCommittedRecords.Add(new PlayerAttackCommittedRecord
                         {
@@ -58,30 +59,29 @@ namespace TopView.Systems
 
         // 공격을 내보낸다. 탄약이 없으면 아무것도 하지 않는다. Ranged와 Throw는 투사체 생성 요청을, Melee는 timing.endTicks까지 이어지는 근접 판정 생성 요청을 넣는다.
         // 공격이 실제로 나갔으면 true를 돌려준다. meleeCenter는 Melee일 때 판정 원의 중심이고, 그 밖에는 Vector3.zero다. 피해량, 근접 범위, 폭발 반지름은 무기 강화 레벨을 반영한다.
-        private static bool CommitAttack(ref PlayerActionStateComponent actionState, ref PlayerWeaponSlotsComponent weaponSlots, Vector3 position, Quaternion rotation, in EntityIdentifier identifier, in WeaponComponent weapon, in PlayerUpgradeComponent upgrade, int weaponLevel, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, out Vector3 meleeCenter)
+        private static bool CommitAttack(ref PlayerActionStateComponent actionState, ref AmmoStateComponent ammo, Vector3 position, Quaternion rotation, in EntityIdentifier identifier, in WeaponComponent weapon, in PlayerUpgradeComponent upgrade, int weaponLevel, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, out Vector3 meleeCenter)
         {
             meleeCenter = Vector3.zero;
             float damage = PlayerUpgradeUtility.GetDamage(in weapon, in upgrade, weaponLevel);
             float explosionRadius = PlayerUpgradeUtility.GetExplosionRadius(in weapon, weaponLevel);
             actionState.isAttackCommitted = true;
-            int weaponIndex = weaponSlots.currentIndex;
 
             switch (weapon.kind)
             {
                 case WeaponKind.Ranged:
-                    if (weaponSlots.currentAmmo[weaponIndex] <= 0)
+                    if (ammo.current <= 0)
                     {
-                        Debug.LogWarning($"PlayerAttackSystem >> 탄창 탄약이 {weaponSlots.currentAmmo[weaponIndex]}이라 원거리 공격을 내보내지 않았다.");
+                        Debug.LogWarning($"PlayerAttackSystem >> 탄창 탄약이 {ammo.current}이라 원거리 공격을 내보내지 않았다.");
                         return false;
                     }
-                    weaponSlots.currentAmmo[weaponIndex]--;
+                    ammo.current--;
                     RequestProjectile(position, rotation, in weapon, damage, explosionRadius, rotation * Vector3.forward * weapon.projectile.speed, Vector3.zero, projectileSpawnRequests);
                     break;
 
                 case WeaponKind.Throw:
-                    if (weaponSlots.reserveAmmo[weaponIndex] <= 0)
+                    if (ammo.reserve <= 0)
                     {
-                        Debug.LogWarning($"PlayerAttackSystem >> 남은 탄약이 {weaponSlots.reserveAmmo[weaponIndex]}이라 투척 공격을 내보내지 않았다.");
+                        Debug.LogWarning($"PlayerAttackSystem >> 남은 탄약이 {ammo.reserve}이라 투척 공격을 내보내지 않았다.");
                         return false;
                     }
                     if (weapon.projectile.flightTicks <= 0)
@@ -89,7 +89,7 @@ namespace TopView.Systems
                         Debug.LogWarning($"PlayerAttackSystem >> flightTicks({weapon.projectile.flightTicks})가 0 이하라 투척 공격을 내보내지 않았다. flightTicks는 0보다 커야 한다.");
                         return false;
                     }
-                    weaponSlots.reserveAmmo[weaponIndex]--;
+                    ammo.reserve--;
                     Vector3 targetPosition = PlayerWeaponUtility.GetThrowTargetPosition(in weapon.throwing, position, rotation, actionState.throwCharge);
                     RequestProjectile(position, rotation, in weapon, damage, explosionRadius, Vector3.zero, targetPosition, projectileSpawnRequests);
                     break;

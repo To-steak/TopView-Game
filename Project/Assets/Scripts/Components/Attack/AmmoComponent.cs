@@ -2,7 +2,7 @@ using System;
 
 namespace TopView.Components
 {
-    // 무기 하나의 탄약 값. 게임 중의 탄약 수는 PlayerWeaponSlotsComponent에 있다
+    // 무기 하나의 탄약 값. 게임 중의 탄약 수는 AmmoStateComponent에 있다
     [Serializable]
     public struct AmmoComponent
     {

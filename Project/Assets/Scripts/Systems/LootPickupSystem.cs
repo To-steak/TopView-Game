@@ -47,7 +47,7 @@ namespace TopView.Systems
                         continue;
                     }
 
-                    if (TryApply(in entity.loot, ref progress, ref player.health, weapons.entities, ref player.weaponSlots))
+                    if (TryApply(in entity.loot, ref progress, ref player.health, weapons.entities, in player.weaponSlots))
                     {
                         despawnRequests.Enqueue(new LootDespawnRequest
                         {
@@ -60,7 +60,7 @@ namespace TopView.Systems
         }
 
         // 전리품의 효과를 적용한다. 효과를 받을 수 없어 바닥에 남길 전리품이면 false를 돌려준다.
-        private static bool TryApply(in LootComponent loot, ref GameProgressComponent progress, ref HealthComponent health, WeaponEntity[] weaponEntities, ref PlayerWeaponSlotsComponent weaponSlots)
+        private static bool TryApply(in LootComponent loot, ref GameProgressComponent progress, ref HealthComponent health, WeaponEntity[] weaponEntities, in PlayerWeaponSlotsComponent weaponSlots)
         {
             switch (loot.kind)
             {
@@ -72,7 +72,7 @@ namespace TopView.Systems
                     health.current = Mathf.Min(health.max, health.current + loot.amount);
                     return true;
                 case LootKind.Ammo:
-                    return TryAddAmmo(weaponEntities, ref weaponSlots, loot.amount);
+                    return TryAddAmmo(weaponEntities, in weaponSlots, loot.amount);
                 default:
                     // 없앤 뒤에는 다시 들어오지 않으므로 틱마다 반복되지 않는다
                     Debug.LogError($"LootPickupSystem >> 효과가 없는 전리품 종류 {loot.kind}를 효과 없이 없앤다.");
@@ -81,14 +81,15 @@ namespace TopView.Systems
         }
 
         // 원거리 무기 전부의 예비 탄약을 더한다. 원거리 무기가 없으면 false를 돌려준다.
-        private static bool TryAddAmmo(WeaponEntity[] weaponEntities, ref PlayerWeaponSlotsComponent weaponSlots, int amount)
+        private static bool TryAddAmmo(WeaponEntity[] weaponEntities, in PlayerWeaponSlotsComponent weaponSlots, int amount)
         {
             bool hasRangedWeapon = false;
             for (int weaponIndex = 0; weaponIndex < weaponSlots.weapons.Length; weaponIndex++)
             {
-                if (weaponEntities[weaponSlots.weapons[weaponIndex].index].weapon.kind == WeaponKind.Ranged)
+                ref WeaponEntity weaponEntity = ref weaponEntities[weaponSlots.weapons[weaponIndex].index];
+                if (weaponEntity.weapon.kind == WeaponKind.Ranged)
                 {
-                    weaponSlots.reserveAmmo[weaponIndex] += amount;
+                    weaponEntity.ammoState.reserve += amount;
                     hasRangedWeapon = true;
                 }
             }

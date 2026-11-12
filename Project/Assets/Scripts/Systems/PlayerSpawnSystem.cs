@@ -42,7 +42,7 @@ namespace TopView.Systems
             }
         }
 
-        // 칸 전체를 새 값으로 바꿔 이전 값이 남지 않게 한다. 무기 식별자 배열과 탄약 배열, 투척 미리보기 점 배열, 무기별 강화 레벨 배열만 다시 쓴다.
+        // 칸 전체를 새 값으로 바꿔 이전 값이 남지 않게 한다. 무기 식별자 배열, 투척 미리보기 점 배열, 무기별 강화 레벨 배열만 다시 쓴다.
         private static void Spawn(ref PlayerEntity entity, in PlayerSpawnRequest request)
         {
             int generation = entity.generation + 1;
@@ -53,13 +53,6 @@ namespace TopView.Systems
                 weaponIdentifiers = new EntityIdentifier[weapons.Length];
             }
             System.Array.Clear(weaponIdentifiers, 0, weaponIdentifiers.Length);
-            int[] currentAmmo = ReuseIntArray(entity.weaponSlots.currentAmmo, weapons.Length);
-            int[] reserveAmmo = ReuseIntArray(entity.weaponSlots.reserveAmmo, weapons.Length);
-            for (int weaponIndex = 0; weaponIndex < weapons.Length; weaponIndex++)
-            {
-                currentAmmo[weaponIndex] = weapons[weaponIndex].ammo.startingCurrent;
-                reserveAmmo[weaponIndex] = weapons[weaponIndex].ammo.startingReserve;
-            }
             Vector3[] previewPoints = ReusePreviewPointArray(entity.throwPreview.points, GetPreviewPointCapacity(weapons));
             int[] weaponLevels = ReuseIntArray(entity.upgradeLevels.weaponLevels, weapons.Length);
             System.Array.Clear(weaponLevels, 0, weaponLevels.Length);
@@ -81,8 +74,6 @@ namespace TopView.Systems
                 weaponSlots = new PlayerWeaponSlotsComponent
                 {
                     weapons = weaponIdentifiers,
-                    currentAmmo = currentAmmo,
-                    reserveAmmo = reserveAmmo,
                     currentIndex = 0,
                     pendingIndex = 0
                 },
@@ -113,7 +104,7 @@ namespace TopView.Systems
             return slotArray != null && slotArray.Length == length ? slotArray : new Vector3[length];
         }
 
-        // 칸이 쓰던 int 배열(탄약, 강화 레벨)을 길이가 같으면 다시 쓴다. 내용은 부르는 쪽이 모두 채운다.
+        // 칸이 쓰던 int 배열(강화 레벨)을 길이가 같으면 다시 쓴다. 내용은 부르는 쪽이 모두 채운다.
         private static int[] ReuseIntArray(int[] slotArray, int length)
         {
             return slotArray != null && slotArray.Length == length ? slotArray : new int[length];

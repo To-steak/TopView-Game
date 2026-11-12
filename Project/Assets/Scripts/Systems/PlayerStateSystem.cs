@@ -33,7 +33,8 @@ namespace TopView.Systems
                 ref readonly PlayerMotionComponent motion = ref entity.motion;
                 ref PlayerWeaponSlotsComponent weaponSlot = ref entity.weaponSlots;
                 ref readonly PlayerActionComponent action = ref entity.action;
-                ref readonly WeaponComponent weapon = ref weapons.entities[weaponSlot.weapons[weaponSlot.currentIndex].index].weapon;
+                ref WeaponEntity weaponEntity = ref weapons.entities[weaponSlot.weapons[weaponSlot.currentIndex].index];
+                ref readonly WeaponComponent weapon = ref weaponEntity.weapon;
                 EntityIdentifier identifier = new EntityIdentifier { index = index, generation = entity.generation };
                 Vector3 moveInput = command.moveDirection;
 
@@ -101,7 +102,7 @@ namespace TopView.Systems
                         isFinished = actionState.elapsedTicks >= action.reloadTicks;
                         if (isFinished)
                         {
-                            PlayerWeaponUtility.Reload(in weapon, ref weaponSlot, in entity.upgradeLevels);
+                            PlayerWeaponUtility.Reload(in weapon, ref weaponEntity.ammoState, PlayerUpgradeUtility.GetWeaponLevel(in entity.upgradeLevels, weaponSlot.currentIndex));
                         }
                         break;
 

@@ -30,10 +30,10 @@ namespace TopView.Utilities
         /// 들고 있는 무기로 들어갈 공격 상태를 구한다.
         /// </summary>
         /// <param name="weapon">들고 있는 무기</param>
-        /// <param name="weaponSlots">든 무기와 무기별 탄약</param>
+        /// <param name="ammo">들고 있는 무기의 탄약</param>
         /// <param name="attackState">들어갈 공격 상태</param>
         /// <returns>들어갈 수 있으면 true. 탄약이 없거나 무기가 없으면 false</returns>
-        public static bool TryGetAttackState(in WeaponComponent weapon, in PlayerWeaponSlotsComponent weaponSlots, out PlayerState attackState)
+        public static bool TryGetAttackState(in WeaponComponent weapon, in AmmoStateComponent ammo, out PlayerState attackState)
         {
             attackState = PlayerState.Idle;
             switch (weapon.kind)
@@ -44,11 +44,11 @@ namespace TopView.Utilities
 
                 case WeaponKind.Ranged:
                     attackState = PlayerState.Shot;
-                    return weaponSlots.currentAmmo[weaponSlots.currentIndex] > 0;
+                    return ammo.current > 0;
 
                 case WeaponKind.Throw:
                     attackState = PlayerState.ThrowCharge;
-                    return weaponSlots.reserveAmmo[weaponSlots.currentIndex] > 0;
+                    return ammo.reserve > 0;
             }
 
             return false;
@@ -120,29 +120,27 @@ namespace TopView.Utilities
         /// 들고 있는 무기를 재장전할 수 있는지 판정한다.
         /// </summary>
         /// <param name="weapon">들고 있는 무기</param>
-        /// <param name="weaponSlots">든 무기와 무기별 탄약</param>
-        /// <param name="upgradeLevels">강화 레벨. 최대 탄약 수에 반영한다</param>
+        /// <param name="ammo">들고 있는 무기의 탄약</param>
+        /// <param name="weaponLevel">들고 있는 무기의 강화 레벨. 최대 탄약 수에 반영한다</param>
         /// <returns>Ranged이고 탄창이 덜 찼으며 예비 탄약이 있으면 true</returns>
-        public static bool CanReload(in WeaponComponent weapon, in PlayerWeaponSlotsComponent weaponSlots, in PlayerUpgradeLevelsComponent upgradeLevels)
+        public static bool CanReload(in WeaponComponent weapon, in AmmoStateComponent ammo, int weaponLevel)
         {
-            int weaponIndex = weaponSlots.currentIndex;
-            int maxAmmo = PlayerUpgradeUtility.GetMaxAmmo(in weapon, PlayerUpgradeUtility.GetWeaponLevel(in upgradeLevels, weaponIndex));
-            return weapon.kind == WeaponKind.Ranged && weaponSlots.currentAmmo[weaponIndex] < maxAmmo && weaponSlots.reserveAmmo[weaponIndex] > 0;
+            int maxAmmo = PlayerUpgradeUtility.GetMaxAmmo(in weapon, weaponLevel);
+            return weapon.kind == WeaponKind.Ranged && ammo.current < maxAmmo && ammo.reserve > 0;
         }
 
         /// <summary>
         /// 예비 탄약에서 모자란 만큼 장전한다.
         /// </summary>
         /// <param name="weapon">들고 있는 무기</param>
-        /// <param name="weaponSlots">든 무기와 무기별 탄약</param>
-        /// <param name="upgradeLevels">강화 레벨. 최대 탄약 수에 반영한다</param>
-        public static void Reload(in WeaponComponent weapon, ref PlayerWeaponSlotsComponent weaponSlots, in PlayerUpgradeLevelsComponent upgradeLevels)
+        /// <param name="ammo">들고 있는 무기의 탄약</param>
+        /// <param name="weaponLevel">들고 있는 무기의 강화 레벨. 최대 탄약 수에 반영한다</param>
+        public static void Reload(in WeaponComponent weapon, ref AmmoStateComponent ammo, int weaponLevel)
         {
-            int weaponIndex = weaponSlots.currentIndex;
-            int maxAmmo = PlayerUpgradeUtility.GetMaxAmmo(in weapon, PlayerUpgradeUtility.GetWeaponLevel(in upgradeLevels, weaponIndex));
-            int loadAmmo = Mathf.Min(maxAmmo - weaponSlots.currentAmmo[weaponIndex], weaponSlots.reserveAmmo[weaponIndex]);
-            weaponSlots.currentAmmo[weaponIndex] += loadAmmo;
-            weaponSlots.reserveAmmo[weaponIndex] -= loadAmmo;
+            int maxAmmo = PlayerUpgradeUtility.GetMaxAmmo(in weapon, weaponLevel);
+            int loadAmmo = Mathf.Min(maxAmmo - ammo.current, ammo.reserve);
+            ammo.current += loadAmmo;
+            ammo.reserve -= loadAmmo;
         }
     }
 }

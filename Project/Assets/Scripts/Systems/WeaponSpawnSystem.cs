@@ -61,7 +61,8 @@ namespace TopView.Systems
                 isAlive = true,
                 generation = generation,
                 owner = new OwnerComponent { owner = request.owner, slotIndex = request.slotIndex },
-                weapon = request.weapon
+                weapon = request.weapon,
+                ammoState = new AmmoStateComponent { current = request.weapon.ammo.startingCurrent, reserve = request.weapon.ammo.startingReserve }
             };
         }
     }

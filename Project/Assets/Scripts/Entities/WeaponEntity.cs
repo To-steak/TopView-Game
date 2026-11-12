@@ -14,5 +14,7 @@ namespace TopView.Entities
         public OwnerComponent owner;
         // 무기 값. 생성 때 Definition에서 복사한다
         public WeaponComponent weapon;
+        // 지금 탄약 수
+        public AmmoStateComponent ammoState;
     }
 }

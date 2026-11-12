@@ -32,7 +32,8 @@ namespace TopView.Systems
                 ref readonly ManaComponent mana = ref entity.mana;
                 ref PlayerWeaponSlotsComponent weaponSlot = ref entity.weaponSlots;
                 ref readonly PlayerVitalsComponent vital = ref entity.vitals;
-                ref readonly WeaponComponent weapon = ref weapons.entities[weaponSlot.weapons[weaponSlot.currentIndex].index].weapon;
+                ref readonly WeaponEntity weaponEntity = ref weapons.entities[weaponSlot.weapons[weaponSlot.currentIndex].index];
+                ref readonly WeaponComponent weapon = ref weaponEntity.weapon;
                 EntityIdentifier identifier = new EntityIdentifier { index = index, generation = entity.generation };
 
                 if (command.isJumpPressed && motion.isGrounded && PlayerStaminaUtility.HasEnoughMana(in mana, PlayerUpgradeUtility.GetJumpManaCost(in vital, in entity.upgrade, in entity.upgradeLevels)))
@@ -54,7 +55,7 @@ namespace TopView.Systems
                     continue;
                 }
 
-                if (command.isReloadPressed && PlayerWeaponUtility.CanReload(in weapon, in weaponSlot, in entity.upgradeLevels))
+                if (command.isReloadPressed && PlayerWeaponUtility.CanReload(in weapon, in weaponEntity.ammoState, PlayerUpgradeUtility.GetWeaponLevel(in entity.upgradeLevels, weaponSlot.currentIndex)))
                 {
                     stateChangeRequests.Enqueue(new PlayerStateChangeRequest { target = identifier, state = PlayerState.Reload, moveInput = command.moveDirection });
                     continue;
@@ -64,7 +65,7 @@ namespace TopView.Systems
                 if ((command.isAttackPressed || command.isAttackHeld) && motion.isGrounded && actionState.attackCooldownTicks == 0)
                 {
                     // 투척 충전은 던진 뒤에도 누르고 있으면 다시 충전되지 않도록 누른 입력으로만 들어간다
-                    if (PlayerWeaponUtility.TryGetAttackState(in weapon, in weaponSlot, out PlayerState attackState) && (command.isAttackPressed || attackState != PlayerState.ThrowCharge))
+                    if (PlayerWeaponUtility.TryGetAttackState(in weapon, in weaponEntity.ammoState, out PlayerState attackState) && (command.isAttackPressed || attackState != PlayerState.ThrowCharge))
                     {
                         stateChangeRequests.Enqueue(new PlayerStateChangeRequest { target = identifier, state = attackState, moveInput = command.moveDirection });
                     }

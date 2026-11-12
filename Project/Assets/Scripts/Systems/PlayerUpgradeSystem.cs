@@ -25,7 +25,7 @@ namespace TopView.Systems
                 ref PlayerEntity entity = ref players.entities[playerIndex];
                 for (int commandIndex = 0; commandIndex < playerUpgradeCommands.Count; commandIndex++)
                 {
-                    Apply(ref entity.upgradeLevels, ref entity.health, ref entity.mana, ref entity.weaponSlots, ref progress, in entity.vitals, in entity.upgrade, weapons.entities, playerUpgradeCommands[commandIndex]);
+                    Apply(ref entity.upgradeLevels, ref entity.health, ref entity.mana, in entity.weaponSlots, ref progress, in entity.vitals, in entity.upgrade, weapons.entities, playerUpgradeCommands[commandIndex]);
                 }
             }
 
@@ -47,7 +47,7 @@ namespace TopView.Systems
         }
 
         // 버튼은 최대 레벨이거나 골드가 모자라면 눌리지 않으므로, 여기서 막히는 명령은 경고하고 버린다
-        private static void Apply(ref PlayerUpgradeLevelsComponent levels, ref HealthComponent health, ref ManaComponent mana, ref PlayerWeaponSlotsComponent weaponSlots, ref GameProgressComponent progress, in PlayerVitalsComponent vitals, in PlayerUpgradeComponent upgrade, WeaponEntity[] weaponEntities, in PlayerUpgradeCommand command)
+        private static void Apply(ref PlayerUpgradeLevelsComponent levels, ref HealthComponent health, ref ManaComponent mana, in PlayerWeaponSlotsComponent weaponSlots, ref GameProgressComponent progress, in PlayerVitalsComponent vitals, in PlayerUpgradeComponent upgrade, WeaponEntity[] weaponEntities, in PlayerUpgradeCommand command)
         {
             if (!TryGetLevel(in levels, in command, out int level))
             {
@@ -89,7 +89,8 @@ namespace TopView.Systems
                     break;
                 case PlayerUpgradeCommandType.Weapon:
                     levels.weaponLevels[command.weaponIndex] = nextLevel;
-                    FillAddedAmmo(ref weaponSlots, in weaponEntities[weaponSlots.weapons[command.weaponIndex].index].weapon, command.weaponIndex, level, nextLevel);
+                    ref WeaponEntity weaponEntity = ref weaponEntities[weaponSlots.weapons[command.weaponIndex].index];
+                    FillAddedAmmo(ref weaponEntity.ammoState, in weaponEntity.weapon, level, nextLevel);
                     break;
             }
         }
@@ -111,9 +112,9 @@ namespace TopView.Systems
         }
 
         // 무기 레벨이 올라 최대 탄약 수가 늘어난 만큼 탄창에도 바로 넣는다
-        private static void FillAddedAmmo(ref PlayerWeaponSlotsComponent weaponSlots, in WeaponComponent weapon, int weaponIndex, int previousLevel, int nextLevel)
+        private static void FillAddedAmmo(ref AmmoStateComponent ammo, in WeaponComponent weapon, int previousLevel, int nextLevel)
         {
-            weaponSlots.currentAmmo[weaponIndex] += PlayerUpgradeUtility.GetMaxAmmo(in weapon, nextLevel) - PlayerUpgradeUtility.GetMaxAmmo(in weapon, previousLevel);
+            ammo.current += PlayerUpgradeUtility.GetMaxAmmo(in weapon, nextLevel) - PlayerUpgradeUtility.GetMaxAmmo(in weapon, previousLevel);
         }
 
         // 항목의 지금 레벨을 꺼낸다. Weapon의 무기 번호가 레벨 배열 밖이거나 처리하지 않는 항목이면 false를 돌려준다
