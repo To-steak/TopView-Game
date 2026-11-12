@@ -134,6 +134,8 @@ Runner가 World의 데이터를 꺼내 호출 순서대로 넘긴다. 게임 상
   - 이유: FixedUpdate에서 읽으면 한 프레임에 틱이 0번이나 2번 돌 때 입력을 놓치거나 두 번 읽는다.
 - Runner가 Update에서 명령 버퍼에 쌓고, CommandSystem이 Tick에서 소비한다.
   - 이유: Logic은 입력이 어디서 왔는지 모르고 명령만 본다.
+- **명령 목록(`~Command` 타입) 하나를 소비하는 곳은 하나다.** 소비하는 곳이 다른 명령은 같은 목록에 넣지 않고 `~Command` 타입을 나눈다. 명령 이름은 소비하는 곳의 일을 드러낸다.
+  - 이유: 여러 곳이 한 목록을 나눠 소비하면 각자 남의 명령을 건너뛰고 남겨 두는 코드가 생기고, 종류를 하나 더할 때 상관없는 소비처까지 고쳐야 한다.
 - 판이 없는 씬에서는 그 씬의 `~Flow`가 명령 목록(`List<~Command>`)을 가지고, Presenter가 넣은 명령을 Update에서 소비한다.
   - 이유: 틱이 없는 씬에는 Logic이 없어, 그 씬의 흐름을 맡은 `~Flow` 한 곳에서 명령을 소비하면 된다.
 - 테스트용 디버그 명령(`DebugCommand`)은 Runner의 에디터 전용 Context Menu(`Runner.Debug.cs`, 파일 전체를 `#if UNITY_EDITOR`로 감쌈)가 Update 밖에서 넣고, `DebugCommandSystem`이 다음 틱에 소비한다. 넣는 양 같은 디버그 값은 Definition이 아니라 `Runner.Debug.cs`의 상수로 둔다.
