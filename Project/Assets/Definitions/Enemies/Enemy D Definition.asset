@@ -31,7 +31,7 @@ MonoBehaviour:
     showsOverlayHealthBar: 1
   attacks:
   - attack:
-      kind: 2
+      kind: 1
       attackRange: 100
       cooldownTicks: 500
       timing:
@@ -39,8 +39,9 @@ MonoBehaviour:
         endTicks: 0
         durationTicks: 60
       damageMultiplier: 1
-      bodyRadius: 0
-      bodyOffset: 0
+      meleeShape:
+        radius: 0
+        offset: 0
       projectile:
         kind: 0
         speed: 10
@@ -59,10 +60,12 @@ MonoBehaviour:
         spawnOffset: {x: 1.63, y: 2.1, z: 1.04}
       - startTicks: 36
         spawnOffset: {x: -1.64, y: 2.06, z: 1.04}
+    animation: 1
+    attackClip: {fileID: 8300000, guid: ae2d2db46850b7c47ab85240cdc448f9, type: 3}
     projectilePrefab: {fileID: 5746081768468073432, guid: 36c9ce1b05aa52a41921b504ebcce19e, type: 3}
     hitEffectPrefab: {fileID: 8142776624367745201, guid: be16a2ead503d12418c1f228fcee2f7c, type: 3}
   - attack:
-      kind: 3
+      kind: 1
       attackRange: 100
       cooldownTicks: 250
       timing:
@@ -70,8 +73,9 @@ MonoBehaviour:
         endTicks: 0
         durationTicks: 110
       damageMultiplier: 1
-      bodyRadius: 0
-      bodyOffset: 0
+      meleeShape:
+        radius: 0
+        offset: 0
       projectile:
         kind: 0
         speed: 10
@@ -88,6 +92,8 @@ MonoBehaviour:
       shots:
       - startTicks: 94
         spawnOffset: {x: 0, y: 1.26, z: 1.88}
+    animation: 2
+    attackClip: {fileID: 8300000, guid: a42a25bfe713e63498febabb408fceea, type: 3}
     projectilePrefab: {fileID: 3605412627769871624, guid: 297f4eb88c308ae4d83672b047e78024, type: 3}
     hitEffectPrefab: {fileID: 8142776624367745201, guid: cf5302637a5478848be4ea59d93ed266, type: 3}
   loots:

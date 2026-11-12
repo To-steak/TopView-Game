@@ -1,4 +1,3 @@
-using TopView.Components;
 using TopView.Entities;
 
 namespace TopView.Records
@@ -10,7 +9,7 @@ namespace TopView.Records
         public EntityIdentifier enemy;
         // 바뀐 상태
         public EnemyState state;
-        // state가 Attack일 때 쓰는 공격 종류
-        public EnemyAttackKind attackKind;
+        // state가 Attack일 때 쓰는 공격의 번호. 그 적의 공격 목록에서의 위치다
+        public int attackIndex;
     }
 }

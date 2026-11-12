@@ -14,6 +14,9 @@ namespace TopView.Core
     {
         // 적 종류별 View 프리팹. 번호가 적 종류 번호다
         private GameObject[] _enemyViewPrefabs;
+        // 적 종류별, 공격 번호별 애니메이션과 공격 소리. 판을 준비할 때 Definition에서 모은다
+        private EnemyAttackAnimation[][] _enemyAttackAnimations;
+        private AudioClip[][] _enemyAttackClips;
         // 적 종류별 체력 게이지 프리팹. 번호가 적 종류 번호다
         private GameObject[] _enemyHealthGaugePrefabs;
 
@@ -155,17 +158,19 @@ namespace TopView.Core
         }
 
         // 적 종류별 Enemy Definition에서 생성 요청 템플릿과 View·게이지 값을 꺼낸다.
-        private static void ReadEnemies(EnemyDefinition[] enemyDefinitions, List<GameObject> projectilePrefabs, List<GameObject> hitEffectPrefabs, out EnemySpawnRequest[] spawnTemplates, out GameObject[] viewPrefabs, out GameObject[] gaugePrefabs)
+        private static void ReadEnemies(EnemyDefinition[] enemyDefinitions, List<GameObject> projectilePrefabs, List<GameObject> hitEffectPrefabs, out EnemySpawnRequest[] spawnTemplates, out GameObject[] viewPrefabs, out EnemyAttackAnimation[][] attackAnimations, out AudioClip[][] attackClips, out GameObject[] gaugePrefabs)
         {
             int enemyKindCount = enemyDefinitions.Length;
             spawnTemplates = new EnemySpawnRequest[enemyKindCount];
             viewPrefabs = new GameObject[enemyKindCount];
+            attackAnimations = new EnemyAttackAnimation[enemyKindCount][];
+            attackClips = new AudioClip[enemyKindCount][];
             gaugePrefabs = new GameObject[enemyKindCount];
 
             for (int kind = 0; kind < enemyKindCount; kind++)
             {
                 EnemyDefinition definition = enemyDefinitions[kind];
-                EnemyAttackComponent[] attacks = ReadAttacks(definition.name, definition.attacks, projectilePrefabs, hitEffectPrefabs);
+                EnemyAttackComponent[] attacks = ReadAttacks(definition.name, definition.attacks, projectilePrefabs, hitEffectPrefabs, out attackAnimations[kind], out attackClips[kind]);
                 WarnIfStopsOutOfRange(definition.name, definition.behavior.stopDistance, attacks);
 
                 spawnTemplates[kind] = new EnemySpawnRequest
@@ -189,7 +194,7 @@ namespace TopView.Core
                     {
                         Debug.LogWarning($"Runner >> {definition.name}의 View Prefab에 Damage Anchor가 연결되어 있지 않아 이 적 종류의 피해량 글자는 적의 발밑에 뜬다.");
                     }
-                    WarnMissingSounds(definition.name, enemyView, attacks);
+                    WarnMissingSounds(definition.name, enemyView, attackClips[kind]);
                 }
                 // 오버레이 체력 바로 체력을 보여 주는 종류는 게이지를 두지 않아도 된다
                 if (definition.healthGaugePrefab == null && definition.behavior.showsOverlayHealthBar)
@@ -217,45 +222,25 @@ namespace TopView.Core
             }
         }
 
-        // 효과음 AudioSource가 없거나, 피격 소리가 비어 있거나, 이 적 종류가 쓰는 공격 종류의 소리가 비어 있거나 소리 칸이 없으면 한 번씩 경고를 남긴다.
-        // 소리 칸이 없는 공격 종류는 코드를 고쳐야 하는 문제라 AudioSource가 없어도 알린다. 빈 소리는 AudioSource가 있을 때만 알린다.
-        private static void WarnMissingSounds(string definitionName, EnemyView enemyView, EnemyAttackComponent[] attacks)
+        // 효과음 AudioSource가 없거나, 피격 소리가 비어 있거나, 공격 소리가 비어 있으면 한 번씩 경고를 남긴다. 공격 번호는 판에 담은 공격 목록에서의 위치다.
+        private static void WarnMissingSounds(string definitionName, EnemyView enemyView, AudioClip[] attackClips)
         {
-            bool hasSource = enemyView.soundEffectSource != null;
-            if (!hasSource)
+            if (enemyView.soundEffectSource == null)
             {
                 Debug.LogWarning($"Runner >> {definitionName}의 View Prefab에 Sound Effect Source가 연결되어 있지 않아 이 적 종류는 효과음 없이 진행한다.");
+                return;
             }
-            else if (enemyView.hitClip == null)
+
+            if (enemyView.hitClip == null)
             {
                 Debug.LogWarning($"Runner >> {definitionName}의 View Prefab에 Hit Clip이 없어 이 적 종류는 피격 소리 없이 진행한다.");
             }
 
-            for (int attackIndex = 0; attackIndex < attacks.Length; attackIndex++)
+            for (int attackIndex = 0; attackIndex < attackClips.Length; attackIndex++)
             {
-                EnemyAttackKind kind = attacks[attackIndex].kind;
-                bool isKindChecked = false;
-                for (int previousIndex = 0; previousIndex < attackIndex; previousIndex++)
+                if (attackClips[attackIndex] == null)
                 {
-                    if (attacks[previousIndex].kind == kind)
-                    {
-                        isKindChecked = true;
-                        break;
-                    }
-                }
-
-                if (isKindChecked)
-                {
-                    continue;
-                }
-
-                if (!EnemyViewSystem.TryGetAttackClip(enemyView, kind, out AudioClip clip))
-                {
-                    Debug.LogError($"Runner >> EnemyView에 {kind} 공격 소리 칸이 정해지지 않아 {definitionName}의 이 공격은 소리 없이 진행한다.");
-                }
-                else if (hasSource && clip == null)
-                {
-                    Debug.LogWarning($"Runner >> {definitionName}의 View Prefab에 {kind} 공격 소리가 없어 이 공격은 소리 없이 진행한다.");
+                    Debug.LogWarning($"Runner >> {definitionName} 공격 {attackIndex}번의 Attack Clip이 없어 이 공격은 소리 없이 진행한다.");
                 }
             }
         }

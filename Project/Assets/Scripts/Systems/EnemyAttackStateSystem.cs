@@ -63,7 +63,7 @@ namespace TopView.Systems
                     {
                         actionState.committedShotCount = 1;
                         CommitBody(in attack, position, rotation.current, damage, in identifier, meleeSpawnRequests);
-                        attackCommittedRecords.Add(new EnemyAttackCommittedRecord { enemy = identifier, attackKind = attack.kind });
+                        attackCommittedRecords.Add(new EnemyAttackCommittedRecord { enemy = identifier, attackIndex = actionState.attackIndex });
                     }
                 }
                 else
@@ -72,7 +72,7 @@ namespace TopView.Systems
                     while (actionState.committedShotCount < attack.shots.Length && actionState.elapsedTicks >= attack.shots[actionState.committedShotCount].startTicks)
                     {
                         CommitShot(in attack, in attack.shots[actionState.committedShotCount], position, rotation.current, hasPlayer, playerPosition, damage, projectileSpawnRequests);
-                        attackCommittedRecords.Add(new EnemyAttackCommittedRecord { enemy = identifier, attackKind = attack.kind });
+                        attackCommittedRecords.Add(new EnemyAttackCommittedRecord { enemy = identifier, attackIndex = actionState.attackIndex });
                         actionState.committedShotCount++;
                     }
                 }

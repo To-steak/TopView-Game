@@ -15,14 +15,6 @@ namespace TopView.Presentation.Views
         public AudioSource soundEffectSource;
         // 피해를 받을 때 재생할 소리. 없으면 null
         public AudioClip hitClip;
-        // Body 공격 판정이 시작될 때 재생할 소리. 없으면 null
-        public AudioClip bodyAttackClip;
-        // Missile 공격이 한 발 나갈 때마다 재생할 소리. 없으면 null
-        public AudioClip missileAttackClip;
-        // BossMissile 공격이 한 발 나갈 때마다 재생할 소리. 없으면 null
-        public AudioClip bossMissileAttackClip;
-        // BossRock 공격이 한 발 나갈 때마다 재생할 소리. 없으면 null
-        public AudioClip bossRockAttackClip;
         // 투사체가 나가는 자리들. 에디터에서 Enemy Definition의 Shots 칸마다 Spawn Offset을 구울 때만 읽고, 게임 중에는 쓰지 않는다
         public Transform[] muzzles;
     }

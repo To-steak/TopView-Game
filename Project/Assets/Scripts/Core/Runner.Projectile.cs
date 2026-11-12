@@ -14,9 +14,12 @@ namespace TopView.Core
         private GameObject[] _hitEffectPrefabs;
 
         // 적 공격 목록에서 엔티티에 담을 공격 값을 꺼내고, 투사체마다 View와 피격 이펙트를 표에 올린다. 발 목록이 잘못된 투사체 공격은 빼고 담는다.
-        private static EnemyAttackComponent[] ReadAttacks(string definitionName, EnemyAttackEntry[] entries, List<GameObject> projectilePrefabs, List<GameObject> hitEffectPrefabs)
+        // 공격의 애니메이션과 소리는 담은 공격과 같은 번호로 따로 돌려준다.
+        private static EnemyAttackComponent[] ReadAttacks(string definitionName, EnemyAttackEntry[] entries, List<GameObject> projectilePrefabs, List<GameObject> hitEffectPrefabs, out EnemyAttackAnimation[] attackAnimations, out AudioClip[] attackClips)
         {
             List<EnemyAttackComponent> attacks = new List<EnemyAttackComponent>(entries.Length);
+            List<EnemyAttackAnimation> animations = new List<EnemyAttackAnimation>(entries.Length);
+            List<AudioClip> clips = new List<AudioClip>(entries.Length);
             for (int attackIndex = 0; attackIndex < entries.Length; attackIndex++)
             {
                 ref readonly EnemyAttackEntry entry = ref entries[attackIndex];
@@ -30,8 +33,12 @@ namespace TopView.Core
                 EnemyAttackComponent attack = entry.attack;
                 AssignProjectileViews(ownerName, hasProjectile, entry.projectilePrefab, entry.hitEffectPrefab, ref attack.projectile, projectilePrefabs, hitEffectPrefabs);
                 attacks.Add(attack);
+                animations.Add(entry.animation);
+                clips.Add(entry.attackClip);
             }
 
+            attackAnimations = animations.ToArray();
+            attackClips = clips.ToArray();
             return attacks.ToArray();
         }
 

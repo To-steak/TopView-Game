@@ -56,6 +56,8 @@ MonoBehaviour:
           serializedVersion: 2
           m_Bits: 0
       shots: []
+    animation: 0
+    attackClip: {fileID: 8300000, guid: 9b8eb43f13281604eaf8164424d54bc6, type: 3}
     projectilePrefab: {fileID: 0}
     hitEffectPrefab: {fileID: 0}
   loots:

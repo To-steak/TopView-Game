@@ -28,9 +28,11 @@ namespace TopView.Presentation.ViewSystems
         /// <param name="attackRecords">이번 프레임에 적이 공격을 내보낸 기록</param>
         /// <param name="damagedRecords">이번 프레임의 적 피해 기록</param>
         /// <param name="viewPrefabsByKind">적 종류별 EnemyView 프리팹</param>
+        /// <param name="attackAnimationsByKind">적 종류별, 공격 번호별 애니메이션</param>
+        /// <param name="attackClipsByKind">적 종류별, 공격 번호별 공격 소리. 소리가 없는 공격은 null</param>
         /// <param name="isPaused">판이 일시정지 중이면 true. Animator를 멈춘다</param>
         /// <param name="context">적 View 실행 상태</param>
-        public static void Present(EnemyEntity[] entities, List<EnemyStateChangedRecord> stateRecords, List<EnemyAttackCommittedRecord> attackRecords, List<EnemyDamagedRecord> damagedRecords, GameObject[] viewPrefabsByKind, bool isPaused, EnemyViewContext context)
+        public static void Present(EnemyEntity[] entities, List<EnemyStateChangedRecord> stateRecords, List<EnemyAttackCommittedRecord> attackRecords, List<EnemyDamagedRecord> damagedRecords, GameObject[] viewPrefabsByKind, EnemyAttackAnimation[][] attackAnimationsByKind, AudioClip[][] attackClipsByKind, bool isPaused, EnemyViewContext context)
         {
             float alpha = Mathf.Clamp01((Time.time - Time.fixedTime) / Time.fixedDeltaTime);
             float animatorSpeed = isPaused ? 0f : 1f;
@@ -72,20 +74,21 @@ namespace TopView.Presentation.ViewSystems
                     continue;
                 }
 
-                ApplyStateRecord(in record, view.animator, context.triggerHashesByKind[entities[record.enemy.index].kind.kind]);
+                int kind = entities[record.enemy.index].kind.kind;
+                ApplyStateRecord(in record, view.animator, attackAnimationsByKind[kind], context.triggerHashesByKind[kind]);
             }
 
             for (int recordIndex = 0; recordIndex < attackRecords.Count; recordIndex++)
             {
                 EnemyAttackCommittedRecord record = attackRecords[recordIndex];
                 EnemyView view = context.views[record.enemy.index];
-                // View가 없거나 다른 적으로 바뀌었거나 소리가 연결되지 않았으면 건너뛴다. 연결 누락과 소리 칸이 없는 종류는 판을 준비할 때 남겼다
-                if (view == null || context.viewGenerations[record.enemy.index] != record.enemy.generation || view.soundEffectSource == null
-                    || !TryGetAttackClip(view, record.attackKind, out AudioClip clip))
+                // View가 없거나 다른 적으로 바뀌었거나 소리가 연결되지 않았으면 건너뛴다. 연결 누락과 빈 소리는 판을 준비할 때 남겼다
+                if (view == null || context.viewGenerations[record.enemy.index] != record.enemy.generation || view.soundEffectSource == null)
                 {
                     continue;
                 }
 
+                AudioClip clip = attackClipsByKind[entities[record.enemy.index].kind.kind][record.attackIndex];
                 if (clip != null)
                 {
                     view.soundEffectSource.PlayOneShot(clip);
@@ -103,35 +106,6 @@ namespace TopView.Presentation.ViewSystems
                 }
 
                 view.soundEffectSource.PlayOneShot(view.hitClip);
-            }
-        }
-
-        /// <summary>
-        /// 공격 종류에 맞는 EnemyView의 공격 소리 칸을 읽는다. 로그는 남기지 않으며, Runner가 판을 준비할 때 이 결과로 빠진 소리를 알린다.
-        /// </summary>
-        /// <param name="view">소리를 읽을 EnemyView</param>
-        /// <param name="attackKind">공격 종류</param>
-        /// <param name="clip">그 종류의 공격 소리. 칸이 비었거나 칸이 없는 종류면 null</param>
-        /// <returns>그 종류의 소리 칸이 EnemyView에 있으면 true</returns>
-        public static bool TryGetAttackClip(EnemyView view, EnemyAttackKind attackKind, out AudioClip clip)
-        {
-            switch (attackKind)
-            {
-                case EnemyAttackKind.Body:
-                    clip = view.bodyAttackClip;
-                    return true;
-                case EnemyAttackKind.Missile:
-                    clip = view.missileAttackClip;
-                    return true;
-                case EnemyAttackKind.BossMissile:
-                    clip = view.bossMissileAttackClip;
-                    return true;
-                case EnemyAttackKind.BossRock:
-                    clip = view.bossRockAttackClip;
-                    return true;
-                default:
-                    clip = null;
-                    return false;
             }
         }
 
@@ -162,7 +136,7 @@ namespace TopView.Presentation.ViewSystems
             context.viewPools[kind].Push(view);
         }
 
-        private static void ApplyStateRecord(in EnemyStateChangedRecord record, Animator animator, int[] triggerHashes)
+        private static void ApplyStateRecord(in EnemyStateChangedRecord record, Animator animator, EnemyAttackAnimation[] attackAnimations, int[] triggerHashes)
         {
             switch (record.state)
             {
@@ -174,7 +148,7 @@ namespace TopView.Presentation.ViewSystems
                     break;
                 case EnemyState.Attack:
                     animator.SetBool(IS_WALK_HASH, false);
-                    animator.SetTrigger(GetAttackTriggerHash(record.attackKind));
+                    animator.SetTrigger(GetAttackTriggerHash(attackAnimations[record.attackIndex]));
                     break;
                 case EnemyState.Die:
                     animator.SetTrigger(DIE_HASH);
@@ -182,16 +156,16 @@ namespace TopView.Presentation.ViewSystems
             }
         }
 
-        private static int GetAttackTriggerHash(EnemyAttackKind attackKind)
+        private static int GetAttackTriggerHash(EnemyAttackAnimation attackAnimation)
         {
-            switch (attackKind)
+            switch (attackAnimation)
             {
-                case EnemyAttackKind.Body:
-                    return ATTACK_HASH;
-                case EnemyAttackKind.BossRock:
+                case EnemyAttackAnimation.Shot:
+                    return SHOT_HASH;
+                case EnemyAttackAnimation.BigShot:
                     return BIG_SHOT_HASH;
                 default:
-                    return SHOT_HASH;
+                    return ATTACK_HASH;
             }
         }
 

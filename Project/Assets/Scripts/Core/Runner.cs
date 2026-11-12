@@ -159,7 +159,7 @@ namespace TopView.Core
             CursorViewSystem.Present(isPaused, _gameSettingsDefinition.crosshairCursor, _viewContext.cursor);
             PlayerViewSystem.Present(_world.players.entities, _world.playerStateChangedRecords, _world.playerAttackCommittedRecords, _playerViewPrefab, _playerWeaponModelPrefabs, _playerRangedLayerBlendInTicks, isPaused, _viewContext.player);
             PlayerThrowPreviewViewSystem.Present(_world.players.entities, _viewContext.player.view, _playerThrowPreviewCircleHeightOffset);
-            EnemyViewSystem.Present(_world.enemies.entities, _world.enemyStateChangedRecords, _world.enemyAttackCommittedRecords, _world.enemyDamagedRecords, _enemyViewPrefabs, isPaused, _viewContext.enemy);
+            EnemyViewSystem.Present(_world.enemies.entities, _world.enemyStateChangedRecords, _world.enemyAttackCommittedRecords, _world.enemyDamagedRecords, _enemyViewPrefabs, _enemyAttackAnimations, _enemyAttackClips, isPaused, _viewContext.enemy);
             EnemyHealthGaugeViewSystem.Present(_world.enemies.entities, _enemyHealthGaugePrefabs, _viewContext.camera.mainCamera, _viewContext.enemy);
             WorldInformationViewSystem.Present(_viewContext.camera.mainCamera, _viewContext.worldInformation);
             ProjectileViewSystem.Present(_world.projectiles.entities, _projectilePrefabs, isPaused, _viewContext.projectile);

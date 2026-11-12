@@ -39,8 +39,9 @@ MonoBehaviour:
         endTicks: 0
         durationTicks: 50
       damageMultiplier: 1
-      bodyRadius: 0
-      bodyOffset: 0
+      meleeShape:
+        radius: 0
+        offset: 0
       projectile:
         kind: 0
         speed: 15
@@ -57,6 +58,8 @@ MonoBehaviour:
       shots:
       - startTicks: 26
         spawnOffset: {x: 0, y: 0.192, z: 0.455}
+    animation: 1
+    attackClip: {fileID: 8300000, guid: a42a25bfe713e63498febabb408fceea, type: 3}
     projectilePrefab: {fileID: 1467422185046970197, guid: 94bbe6c225f22584bbed1cfc8a479c95, type: 3}
     hitEffectPrefab: {fileID: 8142776624367745201, guid: be16a2ead503d12418c1f228fcee2f7c, type: 3}
   loots:

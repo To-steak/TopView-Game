@@ -41,7 +41,7 @@ namespace TopView.Systems
             {
                 enemy = request.target,
                 state = request.state,
-                attackKind = request.state == EnemyState.Attack ? attacks[actionState.attackIndex].kind : default
+                attackIndex = request.state == EnemyState.Attack ? actionState.attackIndex : default
             });
 
             actionState.state = request.state;
