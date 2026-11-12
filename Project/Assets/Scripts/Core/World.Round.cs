@@ -16,7 +16,7 @@ namespace TopView.Core
     public partial class World
     {
         // 화면을 그리는 메인 카메라. 조준점, 이동 방향, 월드 UI가 기준으로 쓴다
-        [SerializeField] private UnityEngine.Camera _mainCamera;
+        [SerializeField] private Camera _mainCamera;
         // 플레이어를 따라가는 시네머신 카메라
         [SerializeField] private PlayerCameraView _playerCameraView;
         // 적 체력 게이지, 월드 글자, 월드 정보 UI를 담는 월드 캔버스

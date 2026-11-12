@@ -46359,6 +46359,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 9024813019329305895, guid: b1d1497c6d63185468f8e292a033a50d, type: 3}
   m_PrefabInstance: {fileID: 570253141}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &570771993 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4453624332627892961, guid: c1a762b0df58d464db55729b66fdff26, type: 3}
+  m_PrefabInstance: {fileID: 289739199}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d76d6114004f01949be71ab60810ba2d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TopView.UserInterface::TopView.UserInterface.Presenters.BossHealthPresenter
 --- !u!1001 &572454661
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -53008,6 +53019,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2683685051158588660, guid: e8e84586d7748d841a214a95e8b23a77, type: 3}
   m_PrefabInstance: {fileID: 655369482}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &656349326 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5969514550019743503, guid: d99d9b0f3946eec459529e22d1935867, type: 3}
+  m_PrefabInstance: {fileID: 654476940}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 321d780bab34eeb4ebea9b0f1fe36a61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TopView.UserInterface::TopView.UserInterface.Presenters.PausePresenter
 --- !u!1001 &656660704
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -68427,6 +68449,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 262059898573229835, guid: 51e91672b76891048bbbda036ac30bf0, type: 3}
   m_PrefabInstance: {fileID: 863271672}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &865584158 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3350229679602930076, guid: 0b2a37ef6d96b0543b13a13124857e62, type: 3}
+  m_PrefabInstance: {fileID: 3985941568089483274}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8036257c602f5af4a9be1a563b3d7c97, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TopView.UserInterface::TopView.UserInterface.PlayerMana.PlayerManaPresenter
 --- !u!1001 &867339482
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -75246,6 +75279,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 4051992451484409770, guid: 1054af40adc65a446889f2fbb259c8e9, type: 3}
   m_PrefabInstance: {fileID: 942957654}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &942957656 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3856181522481403452, guid: 1054af40adc65a446889f2fbb259c8e9, type: 3}
+  m_PrefabInstance: {fileID: 942957654}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bffcea5bba5eeaf41b3f41c897249061, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TopView.UserInterface::TopView.UserInterface.Ammo.AmmoPresenter
 --- !u!1001 &943654915
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -81161,6 +81205,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 5869481541901533200, guid: 999f45f4603f7614b92bd63c7a08dab1, type: 3}
   m_PrefabInstance: {fileID: 1009304277}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1009304279 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4420838134826106663, guid: 999f45f4603f7614b92bd63c7a08dab1, type: 3}
+  m_PrefabInstance: {fileID: 1009304277}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf978a0fc342e4d4aa3cbea167edbcb0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TopView.UserInterface::TopView.UserInterface.Gold.GoldPresenter
 --- !u!1001 &1009656978
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -115385,6 +115440,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 4401800817712656517, guid: 25ae38226c495c14b84cb962dfedb0b3, type: 3}
   m_PrefabInstance: {fileID: 2790689108909534462}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1391847544 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1251740334514635973, guid: 25ae38226c495c14b84cb962dfedb0b3, type: 3}
+  m_PrefabInstance: {fileID: 2790689108909534462}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8a7c1782c4915e4ebdb10ed9bb8cdc0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TopView.UserInterface::TopView.UserInterface.Presenters.GameOverPresenter
 --- !u!1001 &1394158564
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -145122,6 +145188,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 8199096967441562629, guid: 30e5ec2720edb124fa5edf0bf2ad8215, type: 3}
   m_PrefabInstance: {fileID: 1767630228}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1767630230 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2378750082809569961, guid: 30e5ec2720edb124fa5edf0bf2ad8215, type: 3}
+  m_PrefabInstance: {fileID: 1767630228}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f247ec4807b4dc84193d37ad211737bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TopView.UserInterface::TopView.UserInterface.Presenters.SettingsPresenter
 --- !u!1001 &1767881122
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -160885,6 +160962,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1357315599278046579, guid: 0aa89184479b358438534fa9fb38f7ca, type: 3}
   m_PrefabInstance: {fileID: 1940584640}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1944467997 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4226561719183769976, guid: b760b94fda5d9b64ca518a7f4079f783, type: 3}
+  m_PrefabInstance: {fileID: 1890733788}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f73a7164e49b37246a0ae38ef51597ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TopView.UserInterface::TopView.UserInterface.RemainingTime.RemainingTimePresenter
 --- !u!1001 &1947685315
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -161321,6 +161409,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 8793875983945143500, guid: f0aa11181f43b494793212ade7026320, type: 3}
   m_PrefabInstance: {fileID: 1952092110}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1952092112 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1762365136298938359, guid: f0aa11181f43b494793212ade7026320, type: 3}
+  m_PrefabInstance: {fileID: 1952092110}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 310d2411f00463f43ab5a06b4cdc9285, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TopView.UserInterface::TopView.UserInterface.Presenters.UpgradePresenter
 --- !u!1001 &1954127836
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -166186,7 +166285,7 @@ GameObject:
   - component: {fileID: 2012257784}
   - component: {fileID: 2012257783}
   m_Layer: 0
-  m_Name: Runner
+  m_Name: World
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -166204,12 +166303,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 55d3a211773883b4eaa27dc702d3c597, type: 3}
   m_Name: 
   m_EditorClassIdentifier: TopView.Core::TopView.Core.Runner
-  _audioSettingsDefinition: {fileID: 11400000, guid: 2547c441975c8a34f9917dc8cd5aee39, type: 2}
   _lootDefinition: {fileID: 11400000, guid: 873a3ca0e8f87cb40b26097d1ee69536, type: 2}
-  _musicDefinition: {fileID: 11400000, guid: 53468fd0a3681874a8837ec7cede1694, type: 2}
-  _userInterfaceSoundDefinition: {fileID: 11400000, guid: fce0f671d0d7bd44b8e32bdc7a210a40, type: 2}
+  _mainCamera: {fileID: 1979046064}
+  _playerCameraView: {fileID: 1481447818}
+  _worldCanvasView: {fileID: 27587467}
+  _gameOverPresenter: {fileID: 1391847544}
+  _remainingTimePresenter: {fileID: 1944467997}
+  _scorePresenter: {fileID: 2138149130}
+  _goldPresenter: {fileID: 1009304279}
+  _playerHealthPresenter: {fileID: 2069880188}
+  _ammoPresenter: {fileID: 942957656}
+  _playerManaPresenter: {fileID: 865584158}
+  _reloadPresenter: {fileID: 2025393257}
+  _bossHealthPresenter: {fileID: 570771993}
+  _pausePresenter: {fileID: 656349326}
+  _upgradePresenter: {fileID: 1952092112}
+  _settingsPresenter: {fileID: 1767630230}
   _worldTextPrefab: {fileID: 3997208476704559197, guid: 1f089c5d0fabb624b8e6ed25014ba2a7, type: 3}
   _gameSettingsDefinition: {fileID: 11400000, guid: db90d6ae1cf94cc4a9f5125de6d5fb56, type: 2}
+  _musicDefinition: {fileID: 11400000, guid: 53468fd0a3681874a8837ec7cede1694, type: 2}
 --- !u!4 &2012257784
 Transform:
   m_ObjectHideFlags: 0
@@ -167371,6 +167483,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 256602236939657202, guid: 7105882617476f049b4843732a94377c, type: 3}
   m_PrefabInstance: {fileID: 2024183770}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2025393257 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2846599345577797447, guid: 003764f6c8cbdb643bb9774a4bb3d972, type: 3}
+  m_PrefabInstance: {fileID: 298898025}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 223711d0908f49f48823c25e3d76f23e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TopView.UserInterface::TopView.UserInterface.Presenters.ReloadPresenter
 --- !u!1001 &2028369447
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -169579,6 +169702,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 1078764061875756730, guid: 605bb2b3677fadf4aa05c42978e6051e, type: 3}
   m_PrefabInstance: {fileID: 8298805051287733259}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2069880188 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6032119051261708947, guid: 605bb2b3677fadf4aa05c42978e6051e, type: 3}
+  m_PrefabInstance: {fileID: 8298805051287733259}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6dbf4ab05adac8b4992c4736b4d4e2a8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TopView.UserInterface::TopView.UserInterface.PlayerHealth.PlayerHealthPresenter
 --- !u!1001 &2070792470
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -176420,6 +176554,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 8685565612268651816, guid: e92aa4461b9b95d4196125f2c84013b5, type: 3}
   m_PrefabInstance: {fileID: 2138149128}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2138149130 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7431266211225126582, guid: e92aa4461b9b95d4196125f2c84013b5, type: 3}
+  m_PrefabInstance: {fileID: 2138149128}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fb0460de28a44847b4331e03869d191, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TopView.UserInterface::TopView.UserInterface.Score.ScorePresenter
 --- !u!1001 &2139101557
 PrefabInstance:
   m_ObjectHideFlags: 0
