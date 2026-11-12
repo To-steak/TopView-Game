@@ -15,7 +15,12 @@ namespace TopView.Core
     // 판 준비: 한 판의 데이터와 View 실행 상태를 만들고, 판을 끝낼 때 비운다
     public partial class World
     {
-        // 한 판의 데이터에 Definition과 씬의 Authoring 값을 채운 뒤, 씬의 View와 Presenter를 찾아 연결한다.
+        // 플레이어를 따라가는 시네머신 카메라
+        [SerializeField] private PlayerCameraView _playerCameraView;
+        // 적 체력 게이지, 월드 글자, 월드 정보 UI를 담는 월드 캔버스
+        [SerializeField] private WorldCanvasView _worldCanvasView;
+
+        // 한 판의 데이터에 Definition과 씬의 Authoring 값을 채운 뒤, 씬의 View와 Presenter를 연결한다.
         private void StartRound()
         {
             if (!TryFindPlayerSpawner(out PlayerSpawnerAuthoring playerSpawner))
@@ -149,7 +154,7 @@ namespace TopView.Core
             _viewContext = null;
         }
 
-        // 이번 판의 저장소 크기와 View 표에 맞춰 View 실행 상태를 만들고 씬의 카메라를 찾는다.
+        // 이번 판의 저장소 크기와 View 표에 맞춰 View 실행 상태를 만든다.
         private ViewContext CreateViewContext(int enemyKindCount)
         {
             WorldInformationAnchorView[] worldInformationAnchors = ReadWorldInformationAnchors();
@@ -158,7 +163,7 @@ namespace TopView.Core
                 camera = new CameraViewContext
                 {
                     mainCamera = UnityEngine.Camera.main,
-                    playerCameraView = FindAnyObjectByType<PlayerCameraView>()
+                    playerCameraView = _playerCameraView
                 },
                 player = new PlayerViewContext(),
                 enemy = new EnemyViewContext
@@ -222,22 +227,22 @@ namespace TopView.Core
             }
             if (viewContext.camera.playerCameraView == null)
             {
-                Debug.LogError("World >> 씬에 PlayerCameraView가 없다.");
+                Debug.LogError("World >> Player Camera View가 연결되어 있지 않다.");
             }
             if (_gameSettingsDefinition.crosshairCursor == null)
             {
                 Debug.LogError("World >> Game Settings Definition에 Crosshair Cursor가 연결되어 있지 않아 플레이 중에도 기본 커서를 쓴다.");
             }
-            WorldCanvasView worldCanvasView = FindAnyObjectByType<WorldCanvasView>();
-            if (worldCanvasView == null)
+            if (_worldCanvasView == null)
             {
-                Debug.LogError("World >> 씬에 WorldCanvasView가 없어 적 체력 게이지, 월드 글자, 월드 정보 UI가 보이지 않는다.");
+                Debug.LogError("World >> World Canvas View가 연결되어 있지 않아 적 체력 게이지, 월드 글자, 월드 정보 UI가 보이지 않는다.");
             }
             else
             {
-                viewContext.enemy.healthGaugeParent = worldCanvasView.transform;
-                viewContext.worldText.parent = worldCanvasView.transform;
-                viewContext.worldInformation.parent = worldCanvasView.transform;
+                Transform worldCanvasTransform = _worldCanvasView.transform;
+                viewContext.enemy.healthGaugeParent = worldCanvasTransform;
+                viewContext.worldText.parent = worldCanvasTransform;
+                viewContext.worldInformation.parent = worldCanvasTransform;
             }
 
             return viewContext;
