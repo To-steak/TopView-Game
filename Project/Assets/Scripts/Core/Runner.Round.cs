@@ -78,7 +78,7 @@ namespace TopView.Core
             PlayerDetectorComponent[] playerDetectors = ReadPlayerDetectors(enemySpawnerAuthorings);
 
             int enemyKindCount = enemyDefinitions.Length;
-            ReadEnemies(enemyDefinitions, projectilePrefabs, hitEffectPrefabs, out EnemySpawnRequest[] enemySpawnTemplates, out GameObject[] enemyViewPrefabs, out EnemyAttackAnimation[][] enemyAttackAnimations, out AudioClip[][] enemyAttackClips, out GameObject[] enemyHealthGaugePrefabs);
+            ReadEnemies(enemyDefinitions, projectilePrefabs, hitEffectPrefabs, out EnemySpawnRequest[] enemySpawnTemplates, out GameObject[] enemyViewPrefabs, out EnemyAttackAnimation[][] enemyAttackAnimations, out AudioClip[][] enemyAttackClips, out bool[] enemyShowsOverlayHealthBar, out GameObject[] enemyHealthGaugePrefabs);
 
             World world = new World();
             world.rule = gameSettings.rule;
@@ -123,6 +123,7 @@ namespace TopView.Core
             _enemyViewPrefabs = enemyViewPrefabs;
             _enemyAttackAnimations = enemyAttackAnimations;
             _enemyAttackClips = enemyAttackClips;
+            _enemyShowsOverlayHealthBar = enemyShowsOverlayHealthBar;
             _enemyHealthGaugePrefabs = enemyHealthGaugePrefabs;
             _projectilePrefabs = projectilePrefabs.ToArray();
             _hitEffectPrefabs = hitEffectPrefabs.ToArray();

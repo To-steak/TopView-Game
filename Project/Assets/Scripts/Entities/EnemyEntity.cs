@@ -16,8 +16,10 @@ namespace TopView.Entities
         public LevelScalingComponent score;
         // 몸체 크기. 생성 때 Definition에서 복사한다
         public BodyComponent body;
-        // 행동 값. 생성 때 Definition에서 복사한다
-        public EnemyBehaviorComponent behavior;
+        // 이동, 회전 값. 생성 때 Definition에서 복사한다
+        public NavigationMovementComponent movement;
+        // 사망 상태의 길이와 사라질 때 일어나는 일. 생성 때 Definition에서 복사한다
+        public DeathComponent death;
         // 공격 목록
         public AttackListComponent attackList;
         // 드롭 표

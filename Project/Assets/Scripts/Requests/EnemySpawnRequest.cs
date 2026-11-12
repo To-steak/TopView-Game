@@ -24,8 +24,10 @@ namespace TopView.Requests
         public LevelScalingComponent score;
         // 몸체 크기
         public BodyComponent body;
-        // 행동 값
-        public EnemyBehaviorComponent behavior;
+        // 이동, 회전 값
+        public NavigationMovementComponent movement;
+        // 사망 상태의 길이와 사라질 때 일어나는 일
+        public DeathComponent death;
         // 공격 목록. EnemySpawnSystem이 엔티티의 배열로 복사한다
         public EnemyAttackComponent[] attacks;
         // 드롭 표. EnemySpawnSystem이 엔티티의 배열로 복사한다

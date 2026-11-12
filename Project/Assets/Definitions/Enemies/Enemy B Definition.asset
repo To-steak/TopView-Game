@@ -26,13 +26,13 @@ MonoBehaviour:
     incrementPerLevel: 5
   body:
     radius: 1.1
-  behavior:
+  movement:
     stopDistance: 2
     acceleration: 6
     angularSpeed: 360
+  death:
     dieTicks: 36
     endsGameOnDeath: 0
-    showsOverlayHealthBar: 0
   attacks:
   - attack:
       kind: 0
@@ -77,3 +77,4 @@ MonoBehaviour:
     amountIncrement: 5
   viewPrefab: {fileID: 7807188980422851779, guid: 18e5d55b96933154baff3d6e8926d048, type: 3}
   healthGaugePrefab: {fileID: 7240100042028206097, guid: bf39a87b00bea9b45875c9f2d4077307, type: 3}
+  showsOverlayHealthBar: 0

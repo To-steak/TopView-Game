@@ -68,7 +68,7 @@ namespace TopView.Editor
 
                 Vector3 position = entity.position.current;
                 Gizmos.color = new Color(1f, 0.5f, 0f);
-                GizmoShapes.DrawCircle(position, entity.behavior.stopDistance);
+                GizmoShapes.DrawCircle(position, entity.movement.stopDistance);
                 Gizmos.color = Color.cyan;
                 GizmoShapes.DrawCircle(position, entity.body.radius);
                 DrawBodyAttacks(entity.attackList.attacks, position, entity.rotation.current);

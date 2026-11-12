@@ -82,7 +82,8 @@ namespace TopView.Systems
                 kind = new EnemyKindComponent { kind = request.enemyKindIndex },
                 score = request.score,
                 body = request.body,
-                behavior = request.behavior,
+                movement = request.movement,
+                death = request.death,
                 attackList = new AttackListComponent { attacks = attacks },
                 lootList = new LootListComponent { loots = loots },
                 combat = new CombatComponent

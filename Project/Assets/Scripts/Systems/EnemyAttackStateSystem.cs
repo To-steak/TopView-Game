@@ -50,7 +50,7 @@ namespace TopView.Systems
                 // 첫 발이 나가기 전까지 플레이어 쪽으로 돈다
                 if (actionState.committedShotCount == 0 && hasPlayer)
                 {
-                    TargetingUtility.RotateToward(ref rotation.current, position, playerPosition, entity.behavior.angularSpeed * deltaTime);
+                    TargetingUtility.RotateToward(ref rotation.current, position, playerPosition, entity.movement.angularSpeed * deltaTime);
                 }
 
                 EnemyAttackComponent[] attacks = entity.attackList.attacks;
