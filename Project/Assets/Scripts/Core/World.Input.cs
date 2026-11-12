@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 namespace TopView.Core
 {
     // 입력: 프레임 단위 입력을 읽어 플레이어 명령에 쌓는다
-    public partial class Runner
+    public partial class World
     {
         private PlayerActions _playerActions;
 
@@ -129,7 +129,7 @@ namespace TopView.Core
             }
 
             Ray ray = _viewContext.camera.mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
-            Plane plane = new Plane(Vector3.up, new Vector3(0f, GetMuzzleHeight(in _world.players.entities[playerIndex], _world.weapons.entities), 0f));
+            Plane plane = new Plane(Vector3.up, new Vector3(0f, GetMuzzleHeight(in _players.entities[playerIndex], _weapons.entities), 0f));
             if (!plane.Raycast(ray, out float distance))
             {
                 return false;

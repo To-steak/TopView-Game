@@ -4,7 +4,7 @@ using UnityEngine;
 namespace TopView.Core
 {
     // 월드 글자: 프리팹 읽기
-    public partial class Runner
+    public partial class World
     {
         // WorldTextView가 붙은 월드 글자 프리팹
         [SerializeField] private GameObject _worldTextPrefab;
@@ -19,26 +19,26 @@ namespace TopView.Core
 
             if (prefab == null)
             {
-                Debug.LogWarning("Runner >> Runner에 World Text Prefab이 연결되어 있지 않아 월드 글자 없이 진행한다.");
+                Debug.LogWarning("World >> World에 World Text Prefab이 연결되어 있지 않아 월드 글자 없이 진행한다.");
                 return;
             }
 
             WorldTextView view = prefab.GetComponent<WorldTextView>();
             if (view == null)
             {
-                Debug.LogWarning("Runner >> World Text Prefab에 WorldTextView가 붙어 있지 않아 월드 글자 없이 진행한다.");
+                Debug.LogWarning("World >> World Text Prefab에 WorldTextView가 붙어 있지 않아 월드 글자 없이 진행한다.");
                 return;
             }
 
             if (view.lifetimeTicks <= 0)
             {
-                Debug.LogWarning("Runner >> World Text View의 Lifetime Ticks가 0 이하라 월드 글자 없이 진행한다.");
+                Debug.LogWarning("World >> World Text View의 Lifetime Ticks가 0 이하라 월드 글자 없이 진행한다.");
                 return;
             }
 
             if (string.IsNullOrEmpty(view.goldFormat) || string.IsNullOrEmpty(view.healthFormat) || string.IsNullOrEmpty(view.ammoFormat))
             {
-                Debug.LogWarning("Runner >> World Text View의 전리품 글자 형식이 비어 있어 월드 글자 없이 진행한다.");
+                Debug.LogWarning("World >> World Text View의 전리품 글자 형식이 비어 있어 월드 글자 없이 진행한다.");
                 return;
             }
 

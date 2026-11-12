@@ -18,7 +18,7 @@ namespace TopView.UserInterface.Presenters
         private bool _isShown;
 
         /// <summary>
-        /// 명령을 넣을 버퍼를 받고 View의 강화 항목을 만든 뒤 숨긴다. 판을 준비할 때 Runner가 부른다.
+        /// 명령을 넣을 버퍼를 받고 View의 강화 항목을 만든 뒤 숨긴다. 판을 준비할 때 World가 부른다.
         /// </summary>
         /// <param name="commandBuffer">이번 판의 명령 버퍼</param>
         /// <param name="soundRequests">UI 소리 요청 목록</param>

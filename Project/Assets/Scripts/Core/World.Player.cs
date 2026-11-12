@@ -9,7 +9,7 @@ using UnityEngine;
 namespace TopView.Core
 {
     // 플레이어: 스포너와 Definition 읽기
-    public partial class Runner
+    public partial class World
     {
         private GameObject _playerViewPrefab;
         private int _playerCameraPriority;
@@ -27,13 +27,13 @@ namespace TopView.Core
             playerSpawner = null;
             if (playerSpawners.Length == 0)
             {
-                Debug.LogError("Runner >> 씬에 Player Spawner Authoring이 없어 판을 시작할 수 없다.");
+                Debug.LogError("World >> 씬에 Player Spawner Authoring이 없어 판을 시작할 수 없다.");
                 return false;
             }
 
             if (playerSpawners.Length > 1)
             {
-                Debug.LogError($"Runner >> 씬에 Player Spawner Authoring이 하나여야 하는데 {playerSpawners.Length}개라 판을 시작할 수 없다.");
+                Debug.LogError($"World >> 씬에 Player Spawner Authoring이 하나여야 하는데 {playerSpawners.Length}개라 판을 시작할 수 없다.");
                 return false;
             }
 
@@ -49,7 +49,7 @@ namespace TopView.Core
             playerDefinition = playerSpawner.definition;
             if (playerDefinition == null)
             {
-                Debug.LogError("Runner >> Player Spawner Authoring에 Player Definition이 연결되어 있지 않아 판을 시작할 수 없다.");
+                Debug.LogError("World >> Player Spawner Authoring에 Player Definition이 연결되어 있지 않아 판을 시작할 수 없다.");
                 return false;
             }
 
@@ -60,18 +60,18 @@ namespace TopView.Core
 
             if (playerDefinition.viewPrefab == null || playerDefinition.viewPrefab.GetComponent<PlayerView>() == null)
             {
-                Debug.LogError("Runner >> Player Definition의 View Prefab이 없거나 PlayerView가 붙어 있지 않아 판을 시작할 수 없다.");
+                Debug.LogError("World >> Player Definition의 View Prefab이 없거나 PlayerView가 붙어 있지 않아 판을 시작할 수 없다.");
                 return false;
             }
 
             if (playerDefinition.cameraPriority <= 0)
             {
-                Debug.LogWarning("Runner >> Player Definition의 Camera Priority가 0 이하라 플레이어 카메라로 바뀌지 않을 수 있다.");
+                Debug.LogWarning("World >> Player Definition의 Camera Priority가 0 이하라 플레이어 카메라로 바뀌지 않을 수 있다.");
             }
 
             if (playerDefinition.cameraYawDegreesPerSecond <= 0f)
             {
-                Debug.LogWarning("Runner >> Player Definition의 Camera Yaw Degrees Per Second가 0 이하라 Q/E 회전이 없거나 반대로 돈다.");
+                Debug.LogWarning("World >> Player Definition의 Camera Yaw Degrees Per Second가 0 이하라 Q/E 회전이 없거나 반대로 돈다.");
             }
 
             spawnRequest = new PlayerSpawnRequest
@@ -95,7 +95,7 @@ namespace TopView.Core
             weaponModelPrefabs = new GameObject[weaponDefinitions.Length];
             if (weaponDefinitions.Length == 0)
             {
-                Debug.LogError("Runner >> Player Definition의 무기 목록이 비어 있어 판을 시작할 수 없다.");
+                Debug.LogError("World >> Player Definition의 무기 목록이 비어 있어 판을 시작할 수 없다.");
                 return false;
             }
 
@@ -104,7 +104,7 @@ namespace TopView.Core
                 WeaponDefinition definition = weaponDefinitions[weaponIndex];
                 if (definition == null)
                 {
-                    Debug.LogError($"Runner >> Player Definition의 무기 {weaponIndex}번 칸이 비어 있어 판을 시작할 수 없다.");
+                    Debug.LogError($"World >> Player Definition의 무기 {weaponIndex}번 칸이 비어 있어 판을 시작할 수 없다.");
                     return false;
                 }
 

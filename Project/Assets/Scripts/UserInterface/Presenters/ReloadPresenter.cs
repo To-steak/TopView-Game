@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace TopView.UserInterface.Presenters
 {
-    // 플레이어가 재장전하는 동안 ReloadView를 보이고, Runner가 매 프레임 넘기는 재장전 진행을 보여 준다.
+    // 플레이어가 재장전하는 동안 ReloadView를 보이고, World가 매 프레임 넘기는 재장전 진행을 보여 준다.
     public class ReloadPresenter : MonoBehaviour
     {
         [SerializeField] private ReloadView _view;
@@ -14,7 +14,7 @@ namespace TopView.UserInterface.Presenters
         private int _presentedReloadTicks;
 
         /// <summary>
-        /// View를 연출 없이 바로 숨긴다. 판을 준비할 때 Runner가 부른다.
+        /// View를 연출 없이 바로 숨긴다. 판을 준비할 때 World가 부른다.
         /// </summary>
         public void Initialize()
         {

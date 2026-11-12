@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace TopView.Commands
 {
-    // 플레이어 입력. Runner가 Update마다 갱신하고, 누름 입력은 틱이 끝날 때 CommandSystem이 지운다.
+    // 플레이어 입력. World가 Update마다 갱신하고, 누름 입력은 틱이 끝날 때 CommandSystem이 지운다.
     public struct PlayerCommand
     {
         // 이동 방향(월드, XZ). 카메라 기준으로 바꾼 값이며 크기는 입력 크기다

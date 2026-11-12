@@ -7,7 +7,7 @@ using UnityEngine;
 namespace TopView.Core
 {
     // 투사체: 투사체 View 표와 피격 이펙트 표 만들기
-    public partial class Runner
+    public partial class World
     {
         // 투사체 View 표와 피격 이펙트 표. 판을 준비할 때 Definition에서 모은다
         private GameObject[] _projectilePrefabs;
@@ -47,7 +47,7 @@ namespace TopView.Core
         {
             if (shots == null || shots.Length == 0)
             {
-                Debug.LogWarning($"Runner >> {ownerName}의 Shots가 비어 있어 이 공격을 건너뛰었다.");
+                Debug.LogWarning($"World >> {ownerName}의 Shots가 비어 있어 이 공격을 건너뛰었다.");
                 return false;
             }
 
@@ -56,13 +56,13 @@ namespace TopView.Core
                 int startTicks = shots[shotIndex].startTicks;
                 if (shotIndex > 0 && startTicks < shots[shotIndex - 1].startTicks)
                 {
-                    Debug.LogWarning($"Runner >> {ownerName}의 Shots {shotIndex}번 칸의 Start Ticks({startTicks})가 앞 칸({shots[shotIndex - 1].startTicks})보다 작아 이 공격을 건너뛰었다.");
+                    Debug.LogWarning($"World >> {ownerName}의 Shots {shotIndex}번 칸의 Start Ticks({startTicks})가 앞 칸({shots[shotIndex - 1].startTicks})보다 작아 이 공격을 건너뛰었다.");
                     return false;
                 }
 
                 if (startTicks > durationTicks)
                 {
-                    Debug.LogWarning($"Runner >> {ownerName}의 Shots {shotIndex}번 칸의 Start Ticks({startTicks})가 Duration Ticks({durationTicks})보다 커서 이 공격을 건너뛰었다.");
+                    Debug.LogWarning($"World >> {ownerName}의 Shots {shotIndex}번 칸의 Start Ticks({startTicks})가 Duration Ticks({durationTicks})보다 커서 이 공격을 건너뛰었다.");
                     return false;
                 }
             }
@@ -83,7 +83,7 @@ namespace TopView.Core
 
             if (projectilePrefab == null || projectilePrefab.GetComponent<ProjectileView>() == null)
             {
-                Debug.LogWarning($"Runner >> {ownerName}의 투사체 프리팹이 없거나 ProjectileView가 붙어 있지 않아 이 투사체는 보이지 않게 진행한다.");
+                Debug.LogWarning($"World >> {ownerName}의 투사체 프리팹이 없거나 ProjectileView가 붙어 있지 않아 이 투사체는 보이지 않게 진행한다.");
             }
             else
             {
@@ -109,7 +109,7 @@ namespace TopView.Core
 
             if (effectPrefab.GetComponent<ParticleSystem>() == null)
             {
-                Debug.LogWarning($"Runner >> {effectName} 프리팹에 ParticleSystem이 없어 이 이펙트는 나오지 않게 진행한다.");
+                Debug.LogWarning($"World >> {effectName} 프리팹에 ParticleSystem이 없어 이 이펙트는 나오지 않게 진행한다.");
                 return -1;
             }
 

@@ -8,13 +8,14 @@ using TopView.Presentation.ViewContexts;
 using TopView.Presentation.ViewSystems;
 using TopView.Requests;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace TopView.Core
 {
-    // 판 준비: World와 View 실행 상태를 만들고, 판을 끝낼 때 비운다
-    public partial class Runner
+    // 판 준비: 한 판의 데이터와 View 실행 상태를 만들고, 판을 끝낼 때 비운다
+    public partial class World
     {
-        // 새 World를 만들고 Definition과 씬의 Authoring 값을 채운 뒤, 씬의 View와 Presenter를 찾아 연결한다.
+        // 한 판의 데이터에 Definition과 씬의 Authoring 값을 채운 뒤, 씬의 View와 Presenter를 찾아 연결한다.
         private void StartRound()
         {
             if (!TryFindPlayerSpawner(out PlayerSpawnerAuthoring playerSpawner))
@@ -25,14 +26,14 @@ namespace TopView.Core
             GameSettingsDefinition gameSettings = _gameSettingsDefinition;
             if (gameSettings == null)
             {
-                Debug.LogError("Runner >> Runner에 Game Settings Definition이 연결되어 있지 않아 판을 시작할 수 없다.");
+                Debug.LogError("World >> World에 Game Settings Definition이 연결되어 있지 않아 판을 시작할 수 없다.");
                 return;
             }
 
             LootDefinition lootDefinition = _lootDefinition;
             if (lootDefinition == null)
             {
-                Debug.LogError("Runner >> Runner에 Loot Definition이 연결되어 있지 않아 판을 시작할 수 없다.");
+                Debug.LogError("World >> World에 Loot Definition이 연결되어 있지 않아 판을 시작할 수 없다.");
                 return;
             }
 
@@ -46,31 +47,31 @@ namespace TopView.Core
 
             if (gameSettings.enemyCapacityPerKind <= 0 || gameSettings.enemyPathCornerCapacity <= 0 || gameSettings.projectileCapacity <= 0 || gameSettings.lootCapacity <= 0)
             {
-                Debug.LogError("Runner >> Game Settings Definition의 Enemy Capacity Per Kind, Enemy Path Corner Capacity, Projectile Capacity, Loot Capacity 중 0 이하인 값이 있어 판을 시작할 수 없다.");
+                Debug.LogError("World >> Game Settings Definition의 Enemy Capacity Per Kind, Enemy Path Corner Capacity, Projectile Capacity, Loot Capacity 중 0 이하인 값이 있어 판을 시작할 수 없다.");
                 return;
             }
 
             if (lootDefinition.rule.pickupRadius <= 0f || lootDefinition.rule.lifetimeTicks <= 0)
             {
-                Debug.LogError("Runner >> Loot Definition의 Pickup Radius나 Lifetime Ticks가 0 이하라 판을 시작할 수 없다.");
+                Debug.LogError("World >> Loot Definition의 Pickup Radius나 Lifetime Ticks가 0 이하라 판을 시작할 수 없다.");
                 return;
             }
 
             if (gameSettings.rule.navMeshSampleDistance <= 0f)
             {
-                Debug.LogError("Runner >> Game Settings Definition의 Nav Mesh Sample Distance가 0 이하라 판을 시작할 수 없다.");
+                Debug.LogError("World >> Game Settings Definition의 Nav Mesh Sample Distance가 0 이하라 판을 시작할 수 없다.");
                 return;
             }
 
             if (gameSettings.rule.unstuckSampleDistance <= 0f)
             {
-                Debug.LogError("Runner >> Game Settings Definition의 Unstuck Sample Distance가 0 이하라 판을 시작할 수 없다.");
+                Debug.LogError("World >> Game Settings Definition의 Unstuck Sample Distance가 0 이하라 판을 시작할 수 없다.");
                 return;
             }
 
             if (gameSettings.rule.enemyLevelUpIntervalTicks <= 0)
             {
-                Debug.LogError("Runner >> Game Settings Definition의 Enemy Level Up Interval Ticks가 0 이하라 판을 시작할 수 없다.");
+                Debug.LogError("World >> Game Settings Definition의 Enemy Level Up Interval Ticks가 0 이하라 판을 시작할 수 없다.");
                 return;
             }
 
@@ -80,41 +81,42 @@ namespace TopView.Core
             int enemyKindCount = enemyDefinitions.Length;
             ReadEnemies(enemyDefinitions, projectilePrefabs, hitEffectPrefabs, out EnemySpawnRequest[] enemySpawnTemplates, out GameObject[] enemyViewPrefabs, out EnemyAttackAnimation[][] enemyAttackAnimations, out AudioClip[][] enemyAttackClips, out bool[] enemyShowsOverlayHealthBar, out GameObject[] enemyHealthGaugePrefabs);
 
-            World world = new World();
-            world.rule = gameSettings.rule;
-            world.lootRule = lootDefinition.rule;
-            world.flowRule = gameSettings.flowRule;
-            world.enemySpawners = enemySpawners;
-            world.enemySpawnerStates = new EnemySpawnerStateComponent[enemySpawners.Length];
-            world.playerDetectors = playerDetectors;
-            world.playerDetectorStates = new PlayerDetectorStateComponent[playerDetectors.Length];
-            world.random = new System.Random(world.rule.randomSeed);
-            world.playerSpawnRequests.Enqueue(playerSpawnRequest);
-            world.enemySpawnTemplates = enemySpawnTemplates;
+            _rule = gameSettings.rule;
+            _lootRule = lootDefinition.rule;
+            _flowRule = gameSettings.flowRule;
+            _enemySpawners = enemySpawners;
+            _enemySpawnerStates = new EnemySpawnerStateComponent[enemySpawners.Length];
+            _playerDetectors = playerDetectors;
+            _playerDetectorStates = new PlayerDetectorStateComponent[playerDetectors.Length];
+            _random = new System.Random(_rule.randomSeed);
+            _playerSpawnRequests.Enqueue(playerSpawnRequest);
+            _enemySpawnTemplates = enemySpawnTemplates;
             int enemyCapacity = enemyKindCount * gameSettings.enemyCapacityPerKind;
-            world.playerHitTargets = new HitTargetComponent[PLAYER_CAPACITY];
-            world.enemyHitTargets = new HitTargetComponent[enemyCapacity];
+            _playerHitTargets = new HitTargetComponent[PLAYER_CAPACITY];
+            _enemyHitTargets = new HitTargetComponent[enemyCapacity];
             // 공격하는 쪽 하나는 근접 판정을 동시에 하나만 가지고, 한 판정이 맞힐 대상도 플레이어와 적의 칸 수를 넘지 않는다
             int combatantCapacity = PLAYER_CAPACITY + enemyCapacity;
-            world.players = new PlayerStorage(PLAYER_CAPACITY);
-            world.weapons = new WeaponStorage(PLAYER_CAPACITY * playerSpawnRequest.weapons.Length);
-            world.enemies = new EnemyStorage(enemyKindCount, gameSettings.enemyCapacityPerKind, gameSettings.enemyPathCornerCapacity);
-            world.melees = new MeleeStorage(combatantCapacity, combatantCapacity);
-            world.projectiles = new ProjectileStorage(gameSettings.projectileCapacity);
-            world.loots = new LootStorage(gameSettings.lootCapacity);
+            _players = new PlayerStorage(PLAYER_CAPACITY);
+            _weapons = new WeaponStorage(PLAYER_CAPACITY * playerSpawnRequest.weapons.Length);
+            _enemies = new EnemyStorage(enemyKindCount, gameSettings.enemyCapacityPerKind, gameSettings.enemyPathCornerCapacity);
+            _melees = new MeleeStorage(combatantCapacity, combatantCapacity);
+            _projectiles = new ProjectileStorage(gameSettings.projectileCapacity);
+            _loots = new LootStorage(gameSettings.lootCapacity);
 
-            world.progress = new GameProgressComponent
+            _progress = new GameProgressComponent
             {
                 phase = GamePhase.Playing,
-                remainingTicks = world.rule.timeLimitTicks,
+                remainingTicks = _rule.timeLimitTicks,
                 score = 0,
                 gold = 0,
-                enemyLevel = world.rule.startingEnemyLevel,
-                enemyLevelUpRemainingTicks = world.rule.enemyLevelUpIntervalTicks
+                enemyLevel = _rule.startingEnemyLevel,
+                enemyLevelUpRemainingTicks = _rule.enemyLevelUpIntervalTicks
             };
 
+            _navigationPath = new NavMeshPath();
+
             Application.targetFrameRate = gameSettings.targetFrameRate;
-            _world = world;
+            _isRoundReady = true;
             _playerViewPrefab = playerDefinition.viewPrefab;
             _playerCameraPriority = playerDefinition.cameraPriority;
             _playerCameraYawDegreesPerSecond = playerDefinition.cameraYawDegreesPerSecond;
@@ -135,7 +137,7 @@ namespace TopView.Core
             BindPresenters();
         }
 
-        // 판의 World, View 실행 상태, Presenter 연결을 비운다. 씬을 다시 불러오기 전에 불러, 씬이 바뀌기까지 남은 프레임에 판이 돌지 않게 한다.
+        // 판을 멈추고 View 실행 상태와 Presenter 연결을 비운다. 씬을 다시 불러오기 전에 불러, 씬이 바뀌기까지 남은 프레임에 판이 돌지 않게 한다.
         private void ClearRound()
         {
             if (_viewContext != null)
@@ -144,7 +146,7 @@ namespace TopView.Core
                 CursorViewSystem.Release(_viewContext.cursor);
             }
 
-            _world = null;
+            _isRoundReady = false;
             _viewContext = null;
             _gameOverPresenter = null;
             _remainingTimePresenter = null;
@@ -174,20 +176,20 @@ namespace TopView.Core
                 player = new PlayerViewContext(),
                 enemy = new EnemyViewContext
                 {
-                    views = new EnemyView[_world.enemies.entities.Length],
-                    viewGenerations = new int[_world.enemies.entities.Length],
+                    views = new EnemyView[_enemies.entities.Length],
+                    viewGenerations = new int[_enemies.entities.Length],
                     viewPools = new Stack<EnemyView>[enemyKindCount],
                     triggerHashesByKind = new int[enemyKindCount][],
-                    healthGaugeViews = new EnemyHealthGaugeView[_world.enemies.entities.Length],
-                    healthGaugeGenerations = new int[_world.enemies.entities.Length],
-                    healthGaugeRatios = new float[_world.enemies.entities.Length],
+                    healthGaugeViews = new EnemyHealthGaugeView[_enemies.entities.Length],
+                    healthGaugeGenerations = new int[_enemies.entities.Length],
+                    healthGaugeRatios = new float[_enemies.entities.Length],
                     healthGaugePools = new Stack<EnemyHealthGaugeView>[enemyKindCount]
                 },
                 projectile = new ProjectileViewContext
                 {
-                    views = new ProjectileView[_world.projectiles.entities.Length],
-                    viewGenerations = new int[_world.projectiles.entities.Length],
-                    viewIndices = new int[_world.projectiles.entities.Length],
+                    views = new ProjectileView[_projectiles.entities.Length],
+                    viewGenerations = new int[_projectiles.entities.Length],
+                    viewIndices = new int[_projectiles.entities.Length],
                     viewPools = new Stack<ProjectileView>[_projectilePrefabs.Length]
                 },
                 hitEffect = new HitEffectViewContext
@@ -202,9 +204,9 @@ namespace TopView.Core
                 },
                 loot = new LootViewContext
                 {
-                    views = new LootView[_world.loots.entities.Length],
-                    viewGenerations = new int[_world.loots.entities.Length],
-                    viewKinds = new int[_world.loots.entities.Length],
+                    views = new LootView[_loots.entities.Length],
+                    viewGenerations = new int[_loots.entities.Length],
+                    viewKinds = new int[_loots.entities.Length],
                     viewPools = new Stack<LootView>[_lootPrefabs.Length]
                 },
                 music = CreateMusicViewContext(),
@@ -231,20 +233,20 @@ namespace TopView.Core
             }
             if (viewContext.camera.mainCamera == null)
             {
-                Debug.LogError("Runner >> 씬에 MainCamera 태그를 가진 카메라가 없다.");
+                Debug.LogError("World >> 씬에 MainCamera 태그를 가진 카메라가 없다.");
             }
             if (viewContext.camera.playerCameraView == null)
             {
-                Debug.LogError("Runner >> 씬에 PlayerCameraView가 없다.");
+                Debug.LogError("World >> 씬에 PlayerCameraView가 없다.");
             }
             if (_gameSettingsDefinition.crosshairCursor == null)
             {
-                Debug.LogError("Runner >> Game Settings Definition에 Crosshair Cursor가 연결되어 있지 않아 플레이 중에도 기본 커서를 쓴다.");
+                Debug.LogError("World >> Game Settings Definition에 Crosshair Cursor가 연결되어 있지 않아 플레이 중에도 기본 커서를 쓴다.");
             }
             WorldCanvasView worldCanvasView = FindAnyObjectByType<WorldCanvasView>();
             if (worldCanvasView == null)
             {
-                Debug.LogError("Runner >> 씬에 WorldCanvasView가 없어 적 체력 게이지, 월드 글자, 월드 정보 UI가 보이지 않는다.");
+                Debug.LogError("World >> 씬에 WorldCanvasView가 없어 적 체력 게이지, 월드 글자, 월드 정보 UI가 보이지 않는다.");
             }
             else
             {

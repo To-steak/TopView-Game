@@ -6,7 +6,7 @@ using UnityEngine;
 namespace TopView.Core
 {
     // 전리품: 종류별 View 표 만들기와 드롭 표 확인
-    public partial class Runner
+    public partial class World
     {
         // 전리품의 규칙과 종류별 프리팹
         [SerializeField] private LootDefinition _lootDefinition;
@@ -30,13 +30,13 @@ namespace TopView.Core
             LootView view = prefab != null ? prefab.GetComponent<LootView>() : null;
             if (view == null)
             {
-                Debug.LogWarning($"Runner >> Loot Definition의 {kind} 프리팹이 없거나 LootView가 붙어 있지 않아 이 전리품은 보이지 않게 진행한다.");
+                Debug.LogWarning($"World >> Loot Definition의 {kind} 프리팹이 없거나 LootView가 붙어 있지 않아 이 전리품은 보이지 않게 진행한다.");
                 return;
             }
 
             if (view.pickupClip == null)
             {
-                Debug.LogWarning($"Runner >> Loot Definition의 {kind} 프리팹 LootView에 Pickup Clip이 없어 이 전리품은 획득 소리 없이 진행한다.");
+                Debug.LogWarning($"World >> Loot Definition의 {kind} 프리팹 LootView에 Pickup Clip이 없어 이 전리품은 획득 소리 없이 진행한다.");
             }
 
             prefabs[(int)kind] = prefab;
@@ -60,18 +60,18 @@ namespace TopView.Core
                 }
                 else
                 {
-                    Debug.LogWarning($"Runner >> {definitionName} 드롭 표 {lootIndex}번의 Weight가 {loot.weight}라 이 항목은 뽑히지 않는다.");
+                    Debug.LogWarning($"World >> {definitionName} 드롭 표 {lootIndex}번의 Weight가 {loot.weight}라 이 항목은 뽑히지 않는다.");
                 }
 
                 if (loot.kind != LootKind.None && loot.baseAmount <= 0)
                 {
-                    Debug.LogWarning($"Runner >> {definitionName} 드롭 표 {lootIndex}번({loot.kind})의 Base Amount가 {loot.baseAmount}라 얻는 양이 없을 수 있다.");
+                    Debug.LogWarning($"World >> {definitionName} 드롭 표 {lootIndex}번({loot.kind})의 Base Amount가 {loot.baseAmount}라 얻는 양이 없을 수 있다.");
                 }
             }
 
             if (totalWeight <= 0)
             {
-                Debug.LogWarning($"Runner >> {definitionName}의 드롭 표가 비었거나 가중치 합이 0이라 이 적 종류는 전리품을 떨어뜨리지 않는다.");
+                Debug.LogWarning($"World >> {definitionName}의 드롭 표가 비었거나 가중치 합이 0이라 이 적 종류는 전리품을 떨어뜨리지 않는다.");
             }
 
             return loots;

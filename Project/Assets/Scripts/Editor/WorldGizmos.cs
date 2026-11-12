@@ -7,32 +7,30 @@ using UnityEngine;
 
 namespace TopView.Editor
 {
-    // 플레이 중 Runner가 가진 World의 Logic 값을 씬 뷰에 그린다. 배치할 때 봐야 하는 값은 AuthoringGizmos가 그린다.
-    public static class RunnerGizmos
+    // 플레이 중 World의 Logic 값을 씬 뷰에 그린다. 배치할 때 봐야 하는 값은 AuthoringGizmos가 그린다.
+    public static class WorldGizmos
     {
         private const float DROPPED_LOOT_RADIUS = 0.3f;
 
         [DrawGizmo(GizmoType.Selected | GizmoType.NonSelected)]
-        private static void DrawRunner(Runner runner, GizmoType gizmoType)
+        private static void DrawWorld(World world, GizmoType gizmoType)
         {
-            World world = runner.EditorWorld;
-            if (world == null)
+            if (!world.EditorIsRoundReady)
             {
                 return;
             }
 
-            DrawPlayers(world);
-            DrawEnemies(world);
-            DrawMelees(world);
-            DrawProjectiles(world);
-            DrawLootPickupRanges(world);
-            DrawDroppedLoots(world);
+            DrawPlayers(world.EditorPlayers);
+            DrawEnemies(world.EditorEnemies);
+            DrawMelees(world.EditorMelees);
+            DrawProjectiles(world.EditorProjectiles);
+            DrawLootPickupRanges(world.EditorPlayers, world.EditorLootPickupRadius);
+            DrawDroppedLoots(world.EditorLoots);
         }
 
         // 플레이어 이동 충돌에 쓰는 캡슐을 Logic 위치에 그린다. 착지 중이면 초록, 공중이면 노랑
-        private static void DrawPlayers(World world)
+        private static void DrawPlayers(PlayerEntity[] entities)
         {
-            PlayerEntity[] entities = world.players.entities;
             for (int index = 0; index < entities.Length; index++)
             {
                 ref readonly PlayerEntity entity = ref entities[index];
@@ -55,9 +53,8 @@ namespace TopView.Editor
 
         // 살아 있는 적마다 멈추는 거리(주황), 피격 판정 원(청록), Body 공격 판정 원(빨강)을 Logic 위치에 XZ 원으로 그린다.
         // 공격 판정은 여기에 플레이어 반지름을 더해 비교하므로, 원은 플레이어 중심이 아니라 가장자리가 닿는 기준이다
-        private static void DrawEnemies(World world)
+        private static void DrawEnemies(EnemyEntity[] entities)
         {
-            EnemyEntity[] entities = world.enemies.entities;
             for (int index = 0; index < entities.Length; index++)
             {
                 ref readonly EnemyEntity entity = ref entities[index];
@@ -90,9 +87,8 @@ namespace TopView.Editor
         }
 
         // 지금 살아 있는 근접 판정마다 판정 원을 자홍으로 그린다. 플레이어와 적의 근접 공격이 모두 여기에 나온다.
-        private static void DrawMelees(World world)
+        private static void DrawMelees(MeleeEntity[] entities)
         {
-            MeleeEntity[] entities = world.melees.entities;
             Gizmos.color = Color.magenta;
             for (int index = 0; index < entities.Length; index++)
             {
@@ -105,9 +101,8 @@ namespace TopView.Editor
 
         // 살아 있는 투사체마다 판정 구를 Logic 위치에 흰색으로 그린다. 폭발 반지름이 있는 Straight는 폭발 범위를 빨간색 XZ 원으로 함께 그린다.
         // 폭발 판정은 여기에 대상 반지름을 더해 비교하므로, 원은 대상 중심이 아니라 가장자리가 닿는 기준이다
-        private static void DrawProjectiles(World world)
+        private static void DrawProjectiles(ProjectileEntity[] entities)
         {
-            ProjectileEntity[] entities = world.projectiles.entities;
             for (int index = 0; index < entities.Length; index++)
             {
                 ref readonly ProjectileEntity entity = ref entities[index];
@@ -127,23 +122,21 @@ namespace TopView.Editor
         }
 
         // 살아 있는 플레이어마다 전리품 획득 반경을 Logic 위치에 초록색 XZ 원으로 그린다.
-        private static void DrawLootPickupRanges(World world)
+        private static void DrawLootPickupRanges(PlayerEntity[] players, float pickupRadius)
         {
-            PlayerEntity[] players = world.players.entities;
             Gizmos.color = Color.green;
             for (int playerIndex = 0; playerIndex < players.Length; playerIndex++)
             {
                 if (players[playerIndex].isAlive)
                 {
-                    GizmoShapes.DrawCircle(players[playerIndex].position.current, world.lootRule.pickupRadius);
+                    GizmoShapes.DrawCircle(players[playerIndex].position.current, pickupRadius);
                 }
             }
         }
 
         // 떨어져 있는 전리품마다 Logic 위치를 파란색 XZ 원으로 그린다.
-        private static void DrawDroppedLoots(World world)
+        private static void DrawDroppedLoots(LootEntity[] entities)
         {
-            LootEntity[] entities = world.loots.entities;
             Gizmos.color = Color.blue;
             for (int index = 0; index < entities.Length; index++)
             {

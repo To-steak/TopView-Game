@@ -5,7 +5,7 @@ using UnityEngine;
 namespace TopView.Core
 {
     // 디버그: 에디터의 Context Menu로 디버그 명령을 넣는다. 게임 상태는 다음 틱에 DebugCommandSystem이 바꾼다
-    public partial class Runner
+    public partial class World
     {
         private const int DEBUG_GOLD_AMOUNT = 2000000000;
 
@@ -13,13 +13,13 @@ namespace TopView.Core
         [ContextMenu("Debug/Add 2,000,000,000 Gold")]
         private void AddDebugGold()
         {
-            if (_world == null)
+            if (!_isRoundReady)
             {
-                Debug.LogWarning("Runner >> 판이 없어 골드 디버그 명령을 넣지 않았다. 플레이 중에 다시 시도한다.");
+                Debug.LogWarning("World >> 판이 없어 골드 디버그 명령을 넣지 않았다. 플레이 중에 다시 시도한다.");
                 return;
             }
 
-            _world.commandBuffer.debugCommands.Add(new DebugCommand { type = DebugCommandType.AddGold, amount = DEBUG_GOLD_AMOUNT });
+            _commandBuffer.debugCommands.Add(new DebugCommand { type = DebugCommandType.AddGold, amount = DEBUG_GOLD_AMOUNT });
         }
     }
 }

@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace TopView.Presentation.Views
 {
-    // 전리품 프리팹의 참조 묶음. Runner가 프리팹을 확인하고 LootViewSystem이 풀에서 다룰 때, LootSoundViewSystem이 획득 소리를 읽을 때 쓴다.
+    // 전리품 프리팹의 참조 묶음. World가 프리팹을 확인하고 LootViewSystem이 풀에서 다룰 때, LootSoundViewSystem이 획득 소리를 읽을 때 쓴다.
     public class LootView : MonoBehaviour
     {
         // 회전시킬 모델 Transform. 회전하지 않으면 null

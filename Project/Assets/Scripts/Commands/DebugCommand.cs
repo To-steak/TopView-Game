@@ -1,6 +1,6 @@
 namespace TopView.Commands
 {
-    // 테스트용 디버그 명령. 에디터에서 Runner의 Context Menu가 넣고 DebugCommandSystem이 소비한다.
+    // 테스트용 디버그 명령. 에디터에서 World의 Context Menu가 넣고 DebugCommandSystem이 소비한다.
     public struct DebugCommand
     {
         // 명령 종류

@@ -6,7 +6,7 @@ using UnityEngine.Audio;
 namespace TopView.Core
 {
     // 배경음악: 판마다 평소 곡과 보스 곡의 AudioSource를 만들고 Music Definition 값을 담는다
-    public partial class Runner
+    public partial class World
     {
         // 배경음악 곡과 재생 값
         [SerializeField] private MusicDefinition _musicDefinition;
@@ -21,29 +21,29 @@ namespace TopView.Core
             MusicDefinition definition = _musicDefinition;
             if (definition == null)
             {
-                Debug.LogError("Runner >> Runner에 Music Definition이 연결되어 있지 않아 배경음악이 나오지 않는다.");
+                Debug.LogError("World >> World에 Music Definition이 연결되어 있지 않아 배경음악이 나오지 않는다.");
                 return null;
             }
 
             if (definition.normalClip == null)
             {
-                Debug.LogError("Runner >> Music Definition에 Normal Clip이 연결되어 있지 않아 배경음악이 나오지 않는다.");
+                Debug.LogError("World >> Music Definition에 Normal Clip이 연결되어 있지 않아 배경음악이 나오지 않는다.");
                 return null;
             }
 
             if (definition.bossClip == null)
             {
-                Debug.LogWarning("Runner >> Music Definition에 Boss Clip이 연결되어 있지 않아 보스가 나와도 평소 곡을 계속 튼다.");
+                Debug.LogWarning("World >> Music Definition에 Boss Clip이 연결되어 있지 않아 보스가 나와도 평소 곡을 계속 튼다.");
             }
 
             if (definition.outputGroup == null)
             {
-                Debug.LogWarning("Runner >> Music Definition에 Output Group이 연결되어 있지 않아 배경음악이 Audio Mixer를 거치지 않는다.");
+                Debug.LogWarning("World >> Music Definition에 Output Group이 연결되어 있지 않아 배경음악이 Audio Mixer를 거치지 않는다.");
             }
 
             if (definition.fadeTicks < 0)
             {
-                Debug.LogWarning("Runner >> Music Definition의 Fade Ticks가 0보다 작아 페이드 없이 곡을 튼다.");
+                Debug.LogWarning("World >> Music Definition의 Fade Ticks가 0보다 작아 페이드 없이 곡을 튼다.");
             }
 
             GameObject musicObject = new GameObject(MUSIC_OBJECT_NAME);

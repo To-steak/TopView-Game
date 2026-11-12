@@ -10,7 +10,7 @@ using UnityEngine;
 namespace TopView.Core
 {
     // 적: 스포너와 플레이어 감지기, Definition 읽기
-    public partial class Runner
+    public partial class World
     {
         // 적 종류별 View 프리팹. 번호가 적 종류 번호다
         private GameObject[] _enemyViewPrefabs;
@@ -37,19 +37,19 @@ namespace TopView.Core
                 EnemySpawnerAuthoring spawner = spawners[spawnerIndex];
                 if (spawner.definition == null)
                 {
-                    Debug.LogWarning($"Runner >> Spawner Authoring {spawner.name}에 Enemy Definition이 없어 건너뛰었다.");
+                    Debug.LogWarning($"World >> Spawner Authoring {spawner.name}에 Enemy Definition이 없어 건너뛰었다.");
                     continue;
                 }
 
                 if (spawner.rule.spawnIntervalTicks <= 0)
                 {
-                    Debug.LogWarning($"Runner >> Spawner Authoring {spawner.name}의 Spawn Interval Ticks가 0 이하라 건너뛰었다.");
+                    Debug.LogWarning($"World >> Spawner Authoring {spawner.name}의 Spawn Interval Ticks가 0 이하라 건너뛰었다.");
                     continue;
                 }
 
                 if (!spawner.rule.isInfinite && spawner.rule.maxSpawnCount <= 0)
                 {
-                    Debug.LogWarning($"Runner >> Spawner Authoring {spawner.name}의 Max Spawn Count가 0 이하라 건너뛰었다.");
+                    Debug.LogWarning($"World >> Spawner Authoring {spawner.name}의 Max Spawn Count가 0 이하라 건너뛰었다.");
                     continue;
                 }
 
@@ -73,7 +73,7 @@ namespace TopView.Core
 
             if (enemySpawnerList.Count == 0)
             {
-                Debug.LogWarning("Runner >> 씬에 켜진 Enemy Spawner Authoring이 없어 적이 생기지 않는다.");
+                Debug.LogWarning("World >> 씬에 켜진 Enemy Spawner Authoring이 없어 적이 생기지 않는다.");
             }
 
             enemyDefinitions = kinds.ToArray();
@@ -94,14 +94,14 @@ namespace TopView.Core
                 PlayerDetectorAuthoring authoring = authorings[authoringIndex];
                 if (authoring.range.detectionRadius <= 0f)
                 {
-                    Debug.LogWarning($"Runner >> Player Detector Authoring {authoring.name}의 Detection Radius가 0 이하라 건너뛰었다.");
+                    Debug.LogWarning($"World >> Player Detector Authoring {authoring.name}의 Detection Radius가 0 이하라 건너뛰었다.");
                     continue;
                 }
 
                 int[] spawnerIndices = ReadLinkedSpawnerIndices(authoring, spawnerAuthorings);
                 if (spawnerIndices.Length == 0)
                 {
-                    Debug.LogWarning($"Runner >> Player Detector Authoring {authoring.name}에 발동할 수 있는 스포너가 없어 건너뛰었다.");
+                    Debug.LogWarning($"World >> Player Detector Authoring {authoring.name}에 발동할 수 있는 스포너가 없어 건너뛰었다.");
                     continue;
                 }
 
@@ -121,7 +121,7 @@ namespace TopView.Core
             {
                 if (!isSpawnerLinked[spawnerIndex])
                 {
-                    Debug.LogWarning($"Runner >> Spawner Authoring {spawnerAuthorings[spawnerIndex].name}가 어느 Player Detector Authoring에도 연결되어 있지 않아 적을 만들지 않는다.");
+                    Debug.LogWarning($"World >> Spawner Authoring {spawnerAuthorings[spawnerIndex].name}가 어느 Player Detector Authoring에도 연결되어 있지 않아 적을 만들지 않는다.");
                 }
             }
 
@@ -142,14 +142,14 @@ namespace TopView.Core
                 EnemySpawnerAuthoring spawner = authoring.spawners[linkIndex];
                 if (spawner == null)
                 {
-                    Debug.LogWarning($"Runner >> Player Detector Authoring {authoring.name}의 Spawners {linkIndex}번 슬롯이 비어 있어 건너뛰었다.");
+                    Debug.LogWarning($"World >> Player Detector Authoring {authoring.name}의 Spawners {linkIndex}번 슬롯이 비어 있어 건너뛰었다.");
                     continue;
                 }
 
                 int spawnerIndex = System.Array.IndexOf(spawnerAuthorings, spawner);
                 if (spawnerIndex < 0)
                 {
-                    Debug.LogWarning($"Runner >> Player Detector Authoring {authoring.name}에 연결된 스포너 {spawner.name}가 꺼져 있거나 설정이 잘못되어 판에서 빠졌으므로 건너뛰었다.");
+                    Debug.LogWarning($"World >> Player Detector Authoring {authoring.name}에 연결된 스포너 {spawner.name}가 꺼져 있거나 설정이 잘못되어 판에서 빠졌으므로 건너뛰었다.");
                     continue;
                 }
 
@@ -194,14 +194,14 @@ namespace TopView.Core
                 EnemyView enemyView = definition.viewPrefab != null ? definition.viewPrefab.GetComponent<EnemyView>() : null;
                 if (enemyView == null)
                 {
-                    Debug.LogWarning($"Runner >> {definition.name}의 View Prefab이 없거나 EnemyView가 붙어 있지 않아 이 적 종류는 보이지 않게 진행한다.");
+                    Debug.LogWarning($"World >> {definition.name}의 View Prefab이 없거나 EnemyView가 붙어 있지 않아 이 적 종류는 보이지 않게 진행한다.");
                 }
                 else
                 {
                     viewPrefabs[kind] = definition.viewPrefab;
                     if (enemyView.damageAnchor == null)
                     {
-                        Debug.LogWarning($"Runner >> {definition.name}의 View Prefab에 Damage Anchor가 연결되어 있지 않아 이 적 종류의 피해량 글자는 적의 발밑에 뜬다.");
+                        Debug.LogWarning($"World >> {definition.name}의 View Prefab에 Damage Anchor가 연결되어 있지 않아 이 적 종류의 피해량 글자는 적의 발밑에 뜬다.");
                     }
                     WarnMissingSounds(definition.name, enemyView, attackClips[kind]);
                 }
@@ -214,15 +214,15 @@ namespace TopView.Core
                 EnemyHealthGaugeView gaugeView = definition.healthGaugePrefab != null ? definition.healthGaugePrefab.GetComponent<EnemyHealthGaugeView>() : null;
                 if (gaugeView == null)
                 {
-                    Debug.LogWarning($"Runner >> {definition.name}의 Health Gauge Prefab이 없거나 EnemyHealthGaugeView가 붙어 있지 않아 이 적 종류는 체력 게이지 없이 진행한다.");
+                    Debug.LogWarning($"World >> {definition.name}의 Health Gauge Prefab이 없거나 EnemyHealthGaugeView가 붙어 있지 않아 이 적 종류는 체력 게이지 없이 진행한다.");
                 }
                 else if (!EnemyHealthGaugeViewSystem.HasAllReferences(gaugeView))
                 {
-                    Debug.LogWarning($"Runner >> {definition.name}의 Health Gauge Prefab에 Gauge Front, Health Text, Level Text 중 연결되지 않은 칸이 있어 이 적 종류는 체력 게이지 없이 진행한다.");
+                    Debug.LogWarning($"World >> {definition.name}의 Health Gauge Prefab에 Gauge Front, Health Text, Level Text 중 연결되지 않은 칸이 있어 이 적 종류는 체력 게이지 없이 진행한다.");
                 }
                 else if (enemyView != null && enemyView.healthGaugeAnchor == null)
                 {
-                    Debug.LogWarning($"Runner >> {definition.name}의 View Prefab에 Health Gauge Anchor가 연결되어 있지 않아 이 적 종류는 체력 게이지 없이 진행한다.");
+                    Debug.LogWarning($"World >> {definition.name}의 View Prefab에 Health Gauge Anchor가 연결되어 있지 않아 이 적 종류는 체력 게이지 없이 진행한다.");
                 }
                 else
                 {
@@ -236,20 +236,20 @@ namespace TopView.Core
         {
             if (enemyView.soundEffectSource == null)
             {
-                Debug.LogWarning($"Runner >> {definitionName}의 View Prefab에 Sound Effect Source가 연결되어 있지 않아 이 적 종류는 효과음 없이 진행한다.");
+                Debug.LogWarning($"World >> {definitionName}의 View Prefab에 Sound Effect Source가 연결되어 있지 않아 이 적 종류는 효과음 없이 진행한다.");
                 return;
             }
 
             if (enemyView.hitClip == null)
             {
-                Debug.LogWarning($"Runner >> {definitionName}의 View Prefab에 Hit Clip이 없어 이 적 종류는 피격 소리 없이 진행한다.");
+                Debug.LogWarning($"World >> {definitionName}의 View Prefab에 Hit Clip이 없어 이 적 종류는 피격 소리 없이 진행한다.");
             }
 
             for (int attackIndex = 0; attackIndex < attackClips.Length; attackIndex++)
             {
                 if (attackClips[attackIndex] == null)
                 {
-                    Debug.LogWarning($"Runner >> {definitionName} 공격 {attackIndex}번의 Attack Clip이 없어 이 공격은 소리 없이 진행한다.");
+                    Debug.LogWarning($"World >> {definitionName} 공격 {attackIndex}번의 Attack Clip이 없어 이 공격은 소리 없이 진행한다.");
                 }
             }
         }
@@ -270,7 +270,7 @@ namespace TopView.Core
 
             if (stopDistance > maxAttackRange)
             {
-                Debug.LogWarning($"Runner >> {definitionName}의 Stop Distance({stopDistance})가 가장 긴 Attack Range({maxAttackRange})보다 커서 멈춘 자리에서 공격하지 못할 수 있다.");
+                Debug.LogWarning($"World >> {definitionName}의 Stop Distance({stopDistance})가 가장 긴 Attack Range({maxAttackRange})보다 커서 멈춘 자리에서 공격하지 못할 수 있다.");
             }
         }
 

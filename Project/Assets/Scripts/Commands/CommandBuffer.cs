@@ -7,11 +7,11 @@ namespace TopView.Commands
     {
         // 일시정지 명령. PauseSystem이 소비한다
         public List<PauseCommand> pauseCommands = new List<PauseCommand>();
-        // 씬과 앱 전환 명령. Runner가 소비한다
+        // 씬과 앱 전환 명령. World가 소비한다
         public List<SceneCommand> sceneCommands = new List<SceneCommand>();
         // 플레이어 탈출 명령. PlayerUnstuckSystem이 소비한다
         public List<PlayerUnstuckCommand> playerUnstuckCommands = new List<PlayerUnstuckCommand>();
-        // 설정 명령. Runner가 소비한다
+        // 설정 명령. World가 소비한다
         public List<SettingsCommand> settingsCommands = new List<SettingsCommand>();
         // 플레이어 강화 명령. PlayerUpgradeSystem이 소비한다
         public List<PlayerUpgradeCommand> playerUpgradeCommands = new List<PlayerUpgradeCommand>();

@@ -8,7 +8,7 @@ using UnityEngine;
 namespace TopView.Core
 {
     // 볼륨: 판을 준비할 때 저장된 볼륨을 Audio Mixer에 반영하고, 설정 화면에서 바꾼 볼륨을 반영하고 저장한다
-    public partial class Runner
+    public partial class World
     {
         // 볼륨을 조절할 Audio Mixer와 볼륨 시작값
         [SerializeField] private AudioSettingsDefinition _audioSettingsDefinition;
@@ -25,7 +25,7 @@ namespace TopView.Core
             if (_audioSettingsDefinition == null)
             {
                 // 저장된 볼륨을 1로 덮어쓰지 않도록 저장도 하지 않는다
-                Debug.LogWarning("Runner >> Runner에 Audio Settings Definition이 연결되어 있지 않아 저장된 볼륨을 반영하지 않고, 설정 화면의 볼륨을 1로 보이며 저장하지 않는다.");
+                Debug.LogWarning("World >> World에 Audio Settings Definition이 연결되어 있지 않아 저장된 볼륨을 반영하지 않고, 설정 화면의 볼륨을 1로 보이며 저장하지 않는다.");
                 _volume = new AudioVolumeComponent { musicVolume = 1f, soundEffectVolume = 1f };
                 return;
             }
