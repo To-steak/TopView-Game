@@ -21,7 +21,7 @@ paths:
               View ← ViewSystem / Presenter(LateUpdate) ← Entity, Record
 ```
 
-Unity의 FixedUpdate / Update / LateUpdate는 App만 받고, App이 지금 씬의 World(또는 `~Flow`)를 정해진 순서로 부른다. World는 자기 데이터를 꺼내 호출 순서대로 넘긴다. 게임 상태를 바꾸는 곳은 System뿐이다.
+Unity의 FixedUpdate / Update / LateUpdate는 App만 받고, App이 지금 씬의 대표(World 또는 `Menu`)를 정해진 순서로 부른다. World는 자기 데이터를 꺼내 호출 순서대로 넘긴다. 게임 상태를 바꾸는 곳은 System뿐이다.
 
 ## 공통 원칙
 
@@ -75,7 +75,7 @@ Unity의 FixedUpdate / Update / LateUpdate는 App만 받고, App이 지금 씬�
 | `Persistence/` (필요할 때만) | 설정, 기록 저장 | `~Store` (설정·기록 저장과 불러오기) | `<접두사>.Persistence` | Entity |
 | `Presentation/` | 게임 세계의 연출 | `~ViewSystem`, `~View`, `ViewContext`, `~ViewContext`, 오디오, 오브젝트 풀 | `<접두사>.Presentation` | Entity, Definitions, Persistence |
 | `UserInterface/` | 화면 UI | UI View, View가 소유하는 부품(`~Entry`), Presenter | `<접두사>.UserInterface` | Entity, Persistence |
-| `Core/` | 데이터 보관과 실행 순서 | App(앱 수명의 일, 부트스트랩, 로딩, 씬 전환), World, 판이 없는 씬의 흐름(`~Flow`) | `<접두사>.Core` | 전부 |
+| `Core/` | 데이터 보관과 실행 순서 | App(앱 수명의 일, 부트스트랩, 로딩, 씬 전환), 씬의 대표(World, `Menu`) | `<접두사>.Core` | 전부 |
 | `Editor/` | 에디터 도구 | 에디터 도구 (Gizmo, PropertyDrawer, Custom Editor) | `<접두사>.Editor` (플랫폼: Editor 전용) | 전부 |
 
 - 같은 종류의 타입은 한 폴더에, 역할은 이름 접미사로 드러낸다.
@@ -207,7 +207,7 @@ ProjectileHitSystem.Tick(_projectiles, _playerHitTargets, _playerHitTargetCount,
 
 - 수치는 하드코딩하지 않고 `~Definition`(ScriptableObject)에 둔다.
   - 이유: 수치를 코드 수정 없이 에디터에서 조정한다.
-- Definition은 씬에 배치한 오브젝트가 인스펙터 필드로 가리킨다. 엔티티 종류는 `~Authoring`이, 판 전체의 Definition은 World가, 판이 없는 씬의 Definition은 그 씬의 `~Flow`가, 앱 수명의 Definition은 App 프리팹이 가리킨다. 씬마다 다른 값(배경음악 곡 등)은 그 씬의 World나 `~Flow`가 가리키고 App에 등록할 때 넘긴다. `Resources.Load`는 쓰지 않는다.
+- Definition은 씬에 배치한 오브젝트가 인스펙터 필드로 가리킨다. 엔티티 종류는 `~Authoring`이, 판 전체의 Definition은 World가, 판이 없는 씬의 Definition은 그 씬의 대표(`Menu` 등)가, 앱 수명의 Definition은 App 프리팹이 가리킨다. 씬마다 다른 값(배경음악 곡 등)은 그 씬의 대표가 가리키고 App에 등록할 때 넘긴다. `Resources.Load`는 쓰지 않는다.
   - 이유: 참조가 인스펙터에 보여 무엇을 쓰는지 씬에서 바로 알고, 누락은 판 시작 시 null 검사에서 드러난다. `Resources/`는 문자열 경로에 의존하고 안의 에셋을 모두 빌드에 넣는다.
 - 테이블은 생성 시점에만 조회하고 필요한 값은 칸의 컴포넌트로 복사한다. 매 틱 로직은 칸의 컴포넌트만 쓴다.
   - 이유: 컴포넌트 값만 보면 동작을 알 수 있고, 진행 중에 에셋을 바꿔도 판이 흔들리지 않는다.
@@ -247,7 +247,7 @@ Presentation/
   - 이유: 연출 판단이 ViewSystem 한 곳에 모이고, View는 프리팹의 참조 묶음으로만 남는다.
 - 연출의 판단과 동작은 모두 `~ViewSystem`(static)이 한다. Animator 파라미터 이름 등은 `~ViewSystem`의 상수로 둔다.
   - 이유: 문자열 이름이 흩어지면 오타가 실행해 봐야 드러난다.
-- View는 App이 LateUpdate에서 부르는 World(판이 없는 씬에서는 `~Flow`)와 App 자신이 정해진 순서로 호출하는 `~ViewSystem.Present`가 처리한다. 인자는 System처럼 필요한 데이터와 자기 영역의 `~ViewContext`만 받는다. 저장소 대신 읽기만 하는 엔티티 배열(`~Entity[]`)을 받는다. 다른 영역의 값이 필요하면 그 값만 인자로 받는다.
+- View는 App이 LateUpdate에서 부르는 씬의 대표(World, `Menu`)와 App 자신이 정해진 순서로 호출하는 `~ViewSystem.Present`가 처리한다. 인자는 System처럼 필요한 데이터와 자기 영역의 `~ViewContext`만 받는다. 저장소 대신 읽기만 하는 엔티티 배열(`~Entity[]`)을 받는다. 다른 영역의 값이 필요하면 그 값만 인자로 받는다.
   - 이유: 연출의 순서와 읽는 데이터도 Logic처럼 한 곳에서 보인다. `ViewContext`를 통째로 받으면 시그니처가 영향 범위를 보여 주지 못한다.
 - ViewSystem은 다른 ViewSystem을 호출하지 않는다.
   - 이유: 호출 안에 다른 ViewSystem의 동작이 숨으면 시그니처와 World의 호출 순서만 보고 언제 무엇이 일어나는지 알 수 없다.
@@ -263,7 +263,7 @@ Presentation/
 
 - UI는 MVP 구조다. `UserInterface/`은 타입 역할별 하위 폴더로 나눈다. `Views/`에 `~View`를, `Presenters/`에 `~Presenter`를 둔다.
   - 이유: 타입의 접미사만 알면 그 파일의 위치를 안다.
-- UI View는 버튼 입력을 이벤트로 발행하고 표시 메서드(`SetHealth` 등)를 가진다. Presenter는 MonoBehaviour이며, View의 이벤트를 구독해 명령 버퍼에 넣고, 자기를 연결한 쪽(World, 판이 없는 씬의 `~Flow`, 앱 수명의 UI는 App)에게 필요한 데이터만 받아 View의 표시 메서드를 부른다. Model 변경 알림은 없고 연결한 쪽이 매 프레임 데이터를 넘긴다.
+- UI View는 버튼 입력을 이벤트로 발행하고 표시 메서드(`SetHealth` 등)를 가진다. Presenter는 MonoBehaviour이며, View의 이벤트를 구독해 명령 버퍼에 넣고, 자기를 연결한 쪽(씬의 대표인 World나 `Menu`, 앱 수명의 UI는 App)에게 필요한 데이터만 받아 View의 표시 메서드를 부른다. Model 변경 알림은 없고 연결한 쪽이 매 프레임 데이터를 넘긴다.
   - 이유: 게임 데이터를 아는 쪽은 Presenter뿐이라 화면을 바꿔도 로직이 안전하다. 매 프레임 넘기므로 변경 알림 이벤트가 필요 없다.
 - View와 Presenter는 일대일이다.
   - 이유: Presenter 하나가 View 하나만 알면 데이터가 어디로 가는지 한 줄로 따라간다.
@@ -286,9 +286,9 @@ Presentation/
 
 - **App**은 앱에 하나뿐인 DDOL MonoBehaviour다. Menu와 World 씬이 함께 쓰고 씬이 아닌 앱의 수명을 따르는 일(볼륨과 설정 화면, 씬 전환·로딩·종료, 배경음악과 UI 소리 재생)을 맡는다. 한 씬의 수명을 따르는 일은 App에 두지 않는다. 요소별 상태와 처리는 `App.<요소>.cs`로 나눈다.
   - 이유: 두 씬에 같은 일이 있으면 같은 코드가 씬 수만큼 생기고 어긋난다. 씬의 일이 App에 붙으면 씬 전환을 알아채는 코드가 늘어 App이 커진다.
-- **Unity의 FixedUpdate / Update / LateUpdate는 App만 받는다.** World와 `~Flow`는 이 함수들을 두지 않고, App이 부르는 함수(`Tick`, `ReadInput`, `Present` 등)만 둔다. App은 앱 수명의 일과 지금 씬의 World나 `~Flow`를 정해진 순서로 부른다.
+- **Unity의 FixedUpdate / Update / LateUpdate는 App만 받는다.** 씬의 대표는 이 함수들을 두지 않고, App이 부르는 함수(`Tick`, `ReadInput`, `Present` 등)만 둔다. App은 앱 수명의 일과 지금 씬의 대표를 정해진 순서로 부른다.
   - 이유: App과 씬이 각자 Update를 돌리면 호출 순서가 두 파일로 나뉘고, 순서가 Script Execution Order에 숨는다.
-- 씬의 World와 `~Flow`는 static `App.Instance`로 App에 닿는다. Start에서 자기를 App에 등록하고, OnDestroy에서 해제한다. 등록할 때 그 씬의 값(배경음악 Definition, 설정 화면을 열 수 있는지 등)을 넘긴다.
+- 씬의 대표는 static `App.Instance`로 App에 닿는다. Start에서 자기를 App에 등록하고, OnDestroy에서 해제한다. 등록할 때 그 씬의 값(배경음악 Definition, 설정 화면을 열 수 있는지 등)을 넘긴다.
   - 이유: App은 씬보다 오래 살아 씬의 인스펙터로 가리킬 수 없다. 등록이 Start라야 에디터 부트스트랩(아래)이 만든 App에도 등록된다.
 - 빌드는 Menu 씬에서 시작하고, App 프리팹은 Menu 씬에 배치한다. 이미 App이 있으면 새로 생긴 App은 자기를 없앤다(Menu로 돌아올 때). 에디터에서 다른 씬부터 Play하면, `App.Editor.cs`(파일 전체를 `#if UNITY_EDITOR`로 감쌈)가 씬을 불러온 직후 `AssetDatabase`로 App 프리팹을 찾아 만든다.
   - 이유: 빌드에는 에디터 전용 경로가 남지 않고, `Resources/`에 프리팹을 넣지 않아도 된다.
@@ -305,9 +305,9 @@ Presentation/
   - 이유: 호출 순서가 결과를 바꾸므로, 순서를 정하는 곳이 한 곳이어야 한 화면에서 흐름을 따라갈 수 있다.
 - World는 판이 있는 씬에 하나 배치한다. DDOL에 올리지 않고 씬과 함께 생기고 사라진다. 판이 없는 씬(메뉴 등)의 일과 앱 수명의 일을 World에 두지 않는다. App의 실행 상태(배경음악 등)가 판의 데이터를 읽어야 하면, App이 World를 부를 때 그 실행 상태를 인자로 넘긴다.
   - 이유: World가 가진 상태(한 판의 데이터, View 실행 상태, Presenter 연결)는 모두 판의 수명을 따른다. 씬보다 오래 살면 판과 상관없는 전역 일이 붙어 서비스처럼 커지고, 씬 전환을 알아채는 코드가 따로 필요해진다.
-- 판이 없는 씬(메뉴 등)의 흐름은 그 씬에 하나 배치한 `~Flow` MonoBehaviour가 맡는다. `~Flow`는 자기 씬의 Presenter를 연결하고 App이 부를 때 표시한다. 씬 전환과 로딩은 App이 한다. World를 만들지 않고 System을 부르지 않는다.
+- **씬의 대표**는 씬마다 하나 배치해 그 씬의 일을 맡는 MonoBehaviour다. 판이 있는 씬의 대표는 World이고, 판이 없는 씬의 대표는 씬 이름을 딴다(예: `Menu`). 판이 없는 씬의 대표는 자기 씬의 Presenter를 연결하고 App이 부를 때 표시한다. 씬 전환과 로딩은 App이 한다. World를 만들지 않고 System을 부르지 않는다.
   - 이유: 틱이 없는 씬에는 호출 순서가 결과를 바꾸는 일이 없어 World에 둘 이유가 없다. 씬 오브젝트라 씬과 함께 사라져 이전 씬의 상태가 남지 않는다.
-- 한 씬에 World와 `~Flow`를 함께 두지 않는다.
+- 한 씬에 대표를 둘 두지 않는다(World와 `Menu`를 함께 두지 않는다).
   - 이유: 같은 씬을 두 곳이 돌리면 호출 순서가 다시 흩어진다.
 - **로딩:** Core가 `~Definition`의 struct를 World에 대입한다. 판 시작 시 Core는 `~Authoring`마다 Transform 위치 등 씬 값을 채운 생성 요청을 큐에 넣고, 엔티티는 첫 틱의 `~SpawnSystem`이 만든다. Core는 World에 엔티티를 직접 넣지 않는다. System은 Definition과 Authoring을 참조하지 않는다.
   - 이유: 씬에 놓인 엔티티와 게임 중 생긴 엔티티가 같은 경로로 만들어진다. Logic이 에셋에 묶이지 않는다.

@@ -32,7 +32,7 @@ paths:
 
 - 이유: 이름만 보고 필드인지, 지역 변수인지, 상수인지 구분한다. bool은 조건문이 문장처럼 읽힌다.
 
-접미사: `~Entity`, `~Storage`, `~System`, `~Utility`, `~ViewSystem`, `~Record`, `~Request`, `~Command`, `~Component`, `~Definition`, `~Authoring`, `~View`, `~Entry`, `~Presenter`, `~Flow`, `~Store`, 시간 값은 `~Ticks`.
+접미사: `~Entity`, `~Storage`, `~System`, `~Utility`, `~ViewSystem`, `~Record`, `~Request`, `~Command`, `~Component`, `~Definition`, `~Authoring`, `~View`, `~Entry`, `~Presenter`, `~Store`, 시간 값은 `~Ticks`.
 - 이유: 이름만 보고 그 타입의 역할과 따르는 규칙을 안다. `~Ticks`는 단위가 초가 아니라 틱임을 드러낸다.
 
 ## 스타일
