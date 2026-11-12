@@ -29,19 +29,13 @@ namespace TopView.Utilities
         /// <summary>
         /// 들고 있는 무기로 들어갈 공격 상태를 구한다.
         /// </summary>
-        /// <param name="weapons">무기 목록</param>
+        /// <param name="weapon">들고 있는 무기</param>
         /// <param name="weaponSlots">든 무기와 무기별 탄약</param>
         /// <param name="attackState">들어갈 공격 상태</param>
         /// <returns>들어갈 수 있으면 true. 탄약이 없거나 무기가 없으면 false</returns>
-        public static bool TryGetAttackState(WeaponComponent[] weapons, in PlayerWeaponSlotsComponent weaponSlots, out PlayerState attackState)
+        public static bool TryGetAttackState(in WeaponComponent weapon, in PlayerWeaponSlotsComponent weaponSlots, out PlayerState attackState)
         {
             attackState = PlayerState.Idle;
-            if (!IsValidWeaponIndex(weapons, weaponSlots.currentIndex))
-            {
-                return false;
-            }
-
-            ref readonly WeaponComponent weapon = ref weapons[weaponSlots.currentIndex];
             switch (weapon.kind)
             {
                 case WeaponKind.Melee:
@@ -99,13 +93,12 @@ namespace TopView.Utilities
         /// <summary>
         /// 그 번호의 무기로 교체할 수 있는지 판정한다.
         /// </summary>
-        /// <param name="weapons">무기 목록</param>
         /// <param name="weaponSlots">든 무기와 무기별 탄약</param>
         /// <param name="weaponIndex">바꿀 무기 번호</param>
         /// <returns>들고 있지 않은 유효한 무기면 true</returns>
-        public static bool CanSwap(WeaponComponent[] weapons, in PlayerWeaponSlotsComponent weaponSlots, int weaponIndex)
+        public static bool CanSwap(in PlayerWeaponSlotsComponent weaponSlots, int weaponIndex)
         {
-            return weaponIndex != weaponSlots.currentIndex && IsValidWeaponIndex(weapons, weaponIndex);
+            return weaponIndex != weaponSlots.currentIndex && weaponIndex >= 0 && weaponIndex < weaponSlots.weapons.Length;
         }
 
         /// <summary>
@@ -126,19 +119,13 @@ namespace TopView.Utilities
         /// <summary>
         /// 들고 있는 무기를 재장전할 수 있는지 판정한다.
         /// </summary>
-        /// <param name="weapons">무기 목록</param>
+        /// <param name="weapon">들고 있는 무기</param>
         /// <param name="weaponSlots">든 무기와 무기별 탄약</param>
         /// <param name="upgradeLevels">강화 레벨. 최대 탄약 수에 반영한다</param>
         /// <returns>Ranged이고 탄창이 덜 찼으며 예비 탄약이 있으면 true</returns>
-        public static bool CanReload(WeaponComponent[] weapons, in PlayerWeaponSlotsComponent weaponSlots, in PlayerUpgradeLevelsComponent upgradeLevels)
+        public static bool CanReload(in WeaponComponent weapon, in PlayerWeaponSlotsComponent weaponSlots, in PlayerUpgradeLevelsComponent upgradeLevels)
         {
-            if (!IsValidWeaponIndex(weapons, weaponSlots.currentIndex))
-            {
-                return false;
-            }
-
             int weaponIndex = weaponSlots.currentIndex;
-            ref readonly WeaponComponent weapon = ref weapons[weaponIndex];
             int maxAmmo = PlayerUpgradeUtility.GetMaxAmmo(in weapon, PlayerUpgradeUtility.GetWeaponLevel(in upgradeLevels, weaponIndex));
             return weapon.kind == WeaponKind.Ranged && weaponSlots.currentAmmo[weaponIndex] < maxAmmo && weaponSlots.reserveAmmo[weaponIndex] > 0;
         }
@@ -146,21 +133,16 @@ namespace TopView.Utilities
         /// <summary>
         /// 예비 탄약에서 모자란 만큼 장전한다.
         /// </summary>
-        /// <param name="weapons">무기 목록</param>
+        /// <param name="weapon">들고 있는 무기</param>
         /// <param name="weaponSlots">든 무기와 무기별 탄약</param>
         /// <param name="upgradeLevels">강화 레벨. 최대 탄약 수에 반영한다</param>
-        public static void Reload(WeaponComponent[] weapons, ref PlayerWeaponSlotsComponent weaponSlots, in PlayerUpgradeLevelsComponent upgradeLevels)
+        public static void Reload(in WeaponComponent weapon, ref PlayerWeaponSlotsComponent weaponSlots, in PlayerUpgradeLevelsComponent upgradeLevels)
         {
             int weaponIndex = weaponSlots.currentIndex;
-            int maxAmmo = PlayerUpgradeUtility.GetMaxAmmo(in weapons[weaponIndex], PlayerUpgradeUtility.GetWeaponLevel(in upgradeLevels, weaponIndex));
+            int maxAmmo = PlayerUpgradeUtility.GetMaxAmmo(in weapon, PlayerUpgradeUtility.GetWeaponLevel(in upgradeLevels, weaponIndex));
             int loadAmmo = Mathf.Min(maxAmmo - weaponSlots.currentAmmo[weaponIndex], weaponSlots.reserveAmmo[weaponIndex]);
             weaponSlots.currentAmmo[weaponIndex] += loadAmmo;
             weaponSlots.reserveAmmo[weaponIndex] -= loadAmmo;
-        }
-
-        private static bool IsValidWeaponIndex(WeaponComponent[] weapons, int weaponIndex)
-        {
-            return weaponIndex >= 0 && weaponIndex < weapons.Length;
         }
     }
 }

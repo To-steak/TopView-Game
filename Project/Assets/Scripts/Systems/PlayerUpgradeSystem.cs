@@ -14,9 +14,10 @@ namespace TopView.Systems
         /// 강화 명령을 모두 소비한다. 강화 화면이 열려 있을 때만 살아 있는 첫 플레이어를 강화한다. 일시정지 중에도 돌도록 PauseSystem 바로 뒤에서 부른다.
         /// </summary>
         /// <param name="players">플레이어 저장소</param>
+        /// <param name="weapons">무기 저장소</param>
         /// <param name="progress">한 판의 진행 상태. 골드를 쓴다</param>
         /// <param name="playerUpgradeCommands">플레이어 강화 명령 목록</param>
-        public static void Tick(PlayerStorage players, ref GameProgressComponent progress, List<PlayerUpgradeCommand> playerUpgradeCommands)
+        public static void Tick(PlayerStorage players, WeaponStorage weapons, ref GameProgressComponent progress, List<PlayerUpgradeCommand> playerUpgradeCommands)
         {
             // 강화 화면이 닫힌 뒤나 플레이어가 죽은 뒤에 남은 명령은 정상적으로 무시한다
             if (progress.isUpgradeOpen && TryFindAlivePlayer(players, out int playerIndex))
@@ -24,7 +25,7 @@ namespace TopView.Systems
                 ref PlayerEntity entity = ref players.entities[playerIndex];
                 for (int commandIndex = 0; commandIndex < playerUpgradeCommands.Count; commandIndex++)
                 {
-                    Apply(ref entity.upgradeLevels, ref entity.health, ref entity.mana, ref entity.weaponSlots, ref progress, in entity.vitals, in entity.upgrade, entity.weaponList.weapons, playerUpgradeCommands[commandIndex]);
+                    Apply(ref entity.upgradeLevels, ref entity.health, ref entity.mana, ref entity.weaponSlots, ref progress, in entity.vitals, in entity.upgrade, weapons.entities, playerUpgradeCommands[commandIndex]);
                 }
             }
 
@@ -46,7 +47,7 @@ namespace TopView.Systems
         }
 
         // 버튼은 최대 레벨이거나 골드가 모자라면 눌리지 않으므로, 여기서 막히는 명령은 경고하고 버린다
-        private static void Apply(ref PlayerUpgradeLevelsComponent levels, ref HealthComponent health, ref ManaComponent mana, ref PlayerWeaponSlotsComponent weaponSlots, ref GameProgressComponent progress, in PlayerVitalsComponent vitals, in PlayerUpgradeComponent upgrade, WeaponComponent[] weapons, in PlayerUpgradeCommand command)
+        private static void Apply(ref PlayerUpgradeLevelsComponent levels, ref HealthComponent health, ref ManaComponent mana, ref PlayerWeaponSlotsComponent weaponSlots, ref GameProgressComponent progress, in PlayerVitalsComponent vitals, in PlayerUpgradeComponent upgrade, WeaponEntity[] weaponEntities, in PlayerUpgradeCommand command)
         {
             if (!TryGetLevel(in levels, in command, out int level))
             {
@@ -88,7 +89,7 @@ namespace TopView.Systems
                     break;
                 case PlayerUpgradeCommandType.Weapon:
                     levels.weaponLevels[command.weaponIndex] = nextLevel;
-                    FillAddedAmmo(ref weaponSlots, in weapons[command.weaponIndex], command.weaponIndex, level, nextLevel);
+                    FillAddedAmmo(ref weaponSlots, in weaponEntities[weaponSlots.weapons[command.weaponIndex].index].weapon, command.weaponIndex, level, nextLevel);
                     break;
             }
         }

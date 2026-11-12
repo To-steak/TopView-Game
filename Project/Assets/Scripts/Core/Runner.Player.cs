@@ -93,6 +93,11 @@ namespace TopView.Core
             WeaponDefinition[] weaponDefinitions = playerDefinition.weapons;
             weapons = new WeaponComponent[weaponDefinitions.Length];
             weaponModelPrefabs = new GameObject[weaponDefinitions.Length];
+            if (weaponDefinitions.Length == 0)
+            {
+                Debug.LogError("Runner >> Player Definition의 무기 목록이 비어 있어 판을 시작할 수 없다.");
+                return false;
+            }
 
             for (int weaponIndex = 0; weaponIndex < weaponDefinitions.Length; weaponIndex++)
             {

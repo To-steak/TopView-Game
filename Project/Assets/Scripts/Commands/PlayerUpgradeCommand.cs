@@ -5,7 +5,7 @@ namespace TopView.Commands
     {
         // 강화 항목
         public PlayerUpgradeCommandType type;
-        // Weapon일 때 강화할 무기 번호. 번호는 WeaponListComponent의 무기 목록과 같다. 다른 항목은 쓰지 않는다
+        // Weapon일 때 강화할 무기 번호. 번호는 PlayerWeaponSlotsComponent의 무기 칸 번호와 같다. 다른 항목은 쓰지 않는다
         public int weaponIndex;
     }
 }

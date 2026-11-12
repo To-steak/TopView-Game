@@ -15,10 +15,11 @@ namespace TopView.Systems
         /// 상태별로 다음 상태로 넘어갈 때인지 보고, 교체와 재장전을 끝낸다. 사망한 뒤 시간이 되면 게임오버를 요청한다. PlayerAttackSystem 다음, PlayerStateChangeSystem 앞에 부른다.
         /// </summary>
         /// <param name="players">플레이어 저장소</param>
+        /// <param name="weapons">무기 저장소</param>
         /// <param name="command">플레이어 입력</param>
         /// <param name="stateChangeRequests">플레이어 상태 변경 요청 큐</param>
         /// <param name="gameOverRequests">게임오버 요청 큐</param>
-        public static void Tick(PlayerStorage players, in PlayerCommand command, Queue<PlayerStateChangeRequest> stateChangeRequests, Queue<GameOverRequest> gameOverRequests)
+        public static void Tick(PlayerStorage players, WeaponStorage weapons, in PlayerCommand command, Queue<PlayerStateChangeRequest> stateChangeRequests, Queue<GameOverRequest> gameOverRequests)
         {
             for (int index = 0; index < players.entities.Length; index++)
             {
@@ -32,7 +33,7 @@ namespace TopView.Systems
                 ref readonly PlayerMotionComponent motion = ref entity.motion;
                 ref PlayerWeaponSlotsComponent weaponSlot = ref entity.weaponSlots;
                 ref readonly PlayerActionComponent action = ref entity.action;
-                WeaponComponent[] weapons = entity.weaponList.weapons;
+                ref readonly WeaponComponent weapon = ref weapons.entities[weaponSlot.weapons[weaponSlot.currentIndex].index].weapon;
                 EntityIdentifier identifier = new EntityIdentifier { index = index, generation = entity.generation };
                 Vector3 moveInput = command.moveDirection;
 
@@ -63,7 +64,7 @@ namespace TopView.Systems
 
                     case PlayerState.ThrowCharge:
                         // 취소하면 탄약을 쓰지 않고 Idle이나 Move로, 공격 키를 떼면 그때의 충전량으로 Throw에 들어간다
-                        float chargePerTick = weapons[weaponSlot.currentIndex].throwing.chargePerTick;
+                        float chargePerTick = weapon.throwing.chargePerTick;
                         if (actionState.elapsedTicks == 0 && chargePerTick <= 0f)
                         {
                             Debug.LogWarning($"PlayerStateSystem >> chargePerTick({chargePerTick})이 0 이하라 투척 충전량이 0에 머문다. chargePerTick은 0보다 커야 한다.");
@@ -82,7 +83,7 @@ namespace TopView.Systems
                     case PlayerState.Shot:
                     case PlayerState.Swing:
                     case PlayerState.Throw:
-                        isFinished = PlayerWeaponUtility.IsAttackFinished(in actionState, in weapons[weaponSlot.currentIndex]);
+                        isFinished = PlayerWeaponUtility.IsAttackFinished(in actionState, in weapon);
                         break;
 
                     case PlayerState.Swap:
@@ -100,7 +101,7 @@ namespace TopView.Systems
                         isFinished = actionState.elapsedTicks >= action.reloadTicks;
                         if (isFinished)
                         {
-                            PlayerWeaponUtility.Reload(weapons, ref weaponSlot, in entity.upgradeLevels);
+                            PlayerWeaponUtility.Reload(in weapon, ref weaponSlot, in entity.upgradeLevels);
                         }
                         break;
 

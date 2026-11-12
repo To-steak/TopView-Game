@@ -42,11 +42,11 @@ namespace TopView.Systems
             }
         }
 
-        // 칸 전체를 새 값으로 바꿔 이전 값이 남지 않게 한다. 무기 목록과 무기 식별자 배열, 탄약 배열, 투척 미리보기 점 배열, 무기별 강화 레벨 배열만 다시 쓴다.
+        // 칸 전체를 새 값으로 바꿔 이전 값이 남지 않게 한다. 무기 식별자 배열과 탄약 배열, 투척 미리보기 점 배열, 무기별 강화 레벨 배열만 다시 쓴다.
         private static void Spawn(ref PlayerEntity entity, in PlayerSpawnRequest request)
         {
             int generation = entity.generation + 1;
-            WeaponComponent[] weapons = SpawnUtility.ReuseArray(entity.weaponList.weapons, request.weapons);
+            WeaponComponent[] weapons = request.weapons;
             EntityIdentifier[] weaponIdentifiers = entity.weaponSlots.weapons;
             if (weaponIdentifiers == null || weaponIdentifiers.Length != weapons.Length)
             {
@@ -78,7 +78,6 @@ namespace TopView.Systems
                 motion = new PlayerMotionComponent { currentSpeed = request.movement.walkSpeed },
                 health = new HealthComponent { current = request.vitals.startingMaxHealth, max = request.vitals.startingMaxHealth },
                 mana = new ManaComponent { current = request.vitals.startingMaxMana, max = request.vitals.startingMaxMana, recoveryElapsedTicks = request.vitals.manaRecoveryDelayTicks },
-                weaponList = new WeaponListComponent { weapons = weapons },
                 weaponSlots = new PlayerWeaponSlotsComponent
                 {
                     weapons = weaponIdentifiers,

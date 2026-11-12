@@ -273,12 +273,12 @@ namespace TopView.Core
 
             if (_ammoPresenter != null)
             {
-                WeaponComponent[] weapons = entity.weaponList.weapons;
+                WeaponEntity[] weapons = _world.weapons.entities;
                 ref readonly PlayerWeaponSlotsComponent weaponSlot = ref entity.weaponSlots;
                 int weaponIndex = weaponSlot.currentIndex;
-                if (weaponIndex >= 0 && weaponIndex < weapons.Length)
+                if (weaponIndex >= 0 && weaponIndex < weaponSlot.weapons.Length)
                 {
-                    _ammoPresenter.Present(true, true, weapons[weaponIndex].kind, weaponSlot.currentAmmo[weaponIndex], weaponSlot.reserveAmmo[weaponIndex]);
+                    _ammoPresenter.Present(true, true, weapons[weaponSlot.weapons[weaponIndex].index].weapon.kind, weaponSlot.currentAmmo[weaponIndex], weaponSlot.reserveAmmo[weaponIndex]);
                 }
                 else
                 {
@@ -293,7 +293,7 @@ namespace TopView.Core
 
             if (_upgradePresenter != null && _world.progress.isUpgradeOpen)
             {
-                PresentUpgradeInterface(in entity.vitals, in entity.upgrade, in entity.upgradeLevels, entity.weaponList.weapons, _world.progress.gold);
+                PresentUpgradeInterface(in entity.vitals, in entity.upgrade, in entity.upgradeLevels, in entity.weaponSlots, _world.weapons.entities, _world.progress.gold);
             }
 
             if (_reloadPresenter != null)
@@ -304,7 +304,7 @@ namespace TopView.Core
 
         // 항목별 레벨, 비용, 지금과 다음 레벨의 수치를 넘긴다. 최대 레벨이 아니고 골드가 비용 이상일 때만 버튼을 누를 수 있다.
         // 다음 레벨 수치는 최대 레벨이어도 한 레벨 위로 계산한다. 그래야 값이 같은지로 이 항목이 강화하지 않는 효과를 가린다
-        private void PresentUpgradeInterface(in PlayerVitalsComponent vitals, in PlayerUpgradeComponent upgrade, in PlayerUpgradeLevelsComponent levels, WeaponComponent[] weapons, int gold)
+        private void PresentUpgradeInterface(in PlayerVitalsComponent vitals, in PlayerUpgradeComponent upgrade, in PlayerUpgradeLevelsComponent levels, in PlayerWeaponSlotsComponent weaponSlots, WeaponEntity[] weapons, int gold)
         {
             int level = levels.maxHealthLevel;
             PresentUpgradeStat(PlayerUpgradeCommandType.MaxHealth, level, in upgrade, gold,
@@ -332,7 +332,7 @@ namespace TopView.Core
             {
                 int weaponLevel = weaponLevels[weaponIndex];
                 int cost = PlayerUpgradeUtility.GetCost(in upgrade, weaponLevel);
-                WeaponUpgradeEffectComponent effect = GetWeaponUpgradeEffect(in weapons[weaponIndex], in upgrade, weaponLevel);
+                WeaponUpgradeEffectComponent effect = GetWeaponUpgradeEffect(in weapons[weaponSlots.weapons[weaponIndex].index].weapon, in upgrade, weaponLevel);
                 _upgradePresenter.PresentWeapon(weaponIndex, weaponLevel, upgrade.maxLevel, cost, CanUpgrade(weaponLevel, cost, in upgrade, gold), in effect);
             }
         }

@@ -57,7 +57,7 @@ namespace TopView.Core
             // 탈출 버튼은 일시정지 화면에 있어 isPlaying과 상관없이 돈다. 같은 버튼이 넣은 Resume을 PauseSystem이 먼저 처리한다
             PlayerUnstuckSystem.Tick(_world.players, in _world.progress, in _world.rule, _world.commandBuffer.playerUnstuckCommands);
             // 강화 화면은 일시정지 중에 열리므로 isPlaying과 상관없이 돈다. 연 틱의 명령도 처리하도록 PauseSystem 뒤에 둔다
-            PlayerUpgradeSystem.Tick(_world.players, ref _world.progress, _world.commandBuffer.playerUpgradeCommands);
+            PlayerUpgradeSystem.Tick(_world.players, _world.weapons, ref _world.progress, _world.commandBuffer.playerUpgradeCommands);
             // 강화 화면에서 바로 쓸 수 있도록 일시정지 중에도 돈다
             DebugCommandSystem.Tick(ref _world.progress, _world.commandBuffer.debugCommands);
             bool isPlaying = _world.progress.phase == GamePhase.Playing && !_world.progress.isPaused;
@@ -72,21 +72,21 @@ namespace TopView.Core
                 WeaponDespawnSystem.Tick(_world.weapons, _world.weaponDespawnRequests);
                 PlayerStateTimerSystem.Tick(_world.players);
                 // 누름 입력으로 정해진 상태를 뒤의 셋이 함께 읽는다. 이동 입력과 공격을 반영한 뒤에 상태를 넘기므로 이 순서를 지킨다
-                PlayerPressSystem.Tick(_world.players, in _world.commandBuffer.playerCommand, _world.playerStateChangeRequests);
-                PlayerStateChangeSystem.Tick(_world.players, _world.playerStateChangeRequests, _world.playerStateChangedRecords);
+                PlayerPressSystem.Tick(_world.players, _world.weapons, in _world.commandBuffer.playerCommand, _world.playerStateChangeRequests);
+                PlayerStateChangeSystem.Tick(_world.players, _world.weapons, _world.playerStateChangeRequests, _world.playerStateChangedRecords);
                 PlayerMoveInputSystem.Tick(_world.players, in _world.commandBuffer.playerCommand);
-                PlayerAttackSystem.Tick(_world.players, _world.projectileSpawnRequests, _world.meleeSpawnRequests, _world.playerAttackCommittedRecords);
-                PlayerStateSystem.Tick(_world.players, in _world.commandBuffer.playerCommand, _world.playerStateChangeRequests, _world.gameOverRequests);
-                PlayerStateChangeSystem.Tick(_world.players, _world.playerStateChangeRequests, _world.playerStateChangedRecords);
+                PlayerAttackSystem.Tick(_world.players, _world.weapons, _world.projectileSpawnRequests, _world.meleeSpawnRequests, _world.playerAttackCommittedRecords);
+                PlayerStateSystem.Tick(_world.players, _world.weapons, in _world.commandBuffer.playerCommand, _world.playerStateChangeRequests, _world.gameOverRequests);
+                PlayerStateChangeSystem.Tick(_world.players, _world.weapons, _world.playerStateChangeRequests, _world.playerStateChangedRecords);
                 // 막기는 이동이 끝난 위치를 읽고, 조준은 막힌 뒤의 위치를 읽으므로 이 순서를 지킨다
                 PlayerMovementSystem.Tick(_world.players);
                 PlayerBlockSystem.Tick(_world.players, _world.enemies);
                 PlayerAimSystem.Tick(_world.players, in _world.commandBuffer.playerCommand);
                 // 미리보기는 이번 틱의 충전량과 이동·조준이 끝난 위치와 회전을 읽으므로 조준 뒤에 둔다
-                PlayerThrowPreviewSystem.Tick(_world.players);
+                PlayerThrowPreviewSystem.Tick(_world.players, _world.weapons);
                 PlayerStaminaSystem.Tick(_world.players);
                 // 획득은 이동이 끝난 위치를 읽고, 이번 틱 피해가 반영된 체력을 보므로 이 자리에 둔다
-                LootPickupSystem.Tick(_world.loots, _world.players, ref _world.progress, _world.lootRule.pickupRadius, _world.lootDespawnRequests, _world.lootPickedUpRecords);
+                LootPickupSystem.Tick(_world.loots, _world.players, _world.weapons, ref _world.progress, _world.lootRule.pickupRadius, _world.lootDespawnRequests, _world.lootPickedUpRecords);
                 LootDespawnSystem.Tick(_world.loots, _world.lootDespawnRequests);
                 LootLifetimeSystem.Tick(_world.loots, _world.lootDespawnRequests);
                 LootDespawnSystem.Tick(_world.loots, _world.lootDespawnRequests);
@@ -160,7 +160,7 @@ namespace TopView.Core
             // 이번 프레임에 일시정지가 걸리거나 풀리면 소리와 DOTween에 먼저 반영한다
             PauseViewSystem.Present(isPaused, _viewContext.pause);
             CursorViewSystem.Present(isPaused, _gameSettingsDefinition.crosshairCursor, _viewContext.cursor);
-            PlayerViewSystem.Present(_world.players.entities, _world.playerStateChangedRecords, _world.playerAttackCommittedRecords, _playerViewPrefab, _playerWeaponModelPrefabs, _playerRangedLayerBlendInTicks, isPaused, _viewContext.player);
+            PlayerViewSystem.Present(_world.players.entities, _world.weapons.entities, _world.playerStateChangedRecords, _world.playerAttackCommittedRecords, _playerViewPrefab, _playerWeaponModelPrefabs, _playerRangedLayerBlendInTicks, isPaused, _viewContext.player);
             PlayerThrowPreviewViewSystem.Present(_world.players.entities, _viewContext.player.view, _playerThrowPreviewCircleHeightOffset);
             EnemyViewSystem.Present(_world.enemies.entities, _world.enemyStateChangedRecords, _world.enemyAttackCommittedRecords, _world.enemyDamagedRecords, _enemyViewPrefabs, _enemyAttackAnimations, _enemyAttackClips, isPaused, _viewContext.enemy);
             EnemyHealthGaugeViewSystem.Present(_world.enemies.entities, _enemyHealthGaugePrefabs, _viewContext.camera.mainCamera, _viewContext.enemy);

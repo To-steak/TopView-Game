@@ -15,10 +15,11 @@ namespace TopView.Systems
         /// Shot, Swing, Throw 상태에서 timing.startTicks가 지났고 아직 공격이 나가지 않았으면 공격을 내보낸다. PlayerMoveInputSystem 다음에 부른다.
         /// </summary>
         /// <param name="players">플레이어 저장소</param>
+        /// <param name="weapons">무기 저장소</param>
         /// <param name="projectileSpawnRequests">투사체 생성 요청 큐</param>
         /// <param name="meleeSpawnRequests">근접 판정 생성 요청 큐</param>
         /// <param name="attackCommittedRecords">공격을 내보낸 기록 목록. 공격이 실제로 나갔을 때만 남긴다</param>
-        public static void Tick(PlayerStorage players, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, List<PlayerAttackCommittedRecord> attackCommittedRecords)
+        public static void Tick(PlayerStorage players, WeaponStorage weapons, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, List<PlayerAttackCommittedRecord> attackCommittedRecords)
         {
             for (int index = 0; index < players.entities.Length; index++)
             {
@@ -35,7 +36,7 @@ namespace TopView.Systems
                 }
 
                 ref PlayerWeaponSlotsComponent weaponSlot = ref entity.weaponSlots;
-                ref readonly WeaponComponent weapon = ref entity.weaponList.weapons[weaponSlot.currentIndex];
+                ref readonly WeaponComponent weapon = ref weapons.entities[weaponSlot.weapons[weaponSlot.currentIndex].index].weapon;
                 if (!actionState.isAttackCommitted && actionState.elapsedTicks >= weapon.timing.startTicks)
                 {
                     EntityIdentifier identifier = new EntityIdentifier { index = index, generation = entity.generation };

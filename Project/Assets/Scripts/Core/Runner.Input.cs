@@ -129,7 +129,7 @@ namespace TopView.Core
             }
 
             Ray ray = _viewContext.camera.mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
-            Plane plane = new Plane(Vector3.up, new Vector3(0f, GetMuzzleHeight(in _world.players.entities[playerIndex]), 0f));
+            Plane plane = new Plane(Vector3.up, new Vector3(0f, GetMuzzleHeight(in _world.players.entities[playerIndex], _world.weapons.entities), 0f));
             if (!plane.Raycast(ray, out float distance))
             {
                 return false;
@@ -140,16 +140,16 @@ namespace TopView.Core
         }
 
         // 든 무기의 총구 높이(월드). 투사체가 생기는 위치와 같은 식으로 구한다. 든 무기가 없으면 플레이어 위치의 높이
-        private static float GetMuzzleHeight(in PlayerEntity entity)
+        private static float GetMuzzleHeight(in PlayerEntity entity, WeaponEntity[] weapons)
         {
-            WeaponComponent[] weapons = entity.weaponList.weapons;
+            EntityIdentifier[] weaponIdentifiers = entity.weaponSlots.weapons;
             int weaponIndex = entity.weaponSlots.currentIndex;
-            if (weapons == null || weaponIndex < 0 || weaponIndex >= weapons.Length)
+            if (weaponIdentifiers == null || weaponIndex < 0 || weaponIndex >= weaponIdentifiers.Length)
             {
                 return entity.position.current.y;
             }
 
-            return (entity.position.current + entity.rotation.current * weapons[weaponIndex].muzzleOffset).y;
+            return (entity.position.current + entity.rotation.current * weapons[weaponIdentifiers[weaponIndex].index].weapon.muzzleOffset).y;
         }
     }
 }
