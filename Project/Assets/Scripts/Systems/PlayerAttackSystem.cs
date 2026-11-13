@@ -50,7 +50,7 @@ namespace TopView.Systems
                             player = identifier,
                             weaponIndex = weaponSlot.currentIndex,
                             impactPosition = meleeCenter,
-                            impactEffectIndex = weapon.kind == WeaponKind.Melee ? weapon.impactEffectIndex : -1,
+                            impactEffectIndex = weapon.kind == WeaponKind.Melee ? weapon.meleeView.impactEffectIndex : -1,
                             impactScale = weapon.kind == WeaponKind.Melee ? PlayerUpgradeUtility.GetMeleeRangeScale(in weapon, weaponLevel) : 1f
                         });
                     }

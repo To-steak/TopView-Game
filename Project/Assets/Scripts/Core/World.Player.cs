@@ -115,7 +115,7 @@ namespace TopView.Core
 
                 bool hasProjectile = definition.weapon.kind != WeaponKind.Melee;
                 AssignProjectileViews(definition.name, hasProjectile, definition.projectilePrefab, definition.hitEffectPrefab, ref weapons[weaponIndex].projectileView, projectilePrefabs, hitEffectPrefabs);
-                weapons[weaponIndex].impactEffectIndex = hasProjectile ? -1 : IndexHitEffect($"{definition.name}의 임팩트 이펙트", definition.impactEffectPrefab, hitEffectPrefabs);
+                weapons[weaponIndex].meleeView.impactEffectIndex = hasProjectile ? -1 : IndexHitEffect($"{definition.name}의 임팩트 이펙트", definition.impactEffectPrefab, hitEffectPrefabs);
             }
 
             return true;
