@@ -1,0 +1,23 @@
+{
+    "name": "TopView.PlayModeTests",
+    "rootNamespace": "TopView.PlayModeTests",
+    "references": [
+        "UnityEngine.TestRunner",
+        "TopView.Entity",
+        "TopView.Systems",
+        "TopView.Core"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

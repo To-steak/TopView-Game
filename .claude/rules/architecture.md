@@ -78,6 +78,7 @@ Unity의 FixedUpdate / Update / LateUpdate는 App만 받고, App이 지금 씬�
 | `Core/` | 데이터 보관과 실행 순서 | App(앱 수명의 일, 부트스트랩, 로딩, 씬 전환), 씬의 대표(World, `Menu`) | `<접두사>.Core` | 전부 |
 | `Editor/` | 에디터 도구 | 에디터 도구 (Gizmo, PropertyDrawer, Custom Editor) | `<접두사>.Editor` (플랫폼: Editor 전용) | 전부 |
 | `Tests/` | 동작 확인 | `~Tests` (EditMode 테스트) | `<접두사>.Tests` (플랫폼: Editor 전용) | Entity, Systems |
+| `PlayModeTests/` | 씬과 틱 순서의 동작 확인 | `~Tests` (PlayMode 테스트) | `<접두사>.PlayModeTests` | Entity, Systems, Core |
 
 - 같은 종류의 타입은 한 폴더에, 역할은 이름 접미사로 드러낸다.
   - 이유: 이름만 보고 그 타입이 어느 어셈블리에 있고 어떤 규칙을 따르는지 안다.
@@ -333,6 +334,8 @@ Presentation/
   - 이유: World가 씬과 함께 새로 생겨야 새 판에 이전 판의 값이 남지 않는다.
 - 예외: `Editor/`의 Gizmo는 World가 `#if UNITY_EDITOR`로 연 통로(`Editor~` 프로퍼티, bool은 `IsEditor~`)로 World의 데이터를 읽을 수 있다. 통로는 필요한 값만 열고, Gizmo는 값을 바꾸지 않고 읽기만 한다.
   - 이유: 디버그 표시는 게임 결과를 바꾸지 않고, 통로가 빌드에 포함되지 않아 Logic과 View가 World의 데이터에 닿는 길이 생기지 않는다.
+- 예외: `PlayModeTests/`의 테스트는 World가 `World.Test.cs`(파일 전체를 `#if UNITY_INCLUDE_TESTS`로 감쌈)에 연 통로(`Test~` 프로퍼티, bool은 `IsTest~`)로 World의 데이터를 읽고 쓸 수 있다. 통로는 테스트가 필요한 값만 연다.
+  - 이유: 틱 순서에서 생기는 버그는 실제 `World.Tick`을 돌려야 재현되고, 그러려면 테스트가 상황(엔티티, 진행 상태, 요청)을 직접 만들어야 한다. 통로가 빌드에 포함되지 않아 Logic과 View가 World의 데이터에 닿는 길이 생기지 않는다.
 - **World가 필요한 데이터만 꺼내 System, ViewSystem, Presenter에 넘긴다.** 이들은 World를 받지 않는다.
   - 이유: World를 통째로 받으면 시그니처만 보고 무엇을 읽고 쓰는지 알 수 없다.
 - 한 판 안의 틱 순서와 호출 순서는 World가 관리한다. App은 World의 함수를 부를 뿐 판 안의 순서에 끼어들지 않는다.
@@ -361,3 +364,11 @@ System의 동작을 Unity Test Framework의 EditMode 테스트로 확인한다.
   - 이유: System이 저장소와 큐만 받으므로 씬과 Definition 없이 돌릴 수 있다. 이름만 보고 무엇을 확인하는 테스트인지 안다.
 - **버그는 고치기 전에 그 버그로 실패하는 테스트를 먼저 쓴다.** 테스트가 실패하는 것을 확인한 뒤 고치고, 통과를 확인한다.
   - 이유: 실패를 먼저 보지 않으면 테스트가 그 버그를 잡는지 알 수 없다. 남은 테스트가 같은 버그가 다시 생기는 것을 막는다.
+
+### PlayModeTests/
+World의 호출 순서와 씬(지형, NavMesh)에 달린 동작을 PlayMode 테스트로 확인한다.
+
+- **System 하나로 드러나지 않는 버그만 PlayMode로 쓴다.** 실제 `World` 씬을 불러와 판이 준비되면 `Time.timeScale`을 0으로 두어 App의 자동 틱을 멈추고, 테스트가 `World.Tick`을 직접 부른다. 테스트 클래스는 확인하는 대상에 `Tests`를 붙인다(`WorldTickTests`).
+  - 이유: 틱을 테스트가 부르면 몇 번째 틱에 무엇이 일어나는지 정확히 셀 수 있다. 한 틱 차이로 생기는 버그는 사람이 에디터에서 재현할 수 없다.
+- **테스트가 놓는 엔티티의 값은 테스트가 직접 넣는다.** 씬의 배치나 Definition 수치에 기대지 않는다. 씬에서 쓰는 것은 지형, NavMesh처럼 테스트가 만들 수 없는 것뿐이다.
+  - 이유: 씬을 고칠 때마다 테스트가 깨지면 테스트를 믿을 수 없다.
