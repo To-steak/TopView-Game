@@ -18,7 +18,7 @@ namespace TopView.Core
         private EnemyAttackAnimation[][] _enemyAttackAnimations;
         private AudioClip[][] _enemyAttackClips;
         // 적 종류별로 오버레이 체력 바에 체력을 보여 주는지. 판을 준비할 때 Definition에서 모은다
-        private bool[] _enemyShowsOverlayHealthBar;
+        private bool[] _enemyHasOverlayHealthBar;
         // 적 종류별 체력 게이지 프리팹. 번호가 적 종류 번호다
         private GameObject[] _enemyHealthGaugePrefabs;
 
@@ -160,14 +160,14 @@ namespace TopView.Core
         }
 
         // 적 종류별 Enemy Definition에서 생성 요청 템플릿과 View·게이지 값을 꺼낸다.
-        private static void ReadEnemies(EnemyDefinition[] enemyDefinitions, List<GameObject> projectilePrefabs, List<GameObject> hitEffectPrefabs, out EnemySpawnRequest[] spawnTemplates, out GameObject[] viewPrefabs, out EnemyAttackAnimation[][] attackAnimations, out AudioClip[][] attackClips, out bool[] showsOverlayHealthBar, out GameObject[] gaugePrefabs)
+        private static void ReadEnemies(EnemyDefinition[] enemyDefinitions, List<GameObject> projectilePrefabs, List<GameObject> hitEffectPrefabs, out EnemySpawnRequest[] spawnTemplates, out GameObject[] viewPrefabs, out EnemyAttackAnimation[][] attackAnimations, out AudioClip[][] attackClips, out bool[] hasOverlayHealthBar, out GameObject[] gaugePrefabs)
         {
             int enemyKindCount = enemyDefinitions.Length;
             spawnTemplates = new EnemySpawnRequest[enemyKindCount];
             viewPrefabs = new GameObject[enemyKindCount];
             attackAnimations = new EnemyAttackAnimation[enemyKindCount][];
             attackClips = new AudioClip[enemyKindCount][];
-            showsOverlayHealthBar = new bool[enemyKindCount];
+            hasOverlayHealthBar = new bool[enemyKindCount];
             gaugePrefabs = new GameObject[enemyKindCount];
 
             for (int kind = 0; kind < enemyKindCount; kind++)
@@ -175,7 +175,7 @@ namespace TopView.Core
                 EnemyDefinition definition = enemyDefinitions[kind];
                 EnemyAttackComponent[] attacks = ReadAttacks(definition.name, definition.attacks, projectilePrefabs, hitEffectPrefabs, out attackAnimations[kind], out attackClips[kind]);
                 WarnIfStopsOutOfRange(definition.name, definition.movement.stopDistance, attacks);
-                showsOverlayHealthBar[kind] = definition.showsOverlayHealthBar;
+                hasOverlayHealthBar[kind] = definition.hasOverlayHealthBar;
 
                 spawnTemplates[kind] = new EnemySpawnRequest
                 {
@@ -206,7 +206,7 @@ namespace TopView.Core
                     WarnMissingSounds(definition.name, enemyView, attackClips[kind]);
                 }
                 // 오버레이 체력 바로 체력을 보여 주는 종류는 게이지를 두지 않아도 된다
-                if (definition.healthGaugePrefab == null && definition.showsOverlayHealthBar)
+                if (definition.healthGaugePrefab == null && definition.hasOverlayHealthBar)
                 {
                     continue;
                 }

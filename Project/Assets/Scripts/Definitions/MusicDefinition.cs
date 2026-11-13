@@ -9,7 +9,7 @@ namespace TopView.Definitions
     {
         // 평소에 반복 재생하는 곡
         public AudioClip normalClip;
-        // 판에서 화면 체력바를 띄우는 적(Shows Overlay Health Bar)이 처음 나타나면 바꿔 트는 곡. 판이 끝날 때까지 이어 튼다. 비우면 평소 곡을 계속 튼다
+        // 판에서 화면 체력바를 띄우는 적(Has Overlay Health Bar)이 처음 나타나면 바꿔 트는 곡. 판이 끝날 때까지 이어 튼다. 비우면 평소 곡을 계속 튼다
         public AudioClip bossClip;
         // 배경음악을 내보낼 Audio Mixer 그룹. 비우면 Mixer를 거치지 않는다
         public AudioMixerGroup outputGroup;

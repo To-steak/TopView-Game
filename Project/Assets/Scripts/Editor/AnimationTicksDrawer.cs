@@ -53,7 +53,7 @@ namespace TopView.Editor
             if (property.isExpanded)
             {
                 EditorGUI.indentLevel++;
-                float y = line.yMax;
+                float currentY = line.yMax;
 
                 SerializedProperty child = property.Copy();
                 SerializedProperty end = property.GetEndProperty();
@@ -66,9 +66,9 @@ namespace TopView.Editor
                         continue;
                     }
 
-                    y += EditorGUIUtility.standardVerticalSpacing;
+                    currentY += EditorGUIUtility.standardVerticalSpacing;
                     float childHeight = GetChildHeight(child);
-                    Rect childRect = new Rect(position.x, y, position.width, childHeight);
+                    Rect childRect = new Rect(position.x, currentY, position.width, childHeight);
                     if (IsLengthTicks(child.name))
                     {
                         AnimationTickConverter.DrawLengthTicks(childRect, child);
@@ -77,10 +77,10 @@ namespace TopView.Editor
                     {
                         EditorGUI.PropertyField(childRect, child, true);
                     }
-                    y += childHeight;
+                    currentY += childHeight;
                 }
 
-                DrawExtra(new Rect(position.x, y, position.width, GetExtraHeight(property)), property);
+                DrawExtra(new Rect(position.x, currentY, position.width, GetExtraHeight(property)), property);
                 EditorGUI.indentLevel--;
             }
 

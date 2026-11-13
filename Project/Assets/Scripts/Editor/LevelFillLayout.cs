@@ -49,13 +49,13 @@ namespace TopView.Editor
         }
 
         // 둘러싼 네 칸 중 셋만 비면 안쪽으로 꺾인 모서리다. 두 칸이 대각선으로만 비면 각 칸의 볼록한 모서리라 해당하지 않는다.
-        private static bool IsConcaveCorner(bool[,] isEmptyCells, int x, int z)
+        private static bool IsConcaveCorner(bool[,] isEmptyCells, int cornerX, int cornerZ)
         {
             int emptyCount = 0;
-            emptyCount += IsEmpty(isEmptyCells, x - 1, z - 1) ? 1 : 0;
-            emptyCount += IsEmpty(isEmptyCells, x, z - 1) ? 1 : 0;
-            emptyCount += IsEmpty(isEmptyCells, x - 1, z) ? 1 : 0;
-            emptyCount += IsEmpty(isEmptyCells, x, z) ? 1 : 0;
+            emptyCount += IsEmpty(isEmptyCells, cornerX - 1, cornerZ - 1) ? 1 : 0;
+            emptyCount += IsEmpty(isEmptyCells, cornerX, cornerZ - 1) ? 1 : 0;
+            emptyCount += IsEmpty(isEmptyCells, cornerX - 1, cornerZ) ? 1 : 0;
+            emptyCount += IsEmpty(isEmptyCells, cornerX, cornerZ) ? 1 : 0;
             return emptyCount == 3;
         }
 
@@ -63,33 +63,33 @@ namespace TopView.Editor
         {
             int width = isEmptyCells.GetLength(0);
             int depth = isEmptyCells.GetLength(1);
-            for (int z = 1; z < depth; z++)
+            for (int cornerZ = 1; cornerZ < depth; cornerZ++)
             {
-                for (int x = 1; x < width; x++)
+                for (int cornerX = 1; cornerX < width; cornerX++)
                 {
-                    if (!IsConcaveCorner(isEmptyCells, x, z))
+                    if (!IsConcaveCorner(isEmptyCells, cornerX, cornerZ))
                     {
                         continue;
                     }
 
-                    int endX = x;
-                    while (IsEmpty(isEmptyCells, endX, z - 1) && IsEmpty(isEmptyCells, endX, z))
+                    int endX = cornerX;
+                    while (IsEmpty(isEmptyCells, endX, cornerZ - 1) && IsEmpty(isEmptyCells, endX, cornerZ))
                     {
                         endX++;
                     }
-                    if (endX > x && IsConcaveCorner(isEmptyCells, endX, z))
+                    if (endX > cornerX && IsConcaveCorner(isEmptyCells, endX, cornerZ))
                     {
-                        horizontalChords.Add(new LevelFillChord { line = z, start = x, end = endX });
+                        horizontalChords.Add(new LevelFillChord { line = cornerZ, start = cornerX, end = endX });
                     }
 
-                    int endZ = z;
-                    while (IsEmpty(isEmptyCells, x - 1, endZ) && IsEmpty(isEmptyCells, x, endZ))
+                    int endZ = cornerZ;
+                    while (IsEmpty(isEmptyCells, cornerX - 1, endZ) && IsEmpty(isEmptyCells, cornerX, endZ))
                     {
                         endZ++;
                     }
-                    if (endZ > z && IsConcaveCorner(isEmptyCells, x, endZ))
+                    if (endZ > cornerZ && IsConcaveCorner(isEmptyCells, cornerX, endZ))
                     {
-                        verticalChords.Add(new LevelFillChord { line = x, start = z, end = endZ });
+                        verticalChords.Add(new LevelFillChord { line = cornerX, start = cornerZ, end = endZ });
                     }
                 }
             }
@@ -233,29 +233,29 @@ namespace TopView.Editor
         {
             int width = isEmptyCells.GetLength(0);
             int depth = isEmptyCells.GetLength(1);
-            for (int z = 1; z < depth; z++)
+            for (int cornerZ = 1; cornerZ < depth; cornerZ++)
             {
-                for (int x = 1; x < width; x++)
+                for (int cornerX = 1; cornerX < width; cornerX++)
                 {
-                    if (isResolvedCorners[x, z] || !IsConcaveCorner(isEmptyCells, x, z))
+                    if (isResolvedCorners[cornerX, cornerZ] || !IsConcaveCorner(isEmptyCells, cornerX, cornerZ))
                     {
                         continue;
                     }
 
-                    bool isBlockedOnLeft = !IsEmpty(isEmptyCells, x - 1, z - 1) || !IsEmpty(isEmptyCells, x - 1, z);
+                    bool isBlockedOnLeft = !IsEmpty(isEmptyCells, cornerX - 1, cornerZ - 1) || !IsEmpty(isEmptyCells, cornerX - 1, cornerZ);
                     int direction = isBlockedOnLeft ? 1 : -1;
-                    int currentX = x;
+                    int currentX = cornerX;
                     while (true)
                     {
                         int column = direction > 0 ? currentX : currentX - 1;
-                        if (!IsEmpty(isEmptyCells, column, z - 1) || !IsEmpty(isEmptyCells, column, z))
+                        if (!IsEmpty(isEmptyCells, column, cornerZ - 1) || !IsEmpty(isEmptyCells, column, cornerZ))
                         {
                             break;
                         }
 
-                        horizontalCuts[column, z] = true;
+                        horizontalCuts[column, cornerZ] = true;
                         currentX += direction;
-                        if (verticalCuts[currentX, z - 1] || verticalCuts[currentX, z])
+                        if (verticalCuts[currentX, cornerZ - 1] || verticalCuts[currentX, cornerZ])
                         {
                             break;
                         }

@@ -13,7 +13,7 @@ namespace TopView.Core
     {
 #if UNITY_EDITOR
         // 판이 준비되었는지. Editor의 WorldGizmos가 읽기만 한다. false면 아래 통로를 읽지 않는다
-        public bool EditorIsRoundReady => _isRoundReady;
+        public bool IsEditorRoundReady => _isRoundReady;
         // 플레이어 칸. Editor의 WorldGizmos가 읽기만 한다
         public PlayerEntity[] EditorPlayers => _players.entities;
         // 적 칸. Editor의 WorldGizmos가 읽기만 한다

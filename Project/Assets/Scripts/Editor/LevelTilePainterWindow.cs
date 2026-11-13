@@ -980,7 +980,7 @@ namespace TopView.Editor
             tile.name = piece.prefab.name + " " + piece.center.x + "," + piece.center.z;
             tile.transform.SetPositionAndRotation(piece.center, rotation);
             tile.transform.localScale = Vector3.Scale(piece.prefab.transform.localScale, localScale);
-            if (_tileSet.markTilesStatic)
+            if (_tileSet.isPaintedStatic)
             {
                 MarkBatchingStatic(tile.transform);
             }
@@ -1073,7 +1073,7 @@ namespace TopView.Editor
             tile.name = prefab.name + " " + center.x + "," + center.z;
             tile.transform.SetPositionAndRotation(center, rotation);
             tile.transform.localScale = Vector3.Scale(prefab.transform.localScale, GetLocalTileScale(quarterTurns));
-            if (_tileSet.markTilesStatic)
+            if (_tileSet.isPaintedStatic)
             {
                 MarkBatchingStatic(tile.transform);
             }
@@ -1217,7 +1217,7 @@ namespace TopView.Editor
             Undo.RegisterCreatedObjectUndo(prop, "레벨 칠하기");
             prop.transform.SetPositionAndRotation(point, rotation);
             prop.transform.localScale = prefab.transform.localScale * Random.Range(_tileSet.propMinimumScale, _tileSet.propMaximumScale);
-            if (_tileSet.markTilesStatic)
+            if (_tileSet.isPaintedStatic)
             {
                 MarkBatchingStatic(prop.transform);
             }

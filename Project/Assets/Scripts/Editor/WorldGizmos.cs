@@ -15,7 +15,7 @@ namespace TopView.Editor
         [DrawGizmo(GizmoType.Selected | GizmoType.NonSelected)]
         private static void DrawWorld(World world, GizmoType gizmoType)
         {
-            if (!world.EditorIsRoundReady)
+            if (!world.IsEditorRoundReady)
             {
                 return;
             }

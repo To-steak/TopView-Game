@@ -31,7 +31,7 @@ namespace TopView.Editor
             SerializedProperty weapon = serializedObject.FindProperty(nameof(WeaponDefinition.weapon));
             SerializedProperty kindProperty = weapon.FindPropertyRelative(nameof(WeaponComponent.kind));
             WeaponKind kind = (WeaponKind)kindProperty.intValue;
-            bool usesProjectile = kind != WeaponKind.Melee;
+            bool isProjectileWeapon = kind != WeaponKind.Melee;
 
             SerializedProperty ammo = weapon.FindPropertyRelative(nameof(WeaponComponent.ammo));
             SerializedProperty upgrade = weapon.FindPropertyRelative(nameof(WeaponComponent.upgrade));
@@ -54,7 +54,7 @@ namespace TopView.Editor
                 DrawRelative(ammo, nameof(AmmoComponent.startingCurrent), STARTING_CURRENT_AMMO_LABEL);
             }
 
-            if (usesProjectile)
+            if (isProjectileWeapon)
             {
                 DrawRelative(ammo, nameof(AmmoComponent.startingReserve), STARTING_RESERVE_AMMO_LABEL);
                 DrawRelative(weapon, nameof(WeaponComponent.projectile));
@@ -77,7 +77,7 @@ namespace TopView.Editor
             EditorGUI.indentLevel--;
 
             EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(WeaponDefinition.modelPrefab)));
-            if (usesProjectile)
+            if (isProjectileWeapon)
             {
                 EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(WeaponDefinition.projectilePrefab)));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(WeaponDefinition.hitEffectPrefab)));

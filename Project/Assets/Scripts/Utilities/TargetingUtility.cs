@@ -34,9 +34,9 @@ namespace TopView.Utilities
         /// <returns>XZ 거리가 distance 이하이면 true</returns>
         public static bool IsWithin(Vector3 from, Vector3 to, float distance)
         {
-            float x = to.x - from.x;
-            float z = to.z - from.z;
-            return x * x + z * z <= distance * distance;
+            float deltaX = to.x - from.x;
+            float deltaZ = to.z - from.z;
+            return deltaX * deltaX + deltaZ * deltaZ <= distance * distance;
         }
     }
 }

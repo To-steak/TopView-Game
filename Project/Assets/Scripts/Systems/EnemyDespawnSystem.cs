@@ -36,7 +36,7 @@ namespace TopView.Systems
                             position = entity.position.current
                         });
                     }
-                    if (entity.death.endsGameOnDeath)
+                    if (entity.death.isGameOverOnDeath)
                     {
                         gameOverRequests.Enqueue(new GameOverRequest { isVictory = true });
                     }

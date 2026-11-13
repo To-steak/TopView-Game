@@ -1,4 +1,5 @@
 using System;
+using UnityEngine.Serialization;
 
 namespace TopView.Components
 {
@@ -9,6 +10,7 @@ namespace TopView.Components
         // 사망 상태에 들어간 뒤 사라지기까지의 시간(틱)
         public int dieTicks;
         // 사망 상태가 끝나 사라질 때 게임을 끝내는지. 보스에 켠다
-        public bool endsGameOnDeath;
+        [FormerlySerializedAs("endsGameOnDeath")]
+        public bool isGameOverOnDeath;
     }
 }

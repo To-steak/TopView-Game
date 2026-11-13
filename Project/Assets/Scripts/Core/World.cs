@@ -178,7 +178,7 @@ namespace TopView.Core
             CameraViewSystem.Present(_viewContext.camera, _viewContext.player.view, _playerCameraPriority, _commandBuffer.playerCommand.cameraYawInput, _playerCameraYawDegreesPerSecond);
             if (music != null)
             {
-                MusicViewSystem.Present(_enemies.entities, _enemyShowsOverlayHealthBar, music);
+                MusicViewSystem.Present(_enemies.entities, _enemyHasOverlayHealthBar, music);
             }
 
             PresentUserInterface(isSettingsOpen);

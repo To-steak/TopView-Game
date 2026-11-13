@@ -39,7 +39,7 @@ namespace TopView.UserInterface.Views
         private int _presentedLevel;
         private int _presentedMaxLevel;
         private int _presentedCost;
-        private bool _presentedCanUpgrade;
+        private bool _canUpgradePresented;
         private float _presentedValue;
         private float _presentedNextValue;
         private WeaponUpgradeEffectComponent _presentedEffect;
@@ -165,7 +165,7 @@ namespace TopView.UserInterface.Views
 
         private bool IsSamePresented(int level, int maxLevel, int cost, bool canUpgrade)
         {
-            return _hasPresented && level == _presentedLevel && maxLevel == _presentedMaxLevel && cost == _presentedCost && canUpgrade == _presentedCanUpgrade;
+            return _hasPresented && level == _presentedLevel && maxLevel == _presentedMaxLevel && cost == _presentedCost && canUpgrade == _canUpgradePresented;
         }
 
         // 최대 레벨이면 비용 대신 MAX를 보여 준다
@@ -177,7 +177,7 @@ namespace TopView.UserInterface.Views
             _presentedLevel = level;
             _presentedMaxLevel = maxLevel;
             _presentedCost = cost;
-            _presentedCanUpgrade = canUpgrade;
+            _canUpgradePresented = canUpgrade;
             _hasPresented = true;
         }
 

@@ -86,8 +86,8 @@ namespace TopView.Core
             PlayerDetectorComponent[] playerDetectors = ReadPlayerDetectors(enemySpawnerAuthorings);
 
             int enemyKindCount = enemyDefinitions.Length;
-            ReadEnemies(enemyDefinitions, projectilePrefabs, hitEffectPrefabs, out EnemySpawnRequest[] enemySpawnTemplates, out GameObject[] enemyViewPrefabs, out EnemyAttackAnimation[][] enemyAttackAnimations, out AudioClip[][] enemyAttackClips, out bool[] enemyShowsOverlayHealthBar, out GameObject[] enemyHealthGaugePrefabs);
-            WarnMissingBossClip(_musicDefinition, enemyShowsOverlayHealthBar);
+            ReadEnemies(enemyDefinitions, projectilePrefabs, hitEffectPrefabs, out EnemySpawnRequest[] enemySpawnTemplates, out GameObject[] enemyViewPrefabs, out EnemyAttackAnimation[][] enemyAttackAnimations, out AudioClip[][] enemyAttackClips, out bool[] enemyHasOverlayHealthBar, out GameObject[] enemyHealthGaugePrefabs);
+            WarnMissingBossClip(_musicDefinition, enemyHasOverlayHealthBar);
 
             _rule = gameSettings.rule;
             _lootRule = lootDefinition.rule;
@@ -133,7 +133,7 @@ namespace TopView.Core
             _enemyViewPrefabs = enemyViewPrefabs;
             _enemyAttackAnimations = enemyAttackAnimations;
             _enemyAttackClips = enemyAttackClips;
-            _enemyShowsOverlayHealthBar = enemyShowsOverlayHealthBar;
+            _enemyHasOverlayHealthBar = enemyHasOverlayHealthBar;
             _enemyHealthGaugePrefabs = enemyHealthGaugePrefabs;
             _projectilePrefabs = projectilePrefabs.ToArray();
             _hitEffectPrefabs = hitEffectPrefabs.ToArray();
@@ -253,14 +253,14 @@ namespace TopView.Core
 
         // 보스 종류(오버레이 체력 바를 보여 주는 적)가 있는데 Music Definition에 보스 곡이 없으면 알린다. 보스가 나와도 평소 곡을 계속 튼다.
         // Music Definition이 없으면 App이 씬을 등록할 때 이미 알렸으므로 넘어간다.
-        private static void WarnMissingBossClip(MusicDefinition musicDefinition, bool[] enemyShowsOverlayHealthBar)
+        private static void WarnMissingBossClip(MusicDefinition musicDefinition, bool[] enemyHasOverlayHealthBar)
         {
             if (musicDefinition == null || musicDefinition.bossClip != null)
             {
                 return;
             }
 
-            foreach (bool isBossKind in enemyShowsOverlayHealthBar)
+            foreach (bool isBossKind in enemyHasOverlayHealthBar)
             {
                 if (isBossKind)
                 {

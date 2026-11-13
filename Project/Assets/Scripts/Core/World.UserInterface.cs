@@ -320,7 +320,7 @@ namespace TopView.Core
                 for (int index = 0; index < entities.Length; index++)
                 {
                     ref readonly EnemyEntity entity = ref entities[index];
-                    if (entity.isAlive && _enemyShowsOverlayHealthBar[entity.kind.kind])
+                    if (entity.isAlive && _enemyHasOverlayHealthBar[entity.kind.kind])
                     {
                         _bossHealthPresenter.Present(true, entity.health.current, entity.health.max);
                         hasOverlayEnemy = true;
