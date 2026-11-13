@@ -57,10 +57,11 @@ namespace TopView.Core
             // 강화 화면에서 바로 쓸 수 있도록 일시정지 중에도 돈다
             DebugCommandSystem.Tick(ref _progress, _commandBuffer.debugCommands);
             bool isPlaying = _progress.phase == GamePhase.Playing && !_progress.isPaused;
+            // 일시정지와 판 종료 중에도 직전 값을 지금 값으로 맞춰야 View가 두 값 사이를 계속 보간하며 떨지 않는다
+            TransformSnapshotSystem.Tick(_players, _enemies, _projectiles);
             DamageSystem.Tick(ref _progress, _players, _enemies, _playerDamageRequests, _enemyDamageRequests, _enemyDamagedRecords);
             if (isPlaying)
             {
-                TransformSnapshotSystem.Tick(_players, _enemies, _projectiles);
                 PlayerDeathSystem.Tick(_players, _playerStateChangedRecords);
                 MeleeOwnerDeathSystem.Tick(_melees, _players, _meleeDespawnRequests);
                 MeleeDespawnSystem.Tick(_melees, _meleeDespawnRequests);
