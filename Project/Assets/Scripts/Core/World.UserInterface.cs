@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using TopView.Commands;
 using TopView.Components;
-using TopView.Definitions;
 using TopView.Entities;
-using TopView.Presentation.ViewContexts;
 using TopView.UserInterface.Presenters;
 using TopView.Utilities;
 using UnityEngine;

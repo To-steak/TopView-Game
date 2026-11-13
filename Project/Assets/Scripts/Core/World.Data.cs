@@ -49,7 +49,7 @@ namespace TopView.Core
         // 시드 고정 난수 생성기
         private System.Random _random;
         // 입력 명령 버퍼
-        private CommandBuffer _commandBuffer = new CommandBuffer();
+        private readonly CommandBuffer _commandBuffer = new CommandBuffer();
         // 적 경로 계산에 다시 쓰는 NavMeshPath. MonoBehaviour의 필드 초기화에서는 만들 수 없어 판 시작 때 만든다
         private NavMeshPath _navigationPath;
 
@@ -78,51 +78,51 @@ namespace TopView.Core
         private EnemySpawnRequest[] _enemySpawnTemplates;
 
         // 플레이어 생성 요청 큐
-        private Queue<PlayerSpawnRequest> _playerSpawnRequests = new Queue<PlayerSpawnRequest>();
+        private readonly Queue<PlayerSpawnRequest> _playerSpawnRequests = new Queue<PlayerSpawnRequest>();
         // 무기 생성 요청 큐
-        private Queue<WeaponSpawnRequest> _weaponSpawnRequests = new Queue<WeaponSpawnRequest>();
+        private readonly Queue<WeaponSpawnRequest> _weaponSpawnRequests = new Queue<WeaponSpawnRequest>();
         // 적 생성 요청 큐
-        private Queue<EnemySpawnRequest> _enemySpawnRequests = new Queue<EnemySpawnRequest>();
+        private readonly Queue<EnemySpawnRequest> _enemySpawnRequests = new Queue<EnemySpawnRequest>();
         // 적 스포너 발동 요청 큐
-        private Queue<EnemySpawnerActivationRequest> _enemySpawnerActivationRequests = new Queue<EnemySpawnerActivationRequest>();
+        private readonly Queue<EnemySpawnerActivationRequest> _enemySpawnerActivationRequests = new Queue<EnemySpawnerActivationRequest>();
         // 투사체 생성 요청 큐
-        private Queue<ProjectileSpawnRequest> _projectileSpawnRequests = new Queue<ProjectileSpawnRequest>();
+        private readonly Queue<ProjectileSpawnRequest> _projectileSpawnRequests = new Queue<ProjectileSpawnRequest>();
         // 근접 판정 생성 요청 큐
-        private Queue<MeleeSpawnRequest> _meleeSpawnRequests = new Queue<MeleeSpawnRequest>();
+        private readonly Queue<MeleeSpawnRequest> _meleeSpawnRequests = new Queue<MeleeSpawnRequest>();
         // 전리품 생성 요청 큐
-        private Queue<LootSpawnRequest> _lootSpawnRequests = new Queue<LootSpawnRequest>();
+        private readonly Queue<LootSpawnRequest> _lootSpawnRequests = new Queue<LootSpawnRequest>();
         // 플레이어 상태 변경 요청 큐
-        private Queue<PlayerStateChangeRequest> _playerStateChangeRequests = new Queue<PlayerStateChangeRequest>();
+        private readonly Queue<PlayerStateChangeRequest> _playerStateChangeRequests = new Queue<PlayerStateChangeRequest>();
         // 적 상태 변경 요청 큐
-        private Queue<EnemyStateChangeRequest> _enemyStateChangeRequests = new Queue<EnemyStateChangeRequest>();
+        private readonly Queue<EnemyStateChangeRequest> _enemyStateChangeRequests = new Queue<EnemyStateChangeRequest>();
         // 투사체 소멸 요청 큐
-        private Queue<ProjectileDespawnRequest> _projectileDespawnRequests = new Queue<ProjectileDespawnRequest>();
+        private readonly Queue<ProjectileDespawnRequest> _projectileDespawnRequests = new Queue<ProjectileDespawnRequest>();
         // 무기 소멸 요청 큐
-        private Queue<WeaponDespawnRequest> _weaponDespawnRequests = new Queue<WeaponDespawnRequest>();
+        private readonly Queue<WeaponDespawnRequest> _weaponDespawnRequests = new Queue<WeaponDespawnRequest>();
         // 근접 판정 소멸 요청 큐
-        private Queue<MeleeDespawnRequest> _meleeDespawnRequests = new Queue<MeleeDespawnRequest>();
+        private readonly Queue<MeleeDespawnRequest> _meleeDespawnRequests = new Queue<MeleeDespawnRequest>();
         // 전리품 소멸 요청 큐
-        private Queue<LootDespawnRequest> _lootDespawnRequests = new Queue<LootDespawnRequest>();
+        private readonly Queue<LootDespawnRequest> _lootDespawnRequests = new Queue<LootDespawnRequest>();
         // 플레이어 피해 요청 큐. 적의 공격이 넣는다
-        private Queue<DamageRequest> _playerDamageRequests = new Queue<DamageRequest>();
+        private readonly Queue<DamageRequest> _playerDamageRequests = new Queue<DamageRequest>();
         // 적 피해 요청 큐. 플레이어의 공격이 넣는다
-        private Queue<DamageRequest> _enemyDamageRequests = new Queue<DamageRequest>();
+        private readonly Queue<DamageRequest> _enemyDamageRequests = new Queue<DamageRequest>();
         // 게임오버 요청 큐
-        private Queue<GameOverRequest> _gameOverRequests = new Queue<GameOverRequest>();
+        private readonly Queue<GameOverRequest> _gameOverRequests = new Queue<GameOverRequest>();
 
         // 이번 프레임의 플레이어 상태 변경 기록. LateUpdate 마지막에 비운다
-        private List<PlayerStateChangedRecord> _playerStateChangedRecords = new List<PlayerStateChangedRecord>();
+        private readonly List<PlayerStateChangedRecord> _playerStateChangedRecords = new List<PlayerStateChangedRecord>();
         // 이번 프레임에 플레이어가 공격을 내보낸 기록. LateUpdate 마지막에 비운다
-        private List<PlayerAttackCommittedRecord> _playerAttackCommittedRecords = new List<PlayerAttackCommittedRecord>();
+        private readonly List<PlayerAttackCommittedRecord> _playerAttackCommittedRecords = new List<PlayerAttackCommittedRecord>();
         // 이번 프레임의 적 상태 변경 기록. LateUpdate 마지막에 비운다
-        private List<EnemyStateChangedRecord> _enemyStateChangedRecords = new List<EnemyStateChangedRecord>();
+        private readonly List<EnemyStateChangedRecord> _enemyStateChangedRecords = new List<EnemyStateChangedRecord>();
         // 이번 프레임에 적이 공격을 내보낸 기록. LateUpdate 마지막에 비운다
-        private List<EnemyAttackCommittedRecord> _enemyAttackCommittedRecords = new List<EnemyAttackCommittedRecord>();
+        private readonly List<EnemyAttackCommittedRecord> _enemyAttackCommittedRecords = new List<EnemyAttackCommittedRecord>();
         // 이번 프레임의 투사체 명중·폭발 기록. LateUpdate 마지막에 비운다
-        private List<ProjectileHitRecord> _projectileHitRecords = new List<ProjectileHitRecord>();
+        private readonly List<ProjectileHitRecord> _projectileHitRecords = new List<ProjectileHitRecord>();
         // 이번 프레임에 적이 피해를 받은 기록. LateUpdate 마지막에 비운다
-        private List<EnemyDamagedRecord> _enemyDamagedRecords = new List<EnemyDamagedRecord>();
+        private readonly List<EnemyDamagedRecord> _enemyDamagedRecords = new List<EnemyDamagedRecord>();
         // 이번 프레임에 전리품을 획득한 기록. LateUpdate 마지막에 비운다
-        private List<LootPickedUpRecord> _lootPickedUpRecords = new List<LootPickedUpRecord>();
+        private readonly List<LootPickedUpRecord> _lootPickedUpRecords = new List<LootPickedUpRecord>();
     }
 }
