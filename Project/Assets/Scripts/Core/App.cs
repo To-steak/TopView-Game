@@ -43,7 +43,7 @@ namespace TopView.Core
 
             ReportRemainingScene();
             _world = world;
-            BindScene(musicDefinition, true, settingsPresenter);
+            BindScene(musicDefinition, settingsPresenter);
             world.Initialize(_sceneCommands, _settingsCommands, _userInterfaceSoundRequests);
         }
 
@@ -78,7 +78,7 @@ namespace TopView.Core
 
             ReportRemainingScene();
             _menu = menu;
-            BindScene(musicDefinition, false, settingsPresenter);
+            BindScene(musicDefinition, settingsPresenter);
             menu.Initialize(_sceneCommands, _settingsCommands, _userInterfaceSoundRequests);
         }
 
@@ -224,9 +224,9 @@ namespace TopView.Core
         }
 
         // 새 씬의 배경음악을 만들고 설정 화면을 연결한다. 배경음악 오브젝트는 지금 씬에 만들어 씬과 함께 사라진다
-        private void BindScene(MusicDefinition musicDefinition, bool usesBossClip, SettingsPresenter settingsPresenter)
+        private void BindScene(MusicDefinition musicDefinition, SettingsPresenter settingsPresenter)
         {
-            _musicViewContext = CreateMusicViewContext(musicDefinition, usesBossClip);
+            _musicViewContext = CreateMusicViewContext(musicDefinition);
             BindSettingsPresenter(settingsPresenter);
         }
 

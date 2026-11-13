@@ -13,10 +13,11 @@ namespace TopView.Core
 
         private const string MUSIC_OBJECT_NAME = "Music";
 
-        // 지금 씬에 배경음악 오브젝트를 만들어 평소 곡과 보스 곡의 AudioSource를 둔다. 보스 곡을 쓰지 않거나 없으면 보스 곡 AudioSource는 null이다.
+        // 지금 씬에 배경음악 오브젝트를 만들어 평소 곡과 보스 곡의 AudioSource를 둔다. Music Definition에 보스 곡이 없으면 보스 곡 AudioSource는 null이다.
+        // 보스 곡이 필요한 씬인지는 App이 정하지 않는다. 보스 종류가 있는데 보스 곡이 없으면 World가 판을 준비할 때 알린다.
         // 씬에 만들므로 씬이 바뀌면 함께 사라지고, 새 씬은 곡을 처음부터 튼다.
         // Music Definition이나 평소 곡이 없으면 null을 돌려준다.
-        private static MusicViewContext CreateMusicViewContext(MusicDefinition definition, bool usesBossClip)
+        private static MusicViewContext CreateMusicViewContext(MusicDefinition definition)
         {
             if (definition == null)
             {
@@ -30,11 +31,6 @@ namespace TopView.Core
                 return null;
             }
 
-            if (usesBossClip && definition.bossClip == null)
-            {
-                Debug.LogWarning("App >> Music Definition에 Boss Clip이 연결되어 있지 않아 보스가 나와도 평소 곡을 계속 튼다.");
-            }
-
             if (definition.outputGroup == null)
             {
                 Debug.LogWarning("App >> Music Definition에 Output Group이 연결되어 있지 않아 배경음악이 Audio Mixer를 거치지 않는다.");
@@ -46,11 +42,11 @@ namespace TopView.Core
             }
 
             GameObject musicObject = new GameObject(MUSIC_OBJECT_NAME);
-            bool hasBossSource = usesBossClip && definition.bossClip != null;
+            bool hasBossClip = definition.bossClip != null;
             return new MusicViewContext
             {
                 normalSource = CreateMusicSource(musicObject, definition.normalClip, definition.outputGroup),
-                bossSource = hasBossSource ? CreateMusicSource(musicObject, definition.bossClip, definition.outputGroup) : null,
+                bossSource = hasBossClip ? CreateMusicSource(musicObject, definition.bossClip, definition.outputGroup) : null,
                 volume = definition.volume,
                 fadeTicks = definition.fadeTicks
             };

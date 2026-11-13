@@ -87,6 +87,7 @@ namespace TopView.Core
 
             int enemyKindCount = enemyDefinitions.Length;
             ReadEnemies(enemyDefinitions, projectilePrefabs, hitEffectPrefabs, out EnemySpawnRequest[] enemySpawnTemplates, out GameObject[] enemyViewPrefabs, out EnemyAttackAnimation[][] enemyAttackAnimations, out AudioClip[][] enemyAttackClips, out bool[] enemyShowsOverlayHealthBar, out GameObject[] enemyHealthGaugePrefabs);
+            WarnMissingBossClip(_musicDefinition, enemyShowsOverlayHealthBar);
 
             _rule = gameSettings.rule;
             _lootRule = lootDefinition.rule;
@@ -248,6 +249,25 @@ namespace TopView.Core
             }
 
             return viewContext;
+        }
+
+        // 보스 종류(오버레이 체력 바를 보여 주는 적)가 있는데 Music Definition에 보스 곡이 없으면 알린다. 보스가 나와도 평소 곡을 계속 튼다.
+        // Music Definition이 없으면 App이 씬을 등록할 때 이미 알렸으므로 넘어간다.
+        private static void WarnMissingBossClip(MusicDefinition musicDefinition, bool[] enemyShowsOverlayHealthBar)
+        {
+            if (musicDefinition == null || musicDefinition.bossClip != null)
+            {
+                return;
+            }
+
+            foreach (bool isBossKind in enemyShowsOverlayHealthBar)
+            {
+                if (isBossKind)
+                {
+                    Debug.LogWarning("World >> 보스 적 종류가 있는데 Music Definition에 Boss Clip이 연결되어 있지 않아 보스가 나와도 평소 곡을 계속 튼다.");
+                    return;
+                }
+            }
         }
     }
 }
