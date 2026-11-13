@@ -87,8 +87,8 @@ namespace TopView.Core
                 return;
             }
 
-            ReadEnemySpawners(out EnemyDefinition[] enemyDefinitions, out EnemySpawnerComponent[] enemySpawners, out EnemySpawnerAuthoring[] enemySpawnerAuthorings);
-            PlayerDetectorComponent[] playerDetectors = ReadPlayerDetectors(enemySpawnerAuthorings);
+            ReadEnemySpawners(out EnemyDefinition[] enemyDefinitions, out EnemySpawnerSpawnRequest[] enemySpawnerSpawnRequests, out EnemySpawnerAuthoring[] enemySpawnerAuthorings);
+            PlayerDetectorSpawnRequest[] playerDetectorSpawnRequests = ReadPlayerDetectors(enemySpawnerAuthorings);
 
             int enemyKindCount = enemyDefinitions.Length;
             ReadEnemies(enemyDefinitions, projectilePrefabs, hitEffectPrefabs, out EnemySpawnRequest[] enemySpawnTemplates, out GameObject[] enemyViewPrefabs, out EnemyAttackAnimation[][] enemyAttackAnimations, out AudioClip[][] enemyAttackClips, out bool[] enemyHasOverlayHealthBar, out GameObject[] enemyHealthGaugePrefabs);
@@ -96,19 +96,24 @@ namespace TopView.Core
 
             _rule = gameSettings.rule;
             _lootRule = lootDefinition.rule;
-            _enemySpawners = enemySpawners;
-            _enemySpawnerStates = new EnemySpawnerStateComponent[enemySpawners.Length];
-            _playerDetectors = playerDetectors;
-            _playerDetectorStates = new PlayerDetectorStateComponent[playerDetectors.Length];
             _random = new System.Random(_rule.randomSeed);
             _playerSpawnRequests.Enqueue(playerSpawnRequest);
+            for (int spawnerIndex = 0; spawnerIndex < enemySpawnerSpawnRequests.Length; spawnerIndex++)
+            {
+                _enemySpawnerSpawnRequests.Enqueue(enemySpawnerSpawnRequests[spawnerIndex]);
+            }
+            for (int detectorIndex = 0; detectorIndex < playerDetectorSpawnRequests.Length; detectorIndex++)
+            {
+                _playerDetectorSpawnRequests.Enqueue(playerDetectorSpawnRequests[detectorIndex]);
+            }
             _enemySpawnTemplates = enemySpawnTemplates;
             int enemyCapacity = enemyKindCount * ENEMY_CAPACITY_PER_KIND;
             _playerHitTargets = new HitTargetComponent[PLAYER_CAPACITY];
             _enemyHitTargets = new HitTargetComponent[enemyCapacity];
             // 공격하는 쪽 하나는 근접 판정을 동시에 하나만 가지고, 한 판정이 맞힐 대상도 플레이어와 적의 칸 수를 넘지 않는다
             int combatantCapacity = PLAYER_CAPACITY + enemyCapacity;
-            _entities = new EntityStorage(LOOT_CAPACITY, combatantCapacity, combatantCapacity, STRAIGHT_PROJECTILE_CAPACITY, ARC_PROJECTILE_CAPACITY, enemyKindCount, ENEMY_CAPACITY_PER_KIND, ENEMY_PATH_CORNER_CAPACITY, PLAYER_CAPACITY, PLAYER_CAPACITY * playerSpawnRequest.weapons.Length);
+            _entities = new EntityStorage(LOOT_CAPACITY, combatantCapacity, combatantCapacity, STRAIGHT_PROJECTILE_CAPACITY, ARC_PROJECTILE_CAPACITY, enemyKindCount, ENEMY_CAPACITY_PER_KIND, ENEMY_PATH_CORNER_CAPACITY, PLAYER_CAPACITY, PLAYER_CAPACITY * playerSpawnRequest.weapons.Length,
+                enemySpawnerSpawnRequests.Length, playerDetectorSpawnRequests.Length);
 
             _progress = new GameProgressComponent
             {

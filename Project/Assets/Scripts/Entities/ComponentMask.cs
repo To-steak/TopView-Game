@@ -108,6 +108,20 @@ namespace TopView.Entities
         // 연달아 공격하는 간격
         AttackInterval = 1UL << 48,
         // 공격 상태의 길이
-        AttackDuration = 1UL << 49
+        AttackDuration = 1UL << 49,
+        // 적 스포너가 만들 적 종류
+        EnemySpawner = 1UL << 50,
+        // 적 스포너의 생성 규칙
+        EnemySpawnerRule = 1UL << 51,
+        // 적 스포너의 발동과 생성 진행
+        EnemySpawnerState = 1UL << 52,
+        // 감지기가 스포너를 가리키는 연결 번호
+        SpawnerLink = 1UL << 53,
+        // 플레이어 감지 범위
+        PlayerDetectorRange = 1UL << 54,
+        // 플레이어 감지기가 이미 감지했는지
+        PlayerDetectorState = 1UL << 55,
+        // 플레이어 감지기가 발동할 스포너의 연결 번호 목록
+        PlayerDetectorLinks = 1UL << 56
     }
 }

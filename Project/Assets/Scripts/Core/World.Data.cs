@@ -26,14 +26,6 @@ namespace TopView.Core
         private GameRuleComponent _rule;
         // 전리품 규칙 값. 판 시작 때 Definition에서 복사한다
         private LootRuleComponent _lootRule;
-        // 적 스포너 목록. 판 시작 때 켜진 Enemy Spawner Authoring에서 채운다
-        private EnemySpawnerComponent[] _enemySpawners;
-        // 적 스포너 상태 목록. 번호가 enemySpawners와 같다
-        private EnemySpawnerStateComponent[] _enemySpawnerStates;
-        // 플레이어 감지기 목록. 판 시작 때 켜진 Player Detector Authoring에서 채운다
-        private PlayerDetectorComponent[] _playerDetectors;
-        // 플레이어 감지기 상태 목록. 번호가 playerDetectors와 같다
-        private PlayerDetectorStateComponent[] _playerDetectorStates;
         // 한 판의 진행 상태
         private GameProgressComponent _progress;
         // 이번 틱에 적이 노리는 플레이어의 위치. 매 틱 PlayerLocationSystem이 다시 채운다
@@ -45,7 +37,7 @@ namespace TopView.Core
         // 적 경로 계산에 다시 쓰는 NavMeshPath. MonoBehaviour의 필드 초기화에서는 만들 수 없어 판 시작 때 만든다
         private NavMeshPath _navigationPath;
 
-        // 엔티티 저장소. 옮겨 온 종류(전리품, 근접 판정, 투사체, 적, 플레이어, 무기)를 담는다
+        // 엔티티 저장소. 모든 종류(전리품, 근접 판정, 투사체, 적, 플레이어, 무기, 적 스포너, 플레이어 감지기)를 담는다
         private EntityStorage _entities;
         // 이번 틱의 플레이어 피격 대상 목록. 적의 공격이 읽는다. 판 시작 때 플레이어 칸 수로 만들고, 매 틱 HitTargetSystem이 다시 채운다
         private HitTargetComponent[] _playerHitTargets;
@@ -65,6 +57,10 @@ namespace TopView.Core
         private readonly Queue<WeaponSpawnRequest> _weaponSpawnRequests = new Queue<WeaponSpawnRequest>();
         // 적 생성 요청 큐
         private readonly Queue<EnemySpawnRequest> _enemySpawnRequests = new Queue<EnemySpawnRequest>();
+        // 적 스포너 생성 요청 큐. 판을 준비할 때 Core가 넣는다
+        private readonly Queue<EnemySpawnerSpawnRequest> _enemySpawnerSpawnRequests = new Queue<EnemySpawnerSpawnRequest>();
+        // 플레이어 감지기 생성 요청 큐. 판을 준비할 때 Core가 넣는다
+        private readonly Queue<PlayerDetectorSpawnRequest> _playerDetectorSpawnRequests = new Queue<PlayerDetectorSpawnRequest>();
         // 적 스포너 발동 요청 큐
         private readonly Queue<EnemySpawnerActivationRequest> _enemySpawnerActivationRequests = new Queue<EnemySpawnerActivationRequest>();
         // 직선 투사체 생성 요청 큐

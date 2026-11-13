@@ -37,6 +37,13 @@ namespace TopView.Entities
         // 바닥에 떨어진 전리품
         public const ComponentMask LOOT = ComponentMask.Position | ComponentMask.Loot;
 
+        // 적 스포너. 판 시작 때 씬의 Enemy Spawner Authoring마다 생기고 판이 끝날 때까지 남는다
+        public const ComponentMask ENEMY_SPAWNER = ComponentMask.Position | ComponentMask.Rotation | ComponentMask.EnemySpawner | ComponentMask.EnemySpawnerRule
+            | ComponentMask.EnemySpawnerState | ComponentMask.SpawnerLink;
+
+        // 플레이어 감지기. 판 시작 때 씬의 Player Detector Authoring마다 생기고 판이 끝날 때까지 남는다
+        public const ComponentMask PLAYER_DETECTOR = ComponentMask.Position | ComponentMask.PlayerDetectorRange | ComponentMask.PlayerDetectorState | ComponentMask.PlayerDetectorLinks;
+
         // 모든 무기가 가진 컴포넌트
         private const ComponentMask WEAPON = ComponentMask.Owner | ComponentMask.Weapon | ComponentMask.UpgradeLevel | ComponentMask.WeaponUpgrade | ComponentMask.AttackState;
         // 모든 투사체가 가진 컴포넌트

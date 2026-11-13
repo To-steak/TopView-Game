@@ -22,15 +22,15 @@ namespace TopView.Core
         // 적 종류별 체력 게이지 프리팹. 번호가 적 종류 번호다
         private GameObject[] _enemyHealthGaugePrefabs;
 
-        // 씬의 켜진 Spawner Authoring을 이름순으로 읽어 적 종류 목록과 스포너 목록을 만든다. 적 종류 번호는 스포너 이름순에서 처음 나온 순서다. 같은 시드에서 같은 결과가 나오도록 순서를 고정한다.
-        // spawnerAuthorings는 스포너와 번호가 같은 Authoring 목록이다. 감지기의 연결을 번호로 바꿀 때 쓴다.
-        private static void ReadEnemySpawners(out EnemyDefinition[] enemyDefinitions, out EnemySpawnerComponent[] enemySpawners, out EnemySpawnerAuthoring[] spawnerAuthorings)
+        // 씬의 켜진 Spawner Authoring을 이름순으로 읽어 적 종류 목록과 스포너 생성 요청 목록을 만든다. 적 종류 번호는 스포너 이름순에서 처음 나온 순서다. 같은 시드에서 같은 결과가 나오도록 순서를 고정한다.
+        // 스포너의 연결 번호는 요청 목록에서의 번호다. spawnerAuthorings는 번호가 연결 번호와 같은 Authoring 목록이며, 감지기의 연결을 연결 번호로 바꿀 때 쓴다.
+        private static void ReadEnemySpawners(out EnemyDefinition[] enemyDefinitions, out EnemySpawnerSpawnRequest[] enemySpawnerSpawnRequests, out EnemySpawnerAuthoring[] spawnerAuthorings)
         {
             EnemySpawnerAuthoring[] spawners = FindObjectsByType<EnemySpawnerAuthoring>(FindObjectsSortMode.None);
             SortByName(spawners);
 
             List<EnemyDefinition> kinds = new List<EnemyDefinition>();
-            List<EnemySpawnerComponent> enemySpawnerList = new List<EnemySpawnerComponent>();
+            List<EnemySpawnerSpawnRequest> enemySpawnerList = new List<EnemySpawnerSpawnRequest>();
             List<EnemySpawnerAuthoring> spawnerAuthoringList = new List<EnemySpawnerAuthoring>();
             for (int spawnerIndex = 0; spawnerIndex < spawners.Length; spawnerIndex++)
             {
@@ -61,12 +61,13 @@ namespace TopView.Core
                 }
 
                 Transform spawnerTransform = spawner.transform;
-                enemySpawnerList.Add(new EnemySpawnerComponent
+                enemySpawnerList.Add(new EnemySpawnerSpawnRequest
                 {
-                    enemyKindIndex = kind,
                     position = spawnerTransform.position,
                     rotation = spawnerTransform.rotation,
-                    rule = spawner.rule
+                    enemySpawner = new EnemySpawnerComponent { enemyKindIndex = kind },
+                    rule = spawner.rule,
+                    link = new SpawnerLinkComponent { linkIndex = enemySpawnerList.Count }
                 });
                 spawnerAuthoringList.Add(spawner);
             }
@@ -77,17 +78,17 @@ namespace TopView.Core
             }
 
             enemyDefinitions = kinds.ToArray();
-            enemySpawners = enemySpawnerList.ToArray();
+            enemySpawnerSpawnRequests = enemySpawnerList.ToArray();
             spawnerAuthorings = spawnerAuthoringList.ToArray();
         }
 
-        // 씬의 켜진 Player Detector Authoring을 이름순으로 읽어 감지기 목록을 만든다. 연결된 스포너는 spawnerAuthorings에서의 번호로 바꾼다.
-        private static PlayerDetectorComponent[] ReadPlayerDetectors(EnemySpawnerAuthoring[] spawnerAuthorings)
+        // 씬의 켜진 Player Detector Authoring을 이름순으로 읽어 감지기 생성 요청 목록을 만든다. 연결된 스포너는 spawnerAuthorings에서의 번호(연결 번호)로 바꾼다.
+        private static PlayerDetectorSpawnRequest[] ReadPlayerDetectors(EnemySpawnerAuthoring[] spawnerAuthorings)
         {
             PlayerDetectorAuthoring[] authorings = FindObjectsByType<PlayerDetectorAuthoring>(FindObjectsSortMode.None);
             SortByName(authorings);
 
-            List<PlayerDetectorComponent> detectors = new List<PlayerDetectorComponent>();
+            List<PlayerDetectorSpawnRequest> detectors = new List<PlayerDetectorSpawnRequest>();
             bool[] isSpawnerLinked = new bool[spawnerAuthorings.Length];
             for (int authoringIndex = 0; authoringIndex < authorings.Length; authoringIndex++)
             {
@@ -98,22 +99,22 @@ namespace TopView.Core
                     continue;
                 }
 
-                int[] spawnerIndices = ReadLinkedSpawnerIndices(authoring, spawnerAuthorings);
-                if (spawnerIndices.Length == 0)
+                int[] spawnerLinkIndices = ReadLinkedSpawnerIndices(authoring, spawnerAuthorings);
+                if (spawnerLinkIndices.Length == 0)
                 {
                     Debug.LogWarning($"World >> Player Detector Authoring {authoring.name}에 발동할 수 있는 스포너가 없어 건너뛰었다.");
                     continue;
                 }
 
-                detectors.Add(new PlayerDetectorComponent
+                detectors.Add(new PlayerDetectorSpawnRequest
                 {
                     position = authoring.transform.position,
                     range = authoring.range,
-                    spawnerIndices = spawnerIndices
+                    links = new PlayerDetectorLinksComponent { spawnerLinkIndices = spawnerLinkIndices }
                 });
-                for (int linkIndex = 0; linkIndex < spawnerIndices.Length; linkIndex++)
+                for (int linkIndex = 0; linkIndex < spawnerLinkIndices.Length; linkIndex++)
                 {
-                    isSpawnerLinked[spawnerIndices[linkIndex]] = true;
+                    isSpawnerLinked[spawnerLinkIndices[linkIndex]] = true;
                 }
             }
 
@@ -128,7 +129,7 @@ namespace TopView.Core
             return detectors.ToArray();
         }
 
-        // 감지기에 연결된 스포너를 번호로 바꾼다. 빈 슬롯과 판에서 쓰지 않는 스포너(꺼졌거나 설정이 잘못됨)는 경고를 남기고 뺀다.
+        // 감지기에 연결된 스포너를 연결 번호로 바꾼다. 빈 슬롯과 판에서 쓰지 않는 스포너(꺼졌거나 설정이 잘못됨)는 경고를 남기고 뺀다.
         private static int[] ReadLinkedSpawnerIndices(PlayerDetectorAuthoring authoring, EnemySpawnerAuthoring[] spawnerAuthorings)
         {
             if (authoring.spawners == null)

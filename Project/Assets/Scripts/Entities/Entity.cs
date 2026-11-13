@@ -116,5 +116,20 @@ namespace TopView.Entities
         public AttackIntervalComponent attackInterval;
         // 공격 상태의 길이. 생성 때 Definition에서 복사한다
         public AttackDurationComponent attackDuration;
+
+        // 적 스포너가 만들 적 종류
+        public EnemySpawnerComponent enemySpawner;
+        // 적 스포너의 생성 규칙. 생성 때 Authoring에서 복사한다
+        public EnemySpawnerRuleComponent enemySpawnerRule;
+        // 적 스포너의 발동과 생성 진행
+        public EnemySpawnerStateComponent enemySpawnerState;
+        // 감지기가 스포너를 가리키는 연결 번호
+        public SpawnerLinkComponent spawnerLink;
+        // 플레이어 감지 범위. 생성 때 Authoring에서 복사한다
+        public PlayerDetectorRangeComponent playerDetectorRange;
+        // 플레이어 감지기가 이미 감지했는지
+        public PlayerDetectorStateComponent playerDetectorState;
+        // 플레이어 감지기가 발동할 스포너의 연결 번호 목록
+        public PlayerDetectorLinksComponent playerDetectorLinks;
     }
 }
