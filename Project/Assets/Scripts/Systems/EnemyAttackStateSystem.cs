@@ -113,6 +113,7 @@ namespace TopView.Systems
             projectileSpawnRequests.Enqueue(new ProjectileSpawnRequest
             {
                 projectile = attack.projectile,
+                projectileView = attack.projectileView,
                 faction = Faction.Enemy,
                 damage = damage,
                 position = spawnPosition,

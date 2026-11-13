@@ -44,7 +44,7 @@ namespace TopView.Systems
                 {
                     if (entity.motion.isResting)
                     {
-                        Explode(in entity.projectile, entity.position.current, in entity.payload, hitTargets, hitTargetCount, damageRequests, hitRecords);
+                        Explode(in entity.projectile, entity.projectileView.hitEffectIndex, entity.position.current, in entity.payload, hitTargets, hitTargetCount, damageRequests, hitRecords);
                         despawnRequests.Enqueue(new ProjectileDespawnRequest { target = identifier });
                     }
                     continue;
@@ -61,26 +61,26 @@ namespace TopView.Systems
                 Vector3 impactPosition = hasTarget ? Vector3.Lerp(entity.position.previous, entity.position.current, nearestFraction) : entity.position.current;
                 if (entity.projectile.explosionRadius > 0f)
                 {
-                    Explode(in entity.projectile, impactPosition, in entity.payload, hitTargets, hitTargetCount, damageRequests, hitRecords);
+                    Explode(in entity.projectile, entity.projectileView.hitEffectIndex, impactPosition, in entity.payload, hitTargets, hitTargetCount, damageRequests, hitRecords);
                 }
                 else if (hasTarget)
                 {
-                    HitTarget(in entity.projectile, impactPosition, in entity.payload, in hitTargets[nearestTargetIndex], damageRequests, hitRecords);
+                    HitTarget(entity.projectileView.hitEffectIndex, impactPosition, in entity.payload, in hitTargets[nearestTargetIndex], damageRequests, hitRecords);
                 }
                 else
                 {
                     // 맞은 대상 없이 벽에 막혀 멈췄으면 닿은 자리에 피격 이펙트만 남긴다
-                    hitRecords.Add(new ProjectileHitRecord { position = impactPosition, hitEffectIndex = entity.projectile.hitEffectIndex });
+                    hitRecords.Add(new ProjectileHitRecord { position = impactPosition, hitEffectIndex = entity.projectileView.hitEffectIndex });
                 }
                 despawnRequests.Enqueue(new ProjectileDespawnRequest { target = identifier });
             }
         }
 
         // 대상 하나에게 피해를 주고 닿은 자리에 명중 기록을 남긴다.
-        private static void HitTarget(in ProjectileComponent projectile, Vector3 impactPosition, in AttackPayloadComponent payload, in HitTargetComponent hitTarget, Queue<DamageRequest> damageRequests, List<ProjectileHitRecord> hitRecords)
+        private static void HitTarget(int hitEffectIndex, Vector3 impactPosition, in AttackPayloadComponent payload, in HitTargetComponent hitTarget, Queue<DamageRequest> damageRequests, List<ProjectileHitRecord> hitRecords)
         {
             damageRequests.Enqueue(new DamageRequest { target = hitTarget.target, amount = payload.damage });
-            hitRecords.Add(new ProjectileHitRecord { position = impactPosition, hitEffectIndex = projectile.hitEffectIndex });
+            hitRecords.Add(new ProjectileHitRecord { position = impactPosition, hitEffectIndex = hitEffectIndex });
         }
 
         // 이동 선분에서 가장 먼저 닿는 대상과 그 지점의 비율(0~1)을 찾는다. 같은 비율이면 목록에서 앞선 대상을 고른다. 없으면 false
@@ -105,7 +105,7 @@ namespace TopView.Systems
         }
 
         // center에서 폭발해 반지름 안(XZ)의 대상 모두에게 피해를 준다.
-        private static void Explode(in ProjectileComponent projectile, Vector3 center, in AttackPayloadComponent payload, HitTargetComponent[] hitTargets, int hitTargetCount, Queue<DamageRequest> damageRequests, List<ProjectileHitRecord> hitRecords)
+        private static void Explode(in ProjectileComponent projectile, int hitEffectIndex, Vector3 center, in AttackPayloadComponent payload, HitTargetComponent[] hitTargets, int hitTargetCount, Queue<DamageRequest> damageRequests, List<ProjectileHitRecord> hitRecords)
         {
             for (int targetIndex = 0; targetIndex < hitTargetCount; targetIndex++)
             {
@@ -116,7 +116,7 @@ namespace TopView.Systems
                 }
             }
 
-            hitRecords.Add(new ProjectileHitRecord { position = center, hitEffectIndex = projectile.hitEffectIndex });
+            hitRecords.Add(new ProjectileHitRecord { position = center, hitEffectIndex = hitEffectIndex });
         }
 
         // 이동 선분에서 hitFraction 지점의 투사체 구가 대상의 높이 범위에 닿는지.

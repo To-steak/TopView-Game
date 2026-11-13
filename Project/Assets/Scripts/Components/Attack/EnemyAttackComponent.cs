@@ -20,6 +20,8 @@ namespace TopView.Components
         public MeleeShapeComponent meleeShape;
         // 내보내는 투사체. Body가 아닌 공격이 쓴다
         public ProjectileComponent projectile;
+        // 내보내는 투사체를 무엇으로 그릴지. Body가 아닌 공격이 쓴다. 판을 준비할 때 Core가 채운다
+        [NonSerialized] public ProjectileViewComponent projectileView;
         // 투사체를 내보내는 발마다의 시점과 위치. 칸의 startTicks 오름차순으로 둔다. Body가 아닌 공격이 쓴다
         public ProjectileShotComponent[] shots;
     }

@@ -19,6 +19,8 @@ namespace TopView.Components
         public int attackIntervalTicks;
         // 내보내는 투사체. Ranged와 Throw가 쓴다
         public ProjectileComponent projectile;
+        // 내보내는 투사체를 무엇으로 그릴지. Ranged와 Throw가 쓴다. 판을 준비할 때 Core가 채운다
+        [NonSerialized] public ProjectileViewComponent projectileView;
         // 던지기 전에 착탄점을 정하는 값. Throw만 쓴다
         public ThrowComponent throwing;
         // 근접 판정 구의 크기와 위치. Melee만 쓴다

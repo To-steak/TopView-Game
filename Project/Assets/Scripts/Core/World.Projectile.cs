@@ -31,7 +31,7 @@ namespace TopView.Core
                 }
 
                 EnemyAttackComponent attack = entry.attack;
-                AssignProjectileViews(ownerName, hasProjectile, entry.projectilePrefab, entry.hitEffectPrefab, ref attack.projectile, projectilePrefabs, hitEffectPrefabs);
+                AssignProjectileViews(ownerName, hasProjectile, entry.projectilePrefab, entry.hitEffectPrefab, ref attack.projectileView, projectilePrefabs, hitEffectPrefabs);
                 attacks.Add(attack);
                 animations.Add(entry.animation);
                 clips.Add(entry.attackClip);
@@ -70,12 +70,12 @@ namespace TopView.Core
             return true;
         }
 
-        // 투사체 View 표와 피격 이펙트 표에 프리팹을 올리고(이미 있으면 그 번호를 쓰고) 번호를 투사체 값에 넣는다.
+        // 투사체 View 표와 피격 이펙트 표에 프리팹을 올리고(이미 있으면 그 번호를 쓰고) 번호를 투사체 View 값에 넣는다.
         // 투사체가 없거나 프리팹이 빠져 있으면 번호는 -1이고, 그 투사체나 이펙트는 보이지 않는다. 표시용이라 판은 시작한다.
-        private static void AssignProjectileViews(string ownerName, bool hasProjectile, GameObject projectilePrefab, GameObject hitEffectPrefab, ref ProjectileComponent projectile, List<GameObject> projectilePrefabs, List<GameObject> hitEffectPrefabs)
+        private static void AssignProjectileViews(string ownerName, bool hasProjectile, GameObject projectilePrefab, GameObject hitEffectPrefab, ref ProjectileViewComponent projectileView, List<GameObject> projectilePrefabs, List<GameObject> hitEffectPrefabs)
         {
-            projectile.viewIndex = -1;
-            projectile.hitEffectIndex = -1;
+            projectileView.viewIndex = -1;
+            projectileView.hitEffectIndex = -1;
             if (!hasProjectile)
             {
                 return;
@@ -87,15 +87,15 @@ namespace TopView.Core
             }
             else
             {
-                projectile.viewIndex = projectilePrefabs.IndexOf(projectilePrefab);
-                if (projectile.viewIndex < 0)
+                projectileView.viewIndex = projectilePrefabs.IndexOf(projectilePrefab);
+                if (projectileView.viewIndex < 0)
                 {
-                    projectile.viewIndex = projectilePrefabs.Count;
+                    projectileView.viewIndex = projectilePrefabs.Count;
                     projectilePrefabs.Add(projectilePrefab);
                 }
             }
 
-            projectile.hitEffectIndex = IndexHitEffect($"{ownerName}의 피격 이펙트", hitEffectPrefab, hitEffectPrefabs);
+            projectileView.hitEffectIndex = IndexHitEffect($"{ownerName}의 피격 이펙트", hitEffectPrefab, hitEffectPrefabs);
         }
 
         // 피격 이펙트 표에 프리팹을 올리고(이미 있으면 그 번호를 쓰고) 번호를 돌려준다.

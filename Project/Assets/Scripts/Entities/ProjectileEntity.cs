@@ -12,6 +12,8 @@ namespace TopView.Entities
 
         // 투사체 값. 생성 때 무기나 공격의 값에서 복사한다
         public ProjectileComponent projectile;
+        // 무엇으로 그릴지. 생성 때 무기나 공격의 값에서 복사한다
+        public ProjectileViewComponent projectileView;
         // 이동 상태
         public ProjectileMotionComponent motion;
         // 위치

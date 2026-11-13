@@ -23,9 +23,5 @@ namespace TopView.Components
         public float explosionRadius;
         // 닿으면 멈추는 환경 레이어. Straight는 닿으면 사라지고, Grenade는 그 자리에서 폭발한다
         public LayerMask collisionLayer;
-        // 투사체 View 표의 번호. 판을 준비할 때 Core가 채우며, 음수면 없음
-        [NonSerialized] public int viewIndex;
-        // 피격 이펙트 표의 번호. 판을 준비할 때 Core가 채우며, 음수면 없음
-        [NonSerialized] public int hitEffectIndex;
     }
 }

@@ -124,6 +124,7 @@ namespace TopView.Systems
             projectileSpawnRequests.Enqueue(new ProjectileSpawnRequest
             {
                 projectile = projectile,
+                projectileView = weapon.projectileView,
                 faction = Faction.Player,
                 damage = damage,
                 position = position + rotation * weapon.muzzleOffset,

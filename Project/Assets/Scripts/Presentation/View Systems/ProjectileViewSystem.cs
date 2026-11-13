@@ -31,7 +31,7 @@ namespace TopView.Presentation.ViewSystems
                     view = null;
                 }
 
-                if (!entity.isAlive || entity.projectile.viewIndex < 0)
+                if (!entity.isAlive || entity.projectileView.viewIndex < 0)
                 {
                     continue;
                 }
@@ -39,7 +39,7 @@ namespace TopView.Presentation.ViewSystems
                 Vector3 position = Vector3.Lerp(entity.position.previous, entity.position.current, alpha);
                 if (view == null)
                 {
-                    view = Acquire(context, index, entity.generation, entity.projectile.viewIndex, projectilePrefabs, position, entity.rotation.current);
+                    view = Acquire(context, index, entity.generation, entity.projectileView.viewIndex, projectilePrefabs, position, entity.rotation.current);
                 }
                 else
                 {

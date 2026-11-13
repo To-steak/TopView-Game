@@ -56,6 +56,7 @@ namespace TopView.Systems
                 isAlive = true,
                 generation = generation,
                 projectile = request.projectile,
+                projectileView = request.projectileView,
                 motion = new ProjectileMotionComponent { velocity = request.velocity, launchPosition = request.position, targetPosition = request.targetPosition },
                 position = new PositionComponent { previous = request.position, current = request.position },
                 rotation = new RotationComponent { previous = request.rotation, current = request.rotation },
