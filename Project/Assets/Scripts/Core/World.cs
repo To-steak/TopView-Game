@@ -63,6 +63,8 @@ namespace TopView.Core
             if (isPlaying)
             {
                 PlayerDeathSystem.Tick(_entities, _playerStateChangedRecords);
+                // 근접 판정은 주인이 사망한 틱에 지워야 죽은 주인의 공격에 맞지 않으므로, 두 사망 System을 MeleeOwnerDeathSystem 앞에 둔다
+                EnemyDeathSystem.Tick(_entities, _enemyStateChangedRecords);
                 MeleeOwnerDeathSystem.Tick(_entities, _meleeDespawnRequests);
                 MeleeDespawnSystem.Tick(_entities, _meleeDespawnRequests);
                 WeaponOwnerDeathSystem.Tick(_entities, _weaponDespawnRequests);
@@ -89,7 +91,6 @@ namespace TopView.Core
                 LootDespawnSystem.Tick(_entities, _lootDespawnRequests);
                 LootLifetimeSystem.Tick(_entities, _lootDespawnRequests);
                 LootDespawnSystem.Tick(_entities, _lootDespawnRequests);
-                EnemyDeathSystem.Tick(_entities, _enemyStateChangedRecords);
                 EnemyStateTimerSystem.Tick(_entities);
                 PlayerLocationSystem.Tick(_entities, ref _playerLocation);
                 // 공격 상태는 상태 시간이 0이면 건너뛰므로, 공격이 끝나 Idle이 된 적과 막 공격에 들어온 적 모두 다음 틱부터 움직이도록 이 순서를 지킨다

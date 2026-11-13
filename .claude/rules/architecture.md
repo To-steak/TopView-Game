@@ -77,6 +77,7 @@ Unity의 FixedUpdate / Update / LateUpdate는 App만 받고, App이 지금 씬�
 | `UserInterface/` | 화면 UI | UI View, View가 소유하는 부품(`~Entry`), Presenter | `<접두사>.UserInterface` | Entity, Persistence |
 | `Core/` | 데이터 보관과 실행 순서 | App(앱 수명의 일, 부트스트랩, 로딩, 씬 전환), 씬의 대표(World, `Menu`) | `<접두사>.Core` | 전부 |
 | `Editor/` | 에디터 도구 | 에디터 도구 (Gizmo, PropertyDrawer, Custom Editor) | `<접두사>.Editor` (플랫폼: Editor 전용) | 전부 |
+| `Tests/` | 동작 확인 | `~Tests` (EditMode 테스트) | `<접두사>.Tests` (플랫폼: Editor 전용) | Entity, Systems |
 
 - 같은 종류의 타입은 한 폴더에, 역할은 이름 접미사로 드러낸다.
   - 이유: 이름만 보고 그 타입이 어느 어셈블리에 있고 어떤 규칙을 따르는지 안다.
@@ -352,3 +353,11 @@ Gizmo, PropertyDrawer, Custom Editor 등 에디터 도구를 둔다. 플랫폼�
 
 - **Gizmo는 모두 `Editor/`에 두고 `[DrawGizmo]`로 그린다.** 씬에 배치한 값은 `~Authoring`을 읽어 그리고, 플레이 중의 Logic 값은 World의 에디터 전용 통로로 읽어 그린다.
   - 이유: 한 판의 데이터는 플레이 중에만 있어서 배치할 때 봐야 하는 값을 그릴 수 없다. Gizmo가 한 곳에 모이면 무엇을 어디에 둘지 고민하지 않는다.
+
+### Tests/
+System의 동작을 Unity Test Framework의 EditMode 테스트로 확인한다.
+
+- **테스트는 System 하나를 단위로 쓴다.** 필요한 칸만 채운 `EntityStorage`와 큐를 만들어 `Tick`을 부르고, 칸과 큐와 기록의 결과를 확인한다. 테스트 클래스는 대상 System 이름에 `Tests`를 붙인다(`MeleeOwnerDeathSystemTests`).
+  - 이유: System이 저장소와 큐만 받으므로 씬과 Definition 없이 돌릴 수 있다. 이름만 보고 무엇을 확인하는 테스트인지 안다.
+- **버그는 고치기 전에 그 버그로 실패하는 테스트를 먼저 쓴다.** 테스트가 실패하는 것을 확인한 뒤 고치고, 통과를 확인한다.
+  - 이유: 실패를 먼저 보지 않으면 테스트가 그 버그를 잡는지 알 수 없다. 남은 테스트가 같은 버그가 다시 생기는 것을 막는다.
