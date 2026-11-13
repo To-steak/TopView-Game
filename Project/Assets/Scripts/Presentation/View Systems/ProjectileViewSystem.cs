@@ -10,37 +10,24 @@ namespace TopView.Presentation.ViewSystems
     // 살아 있는 투사체마다 View를 풀에서 꺼내 붙여 위치를 보간한다.
     public static class ProjectileViewSystem
     {
-        /// <summary>
-        /// 직선 투사체 저장소의 칸마다 살아 있는 투사체와 View를 맞춘다.
-        /// </summary>
-        /// <param name="entities">직선 투사체 엔티티 배열</param>
-        /// <param name="projectilePrefabs">투사체 View 표. 번호별 ProjectileView 프리팹</param>
-        /// <param name="isPaused">판이 일시정지 중이면 true. 모델을 회전시키지 않는다</param>
-        /// <param name="context">직선 투사체 View 실행 상태</param>
-        public static void Present(StraightProjectileEntity[] entities, GameObject[] projectilePrefabs, bool isPaused, ProjectileViewContext context)
-        {
-            float alpha = GetInterpolationAlpha();
-            for (int index = 0; index < entities.Length; index++)
-            {
-                ref readonly StraightProjectileEntity entity = ref entities[index];
-                PresentSlot(context, index, entity.isAlive, entity.generation, in entity.projectileView, in entity.position, in entity.rotation, projectilePrefabs, isPaused, alpha);
-            }
-        }
+        // 그릴 투사체가 가진 컴포넌트
+        private const ComponentMask PROJECTILE_MASK = ComponentMask.Position | ComponentMask.Rotation | ComponentMask.ProjectileView;
 
         /// <summary>
-        /// 포물선 투사체 저장소의 칸마다 살아 있는 투사체와 View를 맞춘다.
+        /// 저장소의 칸마다 ProjectileView를 가진 투사체와 View를 맞춘다.
         /// </summary>
-        /// <param name="entities">포물선 투사체 엔티티 배열</param>
+        /// <param name="entities">엔티티 배열. Position, Rotation, ProjectileView를 가진 칸만 그린다</param>
         /// <param name="projectilePrefabs">투사체 View 표. 번호별 ProjectileView 프리팹</param>
         /// <param name="isPaused">판이 일시정지 중이면 true. 모델을 회전시키지 않는다</param>
-        /// <param name="context">포물선 투사체 View 실행 상태</param>
-        public static void Present(ArcProjectileEntity[] entities, GameObject[] projectilePrefabs, bool isPaused, ProjectileViewContext context)
+        /// <param name="context">투사체 View 실행 상태</param>
+        public static void Present(Entity[] entities, GameObject[] projectilePrefabs, bool isPaused, ProjectileViewContext context)
         {
             float alpha = GetInterpolationAlpha();
             for (int index = 0; index < entities.Length; index++)
             {
-                ref readonly ArcProjectileEntity entity = ref entities[index];
-                PresentSlot(context, index, entity.isAlive, entity.generation, in entity.projectileView, in entity.position, in entity.rotation, projectilePrefabs, isPaused, alpha);
+                ref readonly Entity entity = ref entities[index];
+                bool hasProjectile = (entity.mask & PROJECTILE_MASK) == PROJECTILE_MASK;
+                PresentSlot(context, index, hasProjectile, entity.generation, in entity.projectileView, in entity.position, in entity.rotation, projectilePrefabs, isPaused, alpha);
             }
         }
 

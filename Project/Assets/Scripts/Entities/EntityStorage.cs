@@ -10,15 +10,41 @@ namespace TopView.Entities
         public Entity[] entities;
         // 전리품 구간의 빈 칸 번호 목록. LootSpawnSystem이 끝에서부터 꺼낸다
         public List<int> freeLootIndices;
+        // 근접 판정 구간의 빈 칸 번호 목록. MeleeSpawnSystem이 끝에서부터 꺼낸다
+        public List<int> freeMeleeIndices;
+        // 직선 투사체 구간의 빈 칸 번호 목록. ProjectileSpawnSystem이 끝에서부터 꺼낸다
+        public List<int> freeStraightProjectileIndices;
+        // 포물선 투사체 구간의 빈 칸 번호 목록. ProjectileSpawnSystem이 끝에서부터 꺼낸다
+        public List<int> freeArcProjectileIndices;
 
         /// <summary>
-        /// 모든 칸이 빈 저장소를 만든다. 구간은 전리품 순서로 앞에서부터 놓는다.
+        /// 모든 칸이 빈 저장소를 만든다. 구간은 전리품, 근접 판정, 직선 투사체, 포물선 투사체 순서로 앞에서부터 놓는다.
+        /// 근접 판정 구간의 칸마다 이미 맞힌 대상을 기록할 배열을 할당한다.
         /// </summary>
         /// <param name="lootCapacity">전리품 구간의 칸 수</param>
-        public EntityStorage(int lootCapacity)
+        /// <param name="meleeCapacity">근접 판정 구간의 칸 수</param>
+        /// <param name="meleeHitCapacity">근접 판정 하나가 기록할 수 있는 이미 맞힌 대상 수</param>
+        /// <param name="straightProjectileCapacity">직선 투사체 구간의 칸 수</param>
+        /// <param name="arcProjectileCapacity">포물선 투사체 구간의 칸 수</param>
+        public EntityStorage(int lootCapacity, int meleeCapacity, int meleeHitCapacity, int straightProjectileCapacity, int arcProjectileCapacity)
         {
-            entities = new Entity[lootCapacity];
-            freeLootIndices = CreateFreeIndices(0, lootCapacity);
+            entities = new Entity[lootCapacity + meleeCapacity + straightProjectileCapacity + arcProjectileCapacity];
+
+            int start = 0;
+            freeLootIndices = CreateFreeIndices(start, lootCapacity);
+            start += lootCapacity;
+
+            freeMeleeIndices = CreateFreeIndices(start, meleeCapacity);
+            for (int index = start; index < start + meleeCapacity; index++)
+            {
+                entities[index].meleeHits.targets = new EntityIdentifier[meleeHitCapacity];
+            }
+            start += meleeCapacity;
+
+            freeStraightProjectileIndices = CreateFreeIndices(start, straightProjectileCapacity);
+            start += straightProjectileCapacity;
+
+            freeArcProjectileIndices = CreateFreeIndices(start, arcProjectileCapacity);
         }
 
         // start부터 count칸의 번호를 끝에서부터 꺼낼 때 앞 번호가 먼저 나오도록 거꾸로 담는다.

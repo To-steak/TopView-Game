@@ -10,10 +10,13 @@ namespace TopView.Systems
     // 근접 판정을 XZ 평면의 원으로 판정해 피해 요청을 넣고, 수명이 다한 판정의 소멸을 요청한다. 공격의 진영이 맞힐 쪽의 목록과 피해 요청 큐를 정한다.
     public static class MeleeHitSystem
     {
+        // 처리할 근접 판정이 가진 컴포넌트
+        private const ComponentMask MELEE_MASK = ComponentMask.Position | ComponentMask.Melee | ComponentMask.MeleeHits | ComponentMask.AttackPayload;
+
         /// <summary>
         /// 근접 판정마다 원 안에서 아직 맞지 않은 대상 모두에게 피해 요청을 넣고, 판정 시간을 1틱 늘려 다 되면 소멸을 요청한다.
         /// </summary>
-        /// <param name="melees">근접 판정 저장소</param>
+        /// <param name="storage">엔티티 저장소. Position, Melee, MeleeHits, AttackPayload를 가진 칸만 처리하고, melee의 진행 시간과 meleeHits를 고친다</param>
         /// <param name="playerHitTargets">플레이어 피격 대상 목록</param>
         /// <param name="playerHitTargetCount">플레이어 피격 대상 목록에서 이번 틱에 채운 대상 수</param>
         /// <param name="enemyHitTargets">적 피격 대상 목록</param>
@@ -21,24 +24,24 @@ namespace TopView.Systems
         /// <param name="playerDamageRequests">플레이어 피해 요청 큐</param>
         /// <param name="enemyDamageRequests">적 피해 요청 큐</param>
         /// <param name="despawnRequests">근접 판정 소멸 요청 큐</param>
-        public static void Tick(MeleeStorage melees, HitTargetComponent[] playerHitTargets, int playerHitTargetCount, HitTargetComponent[] enemyHitTargets, int enemyHitTargetCount, Queue<DamageRequest> playerDamageRequests, Queue<DamageRequest> enemyDamageRequests, Queue<MeleeDespawnRequest> despawnRequests)
+        public static void Tick(EntityStorage storage, HitTargetComponent[] playerHitTargets, int playerHitTargetCount, HitTargetComponent[] enemyHitTargets, int enemyHitTargetCount, Queue<DamageRequest> playerDamageRequests, Queue<DamageRequest> enemyDamageRequests, Queue<MeleeDespawnRequest> despawnRequests)
         {
             int droppedHitCount = 0;
-            for (int index = 0; index < melees.entities.Length; index++)
+            for (int index = 0; index < storage.entities.Length; index++)
             {
-                ref MeleeEntity entity = ref melees.entities[index];
-                if (!entity.isAlive)
+                ref Entity entity = ref storage.entities[index];
+                if ((entity.mask & MELEE_MASK) != MELEE_MASK)
                 {
                     continue;
                 }
 
                 if (entity.payload.faction == Faction.Player)
                 {
-                    droppedHitCount += Hit(in entity.melee, ref entity.hits, entity.position.current, in entity.payload, enemyHitTargets, enemyHitTargetCount, enemyDamageRequests);
+                    droppedHitCount += Hit(in entity.melee, ref entity.meleeHits, entity.position.current, in entity.payload, enemyHitTargets, enemyHitTargetCount, enemyDamageRequests);
                 }
                 else
                 {
-                    droppedHitCount += Hit(in entity.melee, ref entity.hits, entity.position.current, in entity.payload, playerHitTargets, playerHitTargetCount, playerDamageRequests);
+                    droppedHitCount += Hit(in entity.melee, ref entity.meleeHits, entity.position.current, in entity.payload, playerHitTargets, playerHitTargetCount, playerDamageRequests);
                 }
 
                 entity.melee.elapsedTicks++;

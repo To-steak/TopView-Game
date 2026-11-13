@@ -8,40 +8,24 @@ namespace TopView.Systems
     public static class ProjectileDespawnSystem
     {
         /// <summary>
-        /// 쌓인 직선 투사체 소멸 요청을 모두 처리한다. 이미 없어졌거나 칸이 재사용된 대상은 건너뛴다. 요청을 넣는 System 바로 뒤에 부른다.
+        /// 쌓인 투사체 소멸 요청을 모두 처리한다. 이미 없어졌거나 칸이 재사용된 대상은 건너뛴다. 요청을 넣는 System 바로 뒤에 부른다.
         /// </summary>
-        /// <param name="projectiles">직선 투사체 저장소</param>
-        /// <param name="despawnRequests">직선 투사체 소멸 요청 큐</param>
-        public static void Tick(StraightProjectileStorage projectiles, Queue<ProjectileDespawnRequest> despawnRequests)
+        /// <param name="storage">엔티티 저장소. ProjectileHit을 가진 칸만 비우고, StraightFlight면 직선 투사체 구간, ArcFlight면 포물선 투사체 구간의 빈 칸 목록에 돌려준다</param>
+        /// <param name="despawnRequests">투사체 소멸 요청 큐</param>
+        public static void Tick(EntityStorage storage, Queue<ProjectileDespawnRequest> despawnRequests)
         {
             while (despawnRequests.Count > 0)
             {
                 EntityIdentifier target = despawnRequests.Dequeue().target;
-                ref StraightProjectileEntity entity = ref projectiles.entities[target.index];
-                if (entity.isAlive && entity.generation == target.generation)
+                ref Entity entity = ref storage.entities[target.index];
+                if ((entity.mask & ComponentMask.ProjectileHit) == 0 || entity.generation != target.generation)
                 {
-                    entity.isAlive = false;
-                    projectiles.freeIndices.Add(target.index);
+                    continue;
                 }
-            }
-        }
 
-        /// <summary>
-        /// 쌓인 포물선 투사체 소멸 요청을 모두 처리한다. 이미 없어졌거나 칸이 재사용된 대상은 건너뛴다. 요청을 넣는 System 바로 뒤에 부른다.
-        /// </summary>
-        /// <param name="projectiles">포물선 투사체 저장소</param>
-        /// <param name="despawnRequests">포물선 투사체 소멸 요청 큐</param>
-        public static void Tick(ArcProjectileStorage projectiles, Queue<ProjectileDespawnRequest> despawnRequests)
-        {
-            while (despawnRequests.Count > 0)
-            {
-                EntityIdentifier target = despawnRequests.Dequeue().target;
-                ref ArcProjectileEntity entity = ref projectiles.entities[target.index];
-                if (entity.isAlive && entity.generation == target.generation)
-                {
-                    entity.isAlive = false;
-                    projectiles.freeIndices.Add(target.index);
-                }
+                List<int> freeIndices = (entity.mask & ComponentMask.StraightFlight) != 0 ? storage.freeStraightProjectileIndices : storage.freeArcProjectileIndices;
+                entity.mask = ComponentMask.None;
+                freeIndices.Add(target.index);
             }
         }
     }

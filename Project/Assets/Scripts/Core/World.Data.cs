@@ -18,12 +18,6 @@ namespace TopView.Core
         public PlayerEntity[] EditorPlayers => _players.entities;
         // 적 칸. Editor의 WorldGizmos가 읽기만 한다
         public EnemyEntity[] EditorEnemies => _enemies.entities;
-        // 근접 판정 칸. Editor의 WorldGizmos가 읽기만 한다
-        public MeleeEntity[] EditorMelees => _melees.entities;
-        // 직선 투사체 칸. Editor의 WorldGizmos가 읽기만 한다
-        public StraightProjectileEntity[] EditorStraightProjectiles => _straightProjectiles.entities;
-        // 포물선 투사체 칸. Editor의 WorldGizmos가 읽기만 한다
-        public ArcProjectileEntity[] EditorArcProjectiles => _arcProjectiles.entities;
         // 엔티티 칸. Editor의 WorldGizmos가 읽기만 한다
         public Entity[] EditorEntities => _entities.entities;
         // 전리품 획득 반경. Editor의 WorldGizmos가 읽기만 한다
@@ -61,13 +55,7 @@ namespace TopView.Core
         private EnemyStorage _enemies;
         // 무기 저장소
         private WeaponStorage _weapons;
-        // 근접 판정 저장소
-        private MeleeStorage _melees;
-        // 직선 투사체 저장소
-        private StraightProjectileStorage _straightProjectiles;
-        // 포물선 투사체 저장소
-        private ArcProjectileStorage _arcProjectiles;
-        // 엔티티 저장소. 옮겨 온 종류(전리품)를 담는다
+        // 엔티티 저장소. 옮겨 온 종류(전리품, 근접 판정, 투사체)를 담는다
         private EntityStorage _entities;
         // 이번 틱의 플레이어 피격 대상 목록. 적의 공격이 읽는다. 판 시작 때 플레이어 칸 수로 만들고, 매 틱 HitTargetSystem이 다시 채운다
         private HitTargetComponent[] _playerHitTargets;
@@ -101,10 +89,8 @@ namespace TopView.Core
         private readonly Queue<PlayerStateChangeRequest> _playerStateChangeRequests = new Queue<PlayerStateChangeRequest>();
         // 적 상태 변경 요청 큐
         private readonly Queue<EnemyStateChangeRequest> _enemyStateChangeRequests = new Queue<EnemyStateChangeRequest>();
-        // 직선 투사체 소멸 요청 큐
-        private readonly Queue<ProjectileDespawnRequest> _straightProjectileDespawnRequests = new Queue<ProjectileDespawnRequest>();
-        // 포물선 투사체 소멸 요청 큐
-        private readonly Queue<ProjectileDespawnRequest> _arcProjectileDespawnRequests = new Queue<ProjectileDespawnRequest>();
+        // 투사체 소멸 요청 큐. 직선과 포물선 투사체가 함께 쓴다
+        private readonly Queue<ProjectileDespawnRequest> _projectileDespawnRequests = new Queue<ProjectileDespawnRequest>();
         // 무기 소멸 요청 큐
         private readonly Queue<WeaponDespawnRequest> _weaponDespawnRequests = new Queue<WeaponDespawnRequest>();
         // 근접 판정 소멸 요청 큐

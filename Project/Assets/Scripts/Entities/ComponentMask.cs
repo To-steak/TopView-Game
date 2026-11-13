@@ -12,6 +12,28 @@ namespace TopView.Entities
         // 위치
         Position = 1UL << 0,
         // 바닥에 떨어진 전리품
-        Loot = 1UL << 1
+        Loot = 1UL << 1,
+        // 회전
+        Rotation = 1UL << 2,
+        // 근접 판정 값과 진행 시간
+        Melee = 1UL << 3,
+        // 근접 판정이 이미 맞힌 대상
+        MeleeHits = 1UL << 4,
+        // 공격의 진영과 피해량
+        AttackPayload = 1UL << 5,
+        // 직선 투사체의 비행 값
+        StraightFlight = 1UL << 6,
+        // 직선 투사체의 이동 상태
+        StraightMotion = 1UL << 7,
+        // 포물선 투사체의 비행 값
+        ArcFlight = 1UL << 8,
+        // 포물선 투사체의 이동 상태
+        ArcMotion = 1UL << 9,
+        // 투사체의 피격 판정 크기와 멈추는 환경 레이어
+        ProjectileHit = 1UL << 10,
+        // 폭발 범위
+        Explosion = 1UL << 11,
+        // 투사체를 무엇으로 그릴지
+        ProjectileView = 1UL << 12
     }
 }

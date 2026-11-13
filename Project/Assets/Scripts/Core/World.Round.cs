@@ -106,10 +106,7 @@ namespace TopView.Core
             _players = new PlayerStorage(PLAYER_CAPACITY);
             _weapons = new WeaponStorage(PLAYER_CAPACITY * playerSpawnRequest.weapons.Length);
             _enemies = new EnemyStorage(enemyKindCount, gameSettings.enemyCapacityPerKind, gameSettings.enemyPathCornerCapacity);
-            _melees = new MeleeStorage(combatantCapacity, combatantCapacity);
-            _straightProjectiles = new StraightProjectileStorage(gameSettings.straightProjectileCapacity);
-            _arcProjectiles = new ArcProjectileStorage(gameSettings.arcProjectileCapacity);
-            _entities = new EntityStorage(gameSettings.lootCapacity);
+            _entities = new EntityStorage(gameSettings.lootCapacity, combatantCapacity, combatantCapacity, gameSettings.straightProjectileCapacity, gameSettings.arcProjectileCapacity);
 
             _progress = new GameProgressComponent
             {
@@ -181,8 +178,7 @@ namespace TopView.Core
                     healthGaugeRatios = new float[_enemies.entities.Length],
                     healthGaugePools = new Stack<EnemyHealthGaugeView>[enemyKindCount]
                 },
-                straightProjectile = CreateProjectileViewContext(_straightProjectiles.entities.Length),
-                arcProjectile = CreateProjectileViewContext(_arcProjectiles.entities.Length),
+                projectile = CreateProjectileViewContext(_entities.entities.Length),
                 hitEffect = new HitEffectViewContext
                 {
                     pools = new Stack<ParticleSystem>[_hitEffectPrefabs.Length]

@@ -7,13 +7,12 @@ namespace TopView.Systems
     public static class TransformSnapshotSystem
     {
         /// <summary>
-        /// 움직이는 엔티티의 직전 값을 남긴다. 위치나 회전을 바꾸는 System보다 먼저 부른다. 근접 판정은 위치가 바뀌지 않아 남기지 않는다.
+        /// 움직이는 엔티티의 직전 값을 남긴다. 위치나 회전을 바꾸는 System보다 먼저 부른다. 위치가 바뀌지 않는 엔티티(근접 판정, 전리품)도 남기며, 값은 그대로다.
         /// </summary>
         /// <param name="players">플레이어 저장소</param>
         /// <param name="enemies">적 저장소</param>
-        /// <param name="straightProjectiles">직선 투사체 저장소</param>
-        /// <param name="arcProjectiles">포물선 투사체 저장소</param>
-        public static void Tick(PlayerStorage players, EnemyStorage enemies, StraightProjectileStorage straightProjectiles, ArcProjectileStorage arcProjectiles)
+        /// <param name="storage">엔티티 저장소. Position을 가진 칸은 position, Rotation을 가진 칸은 rotation의 직전 값을 남긴다</param>
+        public static void Tick(PlayerStorage players, EnemyStorage enemies, EntityStorage storage)
         {
             for (int index = 0; index < players.entities.Length; index++)
             {
@@ -35,22 +34,15 @@ namespace TopView.Systems
                 }
             }
 
-            for (int index = 0; index < straightProjectiles.entities.Length; index++)
+            for (int index = 0; index < storage.entities.Length; index++)
             {
-                ref StraightProjectileEntity entity = ref straightProjectiles.entities[index];
-                if (entity.isAlive)
+                ref Entity entity = ref storage.entities[index];
+                if ((entity.mask & ComponentMask.Position) != 0)
                 {
                     Snapshot(ref entity.position);
-                    Snapshot(ref entity.rotation);
                 }
-            }
-
-            for (int index = 0; index < arcProjectiles.entities.Length; index++)
-            {
-                ref ArcProjectileEntity entity = ref arcProjectiles.entities[index];
-                if (entity.isAlive)
+                if ((entity.mask & ComponentMask.Rotation) != 0)
                 {
-                    Snapshot(ref entity.position);
                     Snapshot(ref entity.rotation);
                 }
             }

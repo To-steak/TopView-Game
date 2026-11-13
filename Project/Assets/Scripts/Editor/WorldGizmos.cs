@@ -22,9 +22,9 @@ namespace TopView.Editor
 
             DrawPlayers(world.EditorPlayers);
             DrawEnemies(world.EditorEnemies);
-            DrawMelees(world.EditorMelees);
-            DrawStraightProjectiles(world.EditorStraightProjectiles);
-            DrawArcProjectiles(world.EditorArcProjectiles);
+            DrawMelees(world.EditorEntities);
+            DrawStraightProjectiles(world.EditorEntities);
+            DrawArcProjectiles(world.EditorEntities);
             DrawLootPickupRanges(world.EditorPlayers, world.EditorLootPickupRadius);
             DrawDroppedLoots(world.EditorEntities);
         }
@@ -88,12 +88,12 @@ namespace TopView.Editor
         }
 
         // 지금 살아 있는 근접 판정마다 판정 원을 자홍으로 그린다. 플레이어와 적의 근접 공격이 모두 여기에 나온다.
-        private static void DrawMelees(MeleeEntity[] entities)
+        private static void DrawMelees(Entity[] entities)
         {
             Gizmos.color = Color.magenta;
             for (int index = 0; index < entities.Length; index++)
             {
-                if (entities[index].isAlive)
+                if ((entities[index].mask & ComponentMask.Melee) != 0)
                 {
                     GizmoShapes.DrawCircle(entities[index].position.current, entities[index].melee.radius);
                 }
@@ -102,18 +102,18 @@ namespace TopView.Editor
 
         // 살아 있는 직선 투사체마다 판정 구를 Logic 위치에 흰색으로 그린다. 폭발 반지름이 있으면 폭발 범위를 빨간색 XZ 원으로 함께 그린다.
         // 폭발 판정은 여기에 대상 반지름을 더해 비교하므로, 원은 대상 중심이 아니라 가장자리가 닿는 기준이다
-        private static void DrawStraightProjectiles(StraightProjectileEntity[] entities)
+        private static void DrawStraightProjectiles(Entity[] entities)
         {
             for (int index = 0; index < entities.Length; index++)
             {
-                ref readonly StraightProjectileEntity entity = ref entities[index];
-                if (!entity.isAlive)
+                ref readonly Entity entity = ref entities[index];
+                if ((entity.mask & ComponentMask.StraightFlight) == 0)
                 {
                     continue;
                 }
 
                 Gizmos.color = Color.white;
-                Gizmos.DrawWireSphere(entity.position.current, entity.hit.radius);
+                Gizmos.DrawWireSphere(entity.position.current, entity.projectileHit.radius);
                 if (entity.explosion.radius > 0f)
                 {
                     Gizmos.color = Color.red;
@@ -123,15 +123,15 @@ namespace TopView.Editor
         }
 
         // 살아 있는 포물선 투사체마다 판정 구를 Logic 위치에 흰색으로 그린다. 폭발 범위는 투척 미리보기가 보여 주므로 그리지 않는다.
-        private static void DrawArcProjectiles(ArcProjectileEntity[] entities)
+        private static void DrawArcProjectiles(Entity[] entities)
         {
             Gizmos.color = Color.white;
             for (int index = 0; index < entities.Length; index++)
             {
-                ref readonly ArcProjectileEntity entity = ref entities[index];
-                if (entity.isAlive)
+                ref readonly Entity entity = ref entities[index];
+                if ((entity.mask & ComponentMask.ArcFlight) != 0)
                 {
-                    Gizmos.DrawWireSphere(entity.position.current, entity.hit.radius);
+                    Gizmos.DrawWireSphere(entity.position.current, entity.projectileHit.radius);
                 }
             }
         }
