@@ -37,11 +37,11 @@ paths:
   - 이유: 큰 타입을 나눠도 같은 이름으로 묶여 한 번에 찾는다. 에디터 코드가 빌드에 섞이지 않는다.
 - TV0001 익명 함수 금지. 콜백이 필요하면 메서드를 만들고 이름을 넘긴다. 예: `tween.OnComplete(EnableInteraction)`.
   - 이유: 클로저는 숨은 할당과 캡처를 만들고, 콜백이 이름 없이 숨어 흐름을 따라가기 어렵다.
-- 중괄호는 다음 줄에 연다 (Allman).
+- TV0017 중괄호는 다음 줄에 (Allman).
   - 이유: 형식이 하나여야 diff가 형식 차이로 흐려지지 않는다.
-- 멤버 순서: public 필드 → public 프로퍼티 → `[SerializeField] private` 필드 → private 필드 → private 프로퍼티 → const → public 생성자 → public 메서드 → private 메서드.
+- TV0018 멤버 순서.
   - 이유: 어느 파일이든 같은 종류의 멤버를 같은 위치에서 찾는다.
-- 컴포넌트와 엔티티는 struct + public 필드. 배열 원소 struct는 **반드시 `ref`로 접근**한다 (`ref EnemyEntity entity = ref enemies.entities[index];`, 읽기만 하면 `ref readonly`). 매개변수는 수정하면 `ref`, 읽기만 하면 `in`.
+- TV0019 컴포넌트·엔티티는 struct와 public 필드, TV0020 컴포넌트·엔티티 배열 원소는 ref로, TV0021 struct 매개변수는 ref나 in으로, TV0022 고치지 않는 ref 매개변수는 in으로.
   - 이유: 배열 원소를 값으로 꺼내면 복사본을 고쳐서 원본이 바뀌지 않는 버그가 생긴다. `in`/`ref`로 수정 여부가 시그니처에 드러난다.
 
 ## Unity

@@ -9,6 +9,8 @@ namespace TopView.Analyzers
     /// </summary>
     public static class AnalyzerScopeUtility
     {
+        private static readonly string[] DATA_SUFFIXES = { "Component", "Entity" };
+
         private const string ASSEMBLY_PREFIX = "TopView";
         private const string SCRIPT_ROOT = "Assets/Scripts/";
 
@@ -34,6 +36,49 @@ namespace TopView.Analyzers
             }
 
             return normalizedPath.Substring(rootIndex + SCRIPT_ROOT.Length);
+        }
+
+        /// <summary>
+        /// 프로젝트 어셈블리에 선언된 struct인지 확인한다. enum과 Unity·.NET의 struct(Vector3 등)는 아니다.
+        /// </summary>
+        /// <param name="type">검사할 타입</param>
+        /// <returns>프로젝트 struct면 true</returns>
+        public static bool IsProjectStruct(ITypeSymbol type)
+        {
+            if (type == null || type.TypeKind != TypeKind.Struct || type.ContainingAssembly == null)
+            {
+                return false;
+            }
+
+            return type.ContainingAssembly.Name.StartsWith(ASSEMBLY_PREFIX, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// 타입 이름이 컴포넌트·엔티티 접미사(<c>~Component</c>, <c>~Entity</c>)로 끝나는지 확인한다.
+        /// </summary>
+        /// <param name="name">검사할 타입 이름</param>
+        /// <returns>접미사로 끝나면 true</returns>
+        public static bool HasDataSuffix(string name)
+        {
+            foreach (string suffix in DATA_SUFFIXES)
+            {
+                if (name.Length > suffix.Length && name.EndsWith(suffix, StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 프로젝트의 컴포넌트·엔티티 struct인지 확인한다.
+        /// </summary>
+        /// <param name="type">검사할 타입</param>
+        /// <returns>프로젝트 struct이고 이름이 컴포넌트·엔티티 접미사로 끝나면 true</returns>
+        public static bool IsDataStruct(ITypeSymbol type)
+        {
+            return IsProjectStruct(type) && HasDataSuffix(type.Name);
         }
 
         /// <summary>

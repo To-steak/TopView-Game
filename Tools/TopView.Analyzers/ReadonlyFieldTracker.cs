@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
 
@@ -49,7 +48,7 @@ namespace TopView.Analyzers
                 return;
             }
 
-            if (!IsWrite(reference, field))
+            if (!WriteDetectionUtility.IsWrite(reference, field.Type))
             {
                 return;
             }
@@ -87,64 +86,6 @@ namespace TopView.Analyzers
             }
 
             return field.GetAttributes().Length == 0;
-        }
-
-        private static bool IsWrite(IFieldReferenceOperation reference, IFieldSymbol field)
-        {
-            IOperation current = reference;
-            IOperation parent = reference.Parent;
-            while (parent is ITupleOperation)
-            {
-                current = parent;
-                parent = parent.Parent;
-            }
-
-            switch (parent)
-            {
-                case IAssignmentOperation assignment when assignment.Target == current:
-                    return true;
-                case IIncrementOrDecrementOperation _:
-                    return true;
-                case IAddressOfOperation _:
-                    return true;
-                case IArgumentOperation argument when argument.Parameter != null:
-                    if (argument.Parameter.RefKind == RefKind.Ref || argument.Parameter.RefKind == RefKind.Out)
-                    {
-                        return true;
-                    }
-
-                    break;
-            }
-
-            if (reference.Syntax.Parent is RefExpressionSyntax)
-            {
-                return true;
-            }
-
-            return IsMutableStruct(field.Type) && IsReceiver(reference);
-        }
-
-        private static bool IsMutableStruct(ITypeSymbol type)
-        {
-            if (!type.IsValueType || type.SpecialType != SpecialType.None || type.TypeKind == TypeKind.Enum)
-            {
-                return false;
-            }
-
-            return !type.IsReadOnly;
-        }
-
-        private static bool IsReceiver(IOperation operation)
-        {
-            switch (operation.Parent)
-            {
-                case IMemberReferenceOperation memberReference:
-                    return memberReference.Instance == operation;
-                case IInvocationOperation invocation:
-                    return invocation.Instance == operation;
-                default:
-                    return false;
-            }
         }
 
         private static bool IsInitializingWrite(IFieldReferenceOperation reference, IFieldSymbol field, ISymbol containingSymbol)
