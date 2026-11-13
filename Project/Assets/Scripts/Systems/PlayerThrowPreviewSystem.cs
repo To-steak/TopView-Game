@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace TopView.Systems
 {
-    // 투척 충전 중인 플레이어가 지금 던지면 수류탄이 지나갈 궤도와 폭발할 자리를 구한다. 실제 비행(ProjectileSystem)과 같은 계산을 같은 틱 간격으로 한다.
+    // 투척 충전 중인 플레이어가 지금 던지면 수류탄이 지나갈 궤도와 폭발할 자리를 구한다. 실제 비행(ProjectileSystem의 포물선 투사체)과 같은 계산을 같은 틱 간격으로 한다.
     public static class PlayerThrowPreviewSystem
     {
         /// <summary>
@@ -37,7 +37,7 @@ namespace TopView.Systems
                 {
                     continue;
                 }
-                if (weapon.projectile.flightTicks <= 0)
+                if (weapon.arcProjectile.flight.flightTicks <= 0)
                 {
                     // 충전 중 매 틱 걸리므로 충전을 시작한 틱에만 센다
                     if (entity.actionState.elapsedTicks == 0)
@@ -66,8 +66,8 @@ namespace TopView.Systems
         // 던지는 위치에서 1틱씩 포물선을 따라가며 점을 남기고, 환경 레이어에 닿으면 거기서 멈춘다. 점 배열이 모자라면 숨기고 false를 돌려준다.
         private static bool Preview(ref PlayerThrowPreviewComponent preview, in WeaponComponent weapon, Vector3 position, Quaternion rotation, int throwCharge)
         {
-            ref readonly ProjectileComponent projectile = ref weapon.projectile;
-            if (preview.points == null || preview.points.Length < projectile.flightTicks + 1)
+            ref readonly ArcProjectileComponent projectile = ref weapon.arcProjectile;
+            if (preview.points == null || preview.points.Length < projectile.flight.flightTicks + 1)
             {
                 return false;
             }
@@ -78,11 +78,11 @@ namespace TopView.Systems
             preview.points[0] = launchPosition;
             int pointCount = 1;
             Vector3 currentPosition = launchPosition;
-            for (int elapsedTicks = 1; elapsedTicks <= projectile.flightTicks; elapsedTicks++)
+            for (int elapsedTicks = 1; elapsedTicks <= projectile.flight.flightTicks; elapsedTicks++)
             {
-                float progress = ThrowableUtility.GetArcProgress(elapsedTicks, projectile.flightTicks);
-                Vector3 nextPosition = ThrowableUtility.GetArcPosition(launchPosition, targetPosition, projectile.arcHeight, progress);
-                bool isBlocked = ThrowableUtility.TrySweep(in projectile, currentPosition, nextPosition, out currentPosition);
+                float progress = ThrowableUtility.GetArcProgress(elapsedTicks, projectile.flight.flightTicks);
+                Vector3 nextPosition = ThrowableUtility.GetArcPosition(launchPosition, targetPosition, projectile.flight.arcHeight, progress);
+                bool isBlocked = ThrowableUtility.TrySweep(in projectile.hit, currentPosition, nextPosition, out currentPosition);
 
                 preview.points[pointCount] = currentPosition;
                 pointCount++;
@@ -95,7 +95,7 @@ namespace TopView.Systems
             preview.isVisible = true;
             preview.pointCount = pointCount;
             preview.impactPosition = currentPosition;
-            preview.explosionRadius = projectile.explosionRadius;
+            preview.explosionRadius = projectile.explosion.radius;
             return true;
         }
     }

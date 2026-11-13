@@ -35,6 +35,28 @@ MonoBehaviour:
       collisionLayer:
         serializedVersion: 2
         m_Bits: 576
+    straightProjectile:
+      flight:
+        speed: 35
+        lifetimeTicks: 250
+      hit:
+        radius: 0.1
+        collisionLayer:
+          serializedVersion: 2
+          m_Bits: 576
+      explosion:
+        radius: 0
+    arcProjectile:
+      flight:
+        flightTicks: 0
+        arcHeight: 0
+      hit:
+        radius: 0
+        collisionLayer:
+          serializedVersion: 2
+          m_Bits: 0
+      explosion:
+        radius: 0
     throwing:
       chargePerTick: 0
       maxThrowDistance: 0

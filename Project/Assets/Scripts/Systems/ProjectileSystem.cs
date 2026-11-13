@@ -7,49 +7,60 @@ using UnityEngine;
 
 namespace TopView.Systems
 {
-    // 투사체를 움직인다. Straight는 수명이 다하면 소멸을 요청하고, 둘 다 환경에 닿으면 멈춘다. Grenade는 착탄점에 도착해도 멈춘다. 판정과 폭발, 벽에 막힌 Straight의 소멸은 ProjectileHitSystem이 한다.
+    // 투사체를 움직인다. 직선 투사체는 수명이 다하면 소멸을 요청하고, 둘 다 환경에 닿으면 멈춘다. 포물선 투사체는 착탄점에 도착해도 멈춘다. 판정과 폭발, 벽에 막힌 직선 투사체의 소멸은 ProjectileHitSystem이 한다.
     public static class ProjectileSystem
     {
         /// <summary>
-        /// 투사체마다 시간을 1틱 늘린 뒤 움직인다.
+        /// 직선 투사체마다 시간을 1틱 늘린 뒤 곧게 움직이고, 수명이 다한 투사체는 소멸을 요청한다.
         /// </summary>
-        /// <param name="projectiles">투사체 저장소</param>
-        /// <param name="despawnRequests">투사체 소멸 요청 큐</param>
-        public static void Tick(ProjectileStorage projectiles, Queue<ProjectileDespawnRequest> despawnRequests)
+        /// <param name="projectiles">직선 투사체 저장소</param>
+        /// <param name="despawnRequests">직선 투사체 소멸 요청 큐</param>
+        public static void Tick(StraightProjectileStorage projectiles, Queue<ProjectileDespawnRequest> despawnRequests)
         {
             float deltaTime = Time.fixedDeltaTime;
 
             for (int index = 0; index < projectiles.entities.Length; index++)
             {
-                ref ProjectileEntity entity = ref projectiles.entities[index];
-                if (entity.isAlive && Move(in entity.projectile, ref entity.motion, ref entity.position, deltaTime))
+                ref StraightProjectileEntity entity = ref projectiles.entities[index];
+                if (!entity.isAlive)
+                {
+                    continue;
+                }
+
+                entity.motion.elapsedTicks++;
+                MoveStraight(in entity.hit, ref entity.motion, ref entity.position, deltaTime);
+                if (entity.motion.elapsedTicks >= entity.flight.lifetimeTicks)
                 {
                     despawnRequests.Enqueue(new ProjectileDespawnRequest { target = new EntityIdentifier { index = index, generation = entity.generation } });
                 }
             }
         }
 
-        // 시간을 1틱 늘리고 움직인다. 수명이 다한 Straight 투사체면 true를 돌려준다.
-        private static bool Move(in ProjectileComponent projectile, ref ProjectileMotionComponent motion, ref PositionComponent position, float deltaTime)
+        /// <summary>
+        /// 포물선 투사체마다 시간을 1틱 늘린 뒤, 멈추지 않았으면 포물선을 따라 움직인다.
+        /// </summary>
+        /// <param name="projectiles">포물선 투사체 저장소</param>
+        public static void Tick(ArcProjectileStorage projectiles)
         {
-            motion.elapsedTicks++;
-
-            if (projectile.kind == ProjectileKind.Straight)
+            for (int index = 0; index < projectiles.entities.Length; index++)
             {
-                MoveStraight(in projectile, ref motion, ref position, deltaTime);
-                return motion.elapsedTicks >= projectile.lifetimeTicks;
-            }
+                ref ArcProjectileEntity entity = ref projectiles.entities[index];
+                if (!entity.isAlive)
+                {
+                    continue;
+                }
 
-            if (!motion.isResting)
-            {
-                MoveGrenade(in projectile, ref motion, ref position);
+                entity.motion.elapsedTicks++;
+                if (!entity.motion.isResting)
+                {
+                    MoveArc(in entity.flight, in entity.hit, ref entity.motion, ref entity.position);
+                }
             }
-            return false;
         }
 
         // 곧게 움직이다가 환경 레이어에 닿으면 닿은 자리까지만 옮기고 멈춘다.
         // 소멸은 ProjectileHitSystem이 이번 틱의 명중 판정을 마친 뒤 요청한다. 벽 앞에 있던 대상이 같은 틱에 맞을 수 있게 하기 위해서다.
-        private static void MoveStraight(in ProjectileComponent projectile, ref ProjectileMotionComponent motion, ref PositionComponent position, float deltaTime)
+        private static void MoveStraight(in ProjectileHitComponent hit, ref StraightProjectileMotionComponent motion, ref PositionComponent position, float deltaTime)
         {
             Vector3 displacement = motion.velocity * deltaTime;
             float distance = displacement.magnitude;
@@ -59,9 +70,9 @@ namespace TopView.Systems
             }
 
             Vector3 direction = displacement / distance;
-            if (Physics.SphereCast(position.current, projectile.radius, direction, out RaycastHit hit, distance, projectile.collisionLayer, QueryTriggerInteraction.Ignore))
+            if (Physics.SphereCast(position.current, hit.radius, direction, out RaycastHit raycastHit, distance, hit.collisionLayer, QueryTriggerInteraction.Ignore))
             {
-                position.current += direction * hit.distance;
+                position.current += direction * raycastHit.distance;
                 motion.velocity = Vector3.zero;
                 motion.isResting = true;
                 return;
@@ -72,12 +83,12 @@ namespace TopView.Systems
 
         // 지난 시간으로 포물선 위의 다음 위치를 구해 옮긴다. 가는 길에 환경 레이어에 닿으면 닿은 자리에서, 아니면 착탄점에 도착하면 멈춘다.
         // 위치를 누적하지 않고 매 틱 공식으로 구하므로 오차가 쌓이지 않는다. 투척 미리보기도 같은 계산을 쓴다.
-        private static void MoveGrenade(in ProjectileComponent projectile, ref ProjectileMotionComponent motion, ref PositionComponent position)
+        private static void MoveArc(in ArcFlightComponent flight, in ProjectileHitComponent hit, ref ArcProjectileMotionComponent motion, ref PositionComponent position)
         {
-            float progress = ThrowableUtility.GetArcProgress(motion.elapsedTicks, projectile.flightTicks);
-            Vector3 nextPosition = ThrowableUtility.GetArcPosition(motion.launchPosition, motion.targetPosition, projectile.arcHeight, progress);
+            float progress = ThrowableUtility.GetArcProgress(motion.elapsedTicks, flight.flightTicks);
+            Vector3 nextPosition = ThrowableUtility.GetArcPosition(motion.launchPosition, motion.targetPosition, flight.arcHeight, progress);
 
-            if (ThrowableUtility.TrySweep(in projectile, position.current, nextPosition, out Vector3 stopPosition))
+            if (ThrowableUtility.TrySweep(in hit, position.current, nextPosition, out Vector3 stopPosition))
             {
                 position.current = stopPosition;
                 motion.isResting = true;

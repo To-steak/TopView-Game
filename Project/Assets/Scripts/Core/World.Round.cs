@@ -52,9 +52,9 @@ namespace TopView.Core
                 return;
             }
 
-            if (gameSettings.enemyCapacityPerKind <= 0 || gameSettings.enemyPathCornerCapacity <= 0 || gameSettings.projectileCapacity <= 0 || gameSettings.lootCapacity <= 0)
+            if (gameSettings.enemyCapacityPerKind <= 0 || gameSettings.enemyPathCornerCapacity <= 0 || gameSettings.straightProjectileCapacity <= 0 || gameSettings.arcProjectileCapacity <= 0 || gameSettings.lootCapacity <= 0)
             {
-                Debug.LogError("World >> Game Settings Definition의 Enemy Capacity Per Kind, Enemy Path Corner Capacity, Projectile Capacity, Loot Capacity 중 0 이하인 값이 있어 판을 시작할 수 없다.");
+                Debug.LogError("World >> Game Settings Definition의 Enemy Capacity Per Kind, Enemy Path Corner Capacity, Straight Projectile Capacity, Arc Projectile Capacity, Loot Capacity 중 0 이하인 값이 있어 판을 시작할 수 없다.");
                 return;
             }
 
@@ -107,7 +107,8 @@ namespace TopView.Core
             _weapons = new WeaponStorage(PLAYER_CAPACITY * playerSpawnRequest.weapons.Length);
             _enemies = new EnemyStorage(enemyKindCount, gameSettings.enemyCapacityPerKind, gameSettings.enemyPathCornerCapacity);
             _melees = new MeleeStorage(combatantCapacity, combatantCapacity);
-            _projectiles = new ProjectileStorage(gameSettings.projectileCapacity);
+            _straightProjectiles = new StraightProjectileStorage(gameSettings.straightProjectileCapacity);
+            _arcProjectiles = new ArcProjectileStorage(gameSettings.arcProjectileCapacity);
             _loots = new LootStorage(gameSettings.lootCapacity);
 
             _progress = new GameProgressComponent
@@ -180,13 +181,8 @@ namespace TopView.Core
                     healthGaugeRatios = new float[_enemies.entities.Length],
                     healthGaugePools = new Stack<EnemyHealthGaugeView>[enemyKindCount]
                 },
-                projectile = new ProjectileViewContext
-                {
-                    views = new ProjectileView[_projectiles.entities.Length],
-                    viewGenerations = new int[_projectiles.entities.Length],
-                    viewIndices = new int[_projectiles.entities.Length],
-                    viewPools = new Stack<ProjectileView>[_projectilePrefabs.Length]
-                },
+                straightProjectile = CreateProjectileViewContext(_straightProjectiles.entities.Length),
+                arcProjectile = CreateProjectileViewContext(_arcProjectiles.entities.Length),
                 hitEffect = new HitEffectViewContext
                 {
                     pools = new Stack<ParticleSystem>[_hitEffectPrefabs.Length]
@@ -211,10 +207,6 @@ namespace TopView.Core
             {
                 viewContext.enemy.viewPools[kind] = new Stack<EnemyView>();
                 viewContext.enemy.healthGaugePools[kind] = new Stack<EnemyHealthGaugeView>();
-            }
-            for (int viewIndex = 0; viewIndex < _projectilePrefabs.Length; viewIndex++)
-            {
-                viewContext.projectile.viewPools[viewIndex] = new Stack<ProjectileView>();
             }
             for (int effectIndex = 0; effectIndex < _hitEffectPrefabs.Length; effectIndex++)
             {
@@ -249,6 +241,24 @@ namespace TopView.Core
             }
 
             return viewContext;
+        }
+
+        // 투사체 저장소 하나의 칸 수와 투사체 View 표에 맞춰 View 실행 상태를 만든다. 풀은 저장소마다 따로 둔다.
+        private ProjectileViewContext CreateProjectileViewContext(int capacity)
+        {
+            ProjectileViewContext context = new ProjectileViewContext
+            {
+                views = new ProjectileView[capacity],
+                viewGenerations = new int[capacity],
+                viewIndices = new int[capacity],
+                viewPools = new Stack<ProjectileView>[_projectilePrefabs.Length]
+            };
+            for (int viewIndex = 0; viewIndex < _projectilePrefabs.Length; viewIndex++)
+            {
+                context.viewPools[viewIndex] = new Stack<ProjectileView>();
+            }
+
+            return context;
         }
 
         // 보스 종류(오버레이 체력 바를 보여 주는 적)가 있는데 Music Definition에 보스 곡이 없으면 알린다. 보스가 나와도 평소 곡을 계속 튼다.

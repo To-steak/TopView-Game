@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace TopView.Utilities
 {
-    // 던지는 투사체(Grenade)의 포물선 계산과 환경 충돌 검사 도구. 실제 비행과 투척 미리보기가 함께 써서 둘이 어긋나지 않게 한다.
+    // 포물선 투사체의 포물선 계산과 환경 충돌 검사 도구. 실제 비행과 투척 미리보기가 함께 써서 둘이 어긋나지 않게 한다.
     public static class ThrowableUtility
     {
         /// <summary>
@@ -33,12 +33,12 @@ namespace TopView.Utilities
         /// <summary>
         /// from에서 to로 한 틱 움직일 때 환경 레이어에 닿는지 투사체 반지름의 구로 검사한다. 결과만 돌려주고 위치 데이터는 부르는 System이 고친다.
         /// </summary>
-        /// <param name="projectile">투사체 값</param>
+        /// <param name="hit">투사체의 판정 크기와 멈추는 환경 레이어</param>
         /// <param name="from">이번 틱 시작 위치(월드)</param>
         /// <param name="to">이번 틱 목표 위치(월드)</param>
         /// <param name="stopPosition">닿았으면 닿은 자리, 아니면 to</param>
         /// <returns>닿았으면 true</returns>
-        public static bool TrySweep(in ProjectileComponent projectile, Vector3 from, Vector3 to, out Vector3 stopPosition)
+        public static bool TrySweep(in ProjectileHitComponent hit, Vector3 from, Vector3 to, out Vector3 stopPosition)
         {
             stopPosition = to;
             Vector3 displacement = to - from;
@@ -49,9 +49,9 @@ namespace TopView.Utilities
             }
 
             Vector3 direction = displacement / distance;
-            if (Physics.SphereCast(from, projectile.radius, direction, out RaycastHit hit, distance, projectile.collisionLayer, QueryTriggerInteraction.Ignore))
+            if (Physics.SphereCast(from, hit.radius, direction, out RaycastHit raycastHit, distance, hit.collisionLayer, QueryTriggerInteraction.Ignore))
             {
-                stopPosition = from + direction * hit.distance;
+                stopPosition = from + direction * raycastHit.distance;
                 return true;
             }
 

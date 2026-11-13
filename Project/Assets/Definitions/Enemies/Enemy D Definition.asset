@@ -32,7 +32,7 @@ MonoBehaviour:
     angularSpeed: 360
   death:
     dieTicks: 120
-    endsGameOnDeath: 1
+    isGameOverOnDeath: 1
   attacks:
   - attack:
       kind: 1
@@ -57,6 +57,17 @@ MonoBehaviour:
         collisionLayer:
           serializedVersion: 2
           m_Bits: 704
+      straightProjectile:
+        flight:
+          speed: 10
+          lifetimeTicks: 500
+        hit:
+          radius: 0.5
+          collisionLayer:
+            serializedVersion: 2
+            m_Bits: 704
+        explosion:
+          radius: 1
       shots:
       - startTicks: 16
         spawnOffset: {x: 1.63, y: 2.1, z: 1.04}
@@ -89,6 +100,17 @@ MonoBehaviour:
         collisionLayer:
           serializedVersion: 2
           m_Bits: 512
+      straightProjectile:
+        flight:
+          speed: 10
+          lifetimeTicks: 500
+        hit:
+          radius: 1.25
+          collisionLayer:
+            serializedVersion: 2
+            m_Bits: 512
+        explosion:
+          radius: 0
       shots:
       - startTicks: 94
         spawnOffset: {x: 0, y: 1.26, z: 1.88}
@@ -103,4 +125,4 @@ MonoBehaviour:
     amountIncrement: 0
   viewPrefab: {fileID: 2811978939204380695, guid: 4799295fa3bc6664c8e0880573210cbe, type: 3}
   healthGaugePrefab: {fileID: 0}
-  showsOverlayHealthBar: 1
+  hasOverlayHealthBar: 1

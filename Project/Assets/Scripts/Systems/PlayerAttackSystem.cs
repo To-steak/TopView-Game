@@ -16,10 +16,11 @@ namespace TopView.Systems
         /// </summary>
         /// <param name="players">플레이어 저장소</param>
         /// <param name="weapons">무기 저장소</param>
-        /// <param name="projectileSpawnRequests">투사체 생성 요청 큐</param>
+        /// <param name="straightProjectileSpawnRequests">직선 투사체 생성 요청 큐. Ranged가 넣는다</param>
+        /// <param name="arcProjectileSpawnRequests">포물선 투사체 생성 요청 큐. Throw가 넣는다</param>
         /// <param name="meleeSpawnRequests">근접 판정 생성 요청 큐</param>
         /// <param name="attackCommittedRecords">공격을 내보낸 기록 목록. 공격이 실제로 나갔을 때만 남긴다</param>
-        public static void Tick(PlayerStorage players, WeaponStorage weapons, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, List<PlayerAttackCommittedRecord> attackCommittedRecords)
+        public static void Tick(PlayerStorage players, WeaponStorage weapons, Queue<StraightProjectileSpawnRequest> straightProjectileSpawnRequests, Queue<ArcProjectileSpawnRequest> arcProjectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, List<PlayerAttackCommittedRecord> attackCommittedRecords)
         {
             for (int index = 0; index < players.entities.Length; index++)
             {
@@ -42,7 +43,7 @@ namespace TopView.Systems
                 {
                     EntityIdentifier identifier = new EntityIdentifier { index = index, generation = entity.generation };
                     int weaponLevel = weaponEntity.upgradeLevel.level;
-                    if (CommitAttack(ref actionState, ref weaponEntity.ammoState, entity.position.current, entity.rotation.current, in identifier, in weapon, in entity.upgrade, weaponLevel, projectileSpawnRequests, meleeSpawnRequests, out Vector3 meleeCenter))
+                    if (CommitAttack(ref actionState, ref weaponEntity.ammoState, entity.position.current, entity.rotation.current, in identifier, in weapon, in entity.upgrade, weaponLevel, straightProjectileSpawnRequests, arcProjectileSpawnRequests, meleeSpawnRequests, out Vector3 meleeCenter))
                     {
                         attackCommittedRecords.Add(new PlayerAttackCommittedRecord
                         {
@@ -59,7 +60,7 @@ namespace TopView.Systems
 
         // 공격을 내보낸다. 탄약이 없으면 아무것도 하지 않는다. Ranged와 Throw는 투사체 생성 요청을, Melee는 timing.endTicks까지 이어지는 근접 판정 생성 요청을 넣는다.
         // 공격이 실제로 나갔으면 true를 돌려준다. meleeCenter는 Melee일 때 판정 원의 중심이고, 그 밖에는 Vector3.zero다. 피해량, 근접 범위, 폭발 반지름은 무기 강화 레벨을 반영한다.
-        private static bool CommitAttack(ref PlayerActionStateComponent actionState, ref AmmoStateComponent ammo, Vector3 position, Quaternion rotation, in EntityIdentifier identifier, in WeaponComponent weapon, in PlayerUpgradeComponent upgrade, int weaponLevel, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, out Vector3 meleeCenter)
+        private static bool CommitAttack(ref PlayerActionStateComponent actionState, ref AmmoStateComponent ammo, Vector3 position, Quaternion rotation, in EntityIdentifier identifier, in WeaponComponent weapon, in PlayerUpgradeComponent upgrade, int weaponLevel, Queue<StraightProjectileSpawnRequest> straightProjectileSpawnRequests, Queue<ArcProjectileSpawnRequest> arcProjectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, out Vector3 meleeCenter)
         {
             meleeCenter = Vector3.zero;
             float damage = PlayerUpgradeUtility.GetDamage(in weapon, in upgrade, weaponLevel);
@@ -75,7 +76,7 @@ namespace TopView.Systems
                         return false;
                     }
                     ammo.current--;
-                    RequestProjectile(position, rotation, in weapon, damage, explosionRadius, rotation * Vector3.forward * weapon.projectile.speed, Vector3.zero, projectileSpawnRequests);
+                    RequestStraightProjectile(position, rotation, in weapon, damage, explosionRadius, straightProjectileSpawnRequests);
                     break;
 
                 case WeaponKind.Throw:
@@ -84,14 +85,14 @@ namespace TopView.Systems
                         Debug.LogWarning($"PlayerAttackSystem >> 남은 탄약이 {ammo.reserve}이라 투척 공격을 내보내지 않았다.");
                         return false;
                     }
-                    if (weapon.projectile.flightTicks <= 0)
+                    if (weapon.arcProjectile.flight.flightTicks <= 0)
                     {
-                        Debug.LogWarning($"PlayerAttackSystem >> flightTicks({weapon.projectile.flightTicks})가 0 이하라 투척 공격을 내보내지 않았다. flightTicks는 0보다 커야 한다.");
+                        Debug.LogWarning($"PlayerAttackSystem >> flightTicks({weapon.arcProjectile.flight.flightTicks})가 0 이하라 투척 공격을 내보내지 않았다. flightTicks는 0보다 커야 한다.");
                         return false;
                     }
                     ammo.reserve--;
                     Vector3 targetPosition = PlayerWeaponUtility.GetThrowTargetPosition(in weapon.throwing, position, rotation, actionState.throwCharge);
-                    RequestProjectile(position, rotation, in weapon, damage, explosionRadius, Vector3.zero, targetPosition, projectileSpawnRequests);
+                    RequestArcProjectile(position, rotation, in weapon, damage, explosionRadius, targetPosition, arcProjectileSpawnRequests);
                     break;
 
                 case WeaponKind.Melee:
@@ -116,12 +117,12 @@ namespace TopView.Systems
             return true;
         }
 
-        // 무기의 총구 위치에서 플레이어 회전으로 투사체를 내보낸다. Straight는 velocity로, Grenade는 targetPosition을 향해 날아간다. 폭발 반지름은 강화가 반영된 값으로 바꿔 담는다.
-        private static void RequestProjectile(Vector3 position, Quaternion rotation, in WeaponComponent weapon, float damage, float explosionRadius, Vector3 velocity, Vector3 targetPosition, Queue<ProjectileSpawnRequest> projectileSpawnRequests)
+        // 무기의 총구 위치에서 플레이어 회전의 정면으로 직선 투사체를 내보낸다. 폭발 반지름은 강화가 반영된 값으로 바꿔 담는다.
+        private static void RequestStraightProjectile(Vector3 position, Quaternion rotation, in WeaponComponent weapon, float damage, float explosionRadius, Queue<StraightProjectileSpawnRequest> spawnRequests)
         {
-            ProjectileComponent projectile = weapon.projectile;
-            projectile.explosionRadius = explosionRadius;
-            projectileSpawnRequests.Enqueue(new ProjectileSpawnRequest
+            StraightProjectileComponent projectile = weapon.straightProjectile;
+            projectile.explosion.radius = explosionRadius;
+            spawnRequests.Enqueue(new StraightProjectileSpawnRequest
             {
                 projectile = projectile,
                 projectileView = weapon.projectileView,
@@ -129,7 +130,23 @@ namespace TopView.Systems
                 damage = damage,
                 position = position + rotation * weapon.muzzleOffset,
                 rotation = rotation,
-                velocity = velocity,
+                velocity = rotation * Vector3.forward * projectile.flight.speed
+            });
+        }
+
+        // 무기의 총구 위치에서 targetPosition을 향해 포물선 투사체를 던진다. 폭발 반지름은 강화가 반영된 값으로 바꿔 담는다.
+        private static void RequestArcProjectile(Vector3 position, Quaternion rotation, in WeaponComponent weapon, float damage, float explosionRadius, Vector3 targetPosition, Queue<ArcProjectileSpawnRequest> spawnRequests)
+        {
+            ArcProjectileComponent projectile = weapon.arcProjectile;
+            projectile.explosion.radius = explosionRadius;
+            spawnRequests.Enqueue(new ArcProjectileSpawnRequest
+            {
+                projectile = projectile,
+                projectileView = weapon.projectileView,
+                faction = Faction.Player,
+                damage = damage,
+                position = position + rotation * weapon.muzzleOffset,
+                rotation = rotation,
                 targetPosition = targetPosition
             });
         }

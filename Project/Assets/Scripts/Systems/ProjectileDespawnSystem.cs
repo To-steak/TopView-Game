@@ -8,16 +8,35 @@ namespace TopView.Systems
     public static class ProjectileDespawnSystem
     {
         /// <summary>
-        /// 쌓인 소멸 요청을 모두 처리한다. 이미 없어졌거나 칸이 재사용된 대상은 건너뛴다. 요청을 넣는 System 바로 뒤에 부른다.
+        /// 쌓인 직선 투사체 소멸 요청을 모두 처리한다. 이미 없어졌거나 칸이 재사용된 대상은 건너뛴다. 요청을 넣는 System 바로 뒤에 부른다.
         /// </summary>
-        /// <param name="projectiles">투사체 저장소</param>
-        /// <param name="despawnRequests">투사체 소멸 요청 큐</param>
-        public static void Tick(ProjectileStorage projectiles, Queue<ProjectileDespawnRequest> despawnRequests)
+        /// <param name="projectiles">직선 투사체 저장소</param>
+        /// <param name="despawnRequests">직선 투사체 소멸 요청 큐</param>
+        public static void Tick(StraightProjectileStorage projectiles, Queue<ProjectileDespawnRequest> despawnRequests)
         {
             while (despawnRequests.Count > 0)
             {
                 EntityIdentifier target = despawnRequests.Dequeue().target;
-                ref ProjectileEntity entity = ref projectiles.entities[target.index];
+                ref StraightProjectileEntity entity = ref projectiles.entities[target.index];
+                if (entity.isAlive && entity.generation == target.generation)
+                {
+                    entity.isAlive = false;
+                    projectiles.freeIndices.Add(target.index);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 쌓인 포물선 투사체 소멸 요청을 모두 처리한다. 이미 없어졌거나 칸이 재사용된 대상은 건너뛴다. 요청을 넣는 System 바로 뒤에 부른다.
+        /// </summary>
+        /// <param name="projectiles">포물선 투사체 저장소</param>
+        /// <param name="despawnRequests">포물선 투사체 소멸 요청 큐</param>
+        public static void Tick(ArcProjectileStorage projectiles, Queue<ProjectileDespawnRequest> despawnRequests)
+        {
+            while (despawnRequests.Count > 0)
+            {
+                EntityIdentifier target = despawnRequests.Dequeue().target;
+                ref ArcProjectileEntity entity = ref projectiles.entities[target.index];
                 if (entity.isAlive && entity.generation == target.generation)
                 {
                     entity.isAlive = false;

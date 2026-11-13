@@ -11,8 +11,9 @@ namespace TopView.Systems
         /// </summary>
         /// <param name="players">플레이어 저장소</param>
         /// <param name="enemies">적 저장소</param>
-        /// <param name="projectiles">투사체 저장소</param>
-        public static void Tick(PlayerStorage players, EnemyStorage enemies, ProjectileStorage projectiles)
+        /// <param name="straightProjectiles">직선 투사체 저장소</param>
+        /// <param name="arcProjectiles">포물선 투사체 저장소</param>
+        public static void Tick(PlayerStorage players, EnemyStorage enemies, StraightProjectileStorage straightProjectiles, ArcProjectileStorage arcProjectiles)
         {
             for (int index = 0; index < players.entities.Length; index++)
             {
@@ -34,9 +35,19 @@ namespace TopView.Systems
                 }
             }
 
-            for (int index = 0; index < projectiles.entities.Length; index++)
+            for (int index = 0; index < straightProjectiles.entities.Length; index++)
             {
-                ref ProjectileEntity entity = ref projectiles.entities[index];
+                ref StraightProjectileEntity entity = ref straightProjectiles.entities[index];
+                if (entity.isAlive)
+                {
+                    Snapshot(ref entity.position);
+                    Snapshot(ref entity.rotation);
+                }
+            }
+
+            for (int index = 0; index < arcProjectiles.entities.Length; index++)
+            {
+                ref ArcProjectileEntity entity = ref arcProjectiles.entities[index];
                 if (entity.isAlive)
                 {
                     Snapshot(ref entity.position);

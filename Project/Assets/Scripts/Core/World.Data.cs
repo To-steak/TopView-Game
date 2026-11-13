@@ -20,8 +20,10 @@ namespace TopView.Core
         public EnemyEntity[] EditorEnemies => _enemies.entities;
         // 근접 판정 칸. Editor의 WorldGizmos가 읽기만 한다
         public MeleeEntity[] EditorMelees => _melees.entities;
-        // 투사체 칸. Editor의 WorldGizmos가 읽기만 한다
-        public ProjectileEntity[] EditorProjectiles => _projectiles.entities;
+        // 직선 투사체 칸. Editor의 WorldGizmos가 읽기만 한다
+        public StraightProjectileEntity[] EditorStraightProjectiles => _straightProjectiles.entities;
+        // 포물선 투사체 칸. Editor의 WorldGizmos가 읽기만 한다
+        public ArcProjectileEntity[] EditorArcProjectiles => _arcProjectiles.entities;
         // 전리품 칸. Editor의 WorldGizmos가 읽기만 한다
         public LootEntity[] EditorLoots => _loots.entities;
         // 전리품 획득 반경. Editor의 WorldGizmos가 읽기만 한다
@@ -61,8 +63,10 @@ namespace TopView.Core
         private WeaponStorage _weapons;
         // 근접 판정 저장소
         private MeleeStorage _melees;
-        // 투사체 저장소
-        private ProjectileStorage _projectiles;
+        // 직선 투사체 저장소
+        private StraightProjectileStorage _straightProjectiles;
+        // 포물선 투사체 저장소
+        private ArcProjectileStorage _arcProjectiles;
         // 전리품 저장소
         private LootStorage _loots;
         // 이번 틱의 플레이어 피격 대상 목록. 적의 공격이 읽는다. 판 시작 때 플레이어 칸 수로 만들고, 매 틱 HitTargetSystem이 다시 채운다
@@ -85,8 +89,10 @@ namespace TopView.Core
         private readonly Queue<EnemySpawnRequest> _enemySpawnRequests = new Queue<EnemySpawnRequest>();
         // 적 스포너 발동 요청 큐
         private readonly Queue<EnemySpawnerActivationRequest> _enemySpawnerActivationRequests = new Queue<EnemySpawnerActivationRequest>();
-        // 투사체 생성 요청 큐
-        private readonly Queue<ProjectileSpawnRequest> _projectileSpawnRequests = new Queue<ProjectileSpawnRequest>();
+        // 직선 투사체 생성 요청 큐
+        private readonly Queue<StraightProjectileSpawnRequest> _straightProjectileSpawnRequests = new Queue<StraightProjectileSpawnRequest>();
+        // 포물선 투사체 생성 요청 큐
+        private readonly Queue<ArcProjectileSpawnRequest> _arcProjectileSpawnRequests = new Queue<ArcProjectileSpawnRequest>();
         // 근접 판정 생성 요청 큐
         private readonly Queue<MeleeSpawnRequest> _meleeSpawnRequests = new Queue<MeleeSpawnRequest>();
         // 전리품 생성 요청 큐
@@ -95,8 +101,10 @@ namespace TopView.Core
         private readonly Queue<PlayerStateChangeRequest> _playerStateChangeRequests = new Queue<PlayerStateChangeRequest>();
         // 적 상태 변경 요청 큐
         private readonly Queue<EnemyStateChangeRequest> _enemyStateChangeRequests = new Queue<EnemyStateChangeRequest>();
-        // 투사체 소멸 요청 큐
-        private readonly Queue<ProjectileDespawnRequest> _projectileDespawnRequests = new Queue<ProjectileDespawnRequest>();
+        // 직선 투사체 소멸 요청 큐
+        private readonly Queue<ProjectileDespawnRequest> _straightProjectileDespawnRequests = new Queue<ProjectileDespawnRequest>();
+        // 포물선 투사체 소멸 요청 큐
+        private readonly Queue<ProjectileDespawnRequest> _arcProjectileDespawnRequests = new Queue<ProjectileDespawnRequest>();
         // 무기 소멸 요청 큐
         private readonly Queue<WeaponDespawnRequest> _weaponDespawnRequests = new Queue<WeaponDespawnRequest>();
         // 근접 판정 소멸 요청 큐

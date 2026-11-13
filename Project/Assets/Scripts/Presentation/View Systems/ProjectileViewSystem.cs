@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TopView.Components;
 using TopView.Entities;
 using TopView.Presentation.Views;
 using TopView.Presentation.ViewContexts;
@@ -10,47 +11,73 @@ namespace TopView.Presentation.ViewSystems
     public static class ProjectileViewSystem
     {
         /// <summary>
-        /// 저장소의 칸마다 살아 있는 투사체와 View를 맞춘다.
+        /// 직선 투사체 저장소의 칸마다 살아 있는 투사체와 View를 맞춘다.
         /// </summary>
-        /// <param name="entities">투사체 엔티티 배열</param>
+        /// <param name="entities">직선 투사체 엔티티 배열</param>
         /// <param name="projectilePrefabs">투사체 View 표. 번호별 ProjectileView 프리팹</param>
         /// <param name="isPaused">판이 일시정지 중이면 true. 모델을 회전시키지 않는다</param>
-        /// <param name="context">투사체 View 실행 상태</param>
-        public static void Present(ProjectileEntity[] entities, GameObject[] projectilePrefabs, bool isPaused, ProjectileViewContext context)
+        /// <param name="context">직선 투사체 View 실행 상태</param>
+        public static void Present(StraightProjectileEntity[] entities, GameObject[] projectilePrefabs, bool isPaused, ProjectileViewContext context)
         {
-            float alpha = Mathf.Clamp01((Time.time - Time.fixedTime) / Time.fixedDeltaTime);
-
+            float alpha = GetInterpolationAlpha();
             for (int index = 0; index < entities.Length; index++)
             {
-                ref readonly ProjectileEntity entity = ref entities[index];
-                ProjectileView view = context.views[index];
+                ref readonly StraightProjectileEntity entity = ref entities[index];
+                PresentSlot(context, index, entity.isAlive, entity.generation, in entity.projectileView, in entity.position, in entity.rotation, projectilePrefabs, isPaused, alpha);
+            }
+        }
 
-                if (view != null && (!entity.isAlive || context.viewGenerations[index] != entity.generation))
-                {
-                    Release(context, index);
-                    view = null;
-                }
+        /// <summary>
+        /// 포물선 투사체 저장소의 칸마다 살아 있는 투사체와 View를 맞춘다.
+        /// </summary>
+        /// <param name="entities">포물선 투사체 엔티티 배열</param>
+        /// <param name="projectilePrefabs">투사체 View 표. 번호별 ProjectileView 프리팹</param>
+        /// <param name="isPaused">판이 일시정지 중이면 true. 모델을 회전시키지 않는다</param>
+        /// <param name="context">포물선 투사체 View 실행 상태</param>
+        public static void Present(ArcProjectileEntity[] entities, GameObject[] projectilePrefabs, bool isPaused, ProjectileViewContext context)
+        {
+            float alpha = GetInterpolationAlpha();
+            for (int index = 0; index < entities.Length; index++)
+            {
+                ref readonly ArcProjectileEntity entity = ref entities[index];
+                PresentSlot(context, index, entity.isAlive, entity.generation, in entity.projectileView, in entity.position, in entity.rotation, projectilePrefabs, isPaused, alpha);
+            }
+        }
 
-                if (!entity.isAlive || entity.projectileView.viewIndex < 0)
-                {
-                    continue;
-                }
+        private static float GetInterpolationAlpha()
+        {
+            return Mathf.Clamp01((Time.time - Time.fixedTime) / Time.fixedDeltaTime);
+        }
 
-                Vector3 position = Vector3.Lerp(entity.position.previous, entity.position.current, alpha);
-                if (view == null)
-                {
-                    view = Acquire(context, index, entity.generation, entity.projectileView.viewIndex, projectilePrefabs, position, entity.rotation.current);
-                }
-                else
-                {
-                    view.transform.SetPositionAndRotation(position, entity.rotation.current);
-                }
+        // 칸 하나의 View를 엔티티와 맞춘다. 엔티티가 없거나 바뀌었으면 View를 돌려놓고, 살아 있으면 꺼내 붙여 위치를 보간한다.
+        private static void PresentSlot(ProjectileViewContext context, int index, bool isAlive, int generation, in ProjectileViewComponent projectileView, in PositionComponent position, in RotationComponent rotation, GameObject[] projectilePrefabs, bool isPaused, float alpha)
+        {
+            ProjectileView view = context.views[index];
+            if (view != null && (!isAlive || context.viewGenerations[index] != generation))
+            {
+                Release(context, index);
+                view = null;
+            }
 
-                Vector3 rotationSpeed = new Vector3(view.pitchSpeed, view.yawSpeed, view.rollSpeed);
-                if (!isPaused && rotationSpeed != Vector3.zero && view.rotationPivot != null)
-                {
-                    view.rotationPivot.Rotate(rotationSpeed * Time.deltaTime, Space.Self);
-                }
+            if (!isAlive || projectileView.viewIndex < 0)
+            {
+                return;
+            }
+
+            Vector3 interpolatedPosition = Vector3.Lerp(position.previous, position.current, alpha);
+            if (view == null)
+            {
+                view = Acquire(context, index, generation, projectileView.viewIndex, projectilePrefabs, interpolatedPosition, rotation.current);
+            }
+            else
+            {
+                view.transform.SetPositionAndRotation(interpolatedPosition, rotation.current);
+            }
+
+            Vector3 rotationSpeed = new Vector3(view.pitchSpeed, view.yawSpeed, view.rollSpeed);
+            if (!isPaused && rotationSpeed != Vector3.zero && view.rotationPivot != null)
+            {
+                view.rotationPivot.Rotate(rotationSpeed * Time.deltaTime, Space.Self);
             }
         }
 

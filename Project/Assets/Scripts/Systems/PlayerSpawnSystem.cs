@@ -89,7 +89,7 @@ namespace TopView.Systems
                 ref readonly WeaponComponent weapon = ref weapons[weaponIndex];
                 if (weapon.kind == WeaponKind.Throw)
                 {
-                    capacity = Mathf.Max(capacity, weapon.projectile.flightTicks + 1);
+                    capacity = Mathf.Max(capacity, weapon.arcProjectile.flight.flightTicks + 1);
                 }
             }
 

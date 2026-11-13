@@ -118,10 +118,23 @@ namespace TopView.Utilities
         /// </summary>
         /// <param name="weapon">무기</param>
         /// <param name="weaponLevel">무기 강화 레벨</param>
-        /// <returns>폭발 반지름(유닛, XZ). 0이면 폭발하지 않는다</returns>
+        /// <returns>폭발 반지름(유닛, XZ). 0이면 폭발하지 않는다. Ranged는 직선 투사체, Throw는 포물선 투사체의 값을 쓰고, Melee는 0이다</returns>
         public static float GetExplosionRadius(in WeaponComponent weapon, int weaponLevel)
         {
-            return weapon.projectile.explosionRadius + weapon.upgrade.explosionRadiusIncreasePerLevel * weaponLevel;
+            float baseRadius;
+            switch (weapon.kind)
+            {
+                case WeaponKind.Ranged:
+                    baseRadius = weapon.straightProjectile.explosion.radius;
+                    break;
+                case WeaponKind.Throw:
+                    baseRadius = weapon.arcProjectile.explosion.radius;
+                    break;
+                default:
+                    return 0f;
+            }
+
+            return baseRadius + weapon.upgrade.explosionRadiusIncreasePerLevel * weaponLevel;
         }
 
         /// <summary>

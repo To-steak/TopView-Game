@@ -57,9 +57,13 @@ namespace TopView.Editor
             if (isProjectileWeapon)
             {
                 DrawRelative(ammo, nameof(AmmoComponent.startingReserve), STARTING_RESERVE_AMMO_LABEL);
-                DrawRelative(weapon, nameof(WeaponComponent.projectile));
-                if (kind == WeaponKind.Throw)
+                if (kind == WeaponKind.Ranged)
                 {
+                    DrawRelative(weapon, nameof(WeaponComponent.straightProjectile));
+                }
+                else
+                {
+                    DrawRelative(weapon, nameof(WeaponComponent.arcProjectile));
                     DrawRelative(weapon, nameof(WeaponComponent.throwing));
                 }
                 DrawRelative(upgrade, nameof(WeaponUpgradeRuleComponent.explosionRadiusIncreasePerLevel));

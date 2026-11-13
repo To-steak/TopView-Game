@@ -9,8 +9,10 @@ namespace TopView.Presentation.ViewContexts
         public PlayerViewContext player;
         // 적 View와 체력 게이지 실행 상태
         public EnemyViewContext enemy;
-        // 투사체 View 실행 상태
-        public ProjectileViewContext projectile;
+        // 직선 투사체 View 실행 상태
+        public ProjectileViewContext straightProjectile;
+        // 포물선 투사체 View 실행 상태
+        public ProjectileViewContext arcProjectile;
         // 피격 이펙트 실행 상태
         public HitEffectViewContext hitEffect;
         // 월드 글자 실행 상태

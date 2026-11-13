@@ -3,7 +3,7 @@ using TopView.Presentation.Views;
 
 namespace TopView.Presentation.ViewContexts
 {
-    // 투사체 View 실행 상태. 판마다 새로 만든다.
+    // 투사체 저장소 하나의 View 실행 상태. 직선·포물선 저장소마다 하나씩, 판마다 새로 만든다.
     public class ProjectileViewContext
     {
         // 투사체 저장소 칸별 View. 빈 칸은 null

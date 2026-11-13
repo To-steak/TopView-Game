@@ -20,10 +20,10 @@ namespace TopView.Systems
         /// <param name="enemies">적 저장소</param>
         /// <param name="playerLocation">바라보고 투사체로 겨냥할 플레이어의 위치</param>
         /// <param name="stateChangeRequests">적 상태 변경 요청 큐</param>
-        /// <param name="projectileSpawnRequests">투사체 생성 요청 큐</param>
+        /// <param name="projectileSpawnRequests">직선 투사체 생성 요청 큐</param>
         /// <param name="meleeSpawnRequests">근접 판정 생성 요청 큐</param>
         /// <param name="attackCommittedRecords">이번 프레임에 적이 공격을 내보낸 기록</param>
-        public static void Tick(EnemyStorage enemies, in PlayerLocationComponent playerLocation, Queue<EnemyStateChangeRequest> stateChangeRequests, Queue<ProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, List<EnemyAttackCommittedRecord> attackCommittedRecords)
+        public static void Tick(EnemyStorage enemies, in PlayerLocationComponent playerLocation, Queue<EnemyStateChangeRequest> stateChangeRequests, Queue<StraightProjectileSpawnRequest> projectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, List<EnemyAttackCommittedRecord> attackCommittedRecords)
         {
             bool hasPlayer = playerLocation.hasPlayer;
             Vector3 playerPosition = playerLocation.position;
@@ -100,7 +100,7 @@ namespace TopView.Systems
         }
 
         // 투사체 공격의 한 발을 그 발의 위치에서 플레이어 발밑을 향해 내보낸다. 플레이어가 없거나 발사 위치와 겹치면 적의 정면으로 내보낸다.
-        private static void CommitShot(in EnemyAttackComponent attack, in ProjectileShotComponent shot, Vector3 position, Quaternion rotation, bool hasPlayer, Vector3 playerPosition, float damage, Queue<ProjectileSpawnRequest> projectileSpawnRequests)
+        private static void CommitShot(in EnemyAttackComponent attack, in ProjectileShotComponent shot, Vector3 position, Quaternion rotation, bool hasPlayer, Vector3 playerPosition, float damage, Queue<StraightProjectileSpawnRequest> projectileSpawnRequests)
         {
             Vector3 spawnPosition = position + rotation * shot.spawnOffset;
             Quaternion shotRotation = rotation;
@@ -110,15 +110,15 @@ namespace TopView.Systems
                 shotRotation = Quaternion.LookRotation(toPlayer);
             }
 
-            projectileSpawnRequests.Enqueue(new ProjectileSpawnRequest
+            projectileSpawnRequests.Enqueue(new StraightProjectileSpawnRequest
             {
-                projectile = attack.projectile,
+                projectile = attack.straightProjectile,
                 projectileView = attack.projectileView,
                 faction = Faction.Enemy,
                 damage = damage,
                 position = spawnPosition,
                 rotation = shotRotation,
-                velocity = shotRotation * Vector3.forward * attack.projectile.speed
+                velocity = shotRotation * Vector3.forward * attack.straightProjectile.flight.speed
             });
         }
     }

@@ -58,7 +58,7 @@ namespace TopView.Core
             DebugCommandSystem.Tick(ref _progress, _commandBuffer.debugCommands);
             bool isPlaying = _progress.phase == GamePhase.Playing && !_progress.isPaused;
             // 일시정지와 판 종료 중에도 직전 값을 지금 값으로 맞춰야 View가 두 값 사이를 계속 보간하며 떨지 않는다
-            TransformSnapshotSystem.Tick(_players, _enemies, _projectiles);
+            TransformSnapshotSystem.Tick(_players, _enemies, _straightProjectiles, _arcProjectiles);
             DamageSystem.Tick(ref _progress, _players, _enemies, _playerDamageRequests, _enemyDamageRequests, _enemyDamagedRecords);
             if (isPlaying)
             {
@@ -72,7 +72,7 @@ namespace TopView.Core
                 PlayerPressSystem.Tick(_players, _weapons, in _commandBuffer.playerCommand, _playerStateChangeRequests);
                 PlayerStateChangeSystem.Tick(_players, _weapons, _playerStateChangeRequests, _playerStateChangedRecords);
                 PlayerMoveInputSystem.Tick(_players, in _commandBuffer.playerCommand);
-                PlayerAttackSystem.Tick(_players, _weapons, _projectileSpawnRequests, _meleeSpawnRequests, _playerAttackCommittedRecords);
+                PlayerAttackSystem.Tick(_players, _weapons, _straightProjectileSpawnRequests, _arcProjectileSpawnRequests, _meleeSpawnRequests, _playerAttackCommittedRecords);
                 PlayerStateSystem.Tick(_players, _weapons, in _commandBuffer.playerCommand, _playerStateChangeRequests, _gameOverRequests);
                 PlayerStateChangeSystem.Tick(_players, _weapons, _playerStateChangeRequests, _playerStateChangedRecords);
                 // 막기는 이동이 끝난 위치를 읽고, 조준은 막힌 뒤의 위치를 읽으므로 이 순서를 지킨다
@@ -93,15 +93,18 @@ namespace TopView.Core
                 // 공격 상태는 상태 시간이 0이면 건너뛰므로, 공격이 끝나 Idle이 된 적과 막 공격에 들어온 적 모두 다음 틱부터 움직이도록 이 순서를 지킨다
                 EnemyBehaviorSystem.Tick(_enemies, in _playerLocation, _random, _enemyStateChangeRequests);
                 EnemyStateChangeSystem.Tick(_enemies, _enemyStateChangeRequests, _enemyStateChangedRecords);
-                EnemyAttackStateSystem.Tick(_enemies, in _playerLocation, _enemyStateChangeRequests, _projectileSpawnRequests, _meleeSpawnRequests, _enemyAttackCommittedRecords);
+                EnemyAttackStateSystem.Tick(_enemies, in _playerLocation, _enemyStateChangeRequests, _straightProjectileSpawnRequests, _meleeSpawnRequests, _enemyAttackCommittedRecords);
                 EnemyStateChangeSystem.Tick(_enemies, _enemyStateChangeRequests, _enemyStateChangedRecords);
                 EnemyDespawnSystem.Tick(_enemies, _gameOverRequests, _random, _lootSpawnRequests);
                 EnemyNavigationSystem.Tick(_enemies, _navigationPath, _rule.navMeshSampleDistance);
-                ProjectileSystem.Tick(_projectiles, _projectileDespawnRequests);
-                ProjectileDespawnSystem.Tick(_projectiles, _projectileDespawnRequests);
+                ProjectileSystem.Tick(_straightProjectiles, _straightProjectileDespawnRequests);
+                ProjectileDespawnSystem.Tick(_straightProjectiles, _straightProjectileDespawnRequests);
+                ProjectileSystem.Tick(_arcProjectiles);
                 HitTargetSystem.Tick(_players, _enemies, _playerHitTargets, ref _playerHitTargetCount, _enemyHitTargets, ref _enemyHitTargetCount);
-                ProjectileHitSystem.Tick(_projectiles, _playerHitTargets, _playerHitTargetCount, _enemyHitTargets, _enemyHitTargetCount, _playerDamageRequests, _enemyDamageRequests, _projectileHitRecords, _projectileDespawnRequests);
-                ProjectileDespawnSystem.Tick(_projectiles, _projectileDespawnRequests);
+                ProjectileHitSystem.Tick(_straightProjectiles, _playerHitTargets, _playerHitTargetCount, _enemyHitTargets, _enemyHitTargetCount, _playerDamageRequests, _enemyDamageRequests, _projectileHitRecords, _straightProjectileDespawnRequests);
+                ProjectileDespawnSystem.Tick(_straightProjectiles, _straightProjectileDespawnRequests);
+                ProjectileHitSystem.Tick(_arcProjectiles, _playerHitTargets, _playerHitTargetCount, _enemyHitTargets, _enemyHitTargetCount, _playerDamageRequests, _enemyDamageRequests, _projectileHitRecords, _arcProjectileDespawnRequests);
+                ProjectileDespawnSystem.Tick(_arcProjectiles, _arcProjectileDespawnRequests);
                 MeleeHitSystem.Tick(_melees, _playerHitTargets, _playerHitTargetCount, _enemyHitTargets, _enemyHitTargetCount, _playerDamageRequests, _enemyDamageRequests, _meleeDespawnRequests);
                 MeleeDespawnSystem.Tick(_melees, _meleeDespawnRequests);
             }
@@ -116,7 +119,8 @@ namespace TopView.Core
                 PlayerSpawnSystem.Tick(_players, _playerSpawnRequests, _weaponSpawnRequests);
                 WeaponSpawnSystem.Tick(_weapons, _players, _weaponSpawnRequests);
                 EnemySpawnSystem.Tick(_enemies, _enemySpawnRequests, _rule.navMeshSampleDistance);
-                ProjectileSpawnSystem.Tick(_projectiles, _projectileSpawnRequests);
+                ProjectileSpawnSystem.Tick(_straightProjectiles, _straightProjectileSpawnRequests);
+                ProjectileSpawnSystem.Tick(_arcProjectiles, _arcProjectileSpawnRequests);
                 MeleeSpawnSystem.Tick(_melees, _meleeSpawnRequests);
                 LootSpawnSystem.Tick(_loots, _lootSpawnRequests, _lootRule.lifetimeTicks);
             }
@@ -169,7 +173,8 @@ namespace TopView.Core
             EnemyViewSystem.Present(_enemies.entities, _enemyStateChangedRecords, _enemyAttackCommittedRecords, _enemyDamagedRecords, _enemyViewPrefabs, _enemyAttackAnimations, _enemyAttackClips, isPaused, _viewContext.enemy);
             EnemyHealthGaugeViewSystem.Present(_enemies.entities, _enemyHealthGaugePrefabs, _viewContext.camera.mainCamera, _viewContext.enemy);
             WorldInformationViewSystem.Present(_viewContext.camera.mainCamera, _viewContext.worldInformation);
-            ProjectileViewSystem.Present(_projectiles.entities, _projectilePrefabs, isPaused, _viewContext.projectile);
+            ProjectileViewSystem.Present(_straightProjectiles.entities, _projectilePrefabs, isPaused, _viewContext.straightProjectile);
+            ProjectileViewSystem.Present(_arcProjectiles.entities, _projectilePrefabs, isPaused, _viewContext.arcProjectile);
             LootViewSystem.Present(_loots.entities, _lootPrefabs, isPaused, _viewContext.loot);
             HitEffectViewSystem.Present(_projectileHitRecords, _playerAttackCommittedRecords, _hitEffectPrefabs, isPaused, _viewContext.hitEffect);
             DamageTextViewSystem.Present(_enemyDamagedRecords, _viewContext.enemy.views, _viewContext.enemy.viewGenerations, _worldTextViewPrefab, _viewContext.camera.mainCamera, _viewContext.worldText.pendingTexts);
