@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>TopView.Analyzers</RootNamespace>
+    <IsRoslynComponent>true</IsRoslynComponent>
+    <!-- Unity 6000.3의 컴파일러가 Roslyn 4.3이라 그보다 높은 버전을 참조하면 Unity가 분석기를 불러오지 못한다. -->
+    <CodeAnalysisVersion>4.3.0</CodeAnalysisVersion>
+    <!-- 릴리스 추적(RS2008)은 NuGet으로 배포하는 분석기용이다. 이 분석기는 프로젝트 안에서만 쓴다. -->
+    <NoWarn>$(NoWarn);RS2008</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(CodeAnalysisVersion)" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- Release 빌드가 끝나면 분석기 DLL만 Unity 프로젝트로 복사한다. Roslyn 의존성은 Unity가 제공한다. -->
+  <Target Name="CopyToUnityProject" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(MSBuildThisFileDirectory)..\..\Project\Assets\Analyzers\" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>

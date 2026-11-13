@@ -38,6 +38,11 @@
 ## 작업 범위
 Claude는 코드만 쓴다. Unity 프로젝트 안에서 만들고 수정하는 파일은 다음뿐이다.
 - 스크립트 루트 아래의 `.cs`, `.asmdef`, `.asmref`
+- 정적 분석기를 빌드해 `Project/Assets/Analyzers/`에 복사하는 `TopView.Analyzers.dll` (`.meta`는 사용자가 다룬다)
+
+Unity 프로젝트 밖에서는 정적 분석기 소스 `Tools/TopView.Analyzers/`를 만들고 수정한다.
+- 이유: 분석기는 Unity가 아닌 .NET 라이브러리로 빌드해야 해서, 소스를 `Assets` 안에 두면 Unity가 게임 코드로 컴파일하려 한다.
+- 빌드: `dotnet build Tools/TopView.Analyzers -c Release` (빌드가 DLL을 `Project/Assets/Analyzers/`로 복사한다)
 
 나머지(씬, 프리팹, 에셋, 설정, `.meta`)는 사용자가 에디터에서 다룬다.
 - Claude는 에디터를 직접 조작하지 않는다. 에디터에서 할 일(씬, 프리팹, 에셋, 설정)이 생기면 응답에 구체적으로 적는다.
