@@ -34,6 +34,28 @@ namespace TopView.Entities
         // 폭발 범위
         Explosion = 1UL << 11,
         // 투사체를 무엇으로 그릴지
-        ProjectileView = 1UL << 12
+        ProjectileView = 1UL << 12,
+        // 적 종류 번호
+        EnemyKind = 1UL << 13,
+        // 처치 점수 값
+        Score = 1UL << 14,
+        // 몸체 크기
+        Body = 1UL << 15,
+        // NavMesh 위 이동과 회전 값
+        NavigationMovement = 1UL << 16,
+        // 사망 상태의 길이와 사라질 때 일어나는 일
+        Death = 1UL << 17,
+        // 고를 수 있는 공격 목록
+        AttackList = 1UL << 18,
+        // 드롭 표
+        LootList = 1UL << 19,
+        // 레벨과 공격력
+        Combat = 1UL << 20,
+        // 체력
+        Health = 1UL << 21,
+        // 적의 행동 상태와 공격 진행
+        EnemyActionState = 1UL << 22,
+        // NavMesh 목적지와 경로
+        NavigationAgent = 1UL << 23
     }
 }

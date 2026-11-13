@@ -39,5 +39,28 @@ namespace TopView.Entities
         public ExplosionComponent explosion;
         // 투사체를 무엇으로 그릴지
         public ProjectileViewComponent projectileView;
+
+        // 적 종류 번호
+        public EnemyKindComponent enemyKind;
+        // 처치 점수 값. 생성 때 Definition에서 복사한다
+        public LevelScalingComponent score;
+        // 몸체 크기. 생성 때 Definition에서 복사한다
+        public BodyComponent body;
+        // NavMesh 위 이동과 회전 값. 생성 때 Definition에서 복사한다
+        public NavigationMovementComponent navigationMovement;
+        // 사망 상태의 길이와 사라질 때 일어나는 일. 생성 때 Definition에서 복사한다
+        public DeathComponent death;
+        // 고를 수 있는 공격 목록
+        public AttackListComponent attackList;
+        // 드롭 표
+        public LootListComponent lootList;
+        // 레벨과 공격력
+        public CombatComponent combat;
+        // 체력
+        public HealthComponent health;
+        // 적의 행동 상태와 공격 진행
+        public EnemyActionStateComponent enemyActionState;
+        // NavMesh 목적지와 경로. 적 구간의 칸은 경로 배열을 저장소를 만들 때 할당해 다시 쓴다
+        public NavigationAgentComponent navigationAgent;
     }
 }

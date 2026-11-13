@@ -16,8 +16,6 @@ namespace TopView.Core
         public bool IsEditorRoundReady => _isRoundReady;
         // 플레이어 칸. Editor의 WorldGizmos가 읽기만 한다
         public PlayerEntity[] EditorPlayers => _players.entities;
-        // 적 칸. Editor의 WorldGizmos가 읽기만 한다
-        public EnemyEntity[] EditorEnemies => _enemies.entities;
         // 엔티티 칸. Editor의 WorldGizmos가 읽기만 한다
         public Entity[] EditorEntities => _entities.entities;
         // 전리품 획득 반경. Editor의 WorldGizmos가 읽기만 한다
@@ -51,11 +49,9 @@ namespace TopView.Core
 
         // 플레이어 저장소
         private PlayerStorage _players;
-        // 적 저장소
-        private EnemyStorage _enemies;
         // 무기 저장소
         private WeaponStorage _weapons;
-        // 엔티티 저장소. 옮겨 온 종류(전리품, 근접 판정, 투사체)를 담는다
+        // 엔티티 저장소. 옮겨 온 종류(전리품, 근접 판정, 투사체, 적)를 담는다
         private EntityStorage _entities;
         // 이번 틱의 플레이어 피격 대상 목록. 적의 공격이 읽는다. 판 시작 때 플레이어 칸 수로 만들고, 매 틱 HitTargetSystem이 다시 채운다
         private HitTargetComponent[] _playerHitTargets;

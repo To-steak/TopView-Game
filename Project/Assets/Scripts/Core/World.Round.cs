@@ -105,8 +105,7 @@ namespace TopView.Core
             int combatantCapacity = PLAYER_CAPACITY + enemyCapacity;
             _players = new PlayerStorage(PLAYER_CAPACITY);
             _weapons = new WeaponStorage(PLAYER_CAPACITY * playerSpawnRequest.weapons.Length);
-            _enemies = new EnemyStorage(enemyKindCount, gameSettings.enemyCapacityPerKind, gameSettings.enemyPathCornerCapacity);
-            _entities = new EntityStorage(gameSettings.lootCapacity, combatantCapacity, combatantCapacity, gameSettings.straightProjectileCapacity, gameSettings.arcProjectileCapacity);
+            _entities = new EntityStorage(gameSettings.lootCapacity, combatantCapacity, combatantCapacity, gameSettings.straightProjectileCapacity, gameSettings.arcProjectileCapacity, enemyKindCount, gameSettings.enemyCapacityPerKind, gameSettings.enemyPathCornerCapacity);
 
             _progress = new GameProgressComponent
             {
@@ -169,13 +168,13 @@ namespace TopView.Core
                 player = new PlayerViewContext(),
                 enemy = new EnemyViewContext
                 {
-                    views = new EnemyView[_enemies.entities.Length],
-                    viewGenerations = new int[_enemies.entities.Length],
+                    views = new EnemyView[_entities.entities.Length],
+                    viewGenerations = new int[_entities.entities.Length],
                     viewPools = new Stack<EnemyView>[enemyKindCount],
                     triggerHashesByKind = new int[enemyKindCount][],
-                    healthGaugeViews = new EnemyHealthGaugeView[_enemies.entities.Length],
-                    healthGaugeGenerations = new int[_enemies.entities.Length],
-                    healthGaugeRatios = new float[_enemies.entities.Length],
+                    healthGaugeViews = new EnemyHealthGaugeView[_entities.entities.Length],
+                    healthGaugeGenerations = new int[_entities.entities.Length],
+                    healthGaugeRatios = new float[_entities.entities.Length],
                     healthGaugePools = new Stack<EnemyHealthGaugeView>[enemyKindCount]
                 },
                 projectile = CreateProjectileViewContext(_entities.entities.Length),

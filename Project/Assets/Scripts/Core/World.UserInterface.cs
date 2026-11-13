@@ -32,6 +32,9 @@ namespace TopView.Core
         // App의 UI 소리 요청 목록. App이 World를 등록할 때 넘긴다
         private List<UserInterfaceSoundKind> _userInterfaceSoundRequests;
 
+        // 화면 위 체력 막대를 띄울 수 있는 적이 가진 컴포넌트
+        private const ComponentMask OVERLAY_ENEMY_MASK = ComponentMask.EnemyKind | ComponentMask.Health;
+
         private void BindPresenters()
         {
             if (_gameOverPresenter == null)
@@ -315,12 +318,12 @@ namespace TopView.Core
         {
             if (_bossHealthPresenter != null)
             {
-                EnemyEntity[] entities = _enemies.entities;
+                Entity[] entities = _entities.entities;
                 bool hasOverlayEnemy = false;
                 for (int index = 0; index < entities.Length; index++)
                 {
-                    ref readonly EnemyEntity entity = ref entities[index];
-                    if (entity.isAlive && _enemyHasOverlayHealthBar[entity.kind.kind])
+                    ref readonly Entity entity = ref entities[index];
+                    if ((entity.mask & OVERLAY_ENEMY_MASK) == OVERLAY_ENEMY_MASK && _enemyHasOverlayHealthBar[entity.enemyKind.kind])
                     {
                         _bossHealthPresenter.Present(true, entity.health.current, entity.health.max);
                         hasOverlayEnemy = true;

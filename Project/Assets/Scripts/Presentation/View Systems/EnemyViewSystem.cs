@@ -19,11 +19,13 @@ namespace TopView.Presentation.ViewSystems
         private static readonly int IDLE_STATE_HASH = Animator.StringToHash("Idle");
 
         private const int BASE_LAYER_INDEX = 0;
+        // 그릴 적이 가진 컴포넌트
+        private const ComponentMask ENEMY_MASK = ComponentMask.EnemyKind | ComponentMask.Position | ComponentMask.Rotation;
 
         /// <summary>
         /// 저장소의 칸마다 살아 있는 적과 View를 맞추고, 이번 프레임의 상태 변경 기록을 Animator에 반영하고, 공격 기록마다 공격 소리를, 피해 기록마다 피격 소리를 재생한다.
         /// </summary>
-        /// <param name="entities">적 엔티티 배열</param>
+        /// <param name="entities">엔티티 배열. EnemyKind, Position, Rotation을 가진 칸만 그린다</param>
         /// <param name="stateRecords">이번 프레임의 적 상태 변경 기록</param>
         /// <param name="attackRecords">이번 프레임에 적이 공격을 내보낸 기록</param>
         /// <param name="damagedRecords">이번 프레임의 적 피해 기록</param>
@@ -32,32 +34,33 @@ namespace TopView.Presentation.ViewSystems
         /// <param name="attackClipsByKind">적 종류별, 공격 번호별 공격 소리. 소리가 없는 공격은 null</param>
         /// <param name="isPaused">판이 일시정지 중이면 true. Animator를 멈춘다</param>
         /// <param name="context">적 View 실행 상태</param>
-        public static void Present(EnemyEntity[] entities, List<EnemyStateChangedRecord> stateRecords, List<EnemyAttackCommittedRecord> attackRecords, List<EnemyDamagedRecord> damagedRecords, GameObject[] viewPrefabsByKind, EnemyAttackAnimation[][] attackAnimationsByKind, AudioClip[][] attackClipsByKind, bool isPaused, EnemyViewContext context)
+        public static void Present(Entity[] entities, List<EnemyStateChangedRecord> stateRecords, List<EnemyAttackCommittedRecord> attackRecords, List<EnemyDamagedRecord> damagedRecords, GameObject[] viewPrefabsByKind, EnemyAttackAnimation[][] attackAnimationsByKind, AudioClip[][] attackClipsByKind, bool isPaused, EnemyViewContext context)
         {
             float alpha = Mathf.Clamp01((Time.time - Time.fixedTime) / Time.fixedDeltaTime);
             float animatorSpeed = isPaused ? 0f : 1f;
 
             for (int index = 0; index < entities.Length; index++)
             {
-                ref readonly EnemyEntity entity = ref entities[index];
+                ref readonly Entity entity = ref entities[index];
                 EnemyView view = context.views[index];
+                bool hasEnemy = (entity.mask & ENEMY_MASK) == ENEMY_MASK;
 
-                if (view != null && (!entity.isAlive || context.viewGenerations[index] != entity.generation))
+                if (view != null && (!hasEnemy || context.viewGenerations[index] != entity.generation))
                 {
-                    // 칸은 종류별 구간으로 나뉘어 있어 칸을 다시 채워도 종류 번호는 그대로다
-                    Release(context, index, entity.kind.kind);
+                    // View가 있는 칸은 적 종류별 구간이라, 적이 사라져 마스크가 꺼져도 enemyKind에는 그 구간의 종류 번호가 남아 있다
+                    Release(context, index, entity.enemyKind.kind);
                     view = null;
                 }
 
                 // View 프리팹이 없는 종류는 판을 준비할 때 경고를 남겼으므로 여기서는 건너뛴다
-                if (!entity.isAlive || viewPrefabsByKind[entity.kind.kind] == null)
+                if (!hasEnemy || viewPrefabsByKind[entity.enemyKind.kind] == null)
                 {
                     continue;
                 }
 
                 if (view == null)
                 {
-                    view = Acquire(context, index, entity.kind.kind, entity.generation, viewPrefabsByKind);
+                    view = Acquire(context, index, entity.enemyKind.kind, entity.generation, viewPrefabsByKind);
                 }
 
                 view.animator.speed = animatorSpeed;
@@ -74,7 +77,7 @@ namespace TopView.Presentation.ViewSystems
                     continue;
                 }
 
-                int kind = entities[record.enemy.index].kind.kind;
+                int kind = entities[record.enemy.index].enemyKind.kind;
                 ApplyStateRecord(in record, view.animator, attackAnimationsByKind[kind], context.triggerHashesByKind[kind]);
             }
 
@@ -88,7 +91,7 @@ namespace TopView.Presentation.ViewSystems
                     continue;
                 }
 
-                AudioClip clip = attackClipsByKind[entities[record.enemy.index].kind.kind][record.attackIndex];
+                AudioClip clip = attackClipsByKind[entities[record.enemy.index].enemyKind.kind][record.attackIndex];
                 if (clip != null)
                 {
                     view.soundEffectSource.PlayOneShot(clip);

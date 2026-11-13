@@ -8,6 +8,9 @@ namespace TopView.Systems
     // 길찾기로 움직이는 엔티티를 NavMesh 경로를 따라 옮긴다. 적끼리는 겹쳐도 밀어내지 않는다. NavMesh는 질의로만 쓴다.
     public static class EnemyNavigationSystem
     {
+        // 처리할 적이 가진 컴포넌트
+        private const ComponentMask ENEMY_MASK = ComponentMask.Position | ComponentMask.Rotation | ComponentMask.NavigationMovement | ComponentMask.NavigationAgent;
+
         // 꺾이는 점에 이만큼 가까워지면 다음 점으로 넘어간다(유닛)
         private const float CORNER_REACH_DISTANCE = 0.1f;
         // 이보다 느리면 도는 방향을 정하지 않는다(유닛²/초²)
@@ -16,29 +19,29 @@ namespace TopView.Systems
         /// <summary>
         /// 목적지가 바뀐 적은 경로를 다시 구한 뒤 경로를 따라 옮긴다.
         /// </summary>
-        /// <param name="enemies">적 저장소</param>
+        /// <param name="storage">엔티티 저장소. Position, Rotation, NavigationMovement, NavigationAgent를 가진 칸만 처리하고, 경로와 위치, 회전을 고친다</param>
         /// <param name="path">경로 계산에 다시 쓰는 NavMeshPath</param>
         /// <param name="navMeshSampleDistance">목적지를 NavMesh 위로 맞출 때 찾는 최대 거리(유닛)</param>
-        public static void Tick(EnemyStorage enemies, NavMeshPath path, float navMeshSampleDistance)
+        public static void Tick(EntityStorage storage, NavMeshPath path, float navMeshSampleDistance)
         {
-            EnemyEntity[] entities = enemies.entities;
+            Entity[] entities = storage.entities;
             float deltaTime = Time.fixedDeltaTime;
             int failedPathCount = 0;
 
             for (int index = 0; index < entities.Length; index++)
             {
-                ref EnemyEntity entity = ref entities[index];
-                if (!entity.isAlive)
+                ref Entity entity = ref entities[index];
+                if ((entity.mask & ENEMY_MASK) != ENEMY_MASK)
                 {
                     continue;
                 }
 
-                if (entity.agent.hasDestination && entity.agent.isPathDirty && !TryRecalculatePath(ref entity.agent, entity.position.current, path, navMeshSampleDistance))
+                if (entity.navigationAgent.hasDestination && entity.navigationAgent.isPathDirty && !TryRecalculatePath(ref entity.navigationAgent, entity.position.current, path, navMeshSampleDistance))
                 {
                     failedPathCount++;
                 }
 
-                Move(ref entity.agent, in entity.movement, ref entity.position, ref entity.rotation, deltaTime);
+                Move(ref entity.navigationAgent, in entity.navigationMovement, ref entity.position, ref entity.rotation, deltaTime);
             }
 
             if (failedPathCount > 0)

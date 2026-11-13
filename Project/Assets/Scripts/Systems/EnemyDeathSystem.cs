@@ -9,17 +9,20 @@ namespace TopView.Systems
     // 체력이 0이 된 적을 사망 상태로 바꾸고 멈춘다.
     public static class EnemyDeathSystem
     {
+        // 처리할 적이 가진 컴포넌트
+        private const ComponentMask ENEMY_MASK = ComponentMask.Health | ComponentMask.EnemyActionState | ComponentMask.NavigationAgent;
+
         /// <summary>
         /// 체력이 0이고 아직 사망 상태가 아닌 적을 사망 상태로 바꾼다.
         /// </summary>
-        /// <param name="enemies">적 저장소</param>
+        /// <param name="storage">엔티티 저장소. Health, EnemyActionState, NavigationAgent를 가진 칸만 처리하고, 행동 상태와 경로를 고친다</param>
         /// <param name="stateRecords">적 상태 변경 기록</param>
-        public static void Tick(EnemyStorage enemies, List<EnemyStateChangedRecord> stateRecords)
+        public static void Tick(EntityStorage storage, List<EnemyStateChangedRecord> stateRecords)
         {
-            for (int index = 0; index < enemies.entities.Length; index++)
+            for (int index = 0; index < storage.entities.Length; index++)
             {
-                ref EnemyEntity entity = ref enemies.entities[index];
-                if (!entity.isAlive || entity.health.current > 0f || entity.actionState.state == EnemyState.Die)
+                ref Entity entity = ref storage.entities[index];
+                if ((entity.mask & ENEMY_MASK) != ENEMY_MASK || entity.health.current > 0f || entity.enemyActionState.state == EnemyState.Die)
                 {
                     continue;
                 }
@@ -30,7 +33,7 @@ namespace TopView.Systems
                     state = EnemyState.Die
                 });
 
-                Die(ref entity.actionState, ref entity.agent);
+                Die(ref entity.enemyActionState, ref entity.navigationAgent);
             }
         }
 

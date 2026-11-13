@@ -10,14 +10,18 @@ namespace TopView.Systems
     // Idle과 Walk 상태의 적이 플레이어를 어떻게 쫓고 공격할지 정한다. 실제 이동은 EnemyNavigationSystem이, 공격 진행은 EnemyAttackStateSystem이 한다.
     public static class EnemyBehaviorSystem
     {
+        // 처리할 적이 가진 컴포넌트
+        private const ComponentMask ENEMY_MASK = ComponentMask.Position | ComponentMask.Rotation | ComponentMask.EnemyKind | ComponentMask.NavigationMovement
+            | ComponentMask.AttackList | ComponentMask.EnemyActionState | ComponentMask.NavigationAgent;
+
         /// <summary>
         /// Idle과 Walk 상태의 적마다 플레이어 추적과 공격 시작을 정한다. 플레이어가 없으면 새 행동을 정하지 않는다. EnemyStateChangeSystem 앞에 부른다.
         /// </summary>
-        /// <param name="enemies">적 저장소</param>
+        /// <param name="storage">엔티티 저장소. 적(Position, Rotation, EnemyKind, NavigationMovement, AttackList, EnemyActionState, NavigationAgent)만 처리하고, 회전, 공격 번호, 목적지를 고친다</param>
         /// <param name="playerLocation">추적과 공격 대상인 플레이어의 위치와 반지름</param>
         /// <param name="random">World의 난수 생성기</param>
         /// <param name="stateChangeRequests">적 상태 변경 요청 큐</param>
-        public static void Tick(EnemyStorage enemies, in PlayerLocationComponent playerLocation, System.Random random, Queue<EnemyStateChangeRequest> stateChangeRequests)
+        public static void Tick(EntityStorage storage, in PlayerLocationComponent playerLocation, System.Random random, Queue<EnemyStateChangeRequest> stateChangeRequests)
         {
             bool hasPlayer = playerLocation.hasPlayer;
             Vector3 playerPosition = playerLocation.position;
@@ -26,18 +30,18 @@ namespace TopView.Systems
             int missingAttackCount = 0;
             int missingAttackKind = 0;
 
-            for (int index = 0; index < enemies.entities.Length; index++)
+            for (int index = 0; index < storage.entities.Length; index++)
             {
-                ref EnemyEntity entity = ref enemies.entities[index];
-                if (!entity.isAlive)
+                ref Entity entity = ref storage.entities[index];
+                if ((entity.mask & ENEMY_MASK) != ENEMY_MASK)
                 {
                     continue;
                 }
 
-                ref EnemyActionStateComponent actionState = ref entity.actionState;
-                ref NavigationAgentComponent agent = ref entity.agent;
+                ref EnemyActionStateComponent actionState = ref entity.enemyActionState;
+                ref NavigationAgentComponent agent = ref entity.navigationAgent;
                 ref RotationComponent rotation = ref entity.rotation;
-                ref readonly NavigationMovementComponent movement = ref entity.movement;
+                ref readonly NavigationMovementComponent movement = ref entity.navigationMovement;
                 EnemyAttackComponent[] attacks = entity.attackList.attacks;
                 Vector3 position = entity.position.current;
                 EntityIdentifier identifier = new EntityIdentifier { index = index, generation = entity.generation };
@@ -67,7 +71,7 @@ namespace TopView.Systems
                             if (hasPlayer && attacks.Length == 0)
                             {
                                 missingAttackCount++;
-                                missingAttackKind = entity.kind.kind;
+                                missingAttackKind = entity.enemyKind.kind;
                             }
                             stateChangeRequests.Enqueue(new EnemyStateChangeRequest { target = identifier, state = EnemyState.Idle });
                         }

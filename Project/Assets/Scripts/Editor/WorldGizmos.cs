@@ -21,7 +21,7 @@ namespace TopView.Editor
             }
 
             DrawPlayers(world.EditorPlayers);
-            DrawEnemies(world.EditorEnemies);
+            DrawEnemies(world.EditorEntities);
             DrawMelees(world.EditorEntities);
             DrawStraightProjectiles(world.EditorEntities);
             DrawArcProjectiles(world.EditorEntities);
@@ -54,19 +54,19 @@ namespace TopView.Editor
 
         // 살아 있는 적마다 멈추는 거리(주황), 피격 판정 원(청록), Body 공격 판정 원(빨강)을 Logic 위치에 XZ 원으로 그린다.
         // 공격 판정은 여기에 플레이어 반지름을 더해 비교하므로, 원은 플레이어 중심이 아니라 가장자리가 닿는 기준이다
-        private static void DrawEnemies(EnemyEntity[] entities)
+        private static void DrawEnemies(Entity[] entities)
         {
             for (int index = 0; index < entities.Length; index++)
             {
-                ref readonly EnemyEntity entity = ref entities[index];
-                if (!entity.isAlive)
+                ref readonly Entity entity = ref entities[index];
+                if ((entity.mask & ComponentMask.EnemyKind) == 0)
                 {
                     continue;
                 }
 
                 Vector3 position = entity.position.current;
                 Gizmos.color = new Color(1f, 0.5f, 0f);
-                GizmoShapes.DrawCircle(position, entity.movement.stopDistance);
+                GizmoShapes.DrawCircle(position, entity.navigationMovement.stopDistance);
                 Gizmos.color = Color.cyan;
                 GizmoShapes.DrawCircle(position, entity.body.radius);
                 DrawBodyAttacks(entity.attackList.attacks, position, entity.rotation.current);

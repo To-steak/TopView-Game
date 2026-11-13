@@ -9,15 +9,15 @@ namespace TopView.Systems
         /// <summary>
         /// 상태 시간을 1틱 늘리고 공격별 대기 시간을 1틱 줄인다.
         /// </summary>
-        /// <param name="enemies">적 저장소</param>
-        public static void Tick(EnemyStorage enemies)
+        /// <param name="storage">엔티티 저장소. EnemyActionState를 가진 칸의 상태 시간과 대기 시간을 고친다</param>
+        public static void Tick(EntityStorage storage)
         {
-            for (int index = 0; index < enemies.entities.Length; index++)
+            for (int index = 0; index < storage.entities.Length; index++)
             {
-                ref EnemyEntity entity = ref enemies.entities[index];
-                if (entity.isAlive)
+                ref Entity entity = ref storage.entities[index];
+                if ((entity.mask & ComponentMask.EnemyActionState) != 0)
                 {
-                    Advance(ref entity.actionState);
+                    Advance(ref entity.enemyActionState);
                 }
             }
         }
