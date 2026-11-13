@@ -32,31 +32,51 @@ MonoBehaviour:
     angularSpeed: 360
   death:
     dieTicks: 36
-    endsGameOnDeath: 0
+    isGameOverOnDeath: 0
   attacks:
   - attack:
       kind: 0
       attackRange: 2
       cooldownTicks: 200
+      durationTicks: 50
+      damageMultiplier: 1
+      melee:
+        startTicks: 15
+        endTicks: 27
+        shape:
+          radius: 2
+          offset: 1
+      straight:
+        projectile:
+          flight:
+            speed: 0
+            lifetimeTicks: 0
+          hit:
+            radius: 0
+            collisionLayer:
+              serializedVersion: 2
+              m_Bits: 0
+          explosion:
+            radius: 0
+        shots: []
       timing:
         startTicks: 15
         endTicks: 27
         durationTicks: 50
-      damageMultiplier: 1
       meleeShape:
         radius: 2
         offset: 1
-      projectile:
-        kind: 0
-        speed: 0
-        radius: 0
-        lifetimeTicks: 0
-        flightTicks: 0
-        arcHeight: 0
-        explosionRadius: 0
-        collisionLayer:
-          serializedVersion: 2
-          m_Bits: 0
+      straightProjectile:
+        flight:
+          speed: 0
+          lifetimeTicks: 0
+        hit:
+          radius: 0
+          collisionLayer:
+            serializedVersion: 2
+            m_Bits: 0
+        explosion:
+          radius: 0
       shots: []
     animation: 0
     attackClip: {fileID: 8300000, guid: 9b8eb43f13281604eaf8164424d54bc6, type: 3}
@@ -77,4 +97,4 @@ MonoBehaviour:
     amountIncrement: 5
   viewPrefab: {fileID: 7807188980422851779, guid: 18e5d55b96933154baff3d6e8926d048, type: 3}
   healthGaugePrefab: {fileID: 7240100042028206097, guid: bf39a87b00bea9b45875c9f2d4077307, type: 3}
-  showsOverlayHealthBar: 0
+  hasOverlayHealthBar: 0

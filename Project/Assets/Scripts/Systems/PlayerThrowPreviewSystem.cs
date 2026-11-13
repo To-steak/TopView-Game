@@ -37,7 +37,7 @@ namespace TopView.Systems
                 {
                     continue;
                 }
-                if (weapon.arcProjectile.flight.flightTicks <= 0)
+                if (weapon.arc.projectile.flight.flightTicks <= 0 || AttackUtility.GetShotCount(in weapon.arc) == 0)
                 {
                     // 충전 중 매 틱 걸리므로 충전을 시작한 틱에만 센다
                     if (entity.actionState.elapsedTicks == 0)
@@ -55,7 +55,7 @@ namespace TopView.Systems
 
             if (invalidFlightCount > 0)
             {
-                Debug.LogWarning($"PlayerThrowPreviewSystem >> flightTicks가 0 이하인 투척 무기라 플레이어 {invalidFlightCount}명의 미리보기를 숨겼다. flightTicks는 0보다 커야 한다.");
+                Debug.LogWarning($"PlayerThrowPreviewSystem >> flightTicks가 0 이하이거나 shots가 빈 투척 무기라 플레이어 {invalidFlightCount}명의 미리보기를 숨겼다. flightTicks는 0보다 커야 하고 shots는 한 칸 이상이어야 한다.");
             }
             if (shortArrayCount > 0)
             {
@@ -63,16 +63,16 @@ namespace TopView.Systems
             }
         }
 
-        // 던지는 위치에서 1틱씩 포물선을 따라가며 점을 남기고, 환경 레이어에 닿으면 거기서 멈춘다. 점 배열이 모자라면 숨기고 false를 돌려준다.
+        // 첫 발의 위치에서 1틱씩 포물선을 따라가며 점을 남기고, 환경 레이어에 닿으면 거기서 멈춘다. 점 배열이 모자라면 숨기고 false를 돌려준다.
         private static bool Preview(ref PlayerThrowPreviewComponent preview, in WeaponComponent weapon, Vector3 position, Quaternion rotation, int throwCharge)
         {
-            ref readonly ArcProjectileComponent projectile = ref weapon.arcProjectile;
+            ref readonly ArcProjectileComponent projectile = ref weapon.arc.projectile;
             if (preview.points == null || preview.points.Length < projectile.flight.flightTicks + 1)
             {
                 return false;
             }
 
-            Vector3 launchPosition = position + rotation * weapon.muzzleOffset;
+            Vector3 launchPosition = AttackUtility.GetShotPosition(in weapon.arc.shots[0], position, rotation);
             Vector3 targetPosition = PlayerWeaponUtility.GetThrowTargetPosition(in weapon.throwing, position, rotation, throwCharge);
 
             preview.points[0] = launchPosition;

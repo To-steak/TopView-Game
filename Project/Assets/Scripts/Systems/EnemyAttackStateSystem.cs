@@ -59,19 +59,21 @@ namespace TopView.Systems
                 float damage = entity.combat.attackDamage * attack.damageMultiplier;
                 if (attack.kind == EnemyAttackKind.Body)
                 {
-                    if (actionState.committedShotCount == 0 && actionState.elapsedTicks >= attack.timing.startTicks)
+                    if (AttackUtility.IsShotDue(in attack.melee, actionState.committedShotCount, actionState.elapsedTicks))
                     {
-                        actionState.committedShotCount = 1;
-                        CommitBody(in attack, position, rotation.current, damage, in identifier, meleeSpawnRequests);
+                        actionState.committedShotCount++;
+                        meleeSpawnRequests.Enqueue(AttackUtility.CreateSpawnRequest(in attack.melee, position, rotation.current, in identifier, Faction.Enemy, damage));
                         attackCommittedRecords.Add(new EnemyAttackCommittedRecord { enemy = identifier, attackIndex = actionState.attackIndex });
                     }
                 }
                 else
                 {
                     // 시점이 지난 발을 차례로 내보낸다. 같은 틱에 시점이 겹친 발은 함께 나간다
-                    while (actionState.committedShotCount < attack.shots.Length && actionState.elapsedTicks >= attack.shots[actionState.committedShotCount].startTicks)
+                    while (AttackUtility.IsShotDue(in attack.straight, actionState.committedShotCount, actionState.elapsedTicks))
                     {
-                        CommitShot(in attack, in attack.shots[actionState.committedShotCount], position, rotation.current, hasPlayer, playerPosition, damage, projectileSpawnRequests);
+                        Vector3 shotPosition = AttackUtility.GetShotPosition(in attack.straight.shots[actionState.committedShotCount], position, rotation.current);
+                        Quaternion shotRotation = GetAimRotation(shotPosition, rotation.current, hasPlayer, playerPosition);
+                        projectileSpawnRequests.Enqueue(AttackUtility.CreateSpawnRequest(in attack.straight, in attack.projectileView, shotPosition, shotRotation, Faction.Enemy, damage));
                         attackCommittedRecords.Add(new EnemyAttackCommittedRecord { enemy = identifier, attackIndex = actionState.attackIndex });
                         actionState.committedShotCount++;
                     }
@@ -85,41 +87,16 @@ namespace TopView.Systems
             }
         }
 
-        // Body 공격을 내보낸다. timing.endTicks까지 이어지는 근접 판정 생성 요청을 넣는다.
-        private static void CommitBody(in EnemyAttackComponent attack, Vector3 position, Quaternion rotation, float damage, in EntityIdentifier owner, Queue<MeleeSpawnRequest> meleeSpawnRequests)
+        // 발이 생기는 위치에서 플레이어 발밑을 향하는 회전을 돌려준다. 플레이어가 없거나 발사 위치와 겹치면 적의 회전을 그대로 돌려준다.
+        private static Quaternion GetAimRotation(Vector3 shotPosition, Quaternion rotation, bool hasPlayer, Vector3 playerPosition)
         {
-            meleeSpawnRequests.Enqueue(new MeleeSpawnRequest
-            {
-                owner = owner,
-                faction = Faction.Enemy,
-                center = MeleeShapeUtility.GetCenter(position, rotation, attack.meleeShape.offset),
-                radius = attack.meleeShape.radius,
-                damage = damage,
-                durationTicks = attack.timing.endTicks - attack.timing.startTicks
-            });
-        }
-
-        // 투사체 공격의 한 발을 그 발의 위치에서 플레이어 발밑을 향해 내보낸다. 플레이어가 없거나 발사 위치와 겹치면 적의 정면으로 내보낸다.
-        private static void CommitShot(in EnemyAttackComponent attack, in ProjectileShotComponent shot, Vector3 position, Quaternion rotation, bool hasPlayer, Vector3 playerPosition, float damage, Queue<StraightProjectileSpawnRequest> projectileSpawnRequests)
-        {
-            Vector3 spawnPosition = position + rotation * shot.spawnOffset;
-            Quaternion shotRotation = rotation;
-            Vector3 toPlayer = playerPosition - spawnPosition;
+            Vector3 toPlayer = playerPosition - shotPosition;
             if (hasPlayer && toPlayer.sqrMagnitude > MIN_AIM_DISTANCE * MIN_AIM_DISTANCE)
             {
-                shotRotation = Quaternion.LookRotation(toPlayer);
+                return Quaternion.LookRotation(toPlayer);
             }
 
-            projectileSpawnRequests.Enqueue(new StraightProjectileSpawnRequest
-            {
-                projectile = attack.straightProjectile,
-                projectileView = attack.projectileView,
-                faction = Faction.Enemy,
-                damage = damage,
-                position = spawnPosition,
-                rotation = shotRotation,
-                velocity = shotRotation * Vector3.forward * attack.straightProjectile.flight.speed
-            });
+            return rotation;
         }
     }
 }

@@ -51,7 +51,7 @@ namespace TopView.Systems
 
             actionState.state = request.state;
             actionState.elapsedTicks = 0;
-            actionState.isAttackCommitted = false;
+            actionState.committedShotCount = 0;
 
             EnterState(ref actionState, ref motion, ref rotation, ref mana, in movement, in vital, in upgrade, in upgradeLevels, in weapon, weaponLevel, request.moveInput);
         }

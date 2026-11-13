@@ -120,7 +120,7 @@ namespace TopView.Core
             return cameraForward * input.z + cameraRight * input.x;
         }
 
-        // 마우스가 가리키는 점을 든 무기의 총구 높이의 수평면 위에서 구한다. 카메라나 살아 있는 플레이어가 없으면 false
+        // 마우스가 가리키는 점을 든 무기의 조준 높이의 수평면 위에서 구한다. 카메라나 살아 있는 플레이어가 없으면 false
         private bool TryGetAimPoint(out Vector3 aimPoint)
         {
             aimPoint = Vector3.zero;
@@ -130,7 +130,7 @@ namespace TopView.Core
             }
 
             Ray ray = _viewContext.camera.mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
-            Plane plane = new Plane(Vector3.up, new Vector3(0f, GetMuzzleHeight(in _players.entities[playerIndex], _weapons.entities), 0f));
+            Plane plane = new Plane(Vector3.up, new Vector3(0f, GetAimHeight(in _players.entities[playerIndex], _weapons.entities), 0f));
             if (!plane.Raycast(ray, out float distance))
             {
                 return false;
@@ -140,8 +140,8 @@ namespace TopView.Core
             return true;
         }
 
-        // 든 무기의 총구 높이(월드). 투사체가 생기는 위치와 같은 식으로 구한다. 든 무기가 없으면 플레이어 위치의 높이
-        private static float GetMuzzleHeight(in PlayerEntity entity, WeaponEntity[] weapons)
+        // 든 무기의 조준 높이(월드). 플레이어 발 높이에 무기의 aimHeight를 더한다. 든 무기가 없으면 플레이어 위치의 높이
+        private static float GetAimHeight(in PlayerEntity entity, WeaponEntity[] weapons)
         {
             EntityIdentifier[] weaponIdentifiers = entity.weaponSlots.weapons;
             int weaponIndex = entity.weaponSlots.currentIndex;
@@ -150,7 +150,7 @@ namespace TopView.Core
                 return entity.position.current.y;
             }
 
-            return (entity.position.current + entity.rotation.current * weapons[weaponIdentifiers[weaponIndex].index].weapon.muzzleOffset).y;
+            return entity.position.current.y + weapons[weaponIdentifiers[weaponIndex].index].weapon.aimHeight;
         }
     }
 }

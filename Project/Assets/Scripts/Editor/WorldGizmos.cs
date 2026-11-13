@@ -82,7 +82,7 @@ namespace TopView.Editor
                 ref readonly EnemyAttackComponent attack = ref attacks[attackIndex];
                 if (attack.kind == EnemyAttackKind.Body)
                 {
-                    GizmoShapes.DrawCircle(MeleeShapeUtility.GetCenter(position, rotation, attack.meleeShape.offset), attack.meleeShape.radius);
+                    GizmoShapes.DrawCircle(MeleeShapeUtility.GetCenter(position, rotation, attack.melee.shape.offset), attack.melee.shape.radius);
                 }
             }
         }

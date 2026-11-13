@@ -114,11 +114,31 @@ namespace TopView.Core
                 weaponModelPrefabs[weaponIndex] = definition.modelPrefab;
 
                 bool hasProjectile = definition.weapon.kind != WeaponKind.Melee;
+                if (TryFindWeaponShotsProblem(in definition.weapon, out string shotsProblem))
+                {
+                    Debug.LogError($"World >> {definition.name}의 {shotsProblem}. 판을 시작할 수 없다.");
+                    return false;
+                }
                 AssignProjectileViews(definition.name, hasProjectile, definition.projectilePrefab, definition.hitEffectPrefab, ref weapons[weaponIndex].projectileView, projectilePrefabs, hitEffectPrefabs);
                 weapons[weaponIndex].meleeView.impactEffectIndex = hasProjectile ? -1 : IndexHitEffect($"{definition.name}의 임팩트 이펙트", definition.impactEffectPrefab, hitEffectPrefabs);
             }
 
             return true;
+        }
+
+        // 투사체 무기의 발 목록에 문제가 있으면 적어 true를 돌려준다. Ranged는 마지막 발에서 공격 상태가 끝나 Duration Ticks와 비교하지 않는다. Melee는 발 목록이 없어 false다.
+        private static bool TryFindWeaponShotsProblem(in WeaponComponent weapon, out string problem)
+        {
+            switch (weapon.kind)
+            {
+                case WeaponKind.Ranged:
+                    return TryFindShotsProblem(weapon.straight.shots, false, weapon.durationTicks, out problem);
+                case WeaponKind.Throw:
+                    return TryFindShotsProblem(weapon.arc.shots, true, weapon.durationTicks, out problem);
+            }
+
+            problem = null;
+            return false;
         }
     }
 }

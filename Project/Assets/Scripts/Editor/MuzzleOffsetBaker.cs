@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using TopView.Components;
 using TopView.Definitions;
 using TopView.Presentation.Views;
 using UnityEditor;
@@ -8,33 +8,38 @@ using UnityEngine.SceneManagement;
 
 namespace TopView.Editor
 {
-    // 무기 모델의 WeaponView.muzzle 위치를 플레이어 루트 기준 로컬 위치로 바꿔 muzzleOffset 칸을 채우는 인스펙터 도구.
-    // 플레이어 프리팹을 미리보기 씬에 만들고 게임과 같은 방식으로 무기 모델을 무기 소켓에 붙인 뒤, AnimationPoseSampler로 공격 클립을 timing.startTicks 시점으로 샘플링해 위치를 잰다.
-    // 클립은 에셋에 저장하지 않고, 에디터가 켜져 있는 동안만 에셋마다 기억한다.
+    // 무기 모델의 WeaponView.muzzle 위치를 플레이어 루트 기준 로컬 위치로 바꿔 무기 Shots 칸의 Spawn Offset을 채우는 인스펙터 도구.
+    // 플레이어 프리팹을 미리보기 씬에 만들고 게임과 같은 방식으로 무기 모델을 무기 소켓에 붙인 뒤, AnimationPoseSampler로 그 칸의 클립을 그 칸의 Start Ticks 시점으로 샘플링해 위치를 잰다.
     public static class MuzzleOffsetBaker
     {
-        private static readonly Dictionary<int, AnimationClip> CLIPS = new Dictionary<int, AnimationClip>();
+        /// <summary>
+        /// 굽기 버튼의 높이.
+        /// </summary>
+        public static float Height => AnimationTickConverter.LineHeight;
 
-        private const string CLIP_LABEL = "Shot Clip";
-        private const string BAKE_LABEL = "Bake Muzzle Offset";
+        private const string BAKE_LABEL = "Bake Spawn Offset";
 
         /// <summary>
-        /// 샘플링할 클립 칸과 굽기 버튼을 그린다. 버튼을 누르면 muzzleOffset 칸을 채운다. 클립이 없으면 프리팹의 자세 그대로 잰다.
+        /// 굽기 버튼을 그린다. 버튼을 누르면 그 칸의 Spawn Offset을 채운다. 클립이 없으면 프리팹의 자세 그대로 잰다.
         /// </summary>
-        /// <param name="definition">구울 무기</param>
-        /// <param name="muzzleOffset">채울 muzzleOffset 칸</param>
-        /// <param name="attackStartTicks">클립을 샘플링할 시점(틱)</param>
-        public static void Draw(WeaponDefinition definition, SerializedProperty muzzleOffset, int attackStartTicks)
+        /// <param name="rect">그릴 영역(Height 높이)</param>
+        /// <param name="shot">구울 Shots 칸. WeaponDefinition 안의 칸이어야 한다</param>
+        /// <param name="clip">샘플링할 클립. 없으면 null</param>
+        public static void Draw(Rect rect, SerializedProperty shot, AnimationClip clip)
         {
-            int key = definition.GetInstanceID();
-            CLIPS.TryGetValue(key, out AnimationClip clip);
-            clip = (AnimationClip)EditorGUILayout.ObjectField(CLIP_LABEL, clip, typeof(AnimationClip), false);
-            CLIPS[key] = clip;
-
-            Rect buttonRect = EditorGUI.IndentedRect(EditorGUILayout.GetControlRect());
-            if (GUI.Button(buttonRect, BAKE_LABEL) && TryBake(definition, clip, attackStartTicks, out Vector3 offset))
+            Rect line = new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight);
+            WeaponDefinition definition = shot.serializedObject.targetObject as WeaponDefinition;
+            if (definition == null)
             {
-                muzzleOffset.vector3Value = offset;
+                EditorGUI.HelpBox(line, $"{nameof(WeaponDefinition)} 안의 칸에서만 굽는다.", MessageType.None);
+                return;
+            }
+
+            Rect buttonRect = EditorGUI.IndentedRect(line);
+            SerializedProperty startTicks = shot.FindPropertyRelative(nameof(ProjectileShotComponent.startTicks));
+            if (GUI.Button(buttonRect, BAKE_LABEL) && TryBake(definition, clip, startTicks.intValue, out Vector3 offset))
+            {
+                shot.FindPropertyRelative(nameof(ProjectileShotComponent.spawnOffset)).vector3Value = offset;
             }
         }
 

@@ -11,19 +11,39 @@ namespace TopView.Utilities
         private const int MAX_THROW_CHARGE = 100;
 
         /// <summary>
-        /// 공격 상태를 끝낼 때인지 판정한다. Ranged는 투사체를 내보내면 바로 끝나고, Melee와 Throw는 공격이 나간 뒤 timing.durationTicks까지 기다린다.
+        /// 공격 상태를 끝낼 때인지 판정한다. Ranged는 마지막 발을 내보내면 바로 끝나고, Melee와 Throw는 공격이 모두 나간 뒤 durationTicks까지 기다린다.
         /// </summary>
         /// <param name="actionState">행동 상태와 공격 진행</param>
         /// <param name="weapon">들고 있는 무기</param>
         /// <returns>공격 상태를 끝낼 때면 true</returns>
         public static bool IsAttackFinished(in PlayerActionStateComponent actionState, in WeaponComponent weapon)
         {
-            if (!actionState.isAttackCommitted)
+            if (actionState.committedShotCount < GetShotCount(in weapon))
             {
                 return false;
             }
 
-            return weapon.kind == WeaponKind.Ranged || actionState.elapsedTicks >= weapon.timing.durationTicks;
+            return weapon.kind == WeaponKind.Ranged || actionState.elapsedTicks >= weapon.durationTicks;
+        }
+
+        /// <summary>
+        /// 무기의 공격 한 번에 내보내는 발 수를 돌려준다. 무기 종류가 쓰는 공격 값의 발 수다.
+        /// </summary>
+        /// <param name="weapon">무기</param>
+        /// <returns>내보내는 발 수. 처리하지 않는 무기 종류면 0</returns>
+        public static int GetShotCount(in WeaponComponent weapon)
+        {
+            switch (weapon.kind)
+            {
+                case WeaponKind.Melee:
+                    return AttackUtility.GetShotCount(in weapon.melee);
+                case WeaponKind.Ranged:
+                    return AttackUtility.GetShotCount(in weapon.straight);
+                case WeaponKind.Throw:
+                    return AttackUtility.GetShotCount(in weapon.arc);
+            }
+
+            return 0;
         }
 
         /// <summary>

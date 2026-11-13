@@ -40,7 +40,7 @@ namespace TopView.Systems
         {
             actionState.state = PlayerState.Die;
             actionState.elapsedTicks = 0;
-            actionState.isAttackCommitted = false;
+            actionState.committedShotCount = 0;
 
             motion.moveDirection = Vector3.zero;
             motion.isRotationLocked = true;

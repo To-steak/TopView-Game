@@ -106,7 +106,7 @@ namespace TopView.Editor
             }
         }
 
-        // 칸 경로의 마지막 배열 번호를 돌려준다. 예: attacks.Array.data[1].attack.shots.Array.data[0] → 0
+        // 칸 경로의 마지막 배열 번호를 돌려준다. 예: attacks.Array.data[1].attack.straight.shots.Array.data[0] → 0
         private static int GetArrayIndex(string propertyPath)
         {
             int openIndex = propertyPath.LastIndexOf('[');

@@ -125,10 +125,10 @@ namespace TopView.Utilities
             switch (weapon.kind)
             {
                 case WeaponKind.Ranged:
-                    baseRadius = weapon.straightProjectile.explosion.radius;
+                    baseRadius = weapon.straight.projectile.explosion.radius;
                     break;
                 case WeaponKind.Throw:
-                    baseRadius = weapon.arcProjectile.explosion.radius;
+                    baseRadius = weapon.arc.projectile.explosion.radius;
                     break;
                 default:
                     return 0f;

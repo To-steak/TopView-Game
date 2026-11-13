@@ -19,22 +19,55 @@ MonoBehaviour:
       max: 0
       startingCurrent: 0
       startingReserve: 5
+    durationTicks: 30
+    attackIntervalTicks: 0
+    melee:
+      startTicks: 0
+      endTicks: 0
+      shape:
+        radius: 0
+        offset: 0
+    straight:
+      projectile:
+        flight:
+          speed: 0
+          lifetimeTicks: 0
+        hit:
+          radius: 0
+          collisionLayer:
+            serializedVersion: 2
+            m_Bits: 0
+        explosion:
+          radius: 0
+      shots: []
+    arc:
+      projectile:
+        flight:
+          flightTicks: 50
+          arcHeight: 2
+        hit:
+          radius: 0.15
+          collisionLayer:
+            serializedVersion: 2
+            m_Bits: 4294966856
+        explosion:
+          radius: 3
+      shots:
+      - startTicks: 15
+        spawnOffset: {x: 0, y: 0, z: 0}
+    throwing:
+      chargePerTick: 3
+      maxThrowDistance: 10
+    upgrade:
+      maxAmmoRatioPerLevel: 0
+      attackIntervalRatioPerLevel: 0
+      explosionRadiusIncreasePerLevel: 0
+      meleeRangeRatioPerLevel: 0
+    aimHeight: 0
     timing:
       startTicks: 15
       endTicks: 0
       durationTicks: 30
-    attackIntervalTicks: 0
-    projectile:
-      kind: 1
-      speed: 10
-      radius: 0.15
-      lifetimeTicks: 0
-      flightTicks: 50
-      arcHeight: 2
-      explosionRadius: 3
-      collisionLayer:
-        serializedVersion: 2
-        m_Bits: 4294966856
     straightProjectile:
       flight:
         speed: 0
@@ -57,17 +90,9 @@ MonoBehaviour:
           m_Bits: 4294966856
       explosion:
         radius: 3
-    throwing:
-      chargePerTick: 3
-      maxThrowDistance: 10
     meleeShape:
       radius: 0
       offset: 0
-    upgrade:
-      maxAmmoRatioPerLevel: 0
-      attackIntervalRatioPerLevel: 0
-      explosionRadiusIncreasePerLevel: 0
-      meleeRangeRatioPerLevel: 0
     muzzleOffset: {x: 0, y: 0, z: 0}
   modelPrefab: {fileID: 3006573835764851770, guid: 88eec3c3ac7a9b54c966aeba2bec804e, type: 3}
   projectilePrefab: {fileID: 3006573835764851770, guid: c8836d5c1f9260a41aafb72573635c50, type: 3}
