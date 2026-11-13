@@ -6,13 +6,13 @@ using UnityEngine;
 
 namespace TopView.UserInterface.Presenters
 {
-    // 씬을 불러오는 동안 LoadingView를 보이고, MenuFlow가 매 프레임 넘기는 진행률을 보여 준다.
-    // 들어갈 준비가 되면 들어가기 버튼을 누를 수 있게 하고, 버튼 입력을 메뉴 명령으로 넣는다.
+    // 씬을 불러오는 동안 LoadingView를 보이고, Menu가 매 프레임 넘기는 진행률을 보여 준다.
+    // 들어갈 준비가 되면 들어가기 버튼을 누를 수 있게 하고, 버튼 입력을 씬 명령으로 넣는다.
     public class LoadingPresenter : MonoBehaviour
     {
         [SerializeField] private LoadingView _view;
 
-        private List<MenuCommand> _commands;
+        private List<SceneCommand> _sceneCommands;
         // 버튼 소리를 넣을 목록
         private List<UserInterfaceSoundKind> _soundRequests;
         private bool _isShown;
@@ -21,13 +21,13 @@ namespace TopView.UserInterface.Presenters
         private bool _presentedCanEnter;
 
         /// <summary>
-        /// 명령을 넣을 목록을 받고 View를 숨긴다. MenuFlow가 시작할 때 부른다.
+        /// 명령을 넣을 목록을 받고 View를 숨긴다. Menu가 App에 등록될 때 부른다.
         /// </summary>
-        /// <param name="commands">메뉴 명령 목록</param>
+        /// <param name="sceneCommands">씬과 앱 전환 명령 목록</param>
         /// <param name="soundRequests">UI 소리 요청 목록</param>
-        public void Initialize(List<MenuCommand> commands, List<UserInterfaceSoundKind> soundRequests)
+        public void Initialize(List<SceneCommand> sceneCommands, List<UserInterfaceSoundKind> soundRequests)
         {
-            _commands = commands;
+            _sceneCommands = sceneCommands;
             _soundRequests = soundRequests;
             _view.SetVisible(false);
             _isShown = false;
@@ -84,13 +84,13 @@ namespace TopView.UserInterface.Presenters
         private void HandleEnterClicked()
         {
             AddSound(UserInterfaceSoundKind.Click);
-            if (_commands == null)
+            if (_sceneCommands == null)
             {
-                Debug.LogWarning($"LoadingPresenter >> 명령 목록이 연결되지 않아 {MenuCommandType.EnterWorld} 명령을 버렸다.");
+                Debug.LogWarning($"LoadingPresenter >> 씬 명령 목록이 연결되지 않아 {SceneCommandType.EnterWorld} 명령을 버렸다.");
                 return;
             }
 
-            _commands.Add(new MenuCommand { type = MenuCommandType.EnterWorld });
+            _sceneCommands.Add(new SceneCommand { type = SceneCommandType.EnterWorld });
         }
 
         private void AddSound(UserInterfaceSoundKind kind)

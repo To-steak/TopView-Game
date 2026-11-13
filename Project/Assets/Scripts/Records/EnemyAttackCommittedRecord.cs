@@ -1,4 +1,3 @@
-using TopView.Components;
 using TopView.Entities;
 
 namespace TopView.Records
@@ -8,7 +7,7 @@ namespace TopView.Records
     {
         // 공격한 적
         public EntityIdentifier enemy;
-        // 내보낸 공격의 종류
-        public EnemyAttackKind attackKind;
+        // 내보낸 공격의 번호. 그 적의 공격 목록에서의 위치다
+        public int attackIndex;
     }
 }

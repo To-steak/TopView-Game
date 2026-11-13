@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace TopView.UserInterface.Presenters
 {
-    // 플레이어가 살아 있는 동안 PlayerManaView를 보이고, Runner가 매 프레임 넘기는 마나를 보여 준다.
+    // 플레이어가 살아 있는 동안 PlayerManaView를 보이고, World가 매 프레임 넘기는 마나를 보여 준다.
     public class PlayerManaPresenter : MonoBehaviour
     {
         [SerializeField] private PlayerManaView _view;
@@ -15,7 +15,7 @@ namespace TopView.UserInterface.Presenters
         private float _presentedMaxMana;
 
         /// <summary>
-        /// View를 숨기고 보여 준 값을 처음 상태로 되돌린다. 판을 준비할 때 Runner가 부른다.
+        /// View를 숨기고 보여 준 값을 처음 상태로 되돌린다. 판을 준비할 때 World가 부른다.
         /// </summary>
         public void Initialize()
         {

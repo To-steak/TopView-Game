@@ -15,9 +15,10 @@ namespace TopView.Systems
         /// 쌓인 상태 변경 요청을 모두 처리한다. 없어졌거나 칸이 재사용된 대상은 건너뛴다. 요청을 넣는 System 바로 뒤에 부른다.
         /// </summary>
         /// <param name="players">플레이어 저장소</param>
+        /// <param name="weapons">무기 저장소</param>
         /// <param name="stateChangeRequests">플레이어 상태 변경 요청 큐</param>
         /// <param name="stateRecords">상태 변경 기록</param>
-        public static void Tick(PlayerStorage players, Queue<PlayerStateChangeRequest> stateChangeRequests, List<PlayerStateChangedRecord> stateRecords)
+        public static void Tick(PlayerStorage players, WeaponStorage weapons, Queue<PlayerStateChangeRequest> stateChangeRequests, List<PlayerStateChangedRecord> stateRecords)
         {
             while (stateChangeRequests.Count > 0)
             {
@@ -25,13 +26,14 @@ namespace TopView.Systems
                 ref PlayerEntity entity = ref players.entities[request.target.index];
                 if (entity.isAlive && entity.generation == request.target.generation)
                 {
-                    ChangeState(ref entity.actionState, ref entity.motion, ref entity.rotation, ref entity.mana, in entity.weaponSlots, in entity.movement, in entity.vitals, in entity.upgrade, in entity.upgradeLevels, entity.weaponList.weapons, in request, stateRecords);
+                    ref readonly WeaponEntity weaponEntity = ref weapons.entities[entity.weaponSlots.weapons[entity.weaponSlots.currentIndex].index];
+                    ChangeState(ref entity.actionState, ref entity.motion, ref entity.rotation, ref entity.mana, in entity.movement, in entity.vitals, in entity.upgrade, in entity.upgradeLevels, in weaponEntity.weapon, weaponEntity.upgradeLevel.level, in request, stateRecords);
                 }
             }
         }
 
         // 지금 상태에서 나가고 새 상태에 들어가 상태 변경을 기록한다. Die 상태에서는 바꾸지 않는다.
-        private static void ChangeState(ref PlayerActionStateComponent actionState, ref PlayerMotionComponent motion, ref RotationComponent rotation, ref ManaComponent mana, in PlayerWeaponSlotsComponent weaponSlot, in PlayerMovementComponent movement, in PlayerVitalsComponent vital, in PlayerUpgradeComponent upgrade, in PlayerUpgradeLevelsComponent upgradeLevels, WeaponComponent[] weapons, in PlayerStateChangeRequest request, List<PlayerStateChangedRecord> stateRecords)
+        private static void ChangeState(ref PlayerActionStateComponent actionState, ref PlayerMotionComponent motion, ref RotationComponent rotation, ref ManaComponent mana, in PlayerMovementComponent movement, in PlayerVitalsComponent vital, in PlayerUpgradeComponent upgrade, in PlayerUpgradeLevelsComponent upgradeLevels, in WeaponComponent weapon, int weaponLevel, in PlayerStateChangeRequest request, List<PlayerStateChangedRecord> stateRecords)
         {
             if (actionState.state == PlayerState.Die)
             {
@@ -51,10 +53,10 @@ namespace TopView.Systems
             actionState.elapsedTicks = 0;
             actionState.isAttackCommitted = false;
 
-            EnterState(ref actionState, ref motion, ref rotation, ref mana, in weaponSlot, in movement, in vital, in upgrade, in upgradeLevels, weapons, request.moveInput);
+            EnterState(ref actionState, ref motion, ref rotation, ref mana, in movement, in vital, in upgrade, in upgradeLevels, in weapon, weaponLevel, request.moveInput);
         }
 
-        private static void EnterState(ref PlayerActionStateComponent actionState, ref PlayerMotionComponent motion, ref RotationComponent rotation, ref ManaComponent mana, in PlayerWeaponSlotsComponent weaponSlot, in PlayerMovementComponent movement, in PlayerVitalsComponent vital, in PlayerUpgradeComponent upgrade, in PlayerUpgradeLevelsComponent upgradeLevels, WeaponComponent[] weapons, Vector3 moveInput)
+        private static void EnterState(ref PlayerActionStateComponent actionState, ref PlayerMotionComponent motion, ref RotationComponent rotation, ref ManaComponent mana, in PlayerMovementComponent movement, in PlayerVitalsComponent vital, in PlayerUpgradeComponent upgrade, in PlayerUpgradeLevelsComponent upgradeLevels, in WeaponComponent weapon, int weaponLevel, Vector3 moveInput)
         {
             switch (actionState.state)
             {
@@ -91,12 +93,12 @@ namespace TopView.Systems
                     break;
 
                 case PlayerState.Shot:
-                    actionState.attackCooldownTicks = PlayerUpgradeUtility.GetAttackIntervalTicks(in weapons[weaponSlot.currentIndex], in upgrade, PlayerUpgradeUtility.GetWeaponLevel(in upgradeLevels, weaponSlot.currentIndex));
+                    actionState.attackCooldownTicks = PlayerUpgradeUtility.GetAttackIntervalTicks(in weapon, in upgrade, weaponLevel);
                     break;
 
                 case PlayerState.Swing:
                     motion.isRotationLocked = true;
-                    actionState.attackCooldownTicks = PlayerUpgradeUtility.GetAttackIntervalTicks(in weapons[weaponSlot.currentIndex], in upgrade, PlayerUpgradeUtility.GetWeaponLevel(in upgradeLevels, weaponSlot.currentIndex));
+                    actionState.attackCooldownTicks = PlayerUpgradeUtility.GetAttackIntervalTicks(in weapon, in upgrade, weaponLevel);
                     break;
 
                 case PlayerState.Throw:

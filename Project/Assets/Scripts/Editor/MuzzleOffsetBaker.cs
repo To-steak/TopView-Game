@@ -9,7 +9,7 @@ using UnityEngine.SceneManagement;
 namespace TopView.Editor
 {
     // 무기 모델의 WeaponView.muzzle 위치를 플레이어 루트 기준 로컬 위치로 바꿔 muzzleOffset 칸을 채우는 인스펙터 도구.
-    // 플레이어 프리팹을 미리보기 씬에 만들고 게임과 같은 방식으로 무기 모델을 무기 소켓에 붙인 뒤, AnimationPoseSampler로 공격 클립을 attackStartTicks 시점으로 샘플링해 위치를 잰다.
+    // 플레이어 프리팹을 미리보기 씬에 만들고 게임과 같은 방식으로 무기 모델을 무기 소켓에 붙인 뒤, AnimationPoseSampler로 공격 클립을 timing.startTicks 시점으로 샘플링해 위치를 잰다.
     // 클립은 에셋에 저장하지 않고, 에디터가 켜져 있는 동안만 에셋마다 기억한다.
     public static class MuzzleOffsetBaker
     {

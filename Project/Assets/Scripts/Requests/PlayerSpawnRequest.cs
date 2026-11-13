@@ -18,7 +18,7 @@ namespace TopView.Requests
         public PlayerActionComponent action;
         // 강화 값
         public PlayerUpgradeComponent upgrade;
-        // 무기 목록. PlayerSpawnSystem이 엔티티의 배열로 복사한다
+        // 무기 목록. PlayerSpawnSystem이 무기마다 무기 생성 요청으로 넘긴다
         public WeaponComponent[] weapons;
     }
 }

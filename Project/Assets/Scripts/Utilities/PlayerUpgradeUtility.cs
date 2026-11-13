@@ -78,18 +78,6 @@ namespace TopView.Utilities
         }
 
         /// <summary>
-        /// 무기 하나의 강화 레벨을 돌려준다. 무기 번호는 무기 목록과 같은 번호여야 한다.
-        /// </summary>
-        /// <param name="levels">강화 레벨</param>
-        /// <param name="weaponIndex">무기 번호</param>
-        /// <returns>무기 강화 레벨</returns>
-        public static int GetWeaponLevel(in PlayerUpgradeLevelsComponent levels, int weaponIndex)
-        {
-            // 레벨 배열은 생성 때 무기 목록과 길이를 맞춘다. 번호가 배열 밖이면 0으로 대신하지 않고 예외로 드러낸다
-            return levels.weaponLevels[weaponIndex];
-        }
-
-        /// <summary>
         /// 강화가 반영된 무기 피해량을 돌려준다.
         /// </summary>
         /// <param name="weapon">무기</param>
@@ -110,7 +98,7 @@ namespace TopView.Utilities
         /// <returns>공격 간격(틱)</returns>
         public static int GetAttackIntervalTicks(in WeaponComponent weapon, in PlayerUpgradeComponent upgrade, int weaponLevel)
         {
-            int intervalTicks = Mathf.RoundToInt(Decrease(weapon.attackIntervalTicks, weapon.attackIntervalRatioPerLevel, weaponLevel));
+            int intervalTicks = Mathf.RoundToInt(Decrease(weapon.attackIntervalTicks, weapon.upgrade.attackIntervalRatioPerLevel, weaponLevel));
             return Mathf.Max(intervalTicks, Mathf.Min(weapon.attackIntervalTicks, upgrade.minAttackIntervalTicks));
         }
 
@@ -122,7 +110,7 @@ namespace TopView.Utilities
         /// <returns>장전할 수 있는 최대 탄약 수</returns>
         public static int GetMaxAmmo(in WeaponComponent weapon, int weaponLevel)
         {
-            return Mathf.RoundToInt(Increase(weapon.maxAmmo, weapon.maxAmmoRatioPerLevel, weaponLevel));
+            return Mathf.RoundToInt(Increase(weapon.ammo.max, weapon.upgrade.maxAmmoRatioPerLevel, weaponLevel));
         }
 
         /// <summary>
@@ -133,7 +121,7 @@ namespace TopView.Utilities
         /// <returns>폭발 반지름(유닛, XZ). 0이면 폭발하지 않는다</returns>
         public static float GetExplosionRadius(in WeaponComponent weapon, int weaponLevel)
         {
-            return weapon.projectile.explosionRadius + weapon.explosionRadiusIncreasePerLevel * weaponLevel;
+            return weapon.projectile.explosionRadius + weapon.upgrade.explosionRadiusIncreasePerLevel * weaponLevel;
         }
 
         /// <summary>
@@ -144,7 +132,7 @@ namespace TopView.Utilities
         /// <returns>1 + meleeRangeRatioPerLevel × weaponLevel</returns>
         public static float GetMeleeRangeScale(in WeaponComponent weapon, int weaponLevel)
         {
-            return Increase(1f, weapon.meleeRangeRatioPerLevel, weaponLevel);
+            return Increase(1f, weapon.upgrade.meleeRangeRatioPerLevel, weaponLevel);
         }
     }
 }

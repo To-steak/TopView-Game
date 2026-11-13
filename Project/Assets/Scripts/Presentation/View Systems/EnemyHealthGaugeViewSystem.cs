@@ -89,7 +89,7 @@ namespace TopView.Presentation.ViewSystems
         }
 
         /// <summary>
-        /// 게이지가 표시에 쓰는 칸이 모두 연결되어 있는지 본다. 로그는 남기지 않으며, Runner가 판을 준비할 때 이 결과로 빠진 칸을 알린다.
+        /// 게이지가 표시에 쓰는 칸이 모두 연결되어 있는지 본다. 로그는 남기지 않으며, World가 판을 준비할 때 이 결과로 빠진 칸을 알린다.
         /// </summary>
         /// <param name="gauge">검사할 EnemyHealthGaugeView</param>
         /// <returns>Gauge Front, Health Text, Level Text가 모두 연결되어 있으면 true</returns>

@@ -8,34 +8,25 @@ using UnityEngine.AI;
 
 namespace TopView.Systems
 {
-    // 판 흐름 명령 중 탈출을 처리한다. 땅 아래로 빠진 플레이어를 가까운 NavMesh 위로 옮긴다.
+    // 탈출 명령을 처리한다. 땅 아래로 빠진 플레이어를 가까운 NavMesh 위로 옮긴다.
     public static class PlayerUnstuckSystem
     {
         /// <summary>
-        /// Unstuck 명령을 소비해 살아 있는 플레이어를 가까운 NavMesh 위로 옮긴다. 다른 명령은 남겨 둔다. 진행 중이 아니면 명령만 버린다.
+        /// 탈출 명령을 모두 소비해 살아 있는 플레이어를 가까운 NavMesh 위로 옮긴다. 진행 중이 아니면 명령만 버린다.
         /// 일시정지 화면에서 들어온 명령을 처리하므로 PauseSystem 뒤에서 일시정지와 상관없이 부른다.
         /// </summary>
         /// <param name="players">플레이어 저장소</param>
         /// <param name="progress">한 판의 진행 상태</param>
         /// <param name="rule">한 판의 규칙 값</param>
-        /// <param name="gameFlowCommands">판 흐름 명령 목록</param>
-        public static void Tick(PlayerStorage players, in GameProgressComponent progress, in GameRuleComponent rule, List<GameFlowCommand> gameFlowCommands)
+        /// <param name="playerUnstuckCommands">플레이어 탈출 명령 목록</param>
+        public static void Tick(PlayerStorage players, in GameProgressComponent progress, in GameRuleComponent rule, List<PlayerUnstuckCommand> playerUnstuckCommands)
         {
-            for (int commandIndex = 0; commandIndex < gameFlowCommands.Count; commandIndex++)
+            // 판이 끝난 뒤에 늦게 도착한 명령은 정상적으로 무시한다. 같은 틱에 여러 번 들어와도 한 번 옮긴 뒤에는 이미 NavMesh 위라 한 번만 옮긴다
+            if (playerUnstuckCommands.Count > 0 && progress.phase == GamePhase.Playing)
             {
-                if (gameFlowCommands[commandIndex].type != GameFlowCommandType.Unstuck)
-                {
-                    continue;
-                }
-
-                gameFlowCommands.RemoveAt(commandIndex);
-                commandIndex--;
-                // 판이 끝난 뒤에 늦게 도착한 명령은 정상적으로 무시한다
-                if (progress.phase == GamePhase.Playing)
-                {
-                    MoveAlivePlayers(players, in rule);
-                }
+                MoveAlivePlayers(players, in rule);
             }
+            playerUnstuckCommands.Clear();
         }
 
         private static void MoveAlivePlayers(PlayerStorage players, in GameRuleComponent rule)
@@ -77,7 +68,7 @@ namespace TopView.Systems
                 return false;
             }
 
-            PlayerMovementUtility.GetCapsulePoints(in movement, rotation, Vector3.zero, out Vector3 top, out Vector3 bottom);
+            PlayerMovementUtility.GetCapsulePoints(in movement, rotation, Vector3.zero, out _, out Vector3 bottom);
             float capsuleLowestHeight = bottom.y - movement.capsuleRadius;
             destination = hit.position + Vector3.up * (movement.skinWidth - capsuleLowestHeight);
             return true;

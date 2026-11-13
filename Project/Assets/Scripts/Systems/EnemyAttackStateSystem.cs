@@ -50,7 +50,7 @@ namespace TopView.Systems
                 // 첫 발이 나가기 전까지 플레이어 쪽으로 돈다
                 if (actionState.committedShotCount == 0 && hasPlayer)
                 {
-                    TargetingUtility.RotateToward(ref rotation.current, position, playerPosition, entity.behavior.angularSpeed * deltaTime);
+                    TargetingUtility.RotateToward(ref rotation.current, position, playerPosition, entity.movement.angularSpeed * deltaTime);
                 }
 
                 EnemyAttackComponent[] attacks = entity.attackList.attacks;
@@ -59,11 +59,11 @@ namespace TopView.Systems
                 float damage = entity.combat.attackDamage * attack.damageMultiplier;
                 if (attack.kind == EnemyAttackKind.Body)
                 {
-                    if (actionState.committedShotCount == 0 && actionState.elapsedTicks >= attack.startTicks)
+                    if (actionState.committedShotCount == 0 && actionState.elapsedTicks >= attack.timing.startTicks)
                     {
                         actionState.committedShotCount = 1;
                         CommitBody(in attack, position, rotation.current, damage, in identifier, meleeSpawnRequests);
-                        attackCommittedRecords.Add(new EnemyAttackCommittedRecord { enemy = identifier, attackKind = attack.kind });
+                        attackCommittedRecords.Add(new EnemyAttackCommittedRecord { enemy = identifier, attackIndex = actionState.attackIndex });
                     }
                 }
                 else
@@ -72,7 +72,7 @@ namespace TopView.Systems
                     while (actionState.committedShotCount < attack.shots.Length && actionState.elapsedTicks >= attack.shots[actionState.committedShotCount].startTicks)
                     {
                         CommitShot(in attack, in attack.shots[actionState.committedShotCount], position, rotation.current, hasPlayer, playerPosition, damage, projectileSpawnRequests);
-                        attackCommittedRecords.Add(new EnemyAttackCommittedRecord { enemy = identifier, attackKind = attack.kind });
+                        attackCommittedRecords.Add(new EnemyAttackCommittedRecord { enemy = identifier, attackIndex = actionState.attackIndex });
                         actionState.committedShotCount++;
                     }
                 }
@@ -85,17 +85,17 @@ namespace TopView.Systems
             }
         }
 
-        // Body 공격을 내보낸다. endTicks까지 이어지는 근접 판정 생성 요청을 넣는다.
+        // Body 공격을 내보낸다. timing.endTicks까지 이어지는 근접 판정 생성 요청을 넣는다.
         private static void CommitBody(in EnemyAttackComponent attack, Vector3 position, Quaternion rotation, float damage, in EntityIdentifier owner, Queue<MeleeSpawnRequest> meleeSpawnRequests)
         {
             meleeSpawnRequests.Enqueue(new MeleeSpawnRequest
             {
                 owner = owner,
                 faction = Faction.Enemy,
-                center = position + rotation * Vector3.forward * attack.bodyOffset,
-                radius = attack.bodyRadius,
+                center = MeleeShapeUtility.GetCenter(position, rotation, attack.meleeShape.offset),
+                radius = attack.meleeShape.radius,
                 damage = damage,
-                durationTicks = attack.endTicks - attack.startTicks
+                durationTicks = attack.timing.endTicks - attack.timing.startTicks
             });
         }
 

@@ -23,7 +23,7 @@ namespace TopView.Systems
                 ref EnemyEntity entity = ref enemies.entities[index];
                 if (entity.isAlive
                     && entity.actionState.state == EnemyState.Die
-                    && entity.actionState.elapsedTicks >= entity.behavior.dieTicks)
+                    && entity.actionState.elapsedTicks >= entity.death.dieTicks)
                 {
                     entity.isAlive = false;
                     enemies.freeIndicesByKind[entity.kind.kind].Add(index);
@@ -36,7 +36,7 @@ namespace TopView.Systems
                             position = entity.position.current
                         });
                     }
-                    if (entity.behavior.endsGameOnDeath)
+                    if (entity.death.endsGameOnDeath)
                     {
                         gameOverRequests.Enqueue(new GameOverRequest { isVictory = true });
                     }

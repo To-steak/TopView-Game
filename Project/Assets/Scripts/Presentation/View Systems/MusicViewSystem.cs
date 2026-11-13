@@ -27,8 +27,9 @@ namespace TopView.Presentation.ViewSystems
         /// 평소 곡을 틀고, 살아 있는 보스가 처음 보이면 보스 곡으로 크로스페이드한다. 보스 곡으로 바꾼 뒤에는 보스가 죽어도 판이 끝날 때까지 보스 곡을 유지한다.
         /// </summary>
         /// <param name="enemies">적 엔티티 배열</param>
+        /// <param name="isBossByKind">적 종류별로 보스인지. 오버레이 체력 바에 체력을 보여 주는 종류가 보스다</param>
         /// <param name="context">배경음악 실행 상태</param>
-        public static void Present(EnemyEntity[] enemies, MusicViewContext context)
+        public static void Present(EnemyEntity[] enemies, bool[] isBossByKind, MusicViewContext context)
         {
             Present(context);
 
@@ -43,7 +44,7 @@ namespace TopView.Presentation.ViewSystems
             }
 
             // 보스 곡이 없는 경우는 판을 준비할 때 로그를 남겼다
-            if (context.bossSource == null || !HasAliveBoss(enemies))
+            if (context.bossSource == null || !HasAliveBoss(enemies, isBossByKind))
             {
                 return;
             }
@@ -54,12 +55,12 @@ namespace TopView.Presentation.ViewSystems
             context.hasSwitchedToBoss = true;
         }
 
-        private static bool HasAliveBoss(EnemyEntity[] enemies)
+        private static bool HasAliveBoss(EnemyEntity[] enemies, bool[] isBossByKind)
         {
             for (int index = 0; index < enemies.Length; index++)
             {
                 ref readonly EnemyEntity entity = ref enemies[index];
-                if (entity.isAlive && entity.behavior.showsOverlayHealthBar)
+                if (entity.isAlive && isBossByKind[entity.kind.kind])
                 {
                     return true;
                 }

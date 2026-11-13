@@ -12,7 +12,8 @@ namespace TopView.Systems
         /// 투척 무기로 충전 중인 플레이어는 미리보기를 채우고, 나머지는 숨긴다. 이동과 조준이 끝난 뒤에 부른다.
         /// </summary>
         /// <param name="players">플레이어 저장소</param>
-        public static void Tick(PlayerStorage players)
+        /// <param name="weapons">무기 저장소</param>
+        public static void Tick(PlayerStorage players, WeaponStorage weapons)
         {
             int shortArrayCount = 0;
             int invalidFlightCount = 0;
@@ -31,7 +32,7 @@ namespace TopView.Systems
                     continue;
                 }
 
-                ref readonly WeaponComponent weapon = ref entity.weaponList.weapons[entity.weaponSlots.currentIndex];
+                ref readonly WeaponComponent weapon = ref weapons.entities[entity.weaponSlots.weapons[entity.weaponSlots.currentIndex].index].weapon;
                 if (weapon.kind != WeaponKind.Throw)
                 {
                     continue;
@@ -72,7 +73,7 @@ namespace TopView.Systems
             }
 
             Vector3 launchPosition = position + rotation * weapon.muzzleOffset;
-            Vector3 targetPosition = PlayerWeaponUtility.GetThrowTargetPosition(in projectile, position, rotation, throwCharge);
+            Vector3 targetPosition = PlayerWeaponUtility.GetThrowTargetPosition(in weapon.throwing, position, rotation, throwCharge);
 
             preview.points[0] = launchPosition;
             int pointCount = 1;

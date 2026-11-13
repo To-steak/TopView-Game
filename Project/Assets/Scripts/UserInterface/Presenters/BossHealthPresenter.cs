@@ -1,10 +1,9 @@
 using TopView.UserInterface.Views;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace TopView.UserInterface.Presenters
 {
-    // 보스가 처음 나타나면 BossHealthView를 보이고, 보스가 살아 있는 동안 Runner가 매 프레임 넘기는 체력을 보여 준다.
+    // 보스가 처음 나타나면 BossHealthView를 보이고, 보스가 살아 있는 동안 World가 매 프레임 넘기는 체력을 보여 준다.
     public class BossHealthPresenter : MonoBehaviour
     {
         [SerializeField] private BossHealthView _view;
@@ -15,7 +14,7 @@ namespace TopView.UserInterface.Presenters
         private float _presentedMaxHealth;
 
         /// <summary>
-        /// View를 숨긴다. 판을 준비할 때 Runner가 부른다.
+        /// View를 숨긴다. 판을 준비할 때 World가 부른다.
         /// </summary>
         public void Initialize()
         {

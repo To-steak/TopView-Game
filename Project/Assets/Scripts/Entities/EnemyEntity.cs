@@ -12,10 +12,14 @@ namespace TopView.Entities
 
         // 적 종류 번호
         public EnemyKindComponent kind;
-        // 체력·공격력·이동 속도·점수 값. 생성 때 Definition에서 복사한다
-        public EnemyStatsComponent stats;
-        // 행동 값. 생성 때 Definition에서 복사한다
-        public EnemyBehaviorComponent behavior;
+        // 처치 점수 값. 생성 때 Definition에서 복사한다
+        public LevelScalingComponent score;
+        // 몸체 크기. 생성 때 Definition에서 복사한다
+        public BodyComponent body;
+        // 이동, 회전 값. 생성 때 Definition에서 복사한다
+        public NavigationMovementComponent movement;
+        // 사망 상태의 길이와 사라질 때 일어나는 일. 생성 때 Definition에서 복사한다
+        public DeathComponent death;
         // 공격 목록
         public AttackListComponent attackList;
         // 드롭 표

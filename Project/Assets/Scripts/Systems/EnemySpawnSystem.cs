@@ -73,21 +73,23 @@ namespace TopView.Systems
                 position = hit.position;
             }
 
-            float maxHealth = request.stats.baseMaxHealth + request.level * request.stats.maxHealthIncrement;
+            float maxHealth = LevelScalingUtility.GetValue(in request.maxHealth, request.level);
 
             entity = new EnemyEntity
             {
                 isAlive = true,
                 generation = generation,
                 kind = new EnemyKindComponent { kind = request.enemyKindIndex },
-                stats = request.stats,
-                behavior = request.behavior,
+                score = request.score,
+                body = request.body,
+                movement = request.movement,
+                death = request.death,
                 attackList = new AttackListComponent { attacks = attacks },
                 lootList = new LootListComponent { loots = loots },
                 combat = new CombatComponent
                 {
                     level = request.level,
-                    attackDamage = request.stats.baseAttackDamage + request.level * request.stats.attackDamageIncrement
+                    attackDamage = LevelScalingUtility.GetValue(in request.attackDamage, request.level)
                 },
                 health = new HealthComponent { current = maxHealth, max = maxHealth },
                 position = new PositionComponent { previous = position, current = position },
@@ -99,7 +101,7 @@ namespace TopView.Systems
                 },
                 agent = new NavigationAgentComponent
                 {
-                    maxSpeed = request.stats.baseSpeed + request.level * request.stats.speedIncrement,
+                    maxSpeed = LevelScalingUtility.GetValue(in request.speed, request.level),
                     pathCorners = pathCorners
                 }
             };

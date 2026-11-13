@@ -1,6 +1,6 @@
 namespace TopView.Commands
 {
-    // 설정 명령. SettingsPresenter가 넣고, 그 씬의 흐름을 맡은 쪽(MenuFlow, Runner)이 소비한다.
+    // 설정 명령. 여는 명령은 MenuPresenter와 PausePresenter가, 나머지는 SettingsPresenter가 넣고, App이 소비한다.
     public struct SettingsCommand
     {
         // 명령 종류

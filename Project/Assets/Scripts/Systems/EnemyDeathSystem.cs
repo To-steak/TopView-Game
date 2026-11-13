@@ -27,7 +27,6 @@ namespace TopView.Systems
                 stateRecords.Add(new EnemyStateChangedRecord
                 {
                     enemy = new EntityIdentifier { index = index, generation = entity.generation },
-                    previousState = entity.actionState.state,
                     state = EnemyState.Die
                 });
 

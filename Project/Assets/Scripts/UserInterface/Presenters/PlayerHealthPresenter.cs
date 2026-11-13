@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace TopView.UserInterface.Presenters
 {
-    // 플레이어가 살아 있는 동안 PlayerHealthView를 보이고, Runner가 매 프레임 넘기는 체력을 보여 준다.
+    // 플레이어가 살아 있는 동안 PlayerHealthView를 보이고, World가 매 프레임 넘기는 체력을 보여 준다.
     public class PlayerHealthPresenter : MonoBehaviour
     {
         [SerializeField] private PlayerHealthView _view;
@@ -15,7 +15,7 @@ namespace TopView.UserInterface.Presenters
         private float _presentedMaxHealth;
 
         /// <summary>
-        /// View를 숨기고 보여 준 값을 처음 상태로 되돌린다. 판을 준비할 때 Runner가 부른다.
+        /// View를 숨기고 보여 준 값을 처음 상태로 되돌린다. 판을 준비할 때 World가 부른다.
         /// </summary>
         public void Initialize()
         {

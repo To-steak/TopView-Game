@@ -12,41 +12,45 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7faa2b326f566114093ce464b5910fc0, type: 3}
   m_Name: Enemy A Definition
   m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.EnemyDefinition
-  stats:
-    baseMaxHealth: 100
-    baseAttackDamage: 20
-    baseSpeed: 3
-    baseScore: 10
-    maxHealthIncrement: 20
-    attackDamageIncrement: 2
-    speedIncrement: 0.2
-    scoreIncrement: 3
-    hitRadius: 0.75
-  behavior:
+  maxHealth:
+    baseValue: 100
+    incrementPerLevel: 20
+  attackDamage:
+    baseValue: 20
+    incrementPerLevel: 2
+  speed:
+    baseValue: 3
+    incrementPerLevel: 0.2
+  score:
+    baseValue: 10
+    incrementPerLevel: 3
+  body:
+    radius: 0.75
+  movement:
     stopDistance: 1
     acceleration: 8
     angularSpeed: 360
+  death:
     dieTicks: 36
     endsGameOnDeath: 0
-    showsOverlayHealthBar: 0
   attacks:
   - attack:
       kind: 0
       attackRange: 1
       cooldownTicks: 200
-      startTicks: 15
-      endTicks: 27
-      durationTicks: 50
+      timing:
+        startTicks: 15
+        endTicks: 27
+        durationTicks: 50
       damageMultiplier: 1
-      bodyRadius: 1
-      bodyOffset: 0.5
+      meleeShape:
+        radius: 1
+        offset: 0.5
       projectile:
         kind: 0
         speed: 0
         radius: 0
         lifetimeTicks: 0
-        chargePerTick: 0
-        maxThrowDistance: 0
         flightTicks: 0
         arcHeight: 0
         explosionRadius: 0
@@ -54,6 +58,8 @@ MonoBehaviour:
           serializedVersion: 2
           m_Bits: 0
       shots: []
+    animation: 0
+    attackClip: {fileID: 8300000, guid: 9b8eb43f13281604eaf8164424d54bc6, type: 3}
     projectilePrefab: {fileID: 0}
     hitEffectPrefab: {fileID: 0}
   loots:
@@ -75,3 +81,4 @@ MonoBehaviour:
     amountIncrement: 5
   viewPrefab: {fileID: 7360897978464151965, guid: 3b02148a60e7b3f4189f63f9ca2715b8, type: 3}
   healthGaugePrefab: {fileID: 7240100042028206097, guid: 61bf5277b80621842967d75ffba1dcbe, type: 3}
+  showsOverlayHealthBar: 0

@@ -6,24 +6,30 @@ using UnityEngine;
 
 namespace TopView.UserInterface.Presenters
 {
-    // 일시정지 중이면 PauseView를 보이고, 계속·탈출·설정·나가기 버튼 입력을 판 흐름 명령으로 넣는다.
+    // 일시정지 중이면 PauseView를 보이고, 계속·탈출·설정·나가기 버튼 입력을 각 명령 목록에 넣는다.
     public class PausePresenter : MonoBehaviour
     {
         [SerializeField] private PauseView _view;
 
         private CommandBuffer _commandBuffer;
+        private List<SceneCommand> _sceneCommands;
+        private List<SettingsCommand> _settingsCommands;
         // 버튼 소리를 넣을 목록
         private List<UserInterfaceSoundKind> _soundRequests;
         private bool _isShown;
 
         /// <summary>
-        /// 명령을 넣을 버퍼를 받고 View를 숨긴다. 판을 준비할 때 Runner가 부른다.
+        /// 명령을 넣을 버퍼를 받고 View를 숨긴다. 판을 준비할 때 World가 부른다.
         /// </summary>
         /// <param name="commandBuffer">이번 판의 명령 버퍼</param>
+        /// <param name="sceneCommands">씬과 앱 전환 명령 목록</param>
+        /// <param name="settingsCommands">설정 명령 목록</param>
         /// <param name="soundRequests">UI 소리 요청 목록</param>
-        public void Initialize(CommandBuffer commandBuffer, List<UserInterfaceSoundKind> soundRequests)
+        public void Initialize(CommandBuffer commandBuffer, List<SceneCommand> sceneCommands, List<SettingsCommand> settingsCommands, List<UserInterfaceSoundKind> soundRequests)
         {
             _commandBuffer = commandBuffer;
+            _sceneCommands = sceneCommands;
+            _settingsCommands = settingsCommands;
             _soundRequests = soundRequests;
             _view.SetVisible(false);
             _isShown = false;
@@ -61,38 +67,76 @@ namespace TopView.UserInterface.Presenters
         private void HandleResumeClicked()
         {
             AddSound(UserInterfaceSoundKind.Click);
-            AddCommand(GameFlowCommandType.Resume);
+            AddPauseCommand(PauseCommandType.Resume);
         }
 
         // 플레이어를 옮긴 뒤 바로 게임으로 돌아가도록 일시정지도 푼다
         private void HandleUnstuckClicked()
         {
             AddSound(UserInterfaceSoundKind.Click);
-            AddCommand(GameFlowCommandType.Unstuck);
-            AddCommand(GameFlowCommandType.Resume);
+            AddUnstuckCommand();
+            AddPauseCommand(PauseCommandType.Resume);
         }
 
         private void HandleSettingsClicked()
         {
             AddSound(UserInterfaceSoundKind.Click);
-            AddCommand(GameFlowCommandType.OpenSettings);
+            AddSettingsCommand(SettingsCommandType.Open);
         }
 
         private void HandleExitClicked()
         {
             AddSound(UserInterfaceSoundKind.Close);
-            AddCommand(GameFlowCommandType.ReturnToMenu);
+            AddSceneCommand(SceneCommandType.ReturnToMenu);
         }
 
-        private void AddCommand(GameFlowCommandType type)
+        private void AddPauseCommand(PauseCommandType type)
         {
             if (_commandBuffer == null)
             {
-                Debug.LogWarning($"PausePresenter >> 명령 버퍼가 연결되지 않아 {type} 명령을 버렸다.");
+                ReportMissingCommandBuffer(type.ToString());
                 return;
             }
 
-            _commandBuffer.gameFlowCommands.Add(new GameFlowCommand { type = type });
+            _commandBuffer.pauseCommands.Add(new PauseCommand { type = type });
+        }
+
+        private void AddUnstuckCommand()
+        {
+            if (_commandBuffer == null)
+            {
+                ReportMissingCommandBuffer("Unstuck");
+                return;
+            }
+
+            _commandBuffer.playerUnstuckCommands.Add(new PlayerUnstuckCommand());
+        }
+
+        private void AddSettingsCommand(SettingsCommandType type)
+        {
+            if (_settingsCommands == null)
+            {
+                Debug.LogWarning($"PausePresenter >> 설정 명령 목록이 연결되지 않아 {type} 명령을 버렸다.");
+                return;
+            }
+
+            _settingsCommands.Add(new SettingsCommand { type = type });
+        }
+
+        private void AddSceneCommand(SceneCommandType type)
+        {
+            if (_sceneCommands == null)
+            {
+                Debug.LogWarning($"PausePresenter >> 씬 명령 목록이 연결되지 않아 {type} 명령을 버렸다.");
+                return;
+            }
+
+            _sceneCommands.Add(new SceneCommand { type = type });
+        }
+
+        private static void ReportMissingCommandBuffer(string commandName)
+        {
+            Debug.LogWarning($"PausePresenter >> 명령 버퍼가 연결되지 않아 {commandName} 명령을 버렸다.");
         }
 
         private void AddSound(UserInterfaceSoundKind kind)

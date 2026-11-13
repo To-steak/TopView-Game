@@ -37,7 +37,7 @@ namespace TopView.Systems
                 ref EnemyActionStateComponent actionState = ref entity.actionState;
                 ref NavigationAgentComponent agent = ref entity.agent;
                 ref RotationComponent rotation = ref entity.rotation;
-                ref readonly EnemyBehaviorComponent behavior = ref entity.behavior;
+                ref readonly NavigationMovementComponent movement = ref entity.movement;
                 EnemyAttackComponent[] attacks = entity.attackList.attacks;
                 Vector3 position = entity.position.current;
                 EntityIdentifier identifier = new EntityIdentifier { index = index, generation = entity.generation };
@@ -47,7 +47,7 @@ namespace TopView.Systems
                     case EnemyState.Idle:
                         if (hasPlayer)
                         {
-                            UpdateIdle(ref actionState, ref agent, ref rotation, position, in behavior, attacks, in identifier, playerPosition, playerRadius, deltaTime, random, stateChangeRequests);
+                            UpdateIdle(ref actionState, ref agent, ref rotation, position, in movement, attacks, in identifier, playerPosition, playerRadius, deltaTime, random, stateChangeRequests);
                         }
                         break;
 
@@ -60,7 +60,7 @@ namespace TopView.Systems
                             {
                                 break;
                             }
-                            EnemyNavigationUtility.SetDestination(ref agent, playerPosition, behavior.stopDistance);
+                            EnemyNavigationUtility.SetDestination(ref agent, playerPosition, movement.stopDistance);
                         }
                         if (hasReachedDestination)
                         {
@@ -82,20 +82,20 @@ namespace TopView.Systems
         }
 
         // 고를 수 있는 공격을 하고, 없으면 멈추는 거리 밖일 때만 쫓는다. 멈추는 거리 안이면 플레이어 쪽으로 돌며 대기시간이 끝나기를 제자리에서 기다린다.
-        private static void UpdateIdle(ref EnemyActionStateComponent actionState, ref NavigationAgentComponent agent, ref RotationComponent rotation, Vector3 position, in EnemyBehaviorComponent behavior, EnemyAttackComponent[] attacks, in EntityIdentifier identifier, Vector3 playerPosition, float playerRadius, float deltaTime, System.Random random, Queue<EnemyStateChangeRequest> stateChangeRequests)
+        private static void UpdateIdle(ref EnemyActionStateComponent actionState, ref NavigationAgentComponent agent, ref RotationComponent rotation, Vector3 position, in NavigationMovementComponent movement, EnemyAttackComponent[] attacks, in EntityIdentifier identifier, Vector3 playerPosition, float playerRadius, float deltaTime, System.Random random, Queue<EnemyStateChangeRequest> stateChangeRequests)
         {
             if (TryBeginAttackInRange(ref actionState, position, attacks, in identifier, playerPosition, playerRadius, random, stateChangeRequests))
             {
                 return;
             }
 
-            if (TargetingUtility.IsWithin(position, playerPosition, behavior.stopDistance))
+            if (TargetingUtility.IsWithin(position, playerPosition, movement.stopDistance))
             {
-                TargetingUtility.RotateToward(ref rotation.current, position, playerPosition, behavior.angularSpeed * deltaTime);
+                TargetingUtility.RotateToward(ref rotation.current, position, playerPosition, movement.angularSpeed * deltaTime);
             }
             else
             {
-                EnemyNavigationUtility.SetDestination(ref agent, playerPosition, behavior.stopDistance);
+                EnemyNavigationUtility.SetDestination(ref agent, playerPosition, movement.stopDistance);
                 stateChangeRequests.Enqueue(new EnemyStateChangeRequest { target = identifier, state = EnemyState.Walk });
             }
         }

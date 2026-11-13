@@ -38,7 +38,7 @@ namespace TopView.Systems
                     failedPathCount++;
                 }
 
-                Move(ref entity.agent, in entity.behavior, ref entity.position, ref entity.rotation, deltaTime);
+                Move(ref entity.agent, in entity.movement, ref entity.position, ref entity.rotation, deltaTime);
             }
 
             if (failedPathCount > 0)
@@ -71,7 +71,7 @@ namespace TopView.Systems
         }
 
         // 남은 경로가 멈추는 거리 안이면 멈춘다. 아니면 다음 꺾이는 점 쪽으로 가속·도착 감속하며 움직이고, 진행 방향으로 돈다.
-        private static void Move(ref NavigationAgentComponent agent, in EnemyBehaviorComponent behavior, ref PositionComponent position, ref RotationComponent rotation, float deltaTime)
+        private static void Move(ref NavigationAgentComponent agent, in NavigationMovementComponent movement, ref PositionComponent position, ref RotationComponent rotation, float deltaTime)
         {
             if (!agent.hasDestination)
             {
@@ -88,11 +88,11 @@ namespace TopView.Systems
 
             agent.hasReachedDestination = false;
 
-            float brakingSpeed = Mathf.Sqrt(2f * behavior.acceleration * (remainingDistance - agent.stoppingDistance));
+            float brakingSpeed = Mathf.Sqrt(2f * movement.acceleration * (remainingDistance - agent.stoppingDistance));
             float desiredSpeed = Mathf.Min(agent.maxSpeed, brakingSpeed);
             Vector3 toCorner = agent.pathCorners[agent.pathCornerIndex] - position.current;
             Vector3 desiredVelocity = toCorner.normalized * desiredSpeed;
-            agent.velocity = Vector3.MoveTowards(agent.velocity, desiredVelocity, behavior.acceleration * deltaTime);
+            agent.velocity = Vector3.MoveTowards(agent.velocity, desiredVelocity, movement.acceleration * deltaTime);
 
             Vector3 step = agent.velocity * deltaTime;
             if (step.sqrMagnitude >= toCorner.sqrMagnitude)
@@ -113,7 +113,7 @@ namespace TopView.Systems
             flatVelocity.y = 0f;
             if (flatVelocity.sqrMagnitude > MIN_TURN_SPEED_SQUARED)
             {
-                rotation.current = Quaternion.RotateTowards(rotation.current, Quaternion.LookRotation(flatVelocity), behavior.angularSpeed * deltaTime);
+                rotation.current = Quaternion.RotateTowards(rotation.current, Quaternion.LookRotation(flatVelocity), movement.angularSpeed * deltaTime);
             }
         }
 

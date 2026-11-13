@@ -3,7 +3,6 @@
     "rootNamespace": "TopView.Presentation",
     "references": [
         "TopView.Entity",
-        "TopView.Definitions",
         "Unity.Cinemachine",
         "UnityEngine.UI",
         "Unity.TextMeshPro",

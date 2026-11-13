@@ -14,9 +14,10 @@ namespace TopView.Systems
         /// 강화 명령을 모두 소비한다. 강화 화면이 열려 있을 때만 살아 있는 첫 플레이어를 강화한다. 일시정지 중에도 돌도록 PauseSystem 바로 뒤에서 부른다.
         /// </summary>
         /// <param name="players">플레이어 저장소</param>
+        /// <param name="weapons">무기 저장소</param>
         /// <param name="progress">한 판의 진행 상태. 골드를 쓴다</param>
         /// <param name="playerUpgradeCommands">플레이어 강화 명령 목록</param>
-        public static void Tick(PlayerStorage players, ref GameProgressComponent progress, List<PlayerUpgradeCommand> playerUpgradeCommands)
+        public static void Tick(PlayerStorage players, WeaponStorage weapons, ref GameProgressComponent progress, List<PlayerUpgradeCommand> playerUpgradeCommands)
         {
             // 강화 화면이 닫힌 뒤나 플레이어가 죽은 뒤에 남은 명령은 정상적으로 무시한다
             if (progress.isUpgradeOpen && TryFindAlivePlayer(players, out int playerIndex))
@@ -24,7 +25,7 @@ namespace TopView.Systems
                 ref PlayerEntity entity = ref players.entities[playerIndex];
                 for (int commandIndex = 0; commandIndex < playerUpgradeCommands.Count; commandIndex++)
                 {
-                    Apply(ref entity.upgradeLevels, ref entity.health, ref entity.mana, ref entity.weaponSlots, ref progress, in entity.vitals, in entity.upgrade, entity.weaponList.weapons, playerUpgradeCommands[commandIndex]);
+                    Apply(ref entity.upgradeLevels, ref entity.health, ref entity.mana, in entity.weaponSlots, ref progress, in entity.vitals, in entity.upgrade, weapons.entities, playerUpgradeCommands[commandIndex]);
                 }
             }
 
@@ -46,9 +47,9 @@ namespace TopView.Systems
         }
 
         // 버튼은 최대 레벨이거나 골드가 모자라면 눌리지 않으므로, 여기서 막히는 명령은 경고하고 버린다
-        private static void Apply(ref PlayerUpgradeLevelsComponent levels, ref HealthComponent health, ref ManaComponent mana, ref PlayerWeaponSlotsComponent weaponSlots, ref GameProgressComponent progress, in PlayerVitalsComponent vitals, in PlayerUpgradeComponent upgrade, WeaponComponent[] weapons, in PlayerUpgradeCommand command)
+        private static void Apply(ref PlayerUpgradeLevelsComponent levels, ref HealthComponent health, ref ManaComponent mana, in PlayerWeaponSlotsComponent weaponSlots, ref GameProgressComponent progress, in PlayerVitalsComponent vitals, in PlayerUpgradeComponent upgrade, WeaponEntity[] weaponEntities, in PlayerUpgradeCommand command)
         {
-            if (!TryGetLevel(in levels, in command, out int level))
+            if (!TryGetLevel(in levels, in weaponSlots, weaponEntities, in command, out int level))
             {
                 Debug.LogWarning($"PlayerUpgradeSystem >> 처리하지 않는 항목이거나 무기 번호 {command.weaponIndex}가 무기 목록 밖이라 {command.type} 강화 명령을 버렸다.");
                 return;
@@ -87,8 +88,9 @@ namespace TopView.Systems
                     levels.jumpManaCostLevel = nextLevel;
                     break;
                 case PlayerUpgradeCommandType.Weapon:
-                    levels.weaponLevels[command.weaponIndex] = nextLevel;
-                    FillAddedAmmo(ref weaponSlots, in weapons[command.weaponIndex], command.weaponIndex, level, nextLevel);
+                    ref WeaponEntity weaponEntity = ref weaponEntities[weaponSlots.weapons[command.weaponIndex].index];
+                    weaponEntity.upgradeLevel.level = nextLevel;
+                    FillAddedAmmo(ref weaponEntity.ammoState, in weaponEntity.weapon, level, nextLevel);
                     break;
             }
         }
@@ -110,13 +112,13 @@ namespace TopView.Systems
         }
 
         // 무기 레벨이 올라 최대 탄약 수가 늘어난 만큼 탄창에도 바로 넣는다
-        private static void FillAddedAmmo(ref PlayerWeaponSlotsComponent weaponSlots, in WeaponComponent weapon, int weaponIndex, int previousLevel, int nextLevel)
+        private static void FillAddedAmmo(ref AmmoStateComponent ammo, in WeaponComponent weapon, int previousLevel, int nextLevel)
         {
-            weaponSlots.currentAmmo[weaponIndex] += PlayerUpgradeUtility.GetMaxAmmo(in weapon, nextLevel) - PlayerUpgradeUtility.GetMaxAmmo(in weapon, previousLevel);
+            ammo.current += PlayerUpgradeUtility.GetMaxAmmo(in weapon, nextLevel) - PlayerUpgradeUtility.GetMaxAmmo(in weapon, previousLevel);
         }
 
-        // 항목의 지금 레벨을 꺼낸다. Weapon의 무기 번호가 레벨 배열 밖이거나 처리하지 않는 항목이면 false를 돌려준다
-        private static bool TryGetLevel(in PlayerUpgradeLevelsComponent levels, in PlayerUpgradeCommand command, out int level)
+        // 항목의 지금 레벨을 꺼낸다. Weapon은 그 무기 엔티티의 레벨이다. Weapon의 무기 번호가 무기 칸 밖이거나 처리하지 않는 항목이면 false를 돌려준다
+        private static bool TryGetLevel(in PlayerUpgradeLevelsComponent levels, in PlayerWeaponSlotsComponent weaponSlots, WeaponEntity[] weaponEntities, in PlayerUpgradeCommand command, out int level)
         {
             switch (command.type)
             {
@@ -136,13 +138,13 @@ namespace TopView.Systems
                     level = levels.jumpManaCostLevel;
                     return true;
                 case PlayerUpgradeCommandType.Weapon:
-                    int[] damageLevels = levels.weaponLevels;
-                    if (damageLevels == null || command.weaponIndex < 0 || command.weaponIndex >= damageLevels.Length)
+                    EntityIdentifier[] weaponIdentifiers = weaponSlots.weapons;
+                    if (weaponIdentifiers == null || command.weaponIndex < 0 || command.weaponIndex >= weaponIdentifiers.Length)
                     {
                         level = 0;
                         return false;
                     }
-                    level = damageLevels[command.weaponIndex];
+                    level = weaponEntities[weaponIdentifiers[command.weaponIndex].index].upgradeLevel.level;
                     return true;
                 default:
                     level = 0;

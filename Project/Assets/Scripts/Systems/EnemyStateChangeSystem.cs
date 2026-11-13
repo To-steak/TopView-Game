@@ -40,9 +40,8 @@ namespace TopView.Systems
             stateRecords.Add(new EnemyStateChangedRecord
             {
                 enemy = request.target,
-                previousState = actionState.state,
                 state = request.state,
-                attackKind = request.state == EnemyState.Attack ? attacks[actionState.attackIndex].kind : default
+                attackIndex = request.state == EnemyState.Attack ? actionState.attackIndex : default
             });
 
             actionState.state = request.state;

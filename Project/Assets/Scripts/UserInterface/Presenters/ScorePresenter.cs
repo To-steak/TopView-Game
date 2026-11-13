@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace TopView.UserInterface.Presenters
 {
-    // Runner가 매 프레임 넘기는 점수를 보여 준다.
+    // World가 매 프레임 넘기는 점수를 보여 준다.
     public class ScorePresenter : MonoBehaviour
     {
         [SerializeField] private ScoreView _view;
@@ -14,7 +14,7 @@ namespace TopView.UserInterface.Presenters
         private const int NOT_PRESENTED = -1;
 
         /// <summary>
-        /// 보여 준 값을 처음 상태로 되돌린다. 판을 준비할 때 Runner가 부른다.
+        /// 보여 준 값을 처음 상태로 되돌린다. 판을 준비할 때 World가 부른다.
         /// </summary>
         public void Initialize()
         {

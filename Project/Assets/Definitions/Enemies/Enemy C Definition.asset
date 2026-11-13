@@ -12,41 +12,45 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7faa2b326f566114093ce464b5910fc0, type: 3}
   m_Name: Enemy C Definition
   m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.EnemyDefinition
-  stats:
-    baseMaxHealth: 50
-    baseAttackDamage: 30
-    baseSpeed: 1
-    baseScore: 25
-    maxHealthIncrement: 5
-    attackDamageIncrement: 20
-    speedIncrement: 0.1
-    scoreIncrement: 20
-    hitRadius: 0.5
-  behavior:
+  maxHealth:
+    baseValue: 50
+    incrementPerLevel: 5
+  attackDamage:
+    baseValue: 30
+    incrementPerLevel: 20
+  speed:
+    baseValue: 1
+    incrementPerLevel: 0.1
+  score:
+    baseValue: 25
+    incrementPerLevel: 20
+  body:
+    radius: 0.5
+  movement:
     stopDistance: 5
     acceleration: 4
     angularSpeed: 360
+  death:
     dieTicks: 36
     endsGameOnDeath: 0
-    showsOverlayHealthBar: 0
   attacks:
   - attack:
       kind: 1
       attackRange: 25
       cooldownTicks: 500
-      startTicks: 30
-      endTicks: 0
-      durationTicks: 50
+      timing:
+        startTicks: 0
+        endTicks: 0
+        durationTicks: 50
       damageMultiplier: 1
-      bodyRadius: 0
-      bodyOffset: 0
+      meleeShape:
+        radius: 0
+        offset: 0
       projectile:
         kind: 0
         speed: 15
         radius: 0.25
         lifetimeTicks: 500
-        chargePerTick: 0
-        maxThrowDistance: 0
         flightTicks: 0
         arcHeight: 0
         explosionRadius: 0.5
@@ -56,6 +60,8 @@ MonoBehaviour:
       shots:
       - startTicks: 26
         spawnOffset: {x: 0, y: 0.192, z: 0.455}
+    animation: 1
+    attackClip: {fileID: 8300000, guid: a42a25bfe713e63498febabb408fceea, type: 3}
     projectilePrefab: {fileID: 1467422185046970197, guid: 94bbe6c225f22584bbed1cfc8a479c95, type: 3}
     hitEffectPrefab: {fileID: 8142776624367745201, guid: be16a2ead503d12418c1f228fcee2f7c, type: 3}
   loots:
@@ -73,3 +79,4 @@ MonoBehaviour:
     amountIncrement: 35
   viewPrefab: {fileID: 3745814735767933518, guid: 15ce2362c6dc61145a1e9d46e36f1a8c, type: 3}
   healthGaugePrefab: {fileID: 7240100042028206097, guid: 3f976bcd53dc80f47a8de602438c974c, type: 3}
+  showsOverlayHealthBar: 0
