@@ -15,6 +15,7 @@ namespace TopView.Systems
         /// </summary>
         /// <param name="players">플레이어 저장소</param>
         /// <param name="playerSpawnRequests">플레이어 생성 요청 큐</param>
+        /// <param name="weaponSpawnRequests">무기 생성 요청 큐. 생성한 플레이어가 들 무기마다 넣는다</param>
         public static void Tick(PlayerStorage players, Queue<PlayerSpawnRequest> playerSpawnRequests, Queue<WeaponSpawnRequest> weaponSpawnRequests)
         {
             int droppedCount = 0;
