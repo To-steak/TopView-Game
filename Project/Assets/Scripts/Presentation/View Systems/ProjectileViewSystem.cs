@@ -37,16 +37,16 @@ namespace TopView.Presentation.ViewSystems
         }
 
         // 칸 하나의 View를 엔티티와 맞춘다. 엔티티가 없거나 바뀌었으면 View를 돌려놓고, 살아 있으면 꺼내 붙여 위치를 보간한다.
-        private static void PresentSlot(ProjectileViewContext context, int index, bool isAlive, int generation, in ProjectileViewComponent projectileView, in PositionComponent position, in RotationComponent rotation, GameObject[] projectilePrefabs, bool isPaused, float alpha)
+        private static void PresentSlot(ProjectileViewContext context, int index, bool hasProjectile, int generation, in ProjectileViewComponent projectileView, in PositionComponent position, in RotationComponent rotation, GameObject[] projectilePrefabs, bool isPaused, float alpha)
         {
             ProjectileView view = context.views[index];
-            if (view != null && (!isAlive || context.viewGenerations[index] != generation))
+            if (view != null && (!hasProjectile || context.viewGenerations[index] != generation))
             {
                 Release(context, index);
                 view = null;
             }
 
-            if (!isAlive || projectileView.viewIndex < 0)
+            if (!hasProjectile || projectileView.viewIndex < 0)
             {
                 return;
             }

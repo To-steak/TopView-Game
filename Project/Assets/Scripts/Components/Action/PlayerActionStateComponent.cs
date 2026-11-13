@@ -9,7 +9,7 @@ namespace TopView.Components
         public PlayerState state;
         // 지금 상태에 들어간 뒤 지난 시간(틱). 들어간 틱은 0이다
         public int elapsedTicks;
-        // 지금 공격 상태에서 이미 내보낸 발 수. Melee는 판정이 나가면 1이다. 다음에 내보낼 shots 칸 번호이기도 하다
+        // 지금 공격 상태에서 이미 내보낸 발 수. 근접 공격은 판정이 나가면 1이다. 다음에 내보낼 shots 칸 번호이기도 하다
         public int committedShotCount;
         // 다음 공격 상태에 들어갈 수 있기까지 남은 시간(틱). 0이면 들어갈 수 있다
         public int attackCooldownTicks;

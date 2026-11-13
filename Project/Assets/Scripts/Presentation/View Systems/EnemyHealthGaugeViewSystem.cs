@@ -14,7 +14,7 @@ namespace TopView.Presentation.ViewSystems
         /// <summary>
         /// 저장소의 칸마다 적 View와 게이지를 맞추고, 게이지의 위치·회전·너비·글자를 적에 맞춘다. EnemyViewSystem.Present 다음에 부른다.
         /// </summary>
-        /// <param name="entities">적 엔티티 배열</param>
+        /// <param name="entities">엔티티 배열. 적 View가 있는 칸만 읽는다</param>
         /// <param name="gaugePrefabsByKind">적 종류별 EnemyHealthGaugeView 프리팹</param>
         /// <param name="mainCamera">게이지가 바라볼 카메라. 없으면 null</param>
         /// <param name="context">적 View 실행 상태</param>

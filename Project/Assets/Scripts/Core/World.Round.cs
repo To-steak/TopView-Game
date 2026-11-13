@@ -236,7 +236,7 @@ namespace TopView.Core
             return viewContext;
         }
 
-        // 투사체 저장소 하나의 칸 수와 투사체 View 표에 맞춰 View 실행 상태를 만든다. 풀은 저장소마다 따로 둔다.
+        // 엔티티 저장소의 칸 수와 투사체 View 표에 맞춰 투사체 View 실행 상태를 만든다.
         private ProjectileViewContext CreateProjectileViewContext(int capacity)
         {
             ProjectileViewContext context = new ProjectileViewContext

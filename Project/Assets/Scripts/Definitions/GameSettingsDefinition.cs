@@ -18,11 +18,11 @@ namespace TopView.Definitions
         public int enemyCapacityPerKind;
         // 적 하나의 경로에 담을 수 있는 꺾이는 점의 최대 수. 시작점도 한 칸을 쓴다
         public int enemyPathCornerCapacity;
-        // 동시에 있을 수 있는 직선 투사체 최대 수. 판을 준비할 때 직선 투사체 저장소 칸 수로 쓴다
+        // 동시에 있을 수 있는 직선 투사체 최대 수. 판을 준비할 때 엔티티 저장소의 직선 투사체 구간 칸 수로 쓴다
         [FormerlySerializedAs("projectileCapacity")] public int straightProjectileCapacity;
-        // 동시에 있을 수 있는 포물선 투사체 최대 수. 판을 준비할 때 포물선 투사체 저장소 칸 수로 쓴다
+        // 동시에 있을 수 있는 포물선 투사체 최대 수. 판을 준비할 때 엔티티 저장소의 포물선 투사체 구간 칸 수로 쓴다
         public int arcProjectileCapacity;
-        // 동시에 있을 수 있는 전리품 최대 수. 판을 준비할 때 전리품 저장소 칸 수로 쓴다
+        // 동시에 있을 수 있는 전리품 최대 수. 판을 준비할 때 엔티티 저장소의 전리품 구간 칸 수로 쓴다
         public int lootCapacity;
     }
 }

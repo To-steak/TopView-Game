@@ -54,15 +54,15 @@ namespace TopView.Analyzers
         }
 
         /// <summary>
-        /// 타입 이름이 컴포넌트·엔티티 접미사(<c>~Component</c>, <c>~Entity</c>)로 끝나는지 확인한다.
+        /// 타입 이름이 컴포넌트·엔티티 접미사(<c>~Component</c>, <c>~Entity</c>)로 끝나는지 확인한다. 이름이 접미사 자체(엔티티 칸 <c>Entity</c>)여도 맞다.
         /// </summary>
         /// <param name="name">검사할 타입 이름</param>
-        /// <returns>접미사로 끝나면 true</returns>
+        /// <returns>접미사로 끝나거나 접미사 자체면 true</returns>
         public static bool HasDataSuffix(string name)
         {
             foreach (string suffix in DATA_SUFFIXES)
             {
-                if (name.Length > suffix.Length && name.EndsWith(suffix, StringComparison.Ordinal))
+                if (name.EndsWith(suffix, StringComparison.Ordinal))
                 {
                     return true;
                 }

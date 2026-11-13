@@ -42,7 +42,7 @@ namespace TopView.Presentation.ViewSystems
         /// <summary>
         /// 살아 있는 플레이어가 있으면 View를 만들거나 맞추고, 없으면 View를 끈다.
         /// </summary>
-        /// <param name="entities">플레이어 엔티티 배열</param>
+        /// <param name="entities">엔티티 배열. 플레이어(PlayerActionState)와 그 무기 칸을 읽는다</param>
         /// <param name="stateRecords">이번 프레임의 상태 변경 기록</param>
         /// <param name="attackRecords">이번 프레임의 공격을 내보낸 기록</param>
         /// <param name="viewPrefab">PlayerView가 붙은 프리팹</param>

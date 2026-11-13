@@ -4,7 +4,7 @@
 
 | ID | 규칙 |
 |---|---|
-| TV0020 | 컴포넌트·엔티티 배열의 원소를 값으로 꺼내지 않는다. `ref`로, 읽기만 하면 `ref readonly`로 꺼낸다 |
+| TV0020 | 컴포넌트·엔티티 배열(`Entity[]` 포함)의 원소를 값으로 꺼내지 않는다. `ref`로, 읽기만 하면 `ref readonly`로 꺼낸다 |
 | TV0021 | 프로젝트 struct 매개변수를 값으로 받지 않는다. 고치면 `ref`, 읽기만 하면 `in` |
 | TV0022 | 고치지 않는 `ref` 매개변수는 `in`으로 받는다 |
 
@@ -62,6 +62,28 @@ namespace TopView.Core
         private static void Increment(ref int number)
         {
             number++;
+        }
+    }
+}
+```
+
+## 엔티티 칸 배열(`Entity[]`)도 같다
+
+```csharp
+namespace TopView.Core
+{
+    public struct Entity
+    {
+        public int generation;
+    }
+
+    public class EntitySample
+    {
+        public int Read(Entity[] entities)
+        {
+            Entity copy = entities[0]; // 경고: TV0020
+            ref readonly Entity element = ref entities[0];
+            return copy.generation + element.generation;
         }
     }
 }
