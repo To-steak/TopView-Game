@@ -45,6 +45,8 @@ MonoBehaviour:
     swapStartTicks: 13
     swapTicks: 30
     reloadTicks: 140
+  body:
+    radius: 0.25
   death:
     dieTicks: 74
     isGameOverOnDeath: 1

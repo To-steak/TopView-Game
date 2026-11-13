@@ -9,7 +9,7 @@ namespace TopView.Components
         public bool hasPlayer;
         // 플레이어 위치(월드)
         public Vector3 position;
-        // 플레이어 이동 충돌 캡슐의 반지름. 감지와 공격 범위에 더한다
+        // 플레이어 몸체 반지름(유닛, XZ). 감지와 공격 범위에 더한다
         public float radius;
     }
 }

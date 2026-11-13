@@ -28,10 +28,10 @@ namespace TopView.Systems
                 ref readonly PlayerEntity player = ref players.entities[index];
                 if (player.isAlive && player.health.current > 0f)
                 {
-                    // 점프로 적 투사체를 피할 수 있도록 플레이어만 캡슐 높이로 맞는다
+                    // 점프로 적 투사체를 피할 수 있도록 플레이어만 이동 충돌 캡슐의 높이로 맞는다
                     PlayerMovementUtility.GetCapsulePoints(in player.movement, player.rotation.current, player.position.current, out Vector3 top, out Vector3 bottom);
-                    float radius = player.movement.capsuleRadius;
-                    Add(playerHitTargets, ref playerHitTargetCount, index, player.generation, player.position.current, radius, bottom.y - radius, top.y + radius);
+                    float capsuleRadius = player.movement.capsuleRadius;
+                    Add(playerHitTargets, ref playerHitTargetCount, index, player.generation, player.position.current, player.body.radius, bottom.y - capsuleRadius, top.y + capsuleRadius);
                 }
             }
 

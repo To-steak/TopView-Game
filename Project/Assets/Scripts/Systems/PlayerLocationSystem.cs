@@ -25,7 +25,7 @@ namespace TopView.Systems
 
                 playerLocation.hasPlayer = true;
                 playerLocation.position = entity.position.current;
-                playerLocation.radius = entity.movement.capsuleRadius;
+                playerLocation.radius = entity.body.radius;
                 return;
             }
         }

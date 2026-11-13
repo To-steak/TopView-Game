@@ -81,6 +81,7 @@ namespace TopView.Core
                 movement = playerDefinition.movement,
                 vitals = playerDefinition.vitals,
                 action = playerDefinition.action,
+                body = playerDefinition.body,
                 death = playerDefinition.death,
                 upgrade = playerDefinition.upgrade,
                 weapons = weapons
