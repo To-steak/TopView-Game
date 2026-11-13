@@ -26,7 +26,7 @@ namespace TopView.Editor
             DrawStraightProjectiles(world.EditorStraightProjectiles);
             DrawArcProjectiles(world.EditorArcProjectiles);
             DrawLootPickupRanges(world.EditorPlayers, world.EditorLootPickupRadius);
-            DrawDroppedLoots(world.EditorLoots);
+            DrawDroppedLoots(world.EditorEntities);
         }
 
         // 플레이어 이동 충돌에 쓰는 캡슐을 Logic 위치에 그린다. 착지 중이면 초록, 공중이면 노랑
@@ -150,12 +150,12 @@ namespace TopView.Editor
         }
 
         // 떨어져 있는 전리품마다 Logic 위치를 파란색 XZ 원으로 그린다.
-        private static void DrawDroppedLoots(LootEntity[] entities)
+        private static void DrawDroppedLoots(Entity[] entities)
         {
             Gizmos.color = Color.blue;
             for (int index = 0; index < entities.Length; index++)
             {
-                if (entities[index].isAlive)
+                if ((entities[index].mask & ComponentMask.Loot) != 0)
                 {
                     GizmoShapes.DrawCircle(entities[index].position.current, DROPPED_LOOT_RADIUS);
                 }

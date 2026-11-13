@@ -11,14 +11,14 @@ namespace TopView.Systems
         /// <summary>
         /// 살아 있는 전리품의 남은 수명을 1틱 줄인다. 0이 되면 소멸을 요청한다.
         /// </summary>
-        /// <param name="loots">전리품 저장소</param>
+        /// <param name="storage">엔티티 저장소. Loot를 가진 칸만 처리한다</param>
         /// <param name="despawnRequests">전리품 소멸 요청 큐</param>
-        public static void Tick(LootStorage loots, Queue<LootDespawnRequest> despawnRequests)
+        public static void Tick(EntityStorage storage, Queue<LootDespawnRequest> despawnRequests)
         {
-            for (int index = 0; index < loots.entities.Length; index++)
+            for (int index = 0; index < storage.entities.Length; index++)
             {
-                ref LootEntity entity = ref loots.entities[index];
-                if (entity.isAlive && Elapse(ref entity.loot))
+                ref Entity entity = ref storage.entities[index];
+                if ((entity.mask & ComponentMask.Loot) != 0 && Elapse(ref entity.loot))
                 {
                     despawnRequests.Enqueue(new LootDespawnRequest
                     {

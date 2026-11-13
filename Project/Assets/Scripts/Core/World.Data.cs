@@ -24,8 +24,8 @@ namespace TopView.Core
         public StraightProjectileEntity[] EditorStraightProjectiles => _straightProjectiles.entities;
         // 포물선 투사체 칸. Editor의 WorldGizmos가 읽기만 한다
         public ArcProjectileEntity[] EditorArcProjectiles => _arcProjectiles.entities;
-        // 전리품 칸. Editor의 WorldGizmos가 읽기만 한다
-        public LootEntity[] EditorLoots => _loots.entities;
+        // 엔티티 칸. Editor의 WorldGizmos가 읽기만 한다
+        public Entity[] EditorEntities => _entities.entities;
         // 전리품 획득 반경. Editor의 WorldGizmos가 읽기만 한다
         public float EditorLootPickupRadius => _lootRule.pickupRadius;
 #endif
@@ -67,8 +67,8 @@ namespace TopView.Core
         private StraightProjectileStorage _straightProjectiles;
         // 포물선 투사체 저장소
         private ArcProjectileStorage _arcProjectiles;
-        // 전리품 저장소
-        private LootStorage _loots;
+        // 엔티티 저장소. 옮겨 온 종류(전리품)를 담는다
+        private EntityStorage _entities;
         // 이번 틱의 플레이어 피격 대상 목록. 적의 공격이 읽는다. 판 시작 때 플레이어 칸 수로 만들고, 매 틱 HitTargetSystem이 다시 채운다
         private HitTargetComponent[] _playerHitTargets;
         // 플레이어 피격 대상 목록에서 이번 틱에 채운 대상 수

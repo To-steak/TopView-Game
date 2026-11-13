@@ -109,7 +109,7 @@ namespace TopView.Core
             _melees = new MeleeStorage(combatantCapacity, combatantCapacity);
             _straightProjectiles = new StraightProjectileStorage(gameSettings.straightProjectileCapacity);
             _arcProjectiles = new ArcProjectileStorage(gameSettings.arcProjectileCapacity);
-            _loots = new LootStorage(gameSettings.lootCapacity);
+            _entities = new EntityStorage(gameSettings.lootCapacity);
 
             _progress = new GameProgressComponent
             {
@@ -195,9 +195,9 @@ namespace TopView.Core
                 },
                 loot = new LootViewContext
                 {
-                    views = new LootView[_loots.entities.Length],
-                    viewGenerations = new int[_loots.entities.Length],
-                    viewKinds = new int[_loots.entities.Length],
+                    views = new LootView[_entities.entities.Length],
+                    viewGenerations = new int[_entities.entities.Length],
+                    viewKinds = new int[_entities.entities.Length],
                     viewPools = new Stack<LootView>[_lootPrefabs.Length]
                 },
                 pause = new PauseViewContext(),

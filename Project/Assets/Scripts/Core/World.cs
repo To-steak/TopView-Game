@@ -83,10 +83,10 @@ namespace TopView.Core
                 PlayerThrowPreviewSystem.Tick(_players, _weapons);
                 PlayerStaminaSystem.Tick(_players);
                 // 획득은 이동이 끝난 위치를 읽고, 이번 틱 피해가 반영된 체력을 보므로 이 자리에 둔다
-                LootPickupSystem.Tick(_loots, _players, _weapons, ref _progress, _lootRule.pickupRadius, _lootDespawnRequests, _lootPickedUpRecords);
-                LootDespawnSystem.Tick(_loots, _lootDespawnRequests);
-                LootLifetimeSystem.Tick(_loots, _lootDespawnRequests);
-                LootDespawnSystem.Tick(_loots, _lootDespawnRequests);
+                LootPickupSystem.Tick(_entities, _players, _weapons, ref _progress, _lootRule.pickupRadius, _lootDespawnRequests, _lootPickedUpRecords);
+                LootDespawnSystem.Tick(_entities, _lootDespawnRequests);
+                LootLifetimeSystem.Tick(_entities, _lootDespawnRequests);
+                LootDespawnSystem.Tick(_entities, _lootDespawnRequests);
                 EnemyDeathSystem.Tick(_enemies, _enemyStateChangedRecords);
                 EnemyStateTimerSystem.Tick(_enemies);
                 PlayerLocationSystem.Tick(_players, ref _playerLocation);
@@ -122,7 +122,7 @@ namespace TopView.Core
                 ProjectileSpawnSystem.Tick(_straightProjectiles, _straightProjectileSpawnRequests);
                 ProjectileSpawnSystem.Tick(_arcProjectiles, _arcProjectileSpawnRequests);
                 MeleeSpawnSystem.Tick(_melees, _meleeSpawnRequests);
-                LootSpawnSystem.Tick(_loots, _lootSpawnRequests, _lootRule.lifetimeTicks);
+                LootSpawnSystem.Tick(_entities, _lootSpawnRequests, _lootRule.lifetimeTicks);
             }
 
             CommandSystem.ClearPlayerPresses(ref _commandBuffer.playerCommand);
@@ -175,7 +175,7 @@ namespace TopView.Core
             WorldInformationViewSystem.Present(_viewContext.camera.mainCamera, _viewContext.worldInformation);
             ProjectileViewSystem.Present(_straightProjectiles.entities, _projectilePrefabs, isPaused, _viewContext.straightProjectile);
             ProjectileViewSystem.Present(_arcProjectiles.entities, _projectilePrefabs, isPaused, _viewContext.arcProjectile);
-            LootViewSystem.Present(_loots.entities, _lootPrefabs, isPaused, _viewContext.loot);
+            LootViewSystem.Present(_entities.entities, _lootPrefabs, isPaused, _viewContext.loot);
             HitEffectViewSystem.Present(_projectileHitRecords, _playerAttackCommittedRecords, _hitEffectPrefabs, isPaused, _viewContext.hitEffect);
             DamageTextViewSystem.Present(_enemyDamagedRecords, _viewContext.enemy.views, _viewContext.enemy.viewGenerations, _worldTextViewPrefab, _viewContext.camera.mainCamera, _viewContext.worldText.pendingTexts);
             LootTextViewSystem.Present(_lootPickedUpRecords, _worldTextViewPrefab, _viewContext.worldText.pendingTexts);
