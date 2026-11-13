@@ -211,6 +211,8 @@ public static void Tick(EntityStorage storage, Queue<LootDespawnRequest> despawn
 
 - 수치는 하드코딩하지 않고 `~Definition`(ScriptableObject)에 둔다.
   - 이유: 수치를 코드 수정 없이 에디터에서 조정한다.
+- 예외: 저장소 칸 수처럼 게임 조정 값이 아닌 크기는 Core의 상수로 둔다.
+  - 이유: 메모리 크기는 플레이하며 조정하는 값이 아니고, 인스펙터에 두면 게임 수치처럼 보여 잘못 건드린다.
 - Definition은 씬에 배치한 오브젝트가 인스펙터 필드로 가리킨다. 엔티티 종류는 `~Authoring`이, 판 전체의 Definition은 World가, 판이 없는 씬의 Definition은 그 씬의 대표(`Menu` 등)가, 앱 수명의 Definition은 App 프리팹이 가리킨다. 씬마다 다른 값(배경음악 곡 등)은 그 씬의 대표가 가리키고 App에 등록할 때 넘긴다. `Resources.Load`는 쓰지 않는다.
   - 이유: 참조가 인스펙터에 보여 무엇을 쓰는지 씬에서 바로 알고, 누락은 판 시작 시 null 검사에서 드러난다. `Resources/`는 문자열 경로에 의존하고 안의 에셋을 모두 빌드에 넣는다.
 - 테이블은 생성 시점에만 조회하고 필요한 값은 칸의 컴포넌트로 복사한다. 매 틱 로직은 칸의 컴포넌트만 쓴다.

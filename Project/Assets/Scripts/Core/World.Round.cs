@@ -22,6 +22,17 @@ namespace TopView.Core
         // 적 체력 게이지, 월드 글자, 월드 정보 UI를 담는 월드 캔버스
         [SerializeField] private WorldCanvasView _worldCanvasView;
 
+        // 적 종류마다 동시에 있을 수 있는 최대 수. 엔티티 저장소의 적 종류별 구간 칸 수다
+        private const int ENEMY_CAPACITY_PER_KIND = 512;
+        // 적 하나의 경로에 담을 수 있는 꺾이는 점의 최대 수. 시작점도 한 칸을 쓴다
+        private const int ENEMY_PATH_CORNER_CAPACITY = 8;
+        // 동시에 있을 수 있는 직선 투사체 최대 수. 엔티티 저장소의 직선 투사체 구간 칸 수다
+        private const int STRAIGHT_PROJECTILE_CAPACITY = 512;
+        // 동시에 있을 수 있는 포물선 투사체 최대 수. 엔티티 저장소의 포물선 투사체 구간 칸 수다
+        private const int ARC_PROJECTILE_CAPACITY = 64;
+        // 동시에 있을 수 있는 전리품 최대 수. 엔티티 저장소의 전리품 구간 칸 수다
+        private const int LOOT_CAPACITY = 512;
+
         // 한 판의 데이터에 Definition과 씬의 Authoring 값을 채운 뒤, 씬의 View와 Presenter를 연결한다.
         private void StartRound()
         {
@@ -49,12 +60,6 @@ namespace TopView.Core
 
             if (!TryReadPlayer(playerSpawner, projectilePrefabs, hitEffectPrefabs, out PlayerDefinition playerDefinition, out PlayerSpawnRequest playerSpawnRequest, out GameObject[] weaponModelPrefabs))
             {
-                return;
-            }
-
-            if (gameSettings.enemyCapacityPerKind <= 0 || gameSettings.enemyPathCornerCapacity <= 0 || gameSettings.straightProjectileCapacity <= 0 || gameSettings.arcProjectileCapacity <= 0 || gameSettings.lootCapacity <= 0)
-            {
-                Debug.LogError("World >> Game Settings Definition의 Enemy Capacity Per Kind, Enemy Path Corner Capacity, Straight Projectile Capacity, Arc Projectile Capacity, Loot Capacity 중 0 이하인 값이 있어 판을 시작할 수 없다.");
                 return;
             }
 
@@ -98,12 +103,12 @@ namespace TopView.Core
             _random = new System.Random(_rule.randomSeed);
             _playerSpawnRequests.Enqueue(playerSpawnRequest);
             _enemySpawnTemplates = enemySpawnTemplates;
-            int enemyCapacity = enemyKindCount * gameSettings.enemyCapacityPerKind;
+            int enemyCapacity = enemyKindCount * ENEMY_CAPACITY_PER_KIND;
             _playerHitTargets = new HitTargetComponent[PLAYER_CAPACITY];
             _enemyHitTargets = new HitTargetComponent[enemyCapacity];
             // 공격하는 쪽 하나는 근접 판정을 동시에 하나만 가지고, 한 판정이 맞힐 대상도 플레이어와 적의 칸 수를 넘지 않는다
             int combatantCapacity = PLAYER_CAPACITY + enemyCapacity;
-            _entities = new EntityStorage(gameSettings.lootCapacity, combatantCapacity, combatantCapacity, gameSettings.straightProjectileCapacity, gameSettings.arcProjectileCapacity, enemyKindCount, gameSettings.enemyCapacityPerKind, gameSettings.enemyPathCornerCapacity, PLAYER_CAPACITY, PLAYER_CAPACITY * playerSpawnRequest.weapons.Length);
+            _entities = new EntityStorage(LOOT_CAPACITY, combatantCapacity, combatantCapacity, STRAIGHT_PROJECTILE_CAPACITY, ARC_PROJECTILE_CAPACITY, enemyKindCount, ENEMY_CAPACITY_PER_KIND, ENEMY_PATH_CORNER_CAPACITY, PLAYER_CAPACITY, PLAYER_CAPACITY * playerSpawnRequest.weapons.Length);
 
             _progress = new GameProgressComponent
             {
