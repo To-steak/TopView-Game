@@ -80,3 +80,6 @@ crashlytics-build.properties
 /[Aa]ssets/[Ll]ocal Assets/
 /[Aa]ssets/[Qq]uarterView 3D Action BE5/
 /[Aa]ssets/[Qq]uarterView 3D Action BE5.meta
+
+# Paid packages
+/[Pp]ackages/com.occasoftware.super-simple-skybox/
