@@ -1,6 +1,6 @@
 namespace TopView.Components
 {
-    // 적 스포너의 상태. 런타임 값이며 번호가 같은 EnemySpawnerComponent의 상태다.
+    // 런타임 값. 적 스포너의 발동과 생성 진행.
     public struct EnemySpawnerStateComponent
     {
         // 발동되어 적을 내보내는 중인지

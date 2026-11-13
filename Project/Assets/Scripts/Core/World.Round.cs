@@ -22,6 +22,17 @@ namespace TopView.Core
         // 적 체력 게이지, 월드 글자, 월드 정보 UI를 담는 월드 캔버스
         [SerializeField] private WorldCanvasView _worldCanvasView;
 
+        // 적 종류마다 동시에 있을 수 있는 최대 수. 엔티티 저장소의 적 종류별 구간 칸 수다
+        private const int ENEMY_CAPACITY_PER_KIND = 512;
+        // 적 하나의 경로에 담을 수 있는 꺾이는 점의 최대 수. 시작점도 한 칸을 쓴다
+        private const int ENEMY_PATH_CORNER_CAPACITY = 8;
+        // 동시에 있을 수 있는 직선 투사체 최대 수. 엔티티 저장소의 직선 투사체 구간 칸 수다
+        private const int STRAIGHT_PROJECTILE_CAPACITY = 512;
+        // 동시에 있을 수 있는 포물선 투사체 최대 수. 엔티티 저장소의 포물선 투사체 구간 칸 수다
+        private const int ARC_PROJECTILE_CAPACITY = 64;
+        // 동시에 있을 수 있는 전리품 최대 수. 엔티티 저장소의 전리품 구간 칸 수다
+        private const int LOOT_CAPACITY = 512;
+
         // 한 판의 데이터에 Definition과 씬의 Authoring 값을 채운 뒤, 씬의 View와 Presenter를 연결한다.
         private void StartRound()
         {
@@ -52,12 +63,6 @@ namespace TopView.Core
                 return;
             }
 
-            if (gameSettings.enemyCapacityPerKind <= 0 || gameSettings.enemyPathCornerCapacity <= 0 || gameSettings.projectileCapacity <= 0 || gameSettings.lootCapacity <= 0)
-            {
-                Debug.LogError("World >> Game Settings Definition의 Enemy Capacity Per Kind, Enemy Path Corner Capacity, Projectile Capacity, Loot Capacity 중 0 이하인 값이 있어 판을 시작할 수 없다.");
-                return;
-            }
-
             if (lootDefinition.rule.pickupRadius <= 0f || lootDefinition.rule.lifetimeTicks <= 0)
             {
                 Debug.LogError("World >> Loot Definition의 Pickup Radius나 Lifetime Ticks가 0 이하라 판을 시작할 수 없다.");
@@ -82,32 +87,33 @@ namespace TopView.Core
                 return;
             }
 
-            ReadEnemySpawners(out EnemyDefinition[] enemyDefinitions, out EnemySpawnerComponent[] enemySpawners, out EnemySpawnerAuthoring[] enemySpawnerAuthorings);
-            PlayerDetectorComponent[] playerDetectors = ReadPlayerDetectors(enemySpawnerAuthorings);
+            ReadEnemySpawners(out EnemyDefinition[] enemyDefinitions, out EnemySpawnerSpawnRequest[] enemySpawnerSpawnRequests, out EnemySpawnerAuthoring[] enemySpawnerAuthorings);
+            PlayerDetectorSpawnRequest[] playerDetectorSpawnRequests = ReadPlayerDetectors(enemySpawnerAuthorings);
 
             int enemyKindCount = enemyDefinitions.Length;
-            ReadEnemies(enemyDefinitions, projectilePrefabs, hitEffectPrefabs, out EnemySpawnRequest[] enemySpawnTemplates, out GameObject[] enemyViewPrefabs, out EnemyAttackAnimation[][] enemyAttackAnimations, out AudioClip[][] enemyAttackClips, out bool[] enemyShowsOverlayHealthBar, out GameObject[] enemyHealthGaugePrefabs);
+            ReadEnemies(enemyDefinitions, projectilePrefabs, hitEffectPrefabs, out EnemySpawnRequest[] enemySpawnTemplates, out GameObject[] enemyViewPrefabs, out EnemyAttackAnimation[][] enemyAttackAnimations, out AudioClip[][] enemyAttackClips, out bool[] enemyHasOverlayHealthBar, out GameObject[] enemyHealthGaugePrefabs);
+            WarnMissingBossClip(_musicDefinition, enemyHasOverlayHealthBar);
 
             _rule = gameSettings.rule;
             _lootRule = lootDefinition.rule;
-            _enemySpawners = enemySpawners;
-            _enemySpawnerStates = new EnemySpawnerStateComponent[enemySpawners.Length];
-            _playerDetectors = playerDetectors;
-            _playerDetectorStates = new PlayerDetectorStateComponent[playerDetectors.Length];
             _random = new System.Random(_rule.randomSeed);
             _playerSpawnRequests.Enqueue(playerSpawnRequest);
+            for (int spawnerIndex = 0; spawnerIndex < enemySpawnerSpawnRequests.Length; spawnerIndex++)
+            {
+                _enemySpawnerSpawnRequests.Enqueue(enemySpawnerSpawnRequests[spawnerIndex]);
+            }
+            for (int detectorIndex = 0; detectorIndex < playerDetectorSpawnRequests.Length; detectorIndex++)
+            {
+                _playerDetectorSpawnRequests.Enqueue(playerDetectorSpawnRequests[detectorIndex]);
+            }
             _enemySpawnTemplates = enemySpawnTemplates;
-            int enemyCapacity = enemyKindCount * gameSettings.enemyCapacityPerKind;
+            int enemyCapacity = enemyKindCount * ENEMY_CAPACITY_PER_KIND;
             _playerHitTargets = new HitTargetComponent[PLAYER_CAPACITY];
             _enemyHitTargets = new HitTargetComponent[enemyCapacity];
             // 공격하는 쪽 하나는 근접 판정을 동시에 하나만 가지고, 한 판정이 맞힐 대상도 플레이어와 적의 칸 수를 넘지 않는다
             int combatantCapacity = PLAYER_CAPACITY + enemyCapacity;
-            _players = new PlayerStorage(PLAYER_CAPACITY);
-            _weapons = new WeaponStorage(PLAYER_CAPACITY * playerSpawnRequest.weapons.Length);
-            _enemies = new EnemyStorage(enemyKindCount, gameSettings.enemyCapacityPerKind, gameSettings.enemyPathCornerCapacity);
-            _melees = new MeleeStorage(combatantCapacity, combatantCapacity);
-            _projectiles = new ProjectileStorage(gameSettings.projectileCapacity);
-            _loots = new LootStorage(gameSettings.lootCapacity);
+            _entities = new EntityStorage(LOOT_CAPACITY, combatantCapacity, combatantCapacity, STRAIGHT_PROJECTILE_CAPACITY, ARC_PROJECTILE_CAPACITY, enemyKindCount, ENEMY_CAPACITY_PER_KIND, ENEMY_PATH_CORNER_CAPACITY, PLAYER_CAPACITY, PLAYER_CAPACITY * playerSpawnRequest.weapons.Length,
+                enemySpawnerSpawnRequests.Length, playerDetectorSpawnRequests.Length);
 
             _progress = new GameProgressComponent
             {
@@ -132,7 +138,7 @@ namespace TopView.Core
             _enemyViewPrefabs = enemyViewPrefabs;
             _enemyAttackAnimations = enemyAttackAnimations;
             _enemyAttackClips = enemyAttackClips;
-            _enemyShowsOverlayHealthBar = enemyShowsOverlayHealthBar;
+            _enemyHasOverlayHealthBar = enemyHasOverlayHealthBar;
             _enemyHealthGaugePrefabs = enemyHealthGaugePrefabs;
             _projectilePrefabs = projectilePrefabs.ToArray();
             _hitEffectPrefabs = hitEffectPrefabs.ToArray();
@@ -170,22 +176,16 @@ namespace TopView.Core
                 player = new PlayerViewContext(),
                 enemy = new EnemyViewContext
                 {
-                    views = new EnemyView[_enemies.entities.Length],
-                    viewGenerations = new int[_enemies.entities.Length],
+                    views = new EnemyView[_entities.entities.Length],
+                    viewGenerations = new int[_entities.entities.Length],
                     viewPools = new Stack<EnemyView>[enemyKindCount],
                     triggerHashesByKind = new int[enemyKindCount][],
-                    healthGaugeViews = new EnemyHealthGaugeView[_enemies.entities.Length],
-                    healthGaugeGenerations = new int[_enemies.entities.Length],
-                    healthGaugeRatios = new float[_enemies.entities.Length],
+                    healthGaugeViews = new EnemyHealthGaugeView[_entities.entities.Length],
+                    healthGaugeGenerations = new int[_entities.entities.Length],
+                    healthGaugeRatios = new float[_entities.entities.Length],
                     healthGaugePools = new Stack<EnemyHealthGaugeView>[enemyKindCount]
                 },
-                projectile = new ProjectileViewContext
-                {
-                    views = new ProjectileView[_projectiles.entities.Length],
-                    viewGenerations = new int[_projectiles.entities.Length],
-                    viewIndices = new int[_projectiles.entities.Length],
-                    viewPools = new Stack<ProjectileView>[_projectilePrefabs.Length]
-                },
+                projectile = CreateProjectileViewContext(_entities.entities.Length),
                 hitEffect = new HitEffectViewContext
                 {
                     pools = new Stack<ParticleSystem>[_hitEffectPrefabs.Length]
@@ -198,9 +198,9 @@ namespace TopView.Core
                 },
                 loot = new LootViewContext
                 {
-                    views = new LootView[_loots.entities.Length],
-                    viewGenerations = new int[_loots.entities.Length],
-                    viewKinds = new int[_loots.entities.Length],
+                    views = new LootView[_entities.entities.Length],
+                    viewGenerations = new int[_entities.entities.Length],
+                    viewKinds = new int[_entities.entities.Length],
                     viewPools = new Stack<LootView>[_lootPrefabs.Length]
                 },
                 pause = new PauseViewContext(),
@@ -210,10 +210,6 @@ namespace TopView.Core
             {
                 viewContext.enemy.viewPools[kind] = new Stack<EnemyView>();
                 viewContext.enemy.healthGaugePools[kind] = new Stack<EnemyHealthGaugeView>();
-            }
-            for (int viewIndex = 0; viewIndex < _projectilePrefabs.Length; viewIndex++)
-            {
-                viewContext.projectile.viewPools[viewIndex] = new Stack<ProjectileView>();
             }
             for (int effectIndex = 0; effectIndex < _hitEffectPrefabs.Length; effectIndex++)
             {
@@ -248,6 +244,43 @@ namespace TopView.Core
             }
 
             return viewContext;
+        }
+
+        // 엔티티 저장소의 칸 수와 투사체 View 표에 맞춰 투사체 View 실행 상태를 만든다.
+        private ProjectileViewContext CreateProjectileViewContext(int capacity)
+        {
+            ProjectileViewContext context = new ProjectileViewContext
+            {
+                views = new ProjectileView[capacity],
+                viewGenerations = new int[capacity],
+                viewIndices = new int[capacity],
+                viewPools = new Stack<ProjectileView>[_projectilePrefabs.Length]
+            };
+            for (int viewIndex = 0; viewIndex < _projectilePrefabs.Length; viewIndex++)
+            {
+                context.viewPools[viewIndex] = new Stack<ProjectileView>();
+            }
+
+            return context;
+        }
+
+        // 보스 종류(오버레이 체력 바를 보여 주는 적)가 있는데 Music Definition에 보스 곡이 없으면 알린다. 보스가 나와도 평소 곡을 계속 튼다.
+        // Music Definition이 없으면 App이 씬을 등록할 때 이미 알렸으므로 넘어간다.
+        private static void WarnMissingBossClip(MusicDefinition musicDefinition, bool[] enemyHasOverlayHealthBar)
+        {
+            if (musicDefinition == null || musicDefinition.bossClip != null)
+            {
+                return;
+            }
+
+            foreach (bool isBossKind in enemyHasOverlayHealthBar)
+            {
+                if (isBossKind)
+                {
+                    Debug.LogWarning("World >> 보스 적 종류가 있는데 Music Definition에 Boss Clip이 연결되어 있지 않아 보스가 나와도 평소 곡을 계속 튼다.");
+                    return;
+                }
+            }
         }
     }
 }

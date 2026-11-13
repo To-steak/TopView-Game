@@ -13,7 +13,7 @@ namespace TopView.Commands
         DodgeManaCost,
         // 점프 마나 소모량을 줄인다
         JumpManaCost,
-        // 무기 하나를 강화한다. 피해량과 그 무기의 추가 효과(WeaponComponent의 ~PerLevel 값)가 함께 오른다
+        // 무기 하나를 강화한다. 피해량과 그 무기의 추가 효과(WeaponUpgradeRuleComponent의 ~PerLevel 값)가 함께 오른다
         Weapon
     }
 }

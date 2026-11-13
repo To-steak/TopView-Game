@@ -25,6 +25,8 @@ namespace TopView.Editor
         // 그림자 쪽까지 고르게 밝히는 환경광 색
         private Color _ambientColor = new Color(0.6f, 0.6f, 0.6f, 1f);
         private Texture2D _previewTexture;
+        // 배경을 이 색으로 칠한 뒤 같은 색 픽셀을 투명하게 만든다. 렌더 파이프라인이 알파를 지키지 않아도 배경이 빠진다
+        private static readonly Color KEY_COLOR = new Color(1f, 0f, 1f, 1f);
 
         private const string WINDOW_TITLE = "Pose Icon Baker";
         private const float MAX_PERCENT = 100f;
@@ -33,8 +35,6 @@ namespace TopView.Editor
         private const float MAX_LIGHT_INTENSITY = 4f;
         private const float LIGHT_PITCH_DEGREES = 40f;
         private const float LIGHT_YAW_OFFSET_DEGREES = -30f;
-        // 배경을 이 색으로 칠한 뒤 같은 색 픽셀을 투명하게 만든다. 렌더 파이프라인이 알파를 지키지 않아도 배경이 빠진다
-        private static readonly Color KEY_COLOR = new Color(1f, 0f, 1f, 1f);
         private const float KEY_TOLERANCE = 0.02f;
 
         /// <summary>

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace TopView.Editor
 {
-    // 인스펙터와 Definition Editor 창에서 WeaponDefinition을 그린다. 무기 종류(kind)에 따라 그 종류가 쓰는 칸만 보인다.
+    // 인스펙터와 Definition Editor 창에서 WeaponDefinition을 그린다. 무기 종류(kind)에 따라 그 종류의 무기가 가질 컴포넌트 칸만 보인다.
     // 숨긴 칸의 값은 지우지 않고 그대로 둔다.
     [CustomEditor(typeof(WeaponDefinition))]
     public class WeaponDefinitionEditor : UnityEditor.Editor
@@ -28,92 +28,92 @@ namespace TopView.Editor
                 EditorGUILayout.PropertyField(serializedObject.FindProperty(SCRIPT_PROPERTY_NAME));
             }
 
-            SerializedProperty weapon = serializedObject.FindProperty(nameof(WeaponDefinition.weapon));
-            SerializedProperty kindProperty = weapon.FindPropertyRelative(nameof(WeaponComponent.kind));
-            WeaponKind kind = (WeaponKind)kindProperty.intValue;
-            bool usesProjectile = kind != WeaponKind.Melee;
-
-            SerializedProperty ammo = weapon.FindPropertyRelative(nameof(WeaponComponent.ammo));
-            SerializedProperty upgrade = weapon.FindPropertyRelative(nameof(WeaponComponent.upgrade));
-
-            EditorGUILayout.LabelField(weapon.displayName, EditorStyles.boldLabel);
-            EditorGUI.indentLevel++;
+            SerializedProperty kindProperty = serializedObject.FindProperty(nameof(WeaponDefinition.kind));
             EditorGUILayout.PropertyField(kindProperty);
+            WeaponKind kind = (WeaponKind)kindProperty.intValue;
+
+            SerializedProperty weapon = serializedObject.FindProperty(nameof(WeaponDefinition.weapon));
+            SerializedProperty upgrade = serializedObject.FindProperty(nameof(WeaponDefinition.upgrade));
             DrawRelative(weapon, nameof(WeaponComponent.damage));
-            DrawAttackTicks(weapon, kind);
-            if (kind != WeaponKind.Throw)
+
+            switch (kind)
             {
-                DrawRelative(weapon, nameof(WeaponComponent.attackIntervalTicks));
-                DrawRelative(upgrade, nameof(WeaponUpgradeRuleComponent.attackIntervalRatioPerLevel));
+                case WeaponKind.Melee:
+                    DrawMelee(upgrade);
+                    break;
+                case WeaponKind.Ranged:
+                    DrawRanged(upgrade);
+                    break;
+                case WeaponKind.Throw:
+                    DrawThrow(upgrade);
+                    break;
             }
 
-            if (kind == WeaponKind.Ranged)
-            {
-                DrawRelative(ammo, nameof(AmmoComponent.max), MAX_AMMO_LABEL);
-                DrawRelative(upgrade, nameof(WeaponUpgradeRuleComponent.maxAmmoRatioPerLevel));
-                DrawRelative(ammo, nameof(AmmoComponent.startingCurrent), STARTING_CURRENT_AMMO_LABEL);
-            }
-
-            if (usesProjectile)
-            {
-                DrawRelative(ammo, nameof(AmmoComponent.startingReserve), STARTING_RESERVE_AMMO_LABEL);
-                DrawRelative(weapon, nameof(WeaponComponent.projectile));
-                if (kind == WeaponKind.Throw)
-                {
-                    DrawRelative(weapon, nameof(WeaponComponent.throwing));
-                }
-                DrawRelative(upgrade, nameof(WeaponUpgradeRuleComponent.explosionRadiusIncreasePerLevel));
-            }
-            else
-            {
-                DrawRelative(weapon, nameof(WeaponComponent.meleeShape));
-                DrawRelative(upgrade, nameof(WeaponUpgradeRuleComponent.meleeRangeRatioPerLevel));
-            }
             // 조준 평면의 높이에 모든 종류가 쓴다
-            SerializedProperty muzzleOffset = weapon.FindPropertyRelative(nameof(WeaponComponent.muzzleOffset));
-            EditorGUILayout.PropertyField(muzzleOffset);
-            SerializedProperty timing = weapon.FindPropertyRelative(nameof(WeaponComponent.timing));
-            MuzzleOffsetBaker.Draw((WeaponDefinition)target, muzzleOffset, timing.FindPropertyRelative(nameof(AttackTimingComponent.startTicks)).intValue);
-            EditorGUI.indentLevel--;
+            DrawRelative(weapon, nameof(WeaponComponent.aimHeight));
 
             EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(WeaponDefinition.modelPrefab)));
-            if (usesProjectile)
+            if (kind == WeaponKind.Melee)
+            {
+                EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(WeaponDefinition.impactEffectPrefab)));
+            }
+            else
             {
                 EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(WeaponDefinition.projectilePrefab)));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(WeaponDefinition.hitEffectPrefab)));
-            }
-            else
-            {
-                EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(WeaponDefinition.impactEffectPrefab)));
             }
 
             serializedObject.ApplyModifiedProperties();
         }
 
-        // 공격 시간 칸과 클립 구간 변환 칸을 그린다. Melee는 Start/End/Duration, Throw는 Start/Duration, Ranged는 발사하면 끝나므로 Start만 쓴다.
-        private static void DrawAttackTicks(SerializedProperty weapon, WeaponKind kind)
+        // 근접 공격과 공격 상태의 길이를 클립 구간 하나로 채우는 변환 칸, 공격 간격, 근접 강화 칸을 그린다.
+        private void DrawMelee(SerializedProperty upgrade)
         {
-            SerializedProperty timing = weapon.FindPropertyRelative(nameof(WeaponComponent.timing));
-            SerializedProperty startTicks = timing.FindPropertyRelative(nameof(AttackTimingComponent.startTicks));
-            EditorGUILayout.PropertyField(startTicks);
-            if (kind == WeaponKind.Ranged)
-            {
-                AnimationTickConverter.DrawRange(EditorGUILayout.GetControlRect(false, AnimationTickConverter.RangeHeight), startTicks, null, null);
-                return;
-            }
-
-            SerializedProperty durationTicks = timing.FindPropertyRelative(nameof(AttackTimingComponent.durationTicks));
-            if (kind == WeaponKind.Throw)
-            {
-                EditorGUILayout.PropertyField(durationTicks);
-                AnimationTickConverter.DrawRange(EditorGUILayout.GetControlRect(false, AnimationTickConverter.RangeHeight), startTicks, null, durationTicks);
-                return;
-            }
-
-            SerializedProperty endTicks = timing.FindPropertyRelative(nameof(AttackTimingComponent.endTicks));
-            EditorGUILayout.PropertyField(endTicks);
+            SerializedProperty meleeAttack = serializedObject.FindProperty(nameof(WeaponDefinition.meleeAttack));
+            SerializedProperty durationTicks = serializedObject.FindProperty(nameof(WeaponDefinition.attackDuration)).FindPropertyRelative(nameof(AttackDurationComponent.durationTicks));
+            EditorGUILayout.PropertyField(meleeAttack, true);
             EditorGUILayout.PropertyField(durationTicks);
-            AnimationTickConverter.DrawRange(EditorGUILayout.GetControlRect(false, AnimationTickConverter.RangeHeight), startTicks, endTicks, durationTicks);
+            AnimationTickConverter.DrawRange(EditorGUILayout.GetControlRect(false, AnimationTickConverter.RangeHeight),
+                meleeAttack.FindPropertyRelative(nameof(MeleeAttackComponent.startTicks)),
+                meleeAttack.FindPropertyRelative(nameof(MeleeAttackComponent.endTicks)),
+                durationTicks);
+            DrawAttackInterval(upgrade);
+            DrawRelative(upgrade, nameof(WeaponUpgradeRuleComponent.meleeRangeRatioPerLevel));
+        }
+
+        // 공격 간격, 탄창과 예비 탄약, 직선 투사체 공격, 폭발 강화 칸을 그린다. 발마다의 시작은 Shots의 칸에서 채운다.
+        private void DrawRanged(SerializedProperty upgrade)
+        {
+            DrawAttackInterval(upgrade);
+            SerializedProperty magazine = serializedObject.FindProperty(nameof(WeaponDefinition.magazine));
+            DrawRelative(magazine, nameof(MagazineComponent.max), MAX_AMMO_LABEL);
+            DrawRelative(upgrade, nameof(WeaponUpgradeRuleComponent.maxAmmoRatioPerLevel));
+            DrawRelative(magazine, nameof(MagazineComponent.startingCurrent), STARTING_CURRENT_AMMO_LABEL);
+            DrawReserveAmmo();
+            EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(WeaponDefinition.straightAttack)), true);
+            DrawRelative(upgrade, nameof(WeaponUpgradeRuleComponent.explosionRadiusIncreasePerLevel));
+        }
+
+        // 클립 길이로 채우는 공격 상태의 길이, 예비 탄약, 포물선 투사체 공격, 투척 조준 값, 폭발 강화 칸을 그린다. 발마다의 시작은 Shots의 칸에서 채운다.
+        private void DrawThrow(SerializedProperty upgrade)
+        {
+            SerializedProperty durationTicks = serializedObject.FindProperty(nameof(WeaponDefinition.attackDuration)).FindPropertyRelative(nameof(AttackDurationComponent.durationTicks));
+            AnimationTickConverter.DrawLengthTicks(EditorGUILayout.GetControlRect(), durationTicks);
+            DrawReserveAmmo();
+            EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(WeaponDefinition.arcAttack)), true);
+            EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(WeaponDefinition.throwing)), true);
+            DrawRelative(upgrade, nameof(WeaponUpgradeRuleComponent.explosionRadiusIncreasePerLevel));
+        }
+
+        private void DrawAttackInterval(SerializedProperty upgrade)
+        {
+            EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(WeaponDefinition.attackInterval)).FindPropertyRelative(nameof(AttackIntervalComponent.intervalTicks)));
+            DrawRelative(upgrade, nameof(WeaponUpgradeRuleComponent.attackIntervalRatioPerLevel));
+        }
+
+        private void DrawReserveAmmo()
+        {
+            DrawRelative(serializedObject.FindProperty(nameof(WeaponDefinition.reserveAmmo)), nameof(ReserveAmmoComponent.startingReserve), STARTING_RESERVE_AMMO_LABEL);
         }
 
         // 부모 칸 안의 자식 칸 하나를 자식까지 펼쳐 그린다.

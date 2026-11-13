@@ -13,8 +13,8 @@ namespace TopView.Presentation.ViewSystems
         /// 이번 프레임의 기록마다 피해량 글자를 대기 목록에 넣는다. EnemyViewSystem.Present 다음, WorldTextViewSystem.Present 전에 부른다.
         /// </summary>
         /// <param name="damagedRecords">이번 프레임에 적이 피해를 받은 기록</param>
-        /// <param name="enemyViews">적 저장소 칸별 View</param>
-        /// <param name="enemyViewGenerations">적 저장소 칸별 View가 보여 주는 엔티티의 generation</param>
+        /// <param name="enemyViews">엔티티 저장소 칸별 적 View</param>
+        /// <param name="enemyViewGenerations">엔티티 저장소 칸별 적 View가 보여 주는 엔티티의 generation</param>
         /// <param name="textViewPrefab">표시 값을 읽을 월드 글자 프리팹. 없으면 글자를 넣지 않는다</param>
         /// <param name="mainCamera">시작 위치를 어긋나게 할 기준 카메라. 없으면 null</param>
         /// <param name="pendingTexts">월드 글자 대기 목록</param>

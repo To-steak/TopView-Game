@@ -13,6 +13,10 @@ namespace TopView.Definitions
         public PlayerVitalsComponent vitals;
         // 행동 상태의 길이
         public PlayerActionComponent action;
+        // 몸체 크기
+        public BodyComponent body;
+        // 사망 상태의 길이
+        public DeathComponent death;
         // 강화 값
         public PlayerUpgradeComponent upgrade;
         // 무기 목록. 번호 순서가 교체 키(1, 2, 3 …) 순서다

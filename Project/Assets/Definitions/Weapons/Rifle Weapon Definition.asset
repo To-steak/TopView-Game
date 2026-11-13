@@ -12,41 +12,110 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5ae9619f9bef9542a8b18fe1f1cd54e, type: 3}
   m_Name: Rifle Weapon Definition
   m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.WeaponDefinition
+  kind: 1
   weapon:
-    kind: 1
     damage: 25
+    aimHeight: 0.31125617
+    kind: 1
     ammo:
       max: 30
       startingCurrent: 30
       startingReserve: 120
-    timing:
-      startTicks: 3
-      endTicks: 0
-      durationTicks: 0
+    durationTicks: 0
     attackIntervalTicks: 15
-    projectile:
-      kind: 0
-      speed: 35
-      radius: 0.1
-      lifetimeTicks: 250
-      flightTicks: 0
-      arcHeight: 0
-      explosionRadius: 0
-      collisionLayer:
-        serializedVersion: 2
-        m_Bits: 576
+    melee:
+      startTicks: 0
+      endTicks: 0
+      shape:
+        radius: 0
+        offset: 0
+    straight:
+      projectile:
+        flight:
+          speed: 35
+          lifetimeTicks: 250
+        hit:
+          radius: 0.1
+          collisionLayer:
+            serializedVersion: 2
+            m_Bits: 576
+        explosion:
+          radius: 0
+      shots:
+      - startTicks: 3
+        spawnOffset: {x: 0.10159824, y: 0.31125617, z: 0.58445656}
+    arc:
+      projectile:
+        flight:
+          flightTicks: 0
+          arcHeight: 0
+        hit:
+          radius: 0
+          collisionLayer:
+            serializedVersion: 2
+            m_Bits: 0
+        explosion:
+          radius: 0
+      shots: []
     throwing:
       chargePerTick: 0
       maxThrowDistance: 0
-    meleeShape:
-      radius: 0
-      offset: 0
     upgrade:
       maxAmmoRatioPerLevel: 1
       attackIntervalRatioPerLevel: 0.25
       explosionRadiusIncreasePerLevel: 0
       meleeRangeRatioPerLevel: 0
-    muzzleOffset: {x: 0.10159824, y: 0.31125617, z: 0.58445656}
+  upgrade:
+    maxAmmoRatioPerLevel: 1
+    attackIntervalRatioPerLevel: 0.25
+    explosionRadiusIncreasePerLevel: 0
+    meleeRangeRatioPerLevel: 0
+  attackInterval:
+    intervalTicks: 15
+  attackDuration:
+    durationTicks: 0
+  meleeAttack:
+    startTicks: 0
+    endTicks: 0
+    shape:
+      radius: 0
+      offset: 0
+  straightAttack:
+    projectile:
+      flight:
+        speed: 35
+        lifetimeTicks: 250
+      hit:
+        radius: 0.1
+        collisionLayer:
+          serializedVersion: 2
+          m_Bits: 576
+      explosion:
+        radius: 0
+    shots:
+    - startTicks: 3
+      spawnOffset: {x: 0.10159824, y: 0.31125617, z: 0.58445656}
+  arcAttack:
+    projectile:
+      flight:
+        flightTicks: 0
+        arcHeight: 0
+      hit:
+        radius: 0
+        collisionLayer:
+          serializedVersion: 2
+          m_Bits: 0
+      explosion:
+        radius: 0
+    shots: []
+  throwing:
+    chargePerTick: 0
+    maxThrowDistance: 0
+  magazine:
+    max: 30
+    startingCurrent: 30
+  reserveAmmo:
+    startingReserve: 120
   modelPrefab: {fileID: 998828717951345184, guid: f7522d3e6a599ee4788cc678ffa343e9, type: 3}
   projectilePrefab: {fileID: 8751706380067456088, guid: 628c7144d78511e419e78c1d4015b800, type: 3}
   hitEffectPrefab: {fileID: 8231580814263889171, guid: ca9f089f18e91e34893dea40be54242c, type: 3}

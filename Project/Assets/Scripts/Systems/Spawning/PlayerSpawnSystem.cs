@@ -1,0 +1,110 @@
+using System.Collections.Generic;
+using TopView.Components;
+using TopView.Entities;
+using TopView.Requests;
+using TopView.Utilities;
+using UnityEngine;
+
+namespace TopView.Systems
+{
+    // 플레이어 생성 요청을 받아 저장소의 빈 칸을 채우고, 플레이어가 들 무기마다 무기 생성 요청을 넣는다. 틱 마지막에 WeaponSpawnSystem 앞에 부른다.
+    public static class PlayerSpawnSystem
+    {
+        /// <summary>
+        /// 플레이어 생성 요청을 모두 처리한다. 빈 칸이 없으면 요청을 버린다.
+        /// </summary>
+        /// <param name="storage">엔티티 저장소. 플레이어 구간의 칸을 플레이어 컴포넌트로 채운다</param>
+        /// <param name="playerSpawnRequests">플레이어 생성 요청 큐</param>
+        /// <param name="weaponSpawnRequests">무기 생성 요청 큐. 생성한 플레이어가 들 무기마다 넣는다</param>
+        public static void Tick(EntityStorage storage, Queue<PlayerSpawnRequest> playerSpawnRequests, Queue<WeaponSpawnRequest> weaponSpawnRequests)
+        {
+            int droppedCount = 0;
+            while (playerSpawnRequests.Count > 0)
+            {
+                PlayerSpawnRequest request = playerSpawnRequests.Dequeue();
+                if (!SpawnUtility.TryTakeFreeIndex(storage.freePlayerIndices, out int index))
+                {
+                    droppedCount++;
+                    continue;
+                }
+
+                ref Entity entity = ref storage.entities[index];
+                Spawn(ref entity, in request);
+                EntityIdentifier owner = new EntityIdentifier { index = index, generation = entity.generation };
+                for (int weaponIndex = 0; weaponIndex < request.weapons.Length; weaponIndex++)
+                {
+                    WeaponSpawnRequest weaponSpawnRequest = request.weapons[weaponIndex];
+                    weaponSpawnRequest.owner = owner;
+                    weaponSpawnRequest.slotIndex = weaponIndex;
+                    weaponSpawnRequests.Enqueue(weaponSpawnRequest);
+                }
+            }
+
+            if (droppedCount > 0)
+            {
+                Debug.LogWarning($"PlayerSpawnSystem >> 플레이어 구간에 빈 칸이 없어 생성 요청 {droppedCount}개를 버렸다.");
+            }
+        }
+
+        // 칸 전체를 새 값으로 바꿔 이전 값이 남지 않게 한다. 무기 식별자 배열과 투척 미리보기 점 배열만 다시 쓴다.
+        private static void Spawn(ref Entity entity, in PlayerSpawnRequest request)
+        {
+            int generation = entity.generation + 1;
+            WeaponSpawnRequest[] weapons = request.weapons;
+            EntityIdentifier[] weaponIdentifiers = entity.weaponSlots.weapons;
+            if (weaponIdentifiers == null || weaponIdentifiers.Length != weapons.Length)
+            {
+                weaponIdentifiers = new EntityIdentifier[weapons.Length];
+            }
+            System.Array.Clear(weaponIdentifiers, 0, weaponIdentifiers.Length);
+            Vector3[] previewPoints = ReusePreviewPointArray(entity.throwPreview.points, GetPreviewPointCapacity(weapons));
+
+            entity = new Entity
+            {
+                mask = EntityArchetype.PLAYER,
+                generation = generation,
+                playerMovement = request.movement,
+                playerVitals = request.vitals,
+                playerAction = request.action,
+                body = request.body,
+                death = request.death,
+                playerUpgrade = request.upgrade,
+                position = new PositionComponent { previous = request.position, current = request.position },
+                rotation = new RotationComponent { previous = request.rotation, current = request.rotation },
+                playerActionState = new PlayerActionStateComponent { state = PlayerState.Idle },
+                playerMotion = new PlayerMotionComponent { currentSpeed = request.movement.walkSpeed },
+                health = new HealthComponent { current = request.vitals.startingMaxHealth, max = request.vitals.startingMaxHealth },
+                mana = new ManaComponent { current = request.vitals.startingMaxMana, max = request.vitals.startingMaxMana, recoveryElapsedTicks = request.vitals.manaRecoveryDelayTicks },
+                weaponSlots = new PlayerWeaponSlotsComponent
+                {
+                    weapons = weaponIdentifiers,
+                    currentIndex = 0,
+                    pendingIndex = 0
+                },
+                throwPreview = new PlayerThrowPreviewComponent { points = previewPoints }
+            };
+        }
+
+        // 포물선 투사체 무기 중 가장 긴 비행의 점 수(flightTicks + 1). 포물선 투사체 무기가 없으면 0이다.
+        private static int GetPreviewPointCapacity(WeaponSpawnRequest[] weapons)
+        {
+            int capacity = 0;
+            for (int weaponIndex = 0; weaponIndex < weapons.Length; weaponIndex++)
+            {
+                ref readonly WeaponSpawnRequest weapon = ref weapons[weaponIndex];
+                if ((weapon.mask & ComponentMask.ArcAttack) != 0)
+                {
+                    capacity = Mathf.Max(capacity, weapon.arcAttack.projectile.flight.flightTicks + 1);
+                }
+            }
+
+            return capacity;
+        }
+
+        // 칸이 쓰던 미리보기 점 배열을 길이가 같으면 다시 쓴다. 내용은 PlayerThrowPreviewSystem이 매 틱 채운다.
+        private static Vector3[] ReusePreviewPointArray(Vector3[] slotArray, int length)
+        {
+            return slotArray != null && slotArray.Length == length ? slotArray : new Vector3[length];
+        }
+    }
+}

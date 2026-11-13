@@ -18,7 +18,7 @@ namespace TopView.UserInterface.Presenters
         private bool _isShown;
         // 같은 값을 매 프레임 다시 쓰지 않도록 마지막으로 보여 준 값을 기억한다
         private float _presentedRatio;
-        private bool _presentedCanEnter;
+        private bool _canEnterPresented;
 
         /// <summary>
         /// 명령을 넣을 목록을 받고 View를 숨긴다. Menu가 App에 등록될 때 부른다.
@@ -64,10 +64,10 @@ namespace TopView.UserInterface.Presenters
                 _presentedRatio = ratio;
             }
 
-            if (isFirstFrame || canEnter != _presentedCanEnter)
+            if (isFirstFrame || canEnter != _canEnterPresented)
             {
                 _view.SetEnterButtonInteractable(canEnter);
-                _presentedCanEnter = canEnter;
+                _canEnterPresented = canEnter;
             }
         }
 

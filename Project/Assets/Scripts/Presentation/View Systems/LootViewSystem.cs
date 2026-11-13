@@ -10,26 +10,27 @@ namespace TopView.Presentation.ViewSystems
     public static class LootViewSystem
     {
         /// <summary>
-        /// 저장소의 칸마다 살아 있는 전리품과 View를 맞춘다.
+        /// 저장소의 칸마다 Loot를 가진 엔티티와 View를 맞춘다.
         /// </summary>
-        /// <param name="entities">전리품 엔티티 배열</param>
+        /// <param name="entities">엔티티 배열. Loot를 가진 칸만 그린다</param>
         /// <param name="lootPrefabs">전리품 종류 번호별 LootView 프리팹. 없는 종류는 null</param>
         /// <param name="isPaused">판이 일시정지 중이면 true. 모델을 회전시키지 않는다</param>
         /// <param name="context">전리품 View 실행 상태</param>
-        public static void Present(LootEntity[] entities, GameObject[] lootPrefabs, bool isPaused, LootViewContext context)
+        public static void Present(Entity[] entities, GameObject[] lootPrefabs, bool isPaused, LootViewContext context)
         {
             for (int index = 0; index < entities.Length; index++)
             {
-                ref readonly LootEntity entity = ref entities[index];
+                ref readonly Entity entity = ref entities[index];
                 LootView view = context.views[index];
+                bool hasLoot = (entity.mask & ComponentMask.Loot) != 0;
 
-                if (view != null && (!entity.isAlive || context.viewGenerations[index] != entity.generation))
+                if (view != null && (!hasLoot || context.viewGenerations[index] != entity.generation))
                 {
                     Release(context, index);
                     view = null;
                 }
 
-                if (!entity.isAlive)
+                if (!hasLoot)
                 {
                     continue;
                 }

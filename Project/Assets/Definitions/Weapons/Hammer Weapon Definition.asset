@@ -12,41 +12,106 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5ae9619f9bef9542a8b18fe1f1cd54e, type: 3}
   m_Name: Hammer Weapon Definition
   m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.WeaponDefinition
+  kind: 0
   weapon:
-    kind: 0
     damage: 85
+    aimHeight: 0
+    kind: 0
     ammo:
       max: 0
       startingCurrent: 0
       startingReserve: 0
-    timing:
+    durationTicks: 40
+    attackIntervalTicks: 40
+    melee:
       startTicks: 18
       endTicks: 24
-      durationTicks: 40
-    attackIntervalTicks: 40
-    projectile:
-      kind: 0
-      speed: 0
-      radius: 0
-      lifetimeTicks: 0
-      flightTicks: 0
-      arcHeight: 0
-      explosionRadius: 0
-      collisionLayer:
-        serializedVersion: 2
-        m_Bits: 0
+      shape:
+        radius: 2
+        offset: 1
+    straight:
+      projectile:
+        flight:
+          speed: 0
+          lifetimeTicks: 0
+        hit:
+          radius: 0
+          collisionLayer:
+            serializedVersion: 2
+            m_Bits: 0
+        explosion:
+          radius: 0
+      shots: []
+    arc:
+      projectile:
+        flight:
+          flightTicks: 0
+          arcHeight: 0
+        hit:
+          radius: 0
+          collisionLayer:
+            serializedVersion: 2
+            m_Bits: 0
+        explosion:
+          radius: 0
+      shots: []
     throwing:
       chargePerTick: 0
       maxThrowDistance: 0
-    meleeShape:
-      radius: 2
-      offset: 1
     upgrade:
       maxAmmoRatioPerLevel: 0
       attackIntervalRatioPerLevel: 0
       explosionRadiusIncreasePerLevel: 0
       meleeRangeRatioPerLevel: 0.25
-    muzzleOffset: {x: 0, y: 0, z: 0}
+  upgrade:
+    maxAmmoRatioPerLevel: 0
+    attackIntervalRatioPerLevel: 0
+    explosionRadiusIncreasePerLevel: 0
+    meleeRangeRatioPerLevel: 0.25
+  attackInterval:
+    intervalTicks: 40
+  attackDuration:
+    durationTicks: 40
+  meleeAttack:
+    startTicks: 18
+    endTicks: 24
+    shape:
+      radius: 2
+      offset: 1
+  straightAttack:
+    projectile:
+      flight:
+        speed: 0
+        lifetimeTicks: 0
+      hit:
+        radius: 0
+        collisionLayer:
+          serializedVersion: 2
+          m_Bits: 0
+      explosion:
+        radius: 0
+    shots: []
+  arcAttack:
+    projectile:
+      flight:
+        flightTicks: 0
+        arcHeight: 0
+      hit:
+        radius: 0
+        collisionLayer:
+          serializedVersion: 2
+          m_Bits: 0
+      explosion:
+        radius: 0
+    shots: []
+  throwing:
+    chargePerTick: 0
+    maxThrowDistance: 0
+  magazine:
+    max: 0
+    startingCurrent: 0
+  reserveAmmo:
+    startingReserve: 0
   modelPrefab: {fileID: 4377655535536273225, guid: 48b3e48d1e96a0c4490dc61536c17515, type: 3}
   projectilePrefab: {fileID: 0}
   hitEffectPrefab: {fileID: 0}

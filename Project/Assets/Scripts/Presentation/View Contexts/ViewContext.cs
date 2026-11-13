@@ -9,7 +9,7 @@ namespace TopView.Presentation.ViewContexts
         public PlayerViewContext player;
         // 적 View와 체력 게이지 실행 상태
         public EnemyViewContext enemy;
-        // 투사체 View 실행 상태
+        // 투사체 View 실행 상태. 번호는 엔티티 저장소의 칸 번호다
         public ProjectileViewContext projectile;
         // 피격 이펙트 실행 상태
         public HitEffectViewContext hitEffect;

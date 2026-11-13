@@ -25,13 +25,14 @@ namespace TopView.Core
                 ref readonly EnemyAttackEntry entry = ref entries[attackIndex];
                 string ownerName = $"{definitionName} 공격 {attackIndex}번";
                 bool hasProjectile = entry.attack.kind != EnemyAttackKind.Body;
-                if (hasProjectile && !IsValidShots(ownerName, entry.attack.shots, entry.attack.timing.durationTicks))
+                if (hasProjectile && TryFindShotsProblem(entry.attack.straight.shots, true, entry.attack.durationTicks, out string shotsProblem))
                 {
+                    Debug.LogWarning($"World >> {ownerName}의 {shotsProblem}. 이 공격을 건너뛰었다.");
                     continue;
                 }
 
                 EnemyAttackComponent attack = entry.attack;
-                AssignProjectileViews(ownerName, hasProjectile, entry.projectilePrefab, entry.hitEffectPrefab, ref attack.projectile, projectilePrefabs, hitEffectPrefabs);
+                AssignProjectileViews(ownerName, hasProjectile, entry.projectilePrefab, entry.hitEffectPrefab, ref attack.projectileView, projectilePrefabs, hitEffectPrefabs);
                 attacks.Add(attack);
                 animations.Add(entry.animation);
                 clips.Add(entry.attackClip);
@@ -42,13 +43,14 @@ namespace TopView.Core
             return attacks.ToArray();
         }
 
-        // 투사체 공격의 발 목록이 비었거나, Start Ticks가 오름차순이 아니거나, Duration Ticks보다 큰 칸이 있으면 경고를 남기고 false를 돌려준다.
-        private static bool IsValidShots(string ownerName, ProjectileShotComponent[] shots, int durationTicks)
+        // 발 목록이 비었거나, Start Ticks가 오름차순이 아니거나, hasDuration이면 Duration Ticks보다 큰 칸이 있으면 문제를 적어 true를 돌려준다.
+        private static bool TryFindShotsProblem(ProjectileShotComponent[] shots, bool hasDuration, int durationTicks, out string problem)
         {
+            problem = null;
             if (shots == null || shots.Length == 0)
             {
-                Debug.LogWarning($"World >> {ownerName}의 Shots가 비어 있어 이 공격을 건너뛰었다.");
-                return false;
+                problem = "Shots가 비어 있다";
+                return true;
             }
 
             for (int shotIndex = 0; shotIndex < shots.Length; shotIndex++)
@@ -56,26 +58,26 @@ namespace TopView.Core
                 int startTicks = shots[shotIndex].startTicks;
                 if (shotIndex > 0 && startTicks < shots[shotIndex - 1].startTicks)
                 {
-                    Debug.LogWarning($"World >> {ownerName}의 Shots {shotIndex}번 칸의 Start Ticks({startTicks})가 앞 칸({shots[shotIndex - 1].startTicks})보다 작아 이 공격을 건너뛰었다.");
-                    return false;
+                    problem = $"Shots {shotIndex}번 칸의 Start Ticks({startTicks})가 앞 칸({shots[shotIndex - 1].startTicks})보다 작다";
+                    return true;
                 }
 
-                if (startTicks > durationTicks)
+                if (hasDuration && startTicks > durationTicks)
                 {
-                    Debug.LogWarning($"World >> {ownerName}의 Shots {shotIndex}번 칸의 Start Ticks({startTicks})가 Duration Ticks({durationTicks})보다 커서 이 공격을 건너뛰었다.");
-                    return false;
+                    problem = $"Shots {shotIndex}번 칸의 Start Ticks({startTicks})가 Duration Ticks({durationTicks})보다 크다";
+                    return true;
                 }
             }
 
-            return true;
+            return false;
         }
 
-        // 투사체 View 표와 피격 이펙트 표에 프리팹을 올리고(이미 있으면 그 번호를 쓰고) 번호를 투사체 값에 넣는다.
+        // 투사체 View 표와 피격 이펙트 표에 프리팹을 올리고(이미 있으면 그 번호를 쓰고) 번호를 투사체 View 값에 넣는다.
         // 투사체가 없거나 프리팹이 빠져 있으면 번호는 -1이고, 그 투사체나 이펙트는 보이지 않는다. 표시용이라 판은 시작한다.
-        private static void AssignProjectileViews(string ownerName, bool hasProjectile, GameObject projectilePrefab, GameObject hitEffectPrefab, ref ProjectileComponent projectile, List<GameObject> projectilePrefabs, List<GameObject> hitEffectPrefabs)
+        private static void AssignProjectileViews(string ownerName, bool hasProjectile, GameObject projectilePrefab, GameObject hitEffectPrefab, ref ProjectileViewComponent projectileView, List<GameObject> projectilePrefabs, List<GameObject> hitEffectPrefabs)
         {
-            projectile.viewIndex = -1;
-            projectile.hitEffectIndex = -1;
+            projectileView.viewIndex = -1;
+            projectileView.hitEffectIndex = -1;
             if (!hasProjectile)
             {
                 return;
@@ -87,15 +89,15 @@ namespace TopView.Core
             }
             else
             {
-                projectile.viewIndex = projectilePrefabs.IndexOf(projectilePrefab);
-                if (projectile.viewIndex < 0)
+                projectileView.viewIndex = projectilePrefabs.IndexOf(projectilePrefab);
+                if (projectileView.viewIndex < 0)
                 {
-                    projectile.viewIndex = projectilePrefabs.Count;
+                    projectileView.viewIndex = projectilePrefabs.Count;
                     projectilePrefabs.Add(projectilePrefab);
                 }
             }
 
-            projectile.hitEffectIndex = IndexHitEffect($"{ownerName}의 피격 이펙트", hitEffectPrefab, hitEffectPrefabs);
+            projectileView.hitEffectIndex = IndexHitEffect($"{ownerName}의 피격 이펙트", hitEffectPrefab, hitEffectPrefabs);
         }
 
         // 피격 이펙트 표에 프리팹을 올리고(이미 있으면 그 번호를 쓰고) 번호를 돌려준다.

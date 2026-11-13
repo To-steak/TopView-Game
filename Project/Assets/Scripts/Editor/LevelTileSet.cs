@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace TopView.Editor
 {
@@ -42,8 +43,9 @@ namespace TopView.Editor
         public LevelMountainTiles[] mountainTiles = new LevelMountainTiles[0];
 
         [Header("Options")]
+        [FormerlySerializedAs("markTilesStatic")]
         // 칠한 타일과 소품을 Batching Static으로 표시할지
-        public bool markTilesStatic = true;
+        public bool isPaintedStatic = true;
 
         private const float MINIMUM_TILE_SCALE = 0.01f;
 

@@ -16,13 +16,13 @@ namespace TopView.Presentation.ViewSystems
         public static void Present(bool isPaused, Texture2D crosshairTexture, CursorViewContext context)
         {
             // 텍스처가 없으면 판을 준비할 때 World가 오류를 남기고, 여기서는 기본 커서를 그대로 둔다
-            bool usesCrosshair = !isPaused && crosshairTexture != null;
-            if (usesCrosshair == context.isCrosshairApplied)
+            bool isCrosshairShown = !isPaused && crosshairTexture != null;
+            if (isCrosshairShown == context.isCrosshairApplied)
             {
                 return;
             }
 
-            if (usesCrosshair)
+            if (isCrosshairShown)
             {
                 Vector2 hotspot = new Vector2(crosshairTexture.width * 0.5f, crosshairTexture.height * 0.5f);
                 Cursor.SetCursor(crosshairTexture, hotspot, CursorMode.Auto);
@@ -32,7 +32,7 @@ namespace TopView.Presentation.ViewSystems
                 Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
             }
 
-            context.isCrosshairApplied = usesCrosshair;
+            context.isCrosshairApplied = isCrosshairShown;
         }
 
         /// <summary>

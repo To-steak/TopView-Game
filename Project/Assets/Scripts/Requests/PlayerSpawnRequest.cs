@@ -16,9 +16,13 @@ namespace TopView.Requests
         public PlayerVitalsComponent vitals;
         // 행동 상태의 길이
         public PlayerActionComponent action;
+        // 몸체 크기
+        public BodyComponent body;
+        // 사망 상태의 길이
+        public DeathComponent death;
         // 강화 값
         public PlayerUpgradeComponent upgrade;
-        // 무기 목록. PlayerSpawnSystem이 무기마다 무기 생성 요청으로 넘긴다
-        public WeaponComponent[] weapons;
+        // 무기 생성 요청 목록. owner와 slotIndex는 비어 있고, PlayerSpawnSystem이 채워 무기마다 넘긴다
+        public WeaponSpawnRequest[] weapons;
     }
 }

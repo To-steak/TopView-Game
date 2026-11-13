@@ -1,5 +1,6 @@
 using TopView.Components;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace TopView.Definitions
 {
@@ -30,6 +31,7 @@ namespace TopView.Definitions
         // EnemyHealthGaugeView가 붙은 월드 공간 체력 게이지 프리팹
         public GameObject healthGaugePrefab;
         // 화면의 오버레이 체력 바에 체력을 보여 주는지. 보스에 켠다. 켜면 체력 게이지 프리팹이 없어도 경고하지 않고, 이 종류가 살아 있으면 보스 곡으로 바꾼다
-        public bool showsOverlayHealthBar;
+        [FormerlySerializedAs("showsOverlayHealthBar")]
+        public bool hasOverlayHealthBar;
     }
 }
