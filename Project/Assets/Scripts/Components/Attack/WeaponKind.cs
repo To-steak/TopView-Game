@@ -1,6 +1,6 @@
 namespace TopView.Components
 {
-    // 무기 종류. 어느 공격 값을 쓰는지와 공격 상태, 탄약 규칙을 정한다
+    // 무기 종류. WeaponDefinition에서 무기가 가질 컴포넌트를 고르는 작성용 값이며, 게임 중에는 쓰지 않는다
     public enum WeaponKind
     {
         // 근접 무기. 탄약을 쓰지 않는다

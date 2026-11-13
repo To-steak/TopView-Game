@@ -8,6 +8,8 @@ namespace TopView.Systems
     // 투척 충전 중인 플레이어가 지금 던지면 수류탄이 지나갈 궤도와 폭발할 자리를 구한다. 실제 비행(ProjectileSystem의 포물선 투사체)과 같은 계산을 같은 틱 간격으로 한다.
     public static class PlayerThrowPreviewSystem
     {
+        // 미리보기를 그릴 무기가 가진 컴포넌트
+        private const ComponentMask THROW_MASK = ComponentMask.ArcAttack | ComponentMask.Throw;
         // 처리할 플레이어가 가진 컴포넌트
         private const ComponentMask PLAYER_MASK = ComponentMask.PlayerActionState | ComponentMask.Position | ComponentMask.Rotation | ComponentMask.WeaponSlots | ComponentMask.ThrowPreview;
 
@@ -15,8 +17,7 @@ namespace TopView.Systems
         /// 투척 무기로 충전 중인 플레이어는 미리보기를 채우고, 나머지는 숨긴다. 이동과 조준이 끝난 뒤에 부른다.
         /// </summary>
         /// <param name="storage">엔티티 저장소. 플레이어(PlayerActionState, Position, Rotation, WeaponSlots, ThrowPreview)만 처리한다</param>
-        /// <param name="weapons">무기 저장소</param>
-        public static void Tick(EntityStorage storage, WeaponStorage weapons)
+        public static void Tick(EntityStorage storage)
         {
             int shortArrayCount = 0;
             int invalidFlightCount = 0;
@@ -35,12 +36,12 @@ namespace TopView.Systems
                     continue;
                 }
 
-                ref readonly WeaponComponent weapon = ref weapons.entities[entity.weaponSlots.weapons[entity.weaponSlots.currentIndex].index].weapon;
-                if (weapon.kind != WeaponKind.Throw)
+                ref readonly Entity weapon = ref storage.entities[entity.weaponSlots.weapons[entity.weaponSlots.currentIndex].index];
+                if ((weapon.mask & THROW_MASK) != THROW_MASK)
                 {
                     continue;
                 }
-                if (weapon.arc.projectile.flight.flightTicks <= 0 || AttackUtility.GetShotCount(in weapon.arc) == 0)
+                if (weapon.arcAttack.projectile.flight.flightTicks <= 0 || AttackUtility.GetShotCount(in weapon.arcAttack) == 0)
                 {
                     // 충전 중 매 틱 걸리므로 충전을 시작한 틱에만 센다
                     if (entity.playerActionState.elapsedTicks == 0)
@@ -67,15 +68,15 @@ namespace TopView.Systems
         }
 
         // 첫 발의 위치에서 1틱씩 포물선을 따라가며 점을 남기고, 환경 레이어에 닿으면 거기서 멈춘다. 점 배열이 모자라면 숨기고 false를 돌려준다.
-        private static bool Preview(ref PlayerThrowPreviewComponent preview, in WeaponComponent weapon, Vector3 position, Quaternion rotation, int throwCharge)
+        private static bool Preview(ref PlayerThrowPreviewComponent preview, in Entity weapon, Vector3 position, Quaternion rotation, int throwCharge)
         {
-            ref readonly ArcProjectileComponent projectile = ref weapon.arc.projectile;
+            ref readonly ArcProjectileComponent projectile = ref weapon.arcAttack.projectile;
             if (preview.points == null || preview.points.Length < projectile.flight.flightTicks + 1)
             {
                 return false;
             }
 
-            Vector3 launchPosition = AttackUtility.GetShotPosition(in weapon.arc.shots[0], position, rotation);
+            Vector3 launchPosition = AttackUtility.GetShotPosition(in weapon.arcAttack.shots[0], position, rotation);
             Vector3 targetPosition = PlayerWeaponUtility.GetThrowTargetPosition(in weapon.throwing, position, rotation, throwCharge);
 
             preview.points[0] = launchPosition;

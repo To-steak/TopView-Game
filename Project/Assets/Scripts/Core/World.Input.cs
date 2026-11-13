@@ -130,7 +130,7 @@ namespace TopView.Core
             }
 
             Ray ray = _viewContext.camera.mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
-            Plane plane = new Plane(Vector3.up, new Vector3(0f, GetAimHeight(in _entities.entities[playerIndex], _weapons.entities), 0f));
+            Plane plane = new Plane(Vector3.up, new Vector3(0f, GetAimHeight(in _entities.entities[playerIndex], _entities.entities), 0f));
             if (!plane.Raycast(ray, out float distance))
             {
                 return false;
@@ -141,7 +141,7 @@ namespace TopView.Core
         }
 
         // 든 무기의 조준 높이(월드). 플레이어 발 높이에 무기의 aimHeight를 더한다. 든 무기가 없으면 플레이어 위치의 높이
-        private static float GetAimHeight(in Entity entity, WeaponEntity[] weapons)
+        private static float GetAimHeight(in Entity entity, Entity[] weapons)
         {
             EntityIdentifier[] weaponIdentifiers = entity.weaponSlots.weapons;
             int weaponIndex = entity.weaponSlots.currentIndex;

@@ -10,6 +10,8 @@ namespace TopView.Systems
     // 플레이어가 반경 안에 들어온 전리품을 획득해 효과를 적용한다.
     public static class LootPickupSystem
     {
+        // 탄약 전리품을 받는 무기가 가진 컴포넌트
+        private const ComponentMask AMMO_LOOT_MASK = ComponentMask.Magazine | ComponentMask.ReserveAmmoState;
         // 획득할 수 있는 전리품이 가진 컴포넌트
         private const ComponentMask LOOT_MASK = ComponentMask.Loot | ComponentMask.Position;
 
@@ -20,12 +22,11 @@ namespace TopView.Systems
         /// 살아 있는 플레이어의 획득 반경 안에 있는 전리품의 효과를 적용하고 소멸을 요청한다. 효과를 받을 수 없는 전리품(원거리 무기가 없을 때의 탄약)은 바닥에 남긴다.
         /// </summary>
         /// <param name="storage">엔티티 저장소. Loot와 Position을 가진 칸만 처리한다</param>
-        /// <param name="weapons">무기 저장소</param>
         /// <param name="progress">한 판의 진행 상태. 골드를 더한다</param>
         /// <param name="pickupRadius">플레이어 중심에서 전리품을 획득하는 반경(유닛, XZ)</param>
         /// <param name="despawnRequests">전리품 소멸 요청 큐</param>
         /// <param name="pickedUpRecords">전리품을 획득한 기록 목록</param>
-        public static void Tick(EntityStorage storage, WeaponStorage weapons, ref GameProgressComponent progress, float pickupRadius, Queue<LootDespawnRequest> despawnRequests, List<LootPickedUpRecord> pickedUpRecords)
+        public static void Tick(EntityStorage storage, ref GameProgressComponent progress, float pickupRadius, Queue<LootDespawnRequest> despawnRequests, List<LootPickedUpRecord> pickedUpRecords)
         {
             float sqrPickupRadius = pickupRadius * pickupRadius;
             for (int playerIndex = 0; playerIndex < storage.entities.Length; playerIndex++)
@@ -52,7 +53,7 @@ namespace TopView.Systems
                         continue;
                     }
 
-                    if (TryApply(in entity.loot, ref progress, ref player.health, weapons.entities, in player.weaponSlots))
+                    if (TryApply(in entity.loot, ref progress, ref player.health, storage.entities, in player.weaponSlots))
                     {
                         despawnRequests.Enqueue(new LootDespawnRequest
                         {
@@ -65,7 +66,7 @@ namespace TopView.Systems
         }
 
         // 전리품의 효과를 적용한다. 효과를 받을 수 없어 바닥에 남길 전리품이면 false를 돌려준다.
-        private static bool TryApply(in LootComponent loot, ref GameProgressComponent progress, ref HealthComponent health, WeaponEntity[] weaponEntities, in PlayerWeaponSlotsComponent weaponSlots)
+        private static bool TryApply(in LootComponent loot, ref GameProgressComponent progress, ref HealthComponent health, Entity[] weaponEntities, in PlayerWeaponSlotsComponent weaponSlots)
         {
             switch (loot.kind)
             {
@@ -85,16 +86,16 @@ namespace TopView.Systems
             }
         }
 
-        // 원거리 무기 전부의 예비 탄약을 더한다. 원거리 무기가 없으면 false를 돌려준다.
-        private static bool TryAddAmmo(WeaponEntity[] weaponEntities, in PlayerWeaponSlotsComponent weaponSlots, int amount)
+        // 탄창이 있는 무기 전부의 예비 탄약을 더한다. 그런 무기가 없으면 false를 돌려준다.
+        private static bool TryAddAmmo(Entity[] weaponEntities, in PlayerWeaponSlotsComponent weaponSlots, int amount)
         {
             bool hasRangedWeapon = false;
             for (int weaponIndex = 0; weaponIndex < weaponSlots.weapons.Length; weaponIndex++)
             {
-                ref WeaponEntity weaponEntity = ref weaponEntities[weaponSlots.weapons[weaponIndex].index];
-                if (weaponEntity.weapon.kind == WeaponKind.Ranged)
+                ref Entity weaponEntity = ref weaponEntities[weaponSlots.weapons[weaponIndex].index];
+                if ((weaponEntity.mask & AMMO_LOOT_MASK) == AMMO_LOOT_MASK)
                 {
-                    weaponEntity.ammoState.reserve += amount;
+                    weaponEntity.reserveAmmoState.reserve += amount;
                     hasRangedWeapon = true;
                 }
             }

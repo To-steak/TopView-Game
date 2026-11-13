@@ -38,7 +38,10 @@ namespace TopView.Systems
                 EntityIdentifier owner = new EntityIdentifier { index = index, generation = entity.generation };
                 for (int weaponIndex = 0; weaponIndex < request.weapons.Length; weaponIndex++)
                 {
-                    weaponSpawnRequests.Enqueue(new WeaponSpawnRequest { owner = owner, slotIndex = weaponIndex, weapon = request.weapons[weaponIndex] });
+                    WeaponSpawnRequest weaponSpawnRequest = request.weapons[weaponIndex];
+                    weaponSpawnRequest.owner = owner;
+                    weaponSpawnRequest.slotIndex = weaponIndex;
+                    weaponSpawnRequests.Enqueue(weaponSpawnRequest);
                 }
             }
 
@@ -52,7 +55,7 @@ namespace TopView.Systems
         private static void Spawn(ref Entity entity, in PlayerSpawnRequest request)
         {
             int generation = entity.generation + 1;
-            WeaponComponent[] weapons = request.weapons;
+            WeaponSpawnRequest[] weapons = request.weapons;
             EntityIdentifier[] weaponIdentifiers = entity.weaponSlots.weapons;
             if (weaponIdentifiers == null || weaponIdentifiers.Length != weapons.Length)
             {
@@ -87,16 +90,16 @@ namespace TopView.Systems
             };
         }
 
-        // 투척 무기 중 가장 긴 비행의 점 수(flightTicks + 1). 투척 무기가 없으면 0이다.
-        private static int GetPreviewPointCapacity(WeaponComponent[] weapons)
+        // 포물선 투사체 무기 중 가장 긴 비행의 점 수(flightTicks + 1). 포물선 투사체 무기가 없으면 0이다.
+        private static int GetPreviewPointCapacity(WeaponSpawnRequest[] weapons)
         {
             int capacity = 0;
             for (int weaponIndex = 0; weaponIndex < weapons.Length; weaponIndex++)
             {
-                ref readonly WeaponComponent weapon = ref weapons[weaponIndex];
-                if (weapon.kind == WeaponKind.Throw)
+                ref readonly WeaponSpawnRequest weapon = ref weapons[weaponIndex];
+                if ((weapon.mask & ComponentMask.ArcAttack) != 0)
                 {
-                    capacity = Mathf.Max(capacity, weapon.arc.projectile.flight.flightTicks + 1);
+                    capacity = Mathf.Max(capacity, weapon.arcAttack.projectile.flight.flightTicks + 1);
                 }
             }
 

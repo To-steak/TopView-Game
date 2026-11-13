@@ -21,9 +21,11 @@ namespace TopView.Entities
         public List<int>[] freeEnemyIndicesByKind;
         // 플레이어 구간의 빈 칸 번호 목록. PlayerSpawnSystem이 끝에서부터 꺼낸다
         public List<int> freePlayerIndices;
+        // 무기 구간의 빈 칸 번호 목록. WeaponSpawnSystem이 끝에서부터 꺼낸다
+        public List<int> freeWeaponIndices;
 
         /// <summary>
-        /// 모든 칸이 빈 저장소를 만든다. 구간은 전리품, 근접 판정, 직선 투사체, 포물선 투사체, 적 종류별, 플레이어 순서로 앞에서부터 놓는다.
+        /// 모든 칸이 빈 저장소를 만든다. 구간은 전리품, 근접 판정, 직선 투사체, 포물선 투사체, 적 종류별, 플레이어, 무기 순서로 앞에서부터 놓는다.
         /// 근접 판정 구간의 칸마다 이미 맞힌 대상을 기록할 배열을, 적 구간의 칸마다 경로 배열을 할당한다.
         /// </summary>
         /// <param name="lootCapacity">전리품 구간의 칸 수</param>
@@ -35,9 +37,10 @@ namespace TopView.Entities
         /// <param name="enemyCapacityPerKind">적 종류별 구간의 칸 수</param>
         /// <param name="pathCornerCapacity">적 칸마다 미리 만들어 둘 경로 배열의 크기</param>
         /// <param name="playerCapacity">플레이어 구간의 칸 수</param>
-        public EntityStorage(int lootCapacity, int meleeCapacity, int meleeHitCapacity, int straightProjectileCapacity, int arcProjectileCapacity, int enemyKindCount, int enemyCapacityPerKind, int pathCornerCapacity, int playerCapacity)
+        /// <param name="weaponCapacity">무기 구간의 칸 수</param>
+        public EntityStorage(int lootCapacity, int meleeCapacity, int meleeHitCapacity, int straightProjectileCapacity, int arcProjectileCapacity, int enemyKindCount, int enemyCapacityPerKind, int pathCornerCapacity, int playerCapacity, int weaponCapacity)
         {
-            entities = new Entity[lootCapacity + meleeCapacity + straightProjectileCapacity + arcProjectileCapacity + enemyKindCount * enemyCapacityPerKind + playerCapacity];
+            entities = new Entity[lootCapacity + meleeCapacity + straightProjectileCapacity + arcProjectileCapacity + enemyKindCount * enemyCapacityPerKind + playerCapacity + weaponCapacity];
 
             int start = 0;
             freeLootIndices = CreateFreeIndices(start, lootCapacity);
@@ -68,6 +71,9 @@ namespace TopView.Entities
             }
 
             freePlayerIndices = CreateFreeIndices(start, playerCapacity);
+            start += playerCapacity;
+
+            freeWeaponIndices = CreateFreeIndices(start, weaponCapacity);
         }
 
         // start부터 count칸의 번호를 끝에서부터 꺼낼 때 앞 번호가 먼저 나오도록 거꾸로 담는다.

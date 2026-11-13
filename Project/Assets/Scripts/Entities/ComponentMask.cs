@@ -76,6 +76,38 @@ namespace TopView.Entities
         // 투척 미리보기
         ThrowPreview = 1UL << 32,
         // 플레이어 강화 레벨
-        PlayerUpgradeLevels = 1UL << 33
+        PlayerUpgradeLevels = 1UL << 33,
+        // 이 엔티티를 든 주인
+        Owner = 1UL << 34,
+        // 모든 무기에 있는 값(피해량, 조준 높이)
+        Weapon = 1UL << 35,
+        // 강화 레벨
+        UpgradeLevel = 1UL << 36,
+        // 무기 강화 효과
+        WeaponUpgrade = 1UL << 37,
+        // 주인이 공격 키를 누를 때 들어갈 행동 상태
+        AttackState = 1UL << 38,
+        // 근접 공격
+        MeleeAttack = 1UL << 39,
+        // 근접 판정을 무엇으로 그릴지
+        MeleeView = 1UL << 40,
+        // 직선 투사체 공격
+        StraightAttack = 1UL << 41,
+        // 포물선 투사체 공격
+        ArcAttack = 1UL << 42,
+        // 던지기 전에 착탄점을 정하는 값
+        Throw = 1UL << 43,
+        // 탄창 값
+        Magazine = 1UL << 44,
+        // 장전된 탄약 수
+        MagazineState = 1UL << 45,
+        // 예비 탄약 값
+        ReserveAmmo = 1UL << 46,
+        // 예비 탄약 수
+        ReserveAmmoState = 1UL << 47,
+        // 연달아 공격하는 간격
+        AttackInterval = 1UL << 48,
+        // 공격 상태의 길이
+        AttackDuration = 1UL << 49
     }
 }

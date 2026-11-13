@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5ae9619f9bef9542a8b18fe1f1cd54e, type: 3}
   m_Name: Grenade Weapon Definition
   m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.WeaponDefinition
+  kind: 2
   weapon:
-    kind: 2
     damage: 150
+    aimHeight: 0
+    kind: 2
     ammo:
       max: 0
       startingCurrent: 0
@@ -63,12 +65,23 @@ MonoBehaviour:
       attackIntervalRatioPerLevel: 0
       explosionRadiusIncreasePerLevel: 0
       meleeRangeRatioPerLevel: 0
-    aimHeight: 0
-    timing:
-      startTicks: 15
-      endTicks: 0
-      durationTicks: 30
-    straightProjectile:
+  upgrade:
+    maxAmmoRatioPerLevel: 0
+    attackIntervalRatioPerLevel: 0
+    explosionRadiusIncreasePerLevel: 0
+    meleeRangeRatioPerLevel: 0
+  attackInterval:
+    intervalTicks: 0
+  attackDuration:
+    durationTicks: 30
+  meleeAttack:
+    startTicks: 0
+    endTicks: 0
+    shape:
+      radius: 0
+      offset: 0
+  straightAttack:
+    projectile:
       flight:
         speed: 0
         lifetimeTicks: 0
@@ -79,7 +92,9 @@ MonoBehaviour:
           m_Bits: 0
       explosion:
         radius: 0
-    arcProjectile:
+    shots: []
+  arcAttack:
+    projectile:
       flight:
         flightTicks: 50
         arcHeight: 2
@@ -90,10 +105,17 @@ MonoBehaviour:
           m_Bits: 4294966856
       explosion:
         radius: 3
-    meleeShape:
-      radius: 0
-      offset: 0
-    muzzleOffset: {x: 0, y: 0, z: 0}
+    shots:
+    - startTicks: 15
+      spawnOffset: {x: 0, y: 0, z: 0}
+  throwing:
+    chargePerTick: 3
+    maxThrowDistance: 10
+  magazine:
+    max: 0
+    startingCurrent: 0
+  reserveAmmo:
+    startingReserve: 5
   modelPrefab: {fileID: 3006573835764851770, guid: 88eec3c3ac7a9b54c966aeba2bec804e, type: 3}
   projectilePrefab: {fileID: 3006573835764851770, guid: c8836d5c1f9260a41aafb72573635c50, type: 3}
   hitEffectPrefab: {fileID: 1599315238913598529, guid: 46ffadbb188f9ab498b623c4290ef656, type: 3}

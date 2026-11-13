@@ -1,4 +1,5 @@
 using TopView.Components;
+using TopView.Entities;
 using UnityEngine;
 
 namespace TopView.Utilities
@@ -92,60 +93,63 @@ namespace TopView.Utilities
         /// <summary>
         /// 강화가 반영된 공격 간격(틱)을 돌려준다. 반올림하며, 최소 공격 간격 아래로는 줄지 않는다. 처음부터 최소보다 짧으면 처음 값을 돌려준다.
         /// </summary>
-        /// <param name="weapon">무기</param>
+        /// <param name="attackInterval">무기의 공격 간격</param>
+        /// <param name="weaponUpgrade">무기 강화 효과</param>
         /// <param name="upgrade">강화 값</param>
         /// <param name="weaponLevel">무기 강화 레벨</param>
         /// <returns>공격 간격(틱)</returns>
-        public static int GetAttackIntervalTicks(in WeaponComponent weapon, in PlayerUpgradeComponent upgrade, int weaponLevel)
+        public static int GetAttackIntervalTicks(in AttackIntervalComponent attackInterval, in WeaponUpgradeRuleComponent weaponUpgrade, in PlayerUpgradeComponent upgrade, int weaponLevel)
         {
-            int intervalTicks = Mathf.RoundToInt(Decrease(weapon.attackIntervalTicks, weapon.upgrade.attackIntervalRatioPerLevel, weaponLevel));
-            return Mathf.Max(intervalTicks, Mathf.Min(weapon.attackIntervalTicks, upgrade.minAttackIntervalTicks));
+            int intervalTicks = Mathf.RoundToInt(Decrease(attackInterval.intervalTicks, weaponUpgrade.attackIntervalRatioPerLevel, weaponLevel));
+            return Mathf.Max(intervalTicks, Mathf.Min(attackInterval.intervalTicks, upgrade.minAttackIntervalTicks));
         }
 
         /// <summary>
         /// 강화가 반영된 최대 탄약 수를 돌려준다. 반올림한다.
         /// </summary>
-        /// <param name="weapon">무기</param>
+        /// <param name="magazine">무기의 탄창 값</param>
+        /// <param name="weaponUpgrade">무기 강화 효과</param>
         /// <param name="weaponLevel">무기 강화 레벨</param>
         /// <returns>장전할 수 있는 최대 탄약 수</returns>
-        public static int GetMaxAmmo(in WeaponComponent weapon, int weaponLevel)
+        public static int GetMaxAmmo(in MagazineComponent magazine, in WeaponUpgradeRuleComponent weaponUpgrade, int weaponLevel)
         {
-            return Mathf.RoundToInt(Increase(weapon.ammo.max, weapon.upgrade.maxAmmoRatioPerLevel, weaponLevel));
+            return Mathf.RoundToInt(Increase(magazine.max, weaponUpgrade.maxAmmoRatioPerLevel, weaponLevel));
         }
 
         /// <summary>
         /// 강화가 반영된 투사체 폭발 반지름을 돌려준다.
         /// </summary>
-        /// <param name="weapon">무기</param>
+        /// <param name="weapon">무기 엔티티</param>
         /// <param name="weaponLevel">무기 강화 레벨</param>
-        /// <returns>폭발 반지름(유닛, XZ). 0이면 폭발하지 않는다. Ranged는 직선 투사체, Throw는 포물선 투사체의 값을 쓰고, Melee는 0이다</returns>
-        public static float GetExplosionRadius(in WeaponComponent weapon, int weaponLevel)
+        /// <returns>폭발 반지름(유닛, XZ). 0이면 폭발하지 않는다. StraightAttack은 직선 투사체, ArcAttack은 포물선 투사체의 값을 쓰고, 투사체 공격이 없으면 0이다</returns>
+        public static float GetExplosionRadius(in Entity weapon, int weaponLevel)
         {
             float baseRadius;
-            switch (weapon.kind)
+            if ((weapon.mask & ComponentMask.StraightAttack) != 0)
             {
-                case WeaponKind.Ranged:
-                    baseRadius = weapon.straight.projectile.explosion.radius;
-                    break;
-                case WeaponKind.Throw:
-                    baseRadius = weapon.arc.projectile.explosion.radius;
-                    break;
-                default:
-                    return 0f;
+                baseRadius = weapon.straightAttack.projectile.explosion.radius;
+            }
+            else if ((weapon.mask & ComponentMask.ArcAttack) != 0)
+            {
+                baseRadius = weapon.arcAttack.projectile.explosion.radius;
+            }
+            else
+            {
+                return 0f;
             }
 
-            return baseRadius + weapon.upgrade.explosionRadiusIncreasePerLevel * weaponLevel;
+            return baseRadius + weapon.weaponUpgrade.explosionRadiusIncreasePerLevel * weaponLevel;
         }
 
         /// <summary>
         /// 근접 판정 반지름, 앞쪽으로 띄우는 거리, 임팩트 이펙트 크기에 곱할 배율을 돌려준다.
         /// </summary>
-        /// <param name="weapon">무기</param>
+        /// <param name="weaponUpgrade">무기 강화 효과</param>
         /// <param name="weaponLevel">무기 강화 레벨</param>
         /// <returns>1 + meleeRangeRatioPerLevel × weaponLevel</returns>
-        public static float GetMeleeRangeScale(in WeaponComponent weapon, int weaponLevel)
+        public static float GetMeleeRangeScale(in WeaponUpgradeRuleComponent weaponUpgrade, int weaponLevel)
         {
-            return Increase(1f, weapon.upgrade.meleeRangeRatioPerLevel, weaponLevel);
+            return Increase(1f, weaponUpgrade.meleeRangeRatioPerLevel, weaponLevel);
         }
     }
 }

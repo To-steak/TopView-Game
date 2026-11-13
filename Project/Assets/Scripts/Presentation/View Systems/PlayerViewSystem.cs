@@ -43,7 +43,6 @@ namespace TopView.Presentation.ViewSystems
         /// 살아 있는 플레이어가 있으면 View를 만들거나 맞추고, 없으면 View를 끈다.
         /// </summary>
         /// <param name="entities">플레이어 엔티티 배열</param>
-        /// <param name="weapons">무기 엔티티 배열</param>
         /// <param name="stateRecords">이번 프레임의 상태 변경 기록</param>
         /// <param name="attackRecords">이번 프레임의 공격을 내보낸 기록</param>
         /// <param name="viewPrefab">PlayerView가 붙은 프리팹</param>
@@ -51,7 +50,7 @@ namespace TopView.Presentation.ViewSystems
         /// <param name="rangedLayerBlendInTicks">원거리 레이어 가중치가 0에서 1로 올라오는 시간(틱)</param>
         /// <param name="isPaused">판이 일시정지 중이면 true. Animator와 원거리 레이어 가중치를 멈춘다</param>
         /// <param name="context">플레이어 View 실행 상태</param>
-        public static void Present(Entity[] entities, WeaponEntity[] weapons, List<PlayerStateChangedRecord> stateRecords, List<PlayerAttackCommittedRecord> attackRecords, GameObject viewPrefab, GameObject[] weaponModelPrefabs, int rangedLayerBlendInTicks, bool isPaused, PlayerViewContext context)
+        public static void Present(Entity[] entities, List<PlayerStateChangedRecord> stateRecords, List<PlayerAttackCommittedRecord> attackRecords, GameObject viewPrefab, GameObject[] weaponModelPrefabs, int rangedLayerBlendInTicks, bool isPaused, PlayerViewContext context)
         {
             if (!TryFindAlivePlayer(entities, out int playerIndex))
             {
@@ -88,7 +87,7 @@ namespace TopView.Presentation.ViewSystems
             // 가중치는 프레임 시간만큼 목표로 다가가므로, 일시정지 중에는 Animator와 함께 멈춘다
             if (!isPaused)
             {
-                ApplyRangedLayerWeight(in actionState, in weaponSlot, weapons, animator, context.rangedLayerIndex, rangedLayerBlendInTicks);
+                ApplyRangedLayerWeight(in actionState, in weaponSlot, entities, animator, context.rangedLayerIndex, rangedLayerBlendInTicks);
             }
             ApplyActionLayerWeight(in actionState, animator, context.actionLayerIndex);
             ApplyWeaponModels(in weaponSlot, context.weaponModels);
@@ -411,8 +410,8 @@ namespace TopView.Presentation.ViewSystems
             animator.SetFloat(MOVEMENT_SPEED_HASH, speed);
         }
 
-        // 조준 자세는 Ranged만 쓴다. Ranged가 아니거나 조준하지 않는 상태(Dodge, Jump, Land, Swap, Die)이면 원거리 레이어를 바로 끄고, 그 밖에는 rangedLayerBlendInTicks에 걸쳐 켠다.
-        private static void ApplyRangedLayerWeight(in PlayerActionStateComponent actionState, in PlayerWeaponSlotsComponent weaponSlot, WeaponEntity[] weapons, Animator animator, int rangedLayerIndex, int rangedLayerBlendInTicks)
+        // 조준 자세는 직선 투사체 무기만 쓴다. 직선 투사체 무기가 아니거나 조준하지 않는 상태(Dodge, Jump, Land, Swap, Die)이면 원거리 레이어를 바로 끄고, 그 밖에는 rangedLayerBlendInTicks에 걸쳐 켠다.
+        private static void ApplyRangedLayerWeight(in PlayerActionStateComponent actionState, in PlayerWeaponSlotsComponent weaponSlot, Entity[] weapons, Animator animator, int rangedLayerIndex, int rangedLayerBlendInTicks)
         {
             if (rangedLayerIndex < 0)
             {
@@ -420,7 +419,7 @@ namespace TopView.Presentation.ViewSystems
             }
 
             bool isNotAimingState = actionState.state == PlayerState.Dodge || actionState.state == PlayerState.Jump || actionState.state == PlayerState.Land || actionState.state == PlayerState.Swap || actionState.state == PlayerState.Die;
-            bool isHoldingRanged = weaponSlot.currentIndex < weaponSlot.weapons.Length && weapons[weaponSlot.weapons[weaponSlot.currentIndex].index].weapon.kind == WeaponKind.Ranged;
+            bool isHoldingRanged = weaponSlot.currentIndex < weaponSlot.weapons.Length && (weapons[weaponSlot.weapons[weaponSlot.currentIndex].index].mask & ComponentMask.StraightAttack) != 0;
             if (isNotAimingState || !isHoldingRanged)
             {
                 animator.SetLayerWeight(rangedLayerIndex, LAYER_OFF_WEIGHT);

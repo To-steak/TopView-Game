@@ -1,4 +1,3 @@
-using TopView.Components;
 using TopView.UserInterface.Views;
 using UnityEngine;
 
@@ -13,7 +12,8 @@ namespace TopView.UserInterface.Presenters
         // 같은 값을 매 프레임 다시 쓰지 않도록 마지막으로 보여 준 값을 기억한다
         private bool _hasPresentedValues;
         private bool _hasPresentedWeapon;
-        private WeaponKind _presentedWeaponKind;
+        private bool _hasPresentedMagazine;
+        private bool _hasPresentedReserveAmmo;
         private int _presentedCurrentAmmo;
         private int _presentedReserveAmmo;
 
@@ -35,10 +35,11 @@ namespace TopView.UserInterface.Presenters
         /// </summary>
         /// <param name="hasPlayer">살아 있는 플레이어가 있는지</param>
         /// <param name="hasWeapon">들고 있는 무기가 있는지</param>
-        /// <param name="weaponKind">들고 있는 무기 종류</param>
+        /// <param name="hasMagazine">들고 있는 무기에 탄창이 있는지</param>
+        /// <param name="hasReserveAmmo">들고 있는 무기에 예비 탄약이 있는지</param>
         /// <param name="currentAmmo">장전된 탄약 수</param>
         /// <param name="reserveAmmo">예비 탄약 수</param>
-        public void Present(bool hasPlayer, bool hasWeapon, WeaponKind weaponKind, int currentAmmo, int reserveAmmo)
+        public void Present(bool hasPlayer, bool hasWeapon, bool hasMagazine, bool hasReserveAmmo, int currentAmmo, int reserveAmmo)
         {
             if (!hasPlayer)
             {
@@ -56,34 +57,36 @@ namespace TopView.UserInterface.Presenters
                 _isShown = true;
             }
 
-            if (!_hasPresentedValues || hasWeapon != _hasPresentedWeapon || weaponKind != _presentedWeaponKind
+            if (!_hasPresentedValues || hasWeapon != _hasPresentedWeapon || hasMagazine != _hasPresentedMagazine || hasReserveAmmo != _hasPresentedReserveAmmo
                 || currentAmmo != _presentedCurrentAmmo || reserveAmmo != _presentedReserveAmmo)
             {
-                _view.SetAmmoText(GetAmmoText(hasWeapon, weaponKind, currentAmmo, reserveAmmo));
+                _view.SetAmmoText(GetAmmoText(hasWeapon, hasMagazine, hasReserveAmmo, currentAmmo, reserveAmmo));
                 _hasPresentedWeapon = hasWeapon;
-                _presentedWeaponKind = weaponKind;
+                _hasPresentedMagazine = hasMagazine;
+                _hasPresentedReserveAmmo = hasReserveAmmo;
                 _presentedCurrentAmmo = currentAmmo;
                 _presentedReserveAmmo = reserveAmmo;
                 _hasPresentedValues = true;
             }
         }
 
-        private static string GetAmmoText(bool hasWeapon, WeaponKind weaponKind, int currentAmmo, int reserveAmmo)
+        // 탄창이 있으면 "장전 / 예비", 예비 탄약만 있으면 예비 탄약 수, 탄약이 없는 무기면 "-"를 보여 준다
+        private static string GetAmmoText(bool hasWeapon, bool hasMagazine, bool hasReserveAmmo, int currentAmmo, int reserveAmmo)
         {
             if (!hasWeapon)
             {
                 return NO_WEAPON_TEXT;
             }
-
-            switch (weaponKind)
+            if (hasMagazine)
             {
-                case WeaponKind.Ranged:
-                    return $"{currentAmmo} / {reserveAmmo}";
-                case WeaponKind.Throw:
-                    return $"{reserveAmmo}";
-                default:
-                    return MELEE_AMMO_TEXT;
+                return $"{currentAmmo} / {reserveAmmo}";
             }
+            if (hasReserveAmmo)
+            {
+                return $"{reserveAmmo}";
+            }
+
+            return MELEE_AMMO_TEXT;
         }
     }
 }

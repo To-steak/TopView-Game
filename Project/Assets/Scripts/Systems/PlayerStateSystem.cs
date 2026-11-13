@@ -18,11 +18,10 @@ namespace TopView.Systems
         /// 상태별로 다음 상태로 넘어갈 때인지 보고, 교체와 재장전을 끝낸다. 사망한 뒤 시간이 되면 게임오버를 요청한다. PlayerAttackSystem 다음, PlayerStateChangeSystem 앞에 부른다.
         /// </summary>
         /// <param name="storage">엔티티 저장소. 플레이어(PlayerActionState, Death, PlayerAction, PlayerMotion, WeaponSlots)만 처리한다</param>
-        /// <param name="weapons">무기 저장소</param>
         /// <param name="command">플레이어 입력</param>
         /// <param name="stateChangeRequests">플레이어 상태 변경 요청 큐</param>
         /// <param name="gameOverRequests">게임오버 요청 큐</param>
-        public static void Tick(EntityStorage storage, WeaponStorage weapons, in PlayerCommand command, Queue<PlayerStateChangeRequest> stateChangeRequests, Queue<GameOverRequest> gameOverRequests)
+        public static void Tick(EntityStorage storage, in PlayerCommand command, Queue<PlayerStateChangeRequest> stateChangeRequests, Queue<GameOverRequest> gameOverRequests)
         {
             for (int index = 0; index < storage.entities.Length; index++)
             {
@@ -37,8 +36,7 @@ namespace TopView.Systems
                 ref PlayerWeaponSlotsComponent weaponSlot = ref entity.weaponSlots;
                 ref readonly PlayerActionComponent action = ref entity.playerAction;
                 ref readonly DeathComponent death = ref entity.death;
-                ref WeaponEntity weaponEntity = ref weapons.entities[weaponSlot.weapons[weaponSlot.currentIndex].index];
-                ref readonly WeaponComponent weapon = ref weaponEntity.weapon;
+                ref Entity weapon = ref storage.entities[weaponSlot.weapons[weaponSlot.currentIndex].index];
                 EntityIdentifier identifier = new EntityIdentifier { index = index, generation = entity.generation };
                 Vector3 moveInput = command.moveDirection;
 
@@ -106,7 +104,7 @@ namespace TopView.Systems
                         isFinished = actionState.elapsedTicks >= action.reloadTicks;
                         if (isFinished)
                         {
-                            PlayerWeaponUtility.Reload(in weapon, ref weaponEntity.ammoState, weaponEntity.upgradeLevel.level);
+                            Reload(ref weapon);
                         }
                         break;
 
@@ -124,6 +122,18 @@ namespace TopView.Systems
                     stateChangeRequests.Enqueue(new PlayerStateChangeRequest { target = identifier, state = nextState, moveInput = moveInput });
                 }
             }
+        }
+
+        // 재장전할 수 있는 무기면 강화가 반영된 최대 탄약 수까지 예비 탄약에서 채운다. 재장전 상태는 CanReload를 통과해야 들어오므로 정상 흐름에서는 건너뛰지 않는다.
+        private static void Reload(ref Entity weapon)
+        {
+            if (!PlayerWeaponUtility.CanReload(in weapon))
+            {
+                return;
+            }
+
+            int maxAmmo = PlayerUpgradeUtility.GetMaxAmmo(in weapon.magazine, in weapon.weaponUpgrade, weapon.upgradeLevel.level);
+            PlayerWeaponUtility.Reload(ref weapon.magazineState, ref weapon.reserveAmmoState, maxAmmo);
         }
     }
 }

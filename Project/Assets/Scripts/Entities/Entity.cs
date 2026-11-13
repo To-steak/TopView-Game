@@ -83,5 +83,38 @@ namespace TopView.Entities
         public PlayerThrowPreviewComponent throwPreview;
         // 플레이어 강화 레벨
         public PlayerUpgradeLevelsComponent playerUpgradeLevels;
+
+        // 이 엔티티를 든 주인
+        public OwnerComponent owner;
+        // 모든 무기에 있는 값. damage와 aimHeight만 읽는다
+        public WeaponComponent weapon;
+        // 강화 레벨
+        public UpgradeLevelComponent upgradeLevel;
+        // 무기 강화 효과. 생성 때 Definition에서 복사한다
+        public WeaponUpgradeRuleComponent weaponUpgrade;
+        // 주인이 공격 키를 누를 때 들어갈 행동 상태
+        public AttackStateComponent attackState;
+        // 근접 공격. 생성 때 Definition에서 복사한다
+        public MeleeAttackComponent meleeAttack;
+        // 근접 판정을 무엇으로 그릴지
+        public MeleeViewComponent meleeView;
+        // 직선 투사체 공격. 생성 때 Definition에서 복사한다
+        public StraightAttackComponent straightAttack;
+        // 포물선 투사체 공격. 생성 때 Definition에서 복사한다
+        public ArcAttackComponent arcAttack;
+        // 던지기 전에 착탄점을 정하는 값. 생성 때 Definition에서 복사한다
+        public ThrowComponent throwing;
+        // 탄창 값. 생성 때 Definition에서 복사한다
+        public MagazineComponent magazine;
+        // 장전된 탄약 수
+        public MagazineStateComponent magazineState;
+        // 예비 탄약 값. 생성 때 Definition에서 복사한다
+        public ReserveAmmoComponent reserveAmmo;
+        // 예비 탄약 수
+        public ReserveAmmoStateComponent reserveAmmoState;
+        // 연달아 공격하는 간격. 생성 때 Definition에서 복사한다
+        public AttackIntervalComponent attackInterval;
+        // 공격 상태의 길이. 생성 때 Definition에서 복사한다
+        public AttackDurationComponent attackDuration;
     }
 }

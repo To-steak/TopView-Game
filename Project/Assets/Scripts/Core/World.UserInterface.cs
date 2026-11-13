@@ -174,7 +174,7 @@ namespace TopView.Core
                 }
                 if (_ammoPresenter != null)
                 {
-                    _ammoPresenter.Present(false, false, WeaponKind.Melee, 0, 0);
+                    _ammoPresenter.Present(false, false, false, false, 0, 0);
                 }
                 if (_playerManaPresenter != null)
                 {
@@ -219,17 +219,19 @@ namespace TopView.Core
 
             if (_ammoPresenter != null)
             {
-                WeaponEntity[] weapons = _weapons.entities;
+                Entity[] weapons = _entities.entities;
                 ref readonly PlayerWeaponSlotsComponent weaponSlot = ref entity.weaponSlots;
                 int weaponIndex = weaponSlot.currentIndex;
                 if (weaponIndex >= 0 && weaponIndex < weaponSlot.weapons.Length)
                 {
-                    ref readonly WeaponEntity weaponEntity = ref weapons[weaponSlot.weapons[weaponIndex].index];
-                    _ammoPresenter.Present(true, true, weaponEntity.weapon.kind, weaponEntity.ammoState.current, weaponEntity.ammoState.reserve);
+                    ref readonly Entity weapon = ref weapons[weaponSlot.weapons[weaponIndex].index];
+                    bool hasMagazine = (weapon.mask & ComponentMask.MagazineState) != 0;
+                    bool hasReserveAmmo = (weapon.mask & ComponentMask.ReserveAmmoState) != 0;
+                    _ammoPresenter.Present(true, true, hasMagazine, hasReserveAmmo, weapon.magazineState.current, weapon.reserveAmmoState.reserve);
                 }
                 else
                 {
-                    _ammoPresenter.Present(true, false, WeaponKind.Melee, 0, 0);
+                    _ammoPresenter.Present(true, false, false, false, 0, 0);
                 }
             }
 
@@ -240,7 +242,7 @@ namespace TopView.Core
 
             if (_upgradePresenter != null && _progress.isUpgradeOpen)
             {
-                PresentUpgradeInterface(in entity.playerVitals, in entity.playerUpgrade, in entity.playerUpgradeLevels, in entity.weaponSlots, _weapons.entities, _progress.gold);
+                PresentUpgradeInterface(in entity.playerVitals, in entity.playerUpgrade, in entity.playerUpgradeLevels, in entity.weaponSlots, _entities.entities, _progress.gold);
             }
 
             if (_reloadPresenter != null)
@@ -251,7 +253,7 @@ namespace TopView.Core
 
         // 항목별 레벨, 비용, 지금과 다음 레벨의 수치를 넘긴다. 최대 레벨이 아니고 골드가 비용 이상일 때만 버튼을 누를 수 있다.
         // 다음 레벨 수치는 최대 레벨이어도 한 레벨 위로 계산한다. 그래야 값이 같은지로 이 항목이 강화하지 않는 효과를 가린다
-        private void PresentUpgradeInterface(in PlayerVitalsComponent vitals, in PlayerUpgradeComponent upgrade, in PlayerUpgradeLevelsComponent levels, in PlayerWeaponSlotsComponent weaponSlots, WeaponEntity[] weapons, int gold)
+        private void PresentUpgradeInterface(in PlayerVitalsComponent vitals, in PlayerUpgradeComponent upgrade, in PlayerUpgradeLevelsComponent levels, in PlayerWeaponSlotsComponent weaponSlots, Entity[] weapons, int gold)
         {
             int level = levels.maxHealthLevel;
             PresentUpgradeStat(PlayerUpgradeCommandType.MaxHealth, level, in upgrade, gold,
@@ -277,10 +279,10 @@ namespace TopView.Core
             EntityIdentifier[] weaponIdentifiers = weaponSlots.weapons;
             for (int weaponIndex = 0; weaponIndex < weaponIdentifiers.Length; weaponIndex++)
             {
-                ref readonly WeaponEntity weaponEntity = ref weapons[weaponIdentifiers[weaponIndex].index];
-                int weaponLevel = weaponEntity.upgradeLevel.level;
+                ref readonly Entity weapon = ref weapons[weaponIdentifiers[weaponIndex].index];
+                int weaponLevel = weapon.upgradeLevel.level;
                 int cost = PlayerUpgradeUtility.GetCost(in upgrade, weaponLevel);
-                WeaponUpgradeEffectComponent effect = GetWeaponUpgradeEffect(in weaponEntity.weapon, in upgrade, weaponLevel);
+                WeaponUpgradeEffectComponent effect = GetWeaponUpgradeEffect(in weapon, in upgrade, weaponLevel);
                 _upgradePresenter.PresentWeapon(weaponIndex, weaponLevel, upgrade.maxLevel, cost, CanUpgrade(weaponLevel, cost, in upgrade, gold), in effect);
             }
         }
@@ -291,22 +293,33 @@ namespace TopView.Core
             _upgradePresenter.PresentStat(type, level, upgrade.maxLevel, cost, CanUpgrade(level, cost, in upgrade, gold), value, nextValue);
         }
 
-        private static WeaponUpgradeEffectComponent GetWeaponUpgradeEffect(in WeaponComponent weapon, in PlayerUpgradeComponent upgrade, int level)
+        // 무기가 가진 컴포넌트의 효과만 계산한다. 없는 컴포넌트의 효과는 지금과 다음 값이 모두 0이라 강화 화면에서 가려진다
+        private static WeaponUpgradeEffectComponent GetWeaponUpgradeEffect(in Entity weapon, in PlayerUpgradeComponent upgrade, int level)
         {
             int nextLevel = level + 1;
-            return new WeaponUpgradeEffectComponent
+            WeaponUpgradeEffectComponent effect = new WeaponUpgradeEffectComponent
             {
-                currentDamage = PlayerUpgradeUtility.GetDamage(in weapon, in upgrade, level),
-                nextDamage = PlayerUpgradeUtility.GetDamage(in weapon, in upgrade, nextLevel),
-                currentAttackIntervalTicks = PlayerUpgradeUtility.GetAttackIntervalTicks(in weapon, in upgrade, level),
-                nextAttackIntervalTicks = PlayerUpgradeUtility.GetAttackIntervalTicks(in weapon, in upgrade, nextLevel),
-                currentMaxAmmo = PlayerUpgradeUtility.GetMaxAmmo(in weapon, level),
-                nextMaxAmmo = PlayerUpgradeUtility.GetMaxAmmo(in weapon, nextLevel),
+                currentDamage = PlayerUpgradeUtility.GetDamage(in weapon.weapon, in upgrade, level),
+                nextDamage = PlayerUpgradeUtility.GetDamage(in weapon.weapon, in upgrade, nextLevel),
                 currentExplosionRadius = PlayerUpgradeUtility.GetExplosionRadius(in weapon, level),
-                nextExplosionRadius = PlayerUpgradeUtility.GetExplosionRadius(in weapon, nextLevel),
-                currentMeleeRadius = weapon.melee.shape.radius * PlayerUpgradeUtility.GetMeleeRangeScale(in weapon, level),
-                nextMeleeRadius = weapon.melee.shape.radius * PlayerUpgradeUtility.GetMeleeRangeScale(in weapon, nextLevel)
+                nextExplosionRadius = PlayerUpgradeUtility.GetExplosionRadius(in weapon, nextLevel)
             };
+            if ((weapon.mask & ComponentMask.AttackInterval) != 0)
+            {
+                effect.currentAttackIntervalTicks = PlayerUpgradeUtility.GetAttackIntervalTicks(in weapon.attackInterval, in weapon.weaponUpgrade, in upgrade, level);
+                effect.nextAttackIntervalTicks = PlayerUpgradeUtility.GetAttackIntervalTicks(in weapon.attackInterval, in weapon.weaponUpgrade, in upgrade, nextLevel);
+            }
+            if ((weapon.mask & ComponentMask.Magazine) != 0)
+            {
+                effect.currentMaxAmmo = PlayerUpgradeUtility.GetMaxAmmo(in weapon.magazine, in weapon.weaponUpgrade, level);
+                effect.nextMaxAmmo = PlayerUpgradeUtility.GetMaxAmmo(in weapon.magazine, in weapon.weaponUpgrade, nextLevel);
+            }
+            if ((weapon.mask & ComponentMask.MeleeAttack) != 0)
+            {
+                effect.currentMeleeRadius = weapon.meleeAttack.shape.radius * PlayerUpgradeUtility.GetMeleeRangeScale(in weapon.weaponUpgrade, level);
+                effect.nextMeleeRadius = weapon.meleeAttack.shape.radius * PlayerUpgradeUtility.GetMeleeRangeScale(in weapon.weaponUpgrade, nextLevel);
+            }
+            return effect;
         }
 
         private static bool CanUpgrade(int level, int cost, in PlayerUpgradeComponent upgrade, int gold)

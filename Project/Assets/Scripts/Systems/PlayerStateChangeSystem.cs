@@ -11,6 +11,8 @@ namespace TopView.Systems
     // 상태 변경 요청을 받은 플레이어의 행동 상태를 바꾸고, 상태에 들어가고 나갈 때의 값을 정한다.
     public static class PlayerStateChangeSystem
     {
+        // 공격 간격을 정하는 무기가 가진 컴포넌트
+        private const ComponentMask ATTACK_INTERVAL_MASK = ComponentMask.AttackInterval | ComponentMask.WeaponUpgrade | ComponentMask.UpgradeLevel;
         // 처리할 플레이어가 가진 컴포넌트
         private const ComponentMask PLAYER_MASK = ComponentMask.PlayerActionState | ComponentMask.Rotation | ComponentMask.PlayerMovement | ComponentMask.PlayerVitals | ComponentMask.PlayerUpgrade | ComponentMask.PlayerMotion | ComponentMask.Mana | ComponentMask.WeaponSlots | ComponentMask.PlayerUpgradeLevels;
 
@@ -18,10 +20,9 @@ namespace TopView.Systems
         /// 쌓인 상태 변경 요청을 모두 처리한다. 없어졌거나 칸이 재사용된 대상은 건너뛴다. 요청을 넣는 System 바로 뒤에 부른다.
         /// </summary>
         /// <param name="storage">엔티티 저장소. 플레이어(PlayerActionState, Rotation, PlayerMovement, PlayerVitals, PlayerUpgrade, PlayerMotion, Mana, WeaponSlots, PlayerUpgradeLevels)만 처리한다</param>
-        /// <param name="weapons">무기 저장소</param>
         /// <param name="stateChangeRequests">플레이어 상태 변경 요청 큐</param>
         /// <param name="stateRecords">상태 변경 기록</param>
-        public static void Tick(EntityStorage storage, WeaponStorage weapons, Queue<PlayerStateChangeRequest> stateChangeRequests, List<PlayerStateChangedRecord> stateRecords)
+        public static void Tick(EntityStorage storage, Queue<PlayerStateChangeRequest> stateChangeRequests, List<PlayerStateChangedRecord> stateRecords)
         {
             while (stateChangeRequests.Count > 0)
             {
@@ -29,14 +30,26 @@ namespace TopView.Systems
                 ref Entity entity = ref storage.entities[request.target.index];
                 if ((entity.mask & PLAYER_MASK) == PLAYER_MASK && entity.generation == request.target.generation)
                 {
-                    ref readonly WeaponEntity weaponEntity = ref weapons.entities[entity.weaponSlots.weapons[entity.weaponSlots.currentIndex].index];
-                    ChangeState(ref entity.playerActionState, ref entity.playerMotion, ref entity.rotation, ref entity.mana, in entity.playerMovement, in entity.playerVitals, in entity.playerUpgrade, in entity.playerUpgradeLevels, in weaponEntity.weapon, weaponEntity.upgradeLevel.level, in request, stateRecords);
+                    ref readonly Entity weapon = ref storage.entities[entity.weaponSlots.weapons[entity.weaponSlots.currentIndex].index];
+                    int attackIntervalTicks = GetAttackIntervalTicks(in weapon, in entity.playerUpgrade);
+                    ChangeState(ref entity.playerActionState, ref entity.playerMotion, ref entity.rotation, ref entity.mana, in entity.playerMovement, in entity.playerVitals, in entity.playerUpgrade, in entity.playerUpgradeLevels, attackIntervalTicks, in request, stateRecords);
                 }
             }
         }
 
+        // 강화가 반영된 무기의 공격 간격(틱). AttackInterval이 없는 무기는 0이라 바로 다시 공격할 수 있다.
+        private static int GetAttackIntervalTicks(in Entity weapon, in PlayerUpgradeComponent upgrade)
+        {
+            if ((weapon.mask & ATTACK_INTERVAL_MASK) != ATTACK_INTERVAL_MASK)
+            {
+                return 0;
+            }
+
+            return PlayerUpgradeUtility.GetAttackIntervalTicks(in weapon.attackInterval, in weapon.weaponUpgrade, in upgrade, weapon.upgradeLevel.level);
+        }
+
         // 지금 상태에서 나가고 새 상태에 들어가 상태 변경을 기록한다. Die 상태에서는 바꾸지 않는다.
-        private static void ChangeState(ref PlayerActionStateComponent actionState, ref PlayerMotionComponent motion, ref RotationComponent rotation, ref ManaComponent mana, in PlayerMovementComponent movement, in PlayerVitalsComponent vital, in PlayerUpgradeComponent upgrade, in PlayerUpgradeLevelsComponent upgradeLevels, in WeaponComponent weapon, int weaponLevel, in PlayerStateChangeRequest request, List<PlayerStateChangedRecord> stateRecords)
+        private static void ChangeState(ref PlayerActionStateComponent actionState, ref PlayerMotionComponent motion, ref RotationComponent rotation, ref ManaComponent mana, in PlayerMovementComponent movement, in PlayerVitalsComponent vital, in PlayerUpgradeComponent upgrade, in PlayerUpgradeLevelsComponent upgradeLevels, int attackIntervalTicks, in PlayerStateChangeRequest request, List<PlayerStateChangedRecord> stateRecords)
         {
             if (actionState.state == PlayerState.Die)
             {
@@ -56,10 +69,10 @@ namespace TopView.Systems
             actionState.elapsedTicks = 0;
             actionState.committedShotCount = 0;
 
-            EnterState(ref actionState, ref motion, ref rotation, ref mana, in movement, in vital, in upgrade, in upgradeLevels, in weapon, weaponLevel, request.moveInput);
+            EnterState(ref actionState, ref motion, ref rotation, ref mana, in movement, in vital, in upgrade, in upgradeLevels, attackIntervalTicks, request.moveInput);
         }
 
-        private static void EnterState(ref PlayerActionStateComponent actionState, ref PlayerMotionComponent motion, ref RotationComponent rotation, ref ManaComponent mana, in PlayerMovementComponent movement, in PlayerVitalsComponent vital, in PlayerUpgradeComponent upgrade, in PlayerUpgradeLevelsComponent upgradeLevels, in WeaponComponent weapon, int weaponLevel, Vector3 moveInput)
+        private static void EnterState(ref PlayerActionStateComponent actionState, ref PlayerMotionComponent motion, ref RotationComponent rotation, ref ManaComponent mana, in PlayerMovementComponent movement, in PlayerVitalsComponent vital, in PlayerUpgradeComponent upgrade, in PlayerUpgradeLevelsComponent upgradeLevels, int attackIntervalTicks, Vector3 moveInput)
         {
             switch (actionState.state)
             {
@@ -96,12 +109,12 @@ namespace TopView.Systems
                     break;
 
                 case PlayerState.Shot:
-                    actionState.attackCooldownTicks = PlayerUpgradeUtility.GetAttackIntervalTicks(in weapon, in upgrade, weaponLevel);
+                    actionState.attackCooldownTicks = attackIntervalTicks;
                     break;
 
                 case PlayerState.Swing:
                     motion.isRotationLocked = true;
-                    actionState.attackCooldownTicks = PlayerUpgradeUtility.GetAttackIntervalTicks(in weapon, in upgrade, weaponLevel);
+                    actionState.attackCooldownTicks = attackIntervalTicks;
                     break;
 
                 case PlayerState.Throw:

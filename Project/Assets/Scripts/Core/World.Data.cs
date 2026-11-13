@@ -45,9 +45,7 @@ namespace TopView.Core
         // 적 경로 계산에 다시 쓰는 NavMeshPath. MonoBehaviour의 필드 초기화에서는 만들 수 없어 판 시작 때 만든다
         private NavMeshPath _navigationPath;
 
-        // 무기 저장소
-        private WeaponStorage _weapons;
-        // 엔티티 저장소. 옮겨 온 종류(전리품, 근접 판정, 투사체, 적, 플레이어)를 담는다
+        // 엔티티 저장소. 옮겨 온 종류(전리품, 근접 판정, 투사체, 적, 플레이어, 무기)를 담는다
         private EntityStorage _entities;
         // 이번 틱의 플레이어 피격 대상 목록. 적의 공격이 읽는다. 판 시작 때 플레이어 칸 수로 만들고, 매 틱 HitTargetSystem이 다시 채운다
         private HitTargetComponent[] _playerHitTargets;

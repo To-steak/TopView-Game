@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using TopView.Authoring;
 using TopView.Components;
 using TopView.Definitions;
+using TopView.Entities;
 using TopView.Presentation.Views;
 using TopView.Requests;
 using UnityEngine;
@@ -53,7 +54,7 @@ namespace TopView.Core
                 return false;
             }
 
-            if (!TryReadWeapons(playerDefinition, projectilePrefabs, hitEffectPrefabs, out WeaponComponent[] weapons, out weaponModelPrefabs))
+            if (!TryReadWeapons(playerDefinition, projectilePrefabs, hitEffectPrefabs, out WeaponSpawnRequest[] weapons, out weaponModelPrefabs))
             {
                 return false;
             }
@@ -89,11 +90,11 @@ namespace TopView.Core
             return true;
         }
 
-        // Player Definition의 무기 목록에서 엔티티에 담을 값과 View가 쓸 모델 프리팹을 꺼내고, 투사체 View와 피격 이펙트, 근접 임팩트 이펙트를 표에 올린다. 빈 칸이 있으면 false
-        private static bool TryReadWeapons(PlayerDefinition playerDefinition, List<GameObject> projectilePrefabs, List<GameObject> hitEffectPrefabs, out WeaponComponent[] weapons, out GameObject[] weaponModelPrefabs)
+        // Player Definition의 무기 목록에서 무기 생성 요청과 View가 쓸 모델 프리팹을 꺼내고, 투사체 View와 피격 이펙트, 근접 임팩트 이펙트를 표에 올린다. 빈 칸이 있으면 false
+        private static bool TryReadWeapons(PlayerDefinition playerDefinition, List<GameObject> projectilePrefabs, List<GameObject> hitEffectPrefabs, out WeaponSpawnRequest[] weapons, out GameObject[] weaponModelPrefabs)
         {
             WeaponDefinition[] weaponDefinitions = playerDefinition.weapons;
-            weapons = new WeaponComponent[weaponDefinitions.Length];
+            weapons = new WeaponSpawnRequest[weaponDefinitions.Length];
             weaponModelPrefabs = new GameObject[weaponDefinitions.Length];
             if (weaponDefinitions.Length == 0)
             {
@@ -110,15 +111,20 @@ namespace TopView.Core
                     return false;
                 }
 
-                weapons[weaponIndex] = definition.weapon;
-                weaponModelPrefabs[weaponIndex] = definition.modelPrefab;
-
-                bool hasProjectile = definition.weapon.kind != WeaponKind.Melee;
-                if (TryFindWeaponShotsProblem(in definition.weapon, out string shotsProblem))
+                if (TryFindWeaponShotsProblem(definition, out string shotsProblem))
                 {
                     Debug.LogError($"World >> {definition.name}의 {shotsProblem}. 판을 시작할 수 없다.");
                     return false;
                 }
+
+                if (!TryCreateWeaponSpawnRequest(definition, out weapons[weaponIndex]))
+                {
+                    Debug.LogError($"World >> {definition.name}의 무기 종류({definition.kind})를 처리하지 않아 판을 시작할 수 없다.");
+                    return false;
+                }
+                weaponModelPrefabs[weaponIndex] = definition.modelPrefab;
+
+                bool hasProjectile = definition.kind != WeaponKind.Melee;
                 AssignProjectileViews(definition.name, hasProjectile, definition.projectilePrefab, definition.hitEffectPrefab, ref weapons[weaponIndex].projectileView, projectilePrefabs, hitEffectPrefabs);
                 weapons[weaponIndex].meleeView.impactEffectIndex = hasProjectile ? -1 : IndexHitEffect($"{definition.name}의 임팩트 이펙트", definition.impactEffectPrefab, hitEffectPrefabs);
             }
@@ -126,15 +132,59 @@ namespace TopView.Core
             return true;
         }
 
-        // 투사체 무기의 발 목록에 문제가 있으면 적어 true를 돌려준다. Ranged는 마지막 발에서 공격 상태가 끝나 Duration Ticks와 비교하지 않는다. Melee는 발 목록이 없어 false다.
-        private static bool TryFindWeaponShotsProblem(in WeaponComponent weapon, out string problem)
+        // 무기 종류로 무기가 가질 컴포넌트와 공격 키를 누를 때 들어갈 행동 상태를 정해 주인 없는 생성 요청을 만든다. 처리하지 않는 종류면 false
+        private static bool TryCreateWeaponSpawnRequest(WeaponDefinition definition, out WeaponSpawnRequest request)
         {
-            switch (weapon.kind)
+            request = new WeaponSpawnRequest
+            {
+                mask = ComponentMask.Owner | ComponentMask.Weapon | ComponentMask.UpgradeLevel | ComponentMask.WeaponUpgrade | ComponentMask.AttackState,
+                weapon = definition.weapon,
+                upgrade = definition.upgrade
+            };
+
+            switch (definition.kind)
+            {
+                case WeaponKind.Melee:
+                    request.mask |= ComponentMask.MeleeAttack | ComponentMask.MeleeView | ComponentMask.AttackInterval | ComponentMask.AttackDuration;
+                    request.attackState.state = PlayerState.Swing;
+                    request.meleeAttack = definition.meleeAttack;
+                    request.attackInterval = definition.attackInterval;
+                    request.attackDuration = definition.attackDuration;
+                    return true;
+
+                case WeaponKind.Ranged:
+                    request.mask |= ComponentMask.StraightAttack | ComponentMask.ProjectileView | ComponentMask.Magazine | ComponentMask.MagazineState
+                        | ComponentMask.ReserveAmmo | ComponentMask.ReserveAmmoState | ComponentMask.AttackInterval;
+                    request.attackState.state = PlayerState.Shot;
+                    request.straightAttack = definition.straightAttack;
+                    request.magazine = definition.magazine;
+                    request.reserveAmmo = definition.reserveAmmo;
+                    request.attackInterval = definition.attackInterval;
+                    return true;
+
+                case WeaponKind.Throw:
+                    request.mask |= ComponentMask.ArcAttack | ComponentMask.Throw | ComponentMask.ProjectileView | ComponentMask.ReserveAmmo
+                        | ComponentMask.ReserveAmmoState | ComponentMask.AttackDuration;
+                    request.attackState.state = PlayerState.ThrowCharge;
+                    request.arcAttack = definition.arcAttack;
+                    request.throwing = definition.throwing;
+                    request.reserveAmmo = definition.reserveAmmo;
+                    request.attackDuration = definition.attackDuration;
+                    return true;
+            }
+
+            return false;
+        }
+
+        // 투사체 무기의 발 목록에 문제가 있으면 적어 true를 돌려준다. Ranged는 마지막 발에서 공격 상태가 끝나 Duration Ticks와 비교하지 않는다. Melee는 발 목록이 없어 false다.
+        private static bool TryFindWeaponShotsProblem(WeaponDefinition definition, out string problem)
+        {
+            switch (definition.kind)
             {
                 case WeaponKind.Ranged:
-                    return TryFindShotsProblem(weapon.straight.shots, false, weapon.durationTicks, out problem);
+                    return TryFindShotsProblem(definition.straightAttack.shots, false, 0, out problem);
                 case WeaponKind.Throw:
-                    return TryFindShotsProblem(weapon.arc.shots, true, weapon.durationTicks, out problem);
+                    return TryFindShotsProblem(definition.arcAttack.shots, true, definition.attackDuration.durationTicks, out problem);
             }
 
             problem = null;

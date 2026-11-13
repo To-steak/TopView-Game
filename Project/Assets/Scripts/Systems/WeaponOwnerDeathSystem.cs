@@ -10,19 +10,20 @@ namespace TopView.Systems
     {
         // 처리할 플레이어가 가진 컴포넌트
         private const ComponentMask PLAYER_MASK = ComponentMask.PlayerActionState;
+        // 처리할 무기가 가진 컴포넌트
+        private const ComponentMask WEAPON_MASK = ComponentMask.Owner | ComponentMask.Weapon;
 
         /// <summary>
         /// 주인의 칸이 비었거나 다른 엔티티로 바뀐 무기마다 소멸 요청을 넣는다. WeaponDespawnSystem 바로 앞에 부른다.
         /// </summary>
-        /// <param name="weapons">무기 저장소</param>
-        /// <param name="storage">엔티티 저장소. 플레이어(PlayerActionState)만 처리한다</param>
+        /// <param name="storage">엔티티 저장소. 무기(Owner, Weapon)의 주인 칸이 PlayerActionState를 가졌는지 본다</param>
         /// <param name="despawnRequests">무기 소멸 요청 큐</param>
-        public static void Tick(WeaponStorage weapons, EntityStorage storage, Queue<WeaponDespawnRequest> despawnRequests)
+        public static void Tick(EntityStorage storage, Queue<WeaponDespawnRequest> despawnRequests)
         {
-            for (int index = 0; index < weapons.entities.Length; index++)
+            for (int index = 0; index < storage.entities.Length; index++)
             {
-                ref readonly WeaponEntity entity = ref weapons.entities[index];
-                if (!entity.isAlive)
+                ref readonly Entity entity = ref storage.entities[index];
+                if ((entity.mask & WEAPON_MASK) != WEAPON_MASK)
                 {
                     continue;
                 }

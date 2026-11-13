@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5ae9619f9bef9542a8b18fe1f1cd54e, type: 3}
   m_Name: Pistol Weapon Definition
   m_EditorClassIdentifier: TopView.Definitions::TopView.Definitions.WeaponDefinition
+  kind: 1
   weapon:
-    kind: 1
     damage: 45
+    aimHeight: 0.31032115
+    kind: 1
     ammo:
       max: 8
       startingCurrent: 8
@@ -63,12 +65,23 @@ MonoBehaviour:
       attackIntervalRatioPerLevel: 0
       explosionRadiusIncreasePerLevel: 0.5
       meleeRangeRatioPerLevel: 0
-    aimHeight: 0.31032115
-    timing:
-      startTicks: 3
-      endTicks: 0
-      durationTicks: 0
-    straightProjectile:
+  upgrade:
+    maxAmmoRatioPerLevel: 0.5
+    attackIntervalRatioPerLevel: 0
+    explosionRadiusIncreasePerLevel: 0.5
+    meleeRangeRatioPerLevel: 0
+  attackInterval:
+    intervalTicks: 40
+  attackDuration:
+    durationTicks: 0
+  meleeAttack:
+    startTicks: 0
+    endTicks: 0
+    shape:
+      radius: 0
+      offset: 0
+  straightAttack:
+    projectile:
       flight:
         speed: 35
         lifetimeTicks: 250
@@ -79,7 +92,11 @@ MonoBehaviour:
           m_Bits: 576
       explosion:
         radius: 0
-    arcProjectile:
+    shots:
+    - startTicks: 3
+      spawnOffset: {x: 0.13310209, y: 0.31032115, z: 0.57121754}
+  arcAttack:
+    projectile:
       flight:
         flightTicks: 0
         arcHeight: 0
@@ -90,10 +107,15 @@ MonoBehaviour:
           m_Bits: 0
       explosion:
         radius: 0
-    meleeShape:
-      radius: 0
-      offset: 0
-    muzzleOffset: {x: 0.13310209, y: 0.31032115, z: 0.57121754}
+    shots: []
+  throwing:
+    chargePerTick: 0
+    maxThrowDistance: 0
+  magazine:
+    max: 8
+    startingCurrent: 8
+  reserveAmmo:
+    startingReserve: 32
   modelPrefab: {fileID: 3196504383240874190, guid: c82cad46dd5eeac4cbfebf8c18d4a631, type: 3}
   projectilePrefab: {fileID: 8751706380067456088, guid: efd619ac9fb459d43ae8b33c3b88d388, type: 3}
   hitEffectPrefab: {fileID: 8231580814263889171, guid: 8bc8c0bfc14e7e74d9aa237605256a88, type: 3}
