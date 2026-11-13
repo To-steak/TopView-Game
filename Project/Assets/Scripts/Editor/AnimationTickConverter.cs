@@ -8,6 +8,16 @@ namespace TopView.Editor
     // 클립과 백분율은 에셋에 저장하지 않고, 에디터가 켜져 있는 동안만 칸마다 기억한다.
     public static class AnimationTickConverter
     {
+        /// <summary>
+        /// 인스펙터 한 줄의 높이(줄 간격 포함).
+        /// </summary>
+        public static float LineHeight => EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+
+        /// <summary>
+        /// 구간 변환 칸(클립, 백분율, 변환 버튼)의 높이.
+        /// </summary>
+        public static float RangeHeight => LineHeight * RANGE_LINE_COUNT;
+
         private static readonly Dictionary<string, AnimationClip> CLIPS = new Dictionary<string, AnimationClip>();
         private static readonly Dictionary<string, float> START_PERCENTS = new Dictionary<string, float>();
         private static readonly Dictionary<string, float> END_PERCENTS = new Dictionary<string, float>();
@@ -23,16 +33,6 @@ namespace TopView.Editor
         private const string START_PERCENT_LABEL = "Start %";
         private const string END_PERCENT_LABEL = "End %";
         private const string APPLY_LABEL = "Convert From Clip";
-
-        /// <summary>
-        /// 인스펙터 한 줄의 높이(줄 간격 포함).
-        /// </summary>
-        public static float LineHeight => EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
-
-        /// <summary>
-        /// 구간 변환 칸(클립, 백분율, 변환 버튼)의 높이.
-        /// </summary>
-        public static float RangeHeight => LineHeight * RANGE_LINE_COUNT;
 
         /// <summary>
         /// 초를 Fixed Timestep 기준 틱으로 바꾼다. 가장 가까운 정수로 반올림한다.

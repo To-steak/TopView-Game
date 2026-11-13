@@ -14,17 +14,17 @@ namespace TopView.Editor
     // 고른 Muzzle 번호는 에셋에 저장하지 않고, 에디터가 켜져 있는 동안만 칸마다 기억한다. 처음에는 칸 번호와 같은 번호다.
     public static class EnemySpawnOffsetBaker
     {
+        /// <summary>
+        /// Muzzle 드롭다운과 굽기 버튼의 높이.
+        /// </summary>
+        public static float Height => AnimationTickConverter.LineHeight * LINE_COUNT;
+
         private static readonly Dictionary<string, int> MUZZLE_INDICES = new Dictionary<string, int>();
 
         private const int LINE_COUNT = 2;
         private const string MUZZLE_LABEL = "Muzzle";
         private const string BAKE_LABEL = "Bake Spawn Offset";
         private const string MISSING_MUZZLE_NAME = "(None)";
-
-        /// <summary>
-        /// Muzzle 드롭다운과 굽기 버튼의 높이.
-        /// </summary>
-        public static float Height => AnimationTickConverter.LineHeight * LINE_COUNT;
 
         /// <summary>
         /// Muzzle 드롭다운과 굽기 버튼을 그린다. 버튼을 누르면 그 칸의 Spawn Offset을 채운다. 클립이 없으면 프리팹의 자세 그대로 잰다.

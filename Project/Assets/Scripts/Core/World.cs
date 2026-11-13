@@ -14,15 +14,15 @@ namespace TopView.Core
     // 요소별 상태와 처리는 World.<요소>.cs에, 한 판의 데이터는 World.Data.cs에 나눠 두고, 이 파일에는 호출 순서만 둔다.
     public partial class World : MonoBehaviour
     {
+        // 설정 화면을 열 수 있는지. 설정 버튼은 일시정지 화면에만 있어 일시정지 중에만 연다. App이 설정 명령을 소비할 때 읽는다
+        public bool CanOpenSettings => _isRoundReady && _progress.isPaused;
+
         // 한 판의 규칙과 저장소 용량
         [SerializeField] private GameSettingsDefinition _gameSettingsDefinition;
         // 이 씬의 배경음악 곡과 재생 값. App에 등록할 때 넘긴다
         [SerializeField] private MusicDefinition _musicDefinition;
 
         private ViewContext _viewContext;
-
-        // 설정 화면을 열 수 있는지. 설정 버튼은 일시정지 화면에만 있어 일시정지 중에만 연다. App이 설정 명령을 소비할 때 읽는다
-        public bool CanOpenSettings => _isRoundReady && _progress.isPaused;
 
         /// <summary>
         /// App의 명령 목록을 받아 판을 준비한다. App이 World를 등록할 때 부른다.
@@ -36,40 +36,6 @@ namespace TopView.Core
             _settingsCommands = settingsCommands;
             _userInterfaceSoundRequests = userInterfaceSoundRequests;
             StartRound();
-        }
-
-        private void Awake()
-        {
-            _playerActions = new PlayerActions();
-            _playerActions.Global.Enable();
-            _playerActions.UserInterface.Enable();
-        }
-
-        // 씬의 다른 오브젝트가 Awake를 마친 뒤에 App에 등록한다. App이 Initialize를 불러 판을 준비한다
-        private void Start()
-        {
-            App app = App.Instance;
-            if (app == null)
-            {
-                Debug.LogError("World >> App이 없어 판을 준비하지 않았다. 에디터라면 App 프리팹이 있는지 확인한다.");
-                return;
-            }
-
-            app.RegisterWorld(this, _musicDefinition, _settingsPresenter);
-        }
-
-        private void OnDestroy()
-        {
-            App app = App.Instance;
-            if (app != null)
-            {
-                app.UnregisterWorld(this);
-            }
-            // 일시정지 중에 씬이 사라져도 소리와 DOTween의 일시정지가 다음 씬에 남지 않게 한다
-            ClearRound();
-            _playerActions.Global.Disable();
-            _playerActions.UserInterface.Disable();
-            _playerActions.Dispose();
         }
 
         /// <summary>
@@ -224,6 +190,40 @@ namespace TopView.Core
             _projectileHitRecords.Clear();
             _enemyDamagedRecords.Clear();
             _lootPickedUpRecords.Clear();
+        }
+
+        private void Awake()
+        {
+            _playerActions = new PlayerActions();
+            _playerActions.Global.Enable();
+            _playerActions.UserInterface.Enable();
+        }
+
+        // 씬의 다른 오브젝트가 Awake를 마친 뒤에 App에 등록한다. App이 Initialize를 불러 판을 준비한다
+        private void Start()
+        {
+            App app = App.Instance;
+            if (app == null)
+            {
+                Debug.LogError("World >> App이 없어 판을 준비하지 않았다. 에디터라면 App 프리팹이 있는지 확인한다.");
+                return;
+            }
+
+            app.RegisterWorld(this, _musicDefinition, _settingsPresenter);
+        }
+
+        private void OnDestroy()
+        {
+            App app = App.Instance;
+            if (app != null)
+            {
+                app.UnregisterWorld(this);
+            }
+            // 일시정지 중에 씬이 사라져도 소리와 DOTween의 일시정지가 다음 씬에 남지 않게 한다
+            ClearRound();
+            _playerActions.Global.Disable();
+            _playerActions.UserInterface.Disable();
+            _playerActions.Dispose();
         }
     }
 }

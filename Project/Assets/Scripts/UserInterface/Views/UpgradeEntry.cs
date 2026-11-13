@@ -11,6 +11,16 @@ namespace TopView.UserInterface.Views
     // UpgradeView가 프리팹에서 만들어 소유하며, 레벨·비용·지금과 다음 레벨의 수치를 보여 주고 버튼 입력을 UpgradeView에 알린다.
     public class UpgradeEntry : MonoBehaviour
     {
+        /// <summary>
+        /// 강화 항목.
+        /// </summary>
+        public PlayerUpgradeCommandType Type => _type;
+
+        /// <summary>
+        /// Weapon일 때 강화할 무기 번호.
+        /// </summary>
+        public int WeaponIndex => _weaponIndex;
+
         // 강화 항목
         [SerializeField] private PlayerUpgradeCommandType _type;
         // Weapon일 때 강화할 무기 번호. Player Definition의 무기 목록 번호(교체 키 - 1)다. 다른 항목은 쓰지 않는다
@@ -57,16 +67,6 @@ namespace TopView.UserInterface.Views
         private const string NO_BREAK_END_TAG = "</nobr>";
         // 설명에서 이름을 따로 한 줄에 두는 이름 길이(공백 포함). 이보다 짧은 이름은 수치와 한 줄에 붙인다
         private const int LABEL_OWN_LINE_LENGTH = 5;
-
-        /// <summary>
-        /// 강화 항목.
-        /// </summary>
-        public PlayerUpgradeCommandType Type => _type;
-
-        /// <summary>
-        /// Weapon일 때 강화할 무기 번호.
-        /// </summary>
-        public int WeaponIndex => _weaponIndex;
 
         /// <summary>
         /// 소유한 View를 정한다. UpgradeView가 항목을 만들 때 부른다.
