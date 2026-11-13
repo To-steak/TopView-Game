@@ -63,6 +63,7 @@ namespace TopView.Systems
                 movement = request.movement,
                 vitals = request.vitals,
                 action = request.action,
+                death = request.death,
                 upgrade = request.upgrade,
                 position = new PositionComponent { previous = request.position, current = request.position },
                 rotation = new RotationComponent { previous = request.rotation, current = request.rotation },

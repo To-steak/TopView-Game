@@ -15,8 +15,7 @@ namespace TopView.Editor
         {
             return propertyName == nameof(PlayerActionComponent.dodgeTicks)
                 || propertyName == nameof(PlayerActionComponent.landTicks)
-                || propertyName == nameof(PlayerActionComponent.reloadTicks)
-                || propertyName == nameof(PlayerActionComponent.dieTicks);
+                || propertyName == nameof(PlayerActionComponent.reloadTicks);
         }
 
         protected override float GetExtraHeight(SerializedProperty property)

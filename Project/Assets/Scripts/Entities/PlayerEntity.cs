@@ -16,6 +16,8 @@ namespace TopView.Entities
         public PlayerVitalsComponent vitals;
         // 행동 상태의 길이. 생성 때 Definition에서 복사한다
         public PlayerActionComponent action;
+        // 사망 상태의 길이. 생성 때 Definition에서 복사한다
+        public DeathComponent death;
         // 강화 값. 생성 때 Definition에서 복사한다
         public PlayerUpgradeComponent upgrade;
 

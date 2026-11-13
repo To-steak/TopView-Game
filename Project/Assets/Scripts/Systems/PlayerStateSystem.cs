@@ -33,6 +33,7 @@ namespace TopView.Systems
                 ref readonly PlayerMotionComponent motion = ref entity.motion;
                 ref PlayerWeaponSlotsComponent weaponSlot = ref entity.weaponSlots;
                 ref readonly PlayerActionComponent action = ref entity.action;
+                ref readonly DeathComponent death = ref entity.death;
                 ref WeaponEntity weaponEntity = ref weapons.entities[weaponSlot.weapons[weaponSlot.currentIndex].index];
                 ref readonly WeaponComponent weapon = ref weaponEntity.weapon;
                 EntityIdentifier identifier = new EntityIdentifier { index = index, generation = entity.generation };
@@ -107,7 +108,7 @@ namespace TopView.Systems
                         break;
 
                     case PlayerState.Die:
-                        if (actionState.elapsedTicks == action.dieTicks)
+                        if (death.isGameOverOnDeath && actionState.elapsedTicks == death.dieTicks)
                         {
                             gameOverRequests.Enqueue(new GameOverRequest { isVictory = false });
                         }
