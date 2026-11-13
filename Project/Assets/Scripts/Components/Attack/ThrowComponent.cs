@@ -2,7 +2,7 @@ using System;
 
 namespace TopView.Components
 {
-    // 투척 무기를 던지기 전에 착탄점을 정하는 값. 던진 뒤의 비행은 ProjectileComponent가 정한다.
+    // 투척 무기를 던지기 전에 착탄점을 정하는 값. 던진 뒤의 비행은 ArcProjectileComponent가 정한다.
     [Serializable]
     public struct ThrowComponent
     {

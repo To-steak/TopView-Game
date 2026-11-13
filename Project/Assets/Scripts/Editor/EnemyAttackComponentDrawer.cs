@@ -17,12 +17,6 @@ namespace TopView.Editor
 
         protected override bool IsHidden(SerializedProperty property, string childName)
         {
-            // 옮기기 전의 투사체 값은 이전 메뉴만 읽는다
-            if (childName == nameof(EnemyAttackComponent.projectile))
-            {
-                return true;
-            }
-
             if (IsBody(property))
             {
                 return childName == nameof(EnemyAttackComponent.straightProjectile)

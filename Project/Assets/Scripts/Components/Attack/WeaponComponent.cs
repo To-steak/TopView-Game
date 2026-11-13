@@ -17,8 +17,6 @@ namespace TopView.Components
         public AttackTimingComponent timing;
         // 공격 상태에 들어간 뒤 다음 공격 상태에 들어갈 수 있기까지의 시간(틱). 공격 상태가 끝나는 시간보다 짧으면 효과가 없다. Ranged와 Melee가 쓴다
         public int attackIntervalTicks;
-        // 옮기기 전의 투사체 값. 일회용 이전 메뉴(Tools/TopView/투사체 값 옮기기)만 읽고, 값을 옮긴 뒤 지운다
-        [HideInInspector] public ProjectileComponent projectile;
         // 내보내는 직선 투사체. Ranged만 쓴다
         public StraightProjectileComponent straightProjectile;
         // 내보내는 포물선 투사체. Throw만 쓴다

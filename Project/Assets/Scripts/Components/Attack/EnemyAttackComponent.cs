@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 
 namespace TopView.Components
 {
@@ -19,8 +18,6 @@ namespace TopView.Components
         public float damageMultiplier;
         // Body 판정 구의 크기와 위치. Body만 쓴다
         public MeleeShapeComponent meleeShape;
-        // 옮기기 전의 투사체 값. 일회용 이전 메뉴(Tools/TopView/투사체 값 옮기기)만 읽고, 값을 옮긴 뒤 지운다
-        [HideInInspector] public ProjectileComponent projectile;
         // 내보내는 직선 투사체. Body가 아닌 공격이 쓴다
         public StraightProjectileComponent straightProjectile;
         // 내보내는 투사체를 무엇으로 그릴지. Body가 아닌 공격이 쓴다. 판을 준비할 때 Core가 채운다
