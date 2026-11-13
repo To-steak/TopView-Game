@@ -40,12 +40,14 @@ Claude는 코드만 쓴다. Unity 프로젝트 안에서 만들고 수정하는 
 - 스크립트 루트 아래의 `.cs`, `.asmdef`, `.asmref`
 - 정적 분석기를 빌드해 `Project/Assets/Analyzers/`에 복사하는 `TopView.Analyzers.dll` (`.meta`는 사용자가 다룬다)
 
-Unity 프로젝트 밖에서는 정적 분석기 소스 `Tools/TopView.Analyzers/`를 만들고 수정한다.
+Unity 프로젝트 밖에서는 정적 분석기 소스 `Tools/TopView.Analyzers/`와 그 테스트 `Tools/TopView.Analyzers.Tests/`를 만들고 수정한다.
 - 이유: 분석기는 Unity가 아닌 .NET 라이브러리로 빌드해야 해서, 소스를 `Assets` 안에 두면 Unity가 게임 코드로 컴파일하려 한다.
 - 빌드: `dotnet build Tools/TopView.Analyzers -c Release` (빌드가 DLL을 `Project/Assets/Analyzers/`로 복사한다)
+- 분석기를 고치면 `dotnet test Tools/TopView.Analyzers.Tests`로 확인한다. 규칙을 더하거나 바꾸면 먼저 그 규칙의 예시 문서(`Tools/TopView.Analyzers.Tests/Examples/`)를 고치고, 분석기를 예시에 맞춘다.
+  - 이유: 사용자는 분석기 코드(Roslyn)가 아니라 예시 문서로 규칙의 동작을 확인한다. 예시가 곧 테스트라 문서와 분석기가 어긋나지 않는다.
 
 나머지(씬, 프리팹, 에셋, 설정, `.meta`)는 사용자가 에디터에서 다룬다.
 - Claude는 에디터를 직접 조작하지 않는다. 에디터에서 할 일(씬, 프리팹, 에셋, 설정)이 생기면 응답에 구체적으로 적는다.
-- 코드를 고친 뒤에는 `unity recompile --project-path Project`로 실행 중인 에디터의 컴파일 오류를 확인하고, 오류가 있으면 고친다. 연결된 에디터가 없으면(`unity status`) 확인하지 못했다고 알리고, 에디터를 띄우거나 Play 모드에 들어가지 않는다. 테스트 코드는 작성하지 않는다.
+- 코드를 고친 뒤에는 `unity recompile --project-path Project`로 실행 중인 에디터의 컴파일 오류를 확인하고, 오류가 있으면 고친다. 연결된 에디터가 없으면(`unity status`) 확인하지 못했다고 알리고, 에디터를 띄우거나 Play 모드에 들어가지 않는다.
   - 이유: 컴파일 오류를 Claude가 먼저 잡으면 사용자가 확인하는 일이 동작 검토로 줄어든다. 에디터 상태(열기, Play 모드)는 사용자의 작업을 끊을 수 있어 사용자가 정한다.
 - **파일을 옮기거나 이름을 바꾸지 않는다.** 에디터 밖에서 옮기면 `.meta`의 GUID가 끊어진다. 꼭 필요하면 어느 파일을 어디로 옮길지 응답에 적고 사용자에게 에디터에서 해 달라고 한다. 클래스 이름을 바꿔야 하면 사용자가 에디터에서 파일 이름을 먼저 바꾼 뒤 코드를 고친다.

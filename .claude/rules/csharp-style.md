@@ -7,7 +7,7 @@ paths:
 
 규칙마다 `이유:` 줄은 그 규칙이 없으면 무엇이 깨지는지를 적는다.
 
-`TV0000` 형식의 ID가 붙은 규칙은 정적 분석기(`Tools/TopView.Analyzers/`)가 검사해 Unity Console에 경고로 띄운다. 문서에는 ID와 이유만 두고, 무엇을 어떻게 검사하는지는 분석기 코드와 경고 메시지가 정한다.
+`TV0000` 형식의 ID가 붙은 규칙은 정적 분석기(`Tools/TopView.Analyzers/`)가 검사해 Unity Console에 경고로 띄운다. 문서에는 ID와 이유만 두고, 무엇에 경고하고 무엇을 통과시키는지는 규칙별 예시 문서(`Tools/TopView.Analyzers.Tests/Examples/`)가 정한다. 분석기는 예시 문서대로 동작하는지 테스트로 검사한다.
 
 도구가 생성한 코드(Input System의 액션 클래스 등)는 이 규칙을 적용하지 않는다. 생성 코드는 고치지 않는다.
 
