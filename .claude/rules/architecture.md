@@ -63,7 +63,7 @@ Unity의 FixedUpdate / Update / LateUpdate는 App만 받고, App이 지금 씬�
 
 | 폴더 | 존재 이유 | 내용 | 어셈블리 | 참조 가능 |
 |---|---|---|---|---|
-| `Entities/` | 게임 속 대상과 저장 칸 | `Entity`, `EntityStorage`, `ComponentMask`, `EntityIdentifier`, 행동 상태 enum(`~State`) | `<접두사>.Entity` (`.asmdef`) | 없음 |
+| `Entities/` | 게임 속 대상과 저장 칸 | `Entity`, `EntityStorage`, `ComponentMask`, `EntityArchetype`, `EntityIdentifier`, 행동 상태 enum(`~State`) | `<접두사>.Entity` (`.asmdef`) | 없음 |
 | `Components/` | 모든 데이터의 묶음 | `~Component` struct | `<접두사>.Entity` (`.asmref`) | 〃 |
 | `Requests/` | 틱 안에서 System에 일을 맡김 | `~Request` struct | `<접두사>.Entity` (`.asmref`) | 〃 |
 | `Records/` | 일어난 일을 View에 전달 | `~Record` struct | `<접두사>.Entity` (`.asmref`) | 〃 |
@@ -94,6 +94,8 @@ Unity의 FixedUpdate / Update / LateUpdate는 App만 받고, App이 지금 씬�
   - 이유: 종류별 저장소로 나누면 종류마다 다른 컴포넌트 조합(근접·원거리·투척 무기 등)을 다룰 때 "지금 대상이 어느 저장소에 있나"를 읽는 곳마다 갈라야 한다. 칸 모양이 하나면 식별자 하나로 찾아가고, 컴포넌트가 있는지만 보면 된다.
 - **System은 처리할 컴포넌트의 비트가 모두 켜진 칸만 돈다.** 마스크에는 모든 컴포넌트가 아니라 엔티티마다 있고 없음이 갈리는 것만 비트로 둔다. 켜지지 않은 컴포넌트 필드의 값은 뜻이 없다.
   - 이유: 꺼진 칸의 값은 이전 엔티티의 값이거나 기본값이라, 읽으면 다른 엔티티의 값으로 동작한다.
+- **엔티티 종류별 컴포넌트 조합은 `EntityArchetype`의 상수로 모은다.** 칸을 채우는 `~SpawnSystem`과 Core는 이 값을 마스크로 쓴다. 처리하는 System은 이 값을 쓰지 않고 자기가 읽는 컴포넌트만 마스크로 고른다.
+  - 이유: 종류별 타입이 없어 조합이 생성 코드마다 흩어지면 프로젝트에 어떤 엔티티가 있는지 한곳에서 볼 수 없다. 처리하는 System이 종류 조합을 쓰면 컴포넌트가 같은 다른 종류를 놓친다.
 - **보스처럼 특별한 적을 별도 종류로 만들지 않는다.** 차이는 적의 값으로 표현한다. 예: `isGameOverOnDeath`, `hasOverlayHealthBar`
   - 이유: 종류가 늘면 피해, 피격, View마다 반복이 생긴다.
 - **다른 엔티티가 들고 쓰는 것이라도 자기만의 변하는 상태가 있으면 엔티티로 둔다.** 예: 무기(탄약, 강화 레벨). 주인 쪽에 번호로 줄을 맞춘 배열(`currentAmmo[무기 번호]` 등)로 그 상태를 두지 않는다.

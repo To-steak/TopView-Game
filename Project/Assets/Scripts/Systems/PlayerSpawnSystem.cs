@@ -10,11 +10,6 @@ namespace TopView.Systems
     // 플레이어 생성 요청을 받아 저장소의 빈 칸을 채우고, 플레이어가 들 무기마다 무기 생성 요청을 넣는다. 틱 마지막에 WeaponSpawnSystem 앞에 부른다.
     public static class PlayerSpawnSystem
     {
-        // 플레이어가 가진 컴포넌트
-        private const ComponentMask PLAYER_MASK = ComponentMask.Position | ComponentMask.Rotation | ComponentMask.Body | ComponentMask.Death | ComponentMask.Health
-            | ComponentMask.PlayerMovement | ComponentMask.PlayerVitals | ComponentMask.PlayerAction | ComponentMask.PlayerUpgrade | ComponentMask.PlayerActionState
-            | ComponentMask.PlayerMotion | ComponentMask.Mana | ComponentMask.WeaponSlots | ComponentMask.ThrowPreview | ComponentMask.PlayerUpgradeLevels;
-
         /// <summary>
         /// 플레이어 생성 요청을 모두 처리한다. 빈 칸이 없으면 요청을 버린다.
         /// </summary>
@@ -66,7 +61,7 @@ namespace TopView.Systems
 
             entity = new Entity
             {
-                mask = PLAYER_MASK,
+                mask = EntityArchetype.PLAYER,
                 generation = generation,
                 playerMovement = request.movement,
                 playerVitals = request.vitals,

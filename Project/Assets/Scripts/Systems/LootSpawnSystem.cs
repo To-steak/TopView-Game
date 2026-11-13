@@ -44,7 +44,7 @@ namespace TopView.Systems
 
             entity = new Entity
             {
-                mask = ComponentMask.Position | ComponentMask.Loot,
+                mask = EntityArchetype.LOOT,
                 generation = generation,
                 loot = new LootComponent { kind = request.kind, amount = request.amount, remainingTicks = lifetimeTicks },
                 position = new PositionComponent { previous = request.position, current = request.position }

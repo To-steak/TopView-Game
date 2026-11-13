@@ -132,12 +132,11 @@ namespace TopView.Core
             return true;
         }
 
-        // 무기 종류로 무기가 가질 컴포넌트와 공격 키를 누를 때 들어갈 행동 상태를 정해 주인 없는 생성 요청을 만든다. 처리하지 않는 종류면 false
+        // 무기 종류로 무기가 가질 컴포넌트(EntityArchetype)와 공격 키를 누를 때 들어갈 행동 상태를 정해 주인 없는 생성 요청을 만든다. 처리하지 않는 종류면 false
         private static bool TryCreateWeaponSpawnRequest(WeaponDefinition definition, out WeaponSpawnRequest request)
         {
             request = new WeaponSpawnRequest
             {
-                mask = ComponentMask.Owner | ComponentMask.Weapon | ComponentMask.UpgradeLevel | ComponentMask.WeaponUpgrade | ComponentMask.AttackState,
                 weapon = definition.weapon,
                 upgrade = definition.upgrade
             };
@@ -145,7 +144,7 @@ namespace TopView.Core
             switch (definition.kind)
             {
                 case WeaponKind.Melee:
-                    request.mask |= ComponentMask.MeleeAttack | ComponentMask.MeleeView | ComponentMask.AttackInterval | ComponentMask.AttackDuration;
+                    request.mask = EntityArchetype.MELEE_WEAPON;
                     request.attackState.state = PlayerState.Swing;
                     request.meleeAttack = definition.meleeAttack;
                     request.attackInterval = definition.attackInterval;
@@ -153,8 +152,7 @@ namespace TopView.Core
                     return true;
 
                 case WeaponKind.Ranged:
-                    request.mask |= ComponentMask.StraightAttack | ComponentMask.ProjectileView | ComponentMask.Magazine | ComponentMask.MagazineState
-                        | ComponentMask.ReserveAmmo | ComponentMask.ReserveAmmoState | ComponentMask.AttackInterval;
+                    request.mask = EntityArchetype.RANGED_WEAPON;
                     request.attackState.state = PlayerState.Shot;
                     request.straightAttack = definition.straightAttack;
                     request.magazine = definition.magazine;
@@ -163,8 +161,7 @@ namespace TopView.Core
                     return true;
 
                 case WeaponKind.Throw:
-                    request.mask |= ComponentMask.ArcAttack | ComponentMask.Throw | ComponentMask.ProjectileView | ComponentMask.ReserveAmmo
-                        | ComponentMask.ReserveAmmoState | ComponentMask.AttackDuration;
+                    request.mask = EntityArchetype.THROW_WEAPON;
                     request.attackState.state = PlayerState.ThrowCharge;
                     request.arcAttack = definition.arcAttack;
                     request.throwing = definition.throwing;

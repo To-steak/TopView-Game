@@ -12,11 +12,6 @@ namespace TopView.Systems
     // 적 생성 요청을 받아 저장소의 그 종류 구간 빈 칸을 채운다. 틱 마지막에 부른다.
     public static class EnemySpawnSystem
     {
-        // 적이 가진 컴포넌트
-        private const ComponentMask ENEMY_MASK = ComponentMask.Position | ComponentMask.Rotation | ComponentMask.EnemyKind | ComponentMask.Score | ComponentMask.Body
-            | ComponentMask.NavigationMovement | ComponentMask.Death | ComponentMask.AttackList | ComponentMask.LootList | ComponentMask.Combat
-            | ComponentMask.Health | ComponentMask.EnemyActionState | ComponentMask.NavigationAgent;
-
         /// <summary>
         /// 적 생성 요청을 모두 처리한다. 종류 번호가 범위 밖이거나 빈 칸이 없으면 요청을 버린다.
         /// </summary>
@@ -82,7 +77,7 @@ namespace TopView.Systems
 
             entity = new Entity
             {
-                mask = ENEMY_MASK,
+                mask = EntityArchetype.ENEMY,
                 generation = generation,
                 enemyKind = new EnemyKindComponent { kind = request.enemyKindIndex },
                 score = request.score,

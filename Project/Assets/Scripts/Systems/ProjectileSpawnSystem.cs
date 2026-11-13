@@ -79,8 +79,7 @@ namespace TopView.Systems
 
             entity = new Entity
             {
-                mask = ComponentMask.Position | ComponentMask.Rotation | ComponentMask.StraightFlight | ComponentMask.StraightMotion
-                    | ComponentMask.ProjectileHit | ComponentMask.Explosion | ComponentMask.ProjectileView | ComponentMask.AttackPayload,
+                mask = EntityArchetype.STRAIGHT_PROJECTILE,
                 generation = generation,
                 straightFlight = request.projectile.flight,
                 projectileHit = request.projectile.hit,
@@ -100,8 +99,7 @@ namespace TopView.Systems
 
             entity = new Entity
             {
-                mask = ComponentMask.Position | ComponentMask.Rotation | ComponentMask.ArcFlight | ComponentMask.ArcMotion
-                    | ComponentMask.ProjectileHit | ComponentMask.Explosion | ComponentMask.ProjectileView | ComponentMask.AttackPayload,
+                mask = EntityArchetype.ARC_PROJECTILE,
                 generation = generation,
                 arcFlight = request.projectile.flight,
                 projectileHit = request.projectile.hit,

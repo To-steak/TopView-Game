@@ -46,7 +46,7 @@ namespace TopView.Systems
 
             entity = new Entity
             {
-                mask = ComponentMask.Position | ComponentMask.Melee | ComponentMask.MeleeHits | ComponentMask.AttackPayload,
+                mask = EntityArchetype.MELEE,
                 generation = generation,
                 position = new PositionComponent { previous = request.center, current = request.center },
                 melee = new MeleeComponent
