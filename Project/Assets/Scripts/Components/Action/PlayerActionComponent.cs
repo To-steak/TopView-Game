@@ -2,7 +2,7 @@ using System;
 
 namespace TopView.Components
 {
-    // 플레이어 행동 상태의 길이. 무기 공격의 길이는 WeaponComponent에 있다
+    // 플레이어 행동 상태의 길이. 무기 공격의 길이는 무기의 AttackDurationComponent에 있다
     [Serializable]
     public struct PlayerActionComponent
     {
