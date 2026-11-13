@@ -1,0 +1,29 @@
+root = true
+
+[*.cs]
+
+# 불필요한 using
+dotnet_diagnostic.IDE0005.severity = warning
+
+# 사용하지 않는 변수
+dotnet_diagnostic.CS0168.severity = warning
+dotnet_diagnostic.CS0219.severity = warning
+
+# 사용하지 않는 private 멤버
+dotnet_diagnostic.IDE0051.severity = warning
+
+# private 필드의 readonly 권장
+dotnet_diagnostic.IDE0044.severity = warning
+
+# 명시적인 타입 선언 선호
+csharp_style_var_for_built_in_types = false:warning
+csharp_style_var_when_type_is_apparent = false:warning
+csharp_style_var_elsewhere = false:warning
+
+# 들여쓰기
+indent_style = space
+indent_size = 4
+
+# 줄바꿈
+end_of_line = crlf
+insert_final_newline = true

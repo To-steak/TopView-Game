@@ -6,14 +6,14 @@ namespace TopView.Commands
     public class CommandBuffer
     {
         // 일시정지 명령. PauseSystem이 소비한다
-        public List<PauseCommand> pauseCommands = new List<PauseCommand>();
+        public List<PauseCommand> pauseCommands = new();
         // 플레이어 탈출 명령. PlayerUnstuckSystem이 소비한다
-        public List<PlayerUnstuckCommand> playerUnstuckCommands = new List<PlayerUnstuckCommand>();
+        public List<PlayerUnstuckCommand> playerUnstuckCommands = new();
         // 플레이어 강화 명령. PlayerUpgradeSystem이 소비한다
-        public List<PlayerUpgradeCommand> playerUpgradeCommands = new List<PlayerUpgradeCommand>();
+        public List<PlayerUpgradeCommand> playerUpgradeCommands = new();
         // 디버그 명령. DebugCommandSystem이 소비한다
-        public List<DebugCommand> debugCommands = new List<DebugCommand>();
+        public List<DebugCommand> debugCommands = new();
         // 플레이어 입력
-        public PlayerCommand playerCommand = new PlayerCommand { swapWeaponIndex = -1 };
+        public PlayerCommand playerCommand = new() { swapWeaponIndex = -1 };
     }
 }
