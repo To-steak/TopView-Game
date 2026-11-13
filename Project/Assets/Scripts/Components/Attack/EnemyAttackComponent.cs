@@ -22,14 +22,5 @@ namespace TopView.Components
         public StraightAttackComponent straight;
         // 내보내는 투사체를 무엇으로 그릴지. Projectile만 쓴다. 판을 준비할 때 Core가 채운다
         [NonSerialized] public ProjectileViewComponent projectileView;
-
-        // 옛 칸. 값 이전 메뉴만 읽으며, 이전을 마치면 지운다
-        public AttackTimingComponent timing;
-        // 옛 칸. 값 이전 메뉴만 읽으며, 이전을 마치면 지운다
-        public MeleeShapeComponent meleeShape;
-        // 옛 칸. 값 이전 메뉴만 읽으며, 이전을 마치면 지운다
-        public StraightProjectileComponent straightProjectile;
-        // 옛 칸. 값 이전 메뉴만 읽으며, 이전을 마치면 지운다
-        public ProjectileShotComponent[] shots;
     }
 }

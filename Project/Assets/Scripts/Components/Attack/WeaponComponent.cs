@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 
 namespace TopView.Components
 {
@@ -33,16 +32,5 @@ namespace TopView.Components
         public float aimHeight;
         // 근접 판정을 무엇으로 그릴지. Melee만 쓴다. 판을 준비할 때 Core가 채운다
         [NonSerialized] public MeleeViewComponent meleeView;
-
-        // 옛 칸. 값 이전 메뉴만 읽으며, 이전을 마치면 지운다
-        public AttackTimingComponent timing;
-        // 옛 칸. 값 이전 메뉴만 읽으며, 이전을 마치면 지운다
-        public StraightProjectileComponent straightProjectile;
-        // 옛 칸. 값 이전 메뉴만 읽으며, 이전을 마치면 지운다
-        public ArcProjectileComponent arcProjectile;
-        // 옛 칸. 값 이전 메뉴만 읽으며, 이전을 마치면 지운다
-        public MeleeShapeComponent meleeShape;
-        // 옛 칸. 값 이전 메뉴만 읽으며, 이전을 마치면 지운다
-        public Vector3 muzzleOffset;
     }
 }

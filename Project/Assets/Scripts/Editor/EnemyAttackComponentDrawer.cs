@@ -6,7 +6,7 @@ namespace TopView.Editor
 {
     // EnemyAttackComponent 아래에 클립 변환 칸을 붙인다.
     // Body는 시작·끝 백분율과 클립 길이로 근접 공격의 Start/End Ticks와 Duration Ticks를 채운다. 투사체 공격은 클립 길이로 Duration Ticks를 채우고, 발마다의 시작 백분율은 Shots의 칸에서 채운다.
-    // 공격 종류가 쓰지 않는 칸도 숨긴다. Body는 직선 투사체 공격, 투사체 공격은 근접 공격이다. 값 이전 메뉴만 읽는 옛 칸은 늘 숨긴다.
+    // 공격 종류가 쓰지 않는 칸도 숨긴다. Body는 직선 투사체 공격, 투사체 공격은 근접 공격이다.
     [CustomPropertyDrawer(typeof(EnemyAttackComponent))]
     public class EnemyAttackComponentDrawer : AnimationTicksDrawer
     {
@@ -17,14 +17,6 @@ namespace TopView.Editor
 
         protected override bool IsHidden(SerializedProperty property, string childName)
         {
-            if (childName == nameof(EnemyAttackComponent.timing)
-                || childName == nameof(EnemyAttackComponent.meleeShape)
-                || childName == nameof(EnemyAttackComponent.straightProjectile)
-                || childName == nameof(EnemyAttackComponent.shots))
-            {
-                return true;
-            }
-
             if (IsBody(property))
             {
                 return childName == nameof(EnemyAttackComponent.straight);
