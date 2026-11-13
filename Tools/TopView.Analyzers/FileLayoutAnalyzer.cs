@@ -62,6 +62,7 @@ namespace TopView.Analyzers
         public const string PARTIAL_MAIN_FILE_DIAGNOSTIC_IDENTIFIER = "TV0015";
         public const string PARTIAL_FOLDER_DIAGNOSTIC_IDENTIFIER = "TV0016";
         private const string COMPONENTS_FOLDER = "Components";
+        private const string SYSTEMS_FOLDER = "Systems";
         private const string FILE_EXTENSION = ".cs";
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(
@@ -186,9 +187,9 @@ namespace TopView.Analyzers
         private static string BuildExpectedNamespace(string[] pathParts)
         {
             int folderCount = pathParts.Length - 1;
-            if (folderCount > 0 && pathParts[0] == COMPONENTS_FOLDER)
+            if (folderCount > 0 && (pathParts[0] == COMPONENTS_FOLDER || pathParts[0] == SYSTEMS_FOLDER))
             {
-                return AnalyzerScopeUtility.RootNamespace + "." + COMPONENTS_FOLDER;
+                return AnalyzerScopeUtility.RootNamespace + "." + pathParts[0];
             }
 
             string expectedNamespace = AnalyzerScopeUtility.RootNamespace;
