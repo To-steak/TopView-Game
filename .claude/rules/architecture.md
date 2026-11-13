@@ -118,13 +118,16 @@ Unity의 FixedUpdate / Update / LateUpdate는 App만 받고, App이 지금 씬�
 ```
 Components/
 ├── Action/      행동 상태와 행동 시간
-├── Attack/      무기, 공격, 발사체, 근접, 피격 대상
+├── Attack/      공격을 내보내는 방식(판정 방식, 발, 시간), 진영, 피격 대상, 적 공격 목록
 ├── Game/        판과 메뉴의 규칙, 진행, 설정
 ├── Loot/        전리품
+├── Melee/       근접 판정
 ├── Movement/    위치, 회전, 이동
+├── Projectile/  투사체의 비행, 판정, 폭발, View
 ├── Spawning/    스포너, 감지기
 ├── Upgrade/     강화
-└── Vitals/      체력, 마나, 능력치
+├── Vitals/      체력, 마나, 능력치
+└── Weapon/      들고 쓰는 무기, 주인, 탄약, 투척 조준
 ```
 
 - 하위 폴더의 네임스페이스는 폴더 경로를 따르지 않고 모두 `<접두사>.Components`로 둔다.
