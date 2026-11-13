@@ -13,20 +13,23 @@ namespace TopView.Systems
         // 이보다 짧은 남은 이동은 무시한다(유닛)
         private const float MIN_MOVE_DISTANCE = 0.00001f;
 
+        // 처리할 플레이어가 가진 컴포넌트
+        private const ComponentMask PLAYER_MASK = ComponentMask.PlayerActionState | ComponentMask.Position | ComponentMask.Rotation | ComponentMask.PlayerMovement | ComponentMask.PlayerMotion;
+
         /// <summary>
         /// 땅에 파묻혔으면 땅 위로 올리고, 접지를 판정해 위아래 속도를 갱신한 뒤 장애물을 따라 이동한다.
         /// </summary>
-        /// <param name="players">플레이어 저장소</param>
-        public static void Tick(PlayerStorage players)
+        /// <param name="storage">엔티티 저장소. 플레이어(PlayerActionState, Position, Rotation, PlayerMovement, PlayerMotion)만 처리한다</param>
+        public static void Tick(EntityStorage storage)
         {
             float deltaTime = Time.fixedDeltaTime;
 
-            for (int index = 0; index < players.entities.Length; index++)
+            for (int index = 0; index < storage.entities.Length; index++)
             {
-                ref PlayerEntity entity = ref players.entities[index];
-                if (entity.isAlive)
+                ref Entity entity = ref storage.entities[index];
+                if ((entity.mask & PLAYER_MASK) == PLAYER_MASK)
                 {
-                    Move(ref entity.position, ref entity.motion, in entity.movement, entity.rotation.current, deltaTime);
+                    Move(ref entity.position, ref entity.playerMotion, in entity.playerMovement, entity.rotation.current, deltaTime);
                 }
             }
         }

@@ -20,29 +20,29 @@ namespace TopView.Editor
                 return;
             }
 
-            DrawPlayers(world.EditorPlayers);
+            DrawPlayers(world.EditorEntities);
             DrawEnemies(world.EditorEntities);
             DrawMelees(world.EditorEntities);
             DrawStraightProjectiles(world.EditorEntities);
             DrawArcProjectiles(world.EditorEntities);
-            DrawLootPickupRanges(world.EditorPlayers, world.EditorLootPickupRadius);
+            DrawLootPickupRanges(world.EditorEntities, world.EditorLootPickupRadius);
             DrawDroppedLoots(world.EditorEntities);
         }
 
         // 플레이어 이동 충돌에 쓰는 캡슐을 Logic 위치에 그린다. 착지 중이면 초록, 공중이면 노랑
-        private static void DrawPlayers(PlayerEntity[] entities)
+        private static void DrawPlayers(Entity[] entities)
         {
             for (int index = 0; index < entities.Length; index++)
             {
-                ref readonly PlayerEntity entity = ref entities[index];
-                if (!entity.isAlive)
+                ref readonly Entity entity = ref entities[index];
+                if ((entity.mask & ComponentMask.PlayerMovement) == 0)
                 {
                     continue;
                 }
 
-                PlayerMovementUtility.GetCapsulePoints(in entity.movement, entity.rotation.current, entity.position.current, out Vector3 top, out Vector3 bottom);
-                float radius = entity.movement.capsuleRadius;
-                Gizmos.color = entity.motion.isGrounded ? Color.green : Color.yellow;
+                PlayerMovementUtility.GetCapsulePoints(in entity.playerMovement, entity.rotation.current, entity.position.current, out Vector3 top, out Vector3 bottom);
+                float radius = entity.playerMovement.capsuleRadius;
+                Gizmos.color = entity.playerMotion.isGrounded ? Color.green : Color.yellow;
                 Gizmos.DrawWireSphere(top, radius);
                 Gizmos.DrawWireSphere(bottom, radius);
                 Gizmos.DrawLine(top + Vector3.forward * radius, bottom + Vector3.forward * radius);
@@ -137,12 +137,12 @@ namespace TopView.Editor
         }
 
         // 살아 있는 플레이어마다 전리품 획득 반경을 Logic 위치에 초록색 XZ 원으로 그린다.
-        private static void DrawLootPickupRanges(PlayerEntity[] players, float pickupRadius)
+        private static void DrawLootPickupRanges(Entity[] players, float pickupRadius)
         {
             Gizmos.color = Color.green;
             for (int playerIndex = 0; playerIndex < players.Length; playerIndex++)
             {
-                if (players[playerIndex].isAlive)
+                if ((players[playerIndex].mask & ComponentMask.PlayerActionState) != 0)
                 {
                     GizmoShapes.DrawCircle(players[playerIndex].position.current, pickupRadius);
                 }

@@ -13,19 +13,21 @@ namespace TopView.Systems
         // 플레이어와 적의 중심이 이보다 가까우면 밀어낼 방향을 정할 수 없어 건너뛴다(유닛)
         private const float MIN_BLOCK_DISTANCE = 0.00001f;
 
+        // 처리할 플레이어가 가진 컴포넌트
+        private const ComponentMask PLAYER_MASK = ComponentMask.PlayerActionState | ComponentMask.Position | ComponentMask.PlayerMovement;
+
         /// <summary>
         /// 이번 틱에 적의 피격 원 쪽으로 가까워졌다면 원 밖(XZ)으로 되돌린다. 적이 다가와 겹친 경우는 밀어내지 않는다.
         /// </summary>
-        /// <param name="players">플레이어 저장소</param>
         /// <param name="storage">엔티티 저장소. 적(EnemyKind, Position, Body)을 읽기만 한다</param>
-        public static void Tick(PlayerStorage players, EntityStorage storage)
+        public static void Tick(EntityStorage storage)
         {
-            for (int index = 0; index < players.entities.Length; index++)
+            for (int index = 0; index < storage.entities.Length; index++)
             {
-                ref PlayerEntity entity = ref players.entities[index];
-                if (entity.isAlive)
+                ref Entity entity = ref storage.entities[index];
+                if ((entity.mask & PLAYER_MASK) == PLAYER_MASK)
                 {
-                    BlockByEnemies(ref entity.position, entity.movement.capsuleRadius, storage.entities);
+                    BlockByEnemies(ref entity.position, entity.playerMovement.capsuleRadius, storage.entities);
                 }
             }
         }

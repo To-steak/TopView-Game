@@ -62,5 +62,26 @@ namespace TopView.Entities
         public EnemyActionStateComponent enemyActionState;
         // NavMesh 목적지와 경로. 적 구간의 칸은 경로 배열을 저장소를 만들 때 할당해 다시 쓴다
         public NavigationAgentComponent navigationAgent;
+
+        // 플레이어 이동 값. 생성 때 Definition에서 복사한다
+        public PlayerMovementComponent playerMovement;
+        // 플레이어 체력과 마나 값. 생성 때 Definition에서 복사한다
+        public PlayerVitalsComponent playerVitals;
+        // 플레이어 행동 상태의 길이. 생성 때 Definition에서 복사한다
+        public PlayerActionComponent playerAction;
+        // 플레이어 강화 값. 생성 때 Definition에서 복사한다
+        public PlayerUpgradeComponent playerUpgrade;
+        // 플레이어의 행동 상태와 공격 진행
+        public PlayerActionStateComponent playerActionState;
+        // 플레이어 이동 상태
+        public PlayerMotionComponent playerMotion;
+        // 마나
+        public ManaComponent mana;
+        // 든 무기
+        public PlayerWeaponSlotsComponent weaponSlots;
+        // 투척 미리보기
+        public PlayerThrowPreviewComponent throwPreview;
+        // 플레이어 강화 레벨
+        public PlayerUpgradeLevelsComponent playerUpgradeLevels;
     }
 }

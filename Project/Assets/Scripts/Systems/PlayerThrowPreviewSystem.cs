@@ -8,26 +8,29 @@ namespace TopView.Systems
     // 투척 충전 중인 플레이어가 지금 던지면 수류탄이 지나갈 궤도와 폭발할 자리를 구한다. 실제 비행(ProjectileSystem의 포물선 투사체)과 같은 계산을 같은 틱 간격으로 한다.
     public static class PlayerThrowPreviewSystem
     {
+        // 처리할 플레이어가 가진 컴포넌트
+        private const ComponentMask PLAYER_MASK = ComponentMask.PlayerActionState | ComponentMask.Position | ComponentMask.Rotation | ComponentMask.WeaponSlots | ComponentMask.ThrowPreview;
+
         /// <summary>
         /// 투척 무기로 충전 중인 플레이어는 미리보기를 채우고, 나머지는 숨긴다. 이동과 조준이 끝난 뒤에 부른다.
         /// </summary>
-        /// <param name="players">플레이어 저장소</param>
+        /// <param name="storage">엔티티 저장소. 플레이어(PlayerActionState, Position, Rotation, WeaponSlots, ThrowPreview)만 처리한다</param>
         /// <param name="weapons">무기 저장소</param>
-        public static void Tick(PlayerStorage players, WeaponStorage weapons)
+        public static void Tick(EntityStorage storage, WeaponStorage weapons)
         {
             int shortArrayCount = 0;
             int invalidFlightCount = 0;
-            for (int index = 0; index < players.entities.Length; index++)
+            for (int index = 0; index < storage.entities.Length; index++)
             {
-                ref PlayerEntity entity = ref players.entities[index];
-                if (!entity.isAlive)
+                ref Entity entity = ref storage.entities[index];
+                if ((entity.mask & PLAYER_MASK) != PLAYER_MASK)
                 {
                     continue;
                 }
 
                 entity.throwPreview.isVisible = false;
                 entity.throwPreview.pointCount = 0;
-                if (entity.actionState.state != PlayerState.ThrowCharge)
+                if (entity.playerActionState.state != PlayerState.ThrowCharge)
                 {
                     continue;
                 }
@@ -40,14 +43,14 @@ namespace TopView.Systems
                 if (weapon.arc.projectile.flight.flightTicks <= 0 || AttackUtility.GetShotCount(in weapon.arc) == 0)
                 {
                     // 충전 중 매 틱 걸리므로 충전을 시작한 틱에만 센다
-                    if (entity.actionState.elapsedTicks == 0)
+                    if (entity.playerActionState.elapsedTicks == 0)
                     {
                         invalidFlightCount++;
                     }
                     continue;
                 }
 
-                if (!Preview(ref entity.throwPreview, in weapon, entity.position.current, entity.rotation.current, entity.actionState.throwCharge))
+                if (!Preview(ref entity.throwPreview, in weapon, entity.position.current, entity.rotation.current, entity.playerActionState.throwCharge))
                 {
                     shortArrayCount++;
                 }

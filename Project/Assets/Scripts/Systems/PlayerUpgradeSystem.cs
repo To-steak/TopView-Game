@@ -13,30 +13,30 @@ namespace TopView.Systems
         /// <summary>
         /// 강화 명령을 모두 소비한다. 강화 화면이 열려 있을 때만 살아 있는 첫 플레이어를 강화한다. 일시정지 중에도 돌도록 PauseSystem 바로 뒤에서 부른다.
         /// </summary>
-        /// <param name="players">플레이어 저장소</param>
+        /// <param name="storage">엔티티 저장소. PlayerActionState를 가진 첫 칸의 health, mana, playerUpgradeLevels를 고치고 playerVitals, playerUpgrade, weaponSlots를 읽는다</param>
         /// <param name="weapons">무기 저장소</param>
         /// <param name="progress">한 판의 진행 상태. 골드를 쓴다</param>
         /// <param name="playerUpgradeCommands">플레이어 강화 명령 목록</param>
-        public static void Tick(PlayerStorage players, WeaponStorage weapons, ref GameProgressComponent progress, List<PlayerUpgradeCommand> playerUpgradeCommands)
+        public static void Tick(EntityStorage storage, WeaponStorage weapons, ref GameProgressComponent progress, List<PlayerUpgradeCommand> playerUpgradeCommands)
         {
             // 강화 화면이 닫힌 뒤나 플레이어가 죽은 뒤에 남은 명령은 정상적으로 무시한다
-            if (progress.isUpgradeOpen && TryFindAlivePlayer(players, out int playerIndex))
+            if (progress.isUpgradeOpen && TryFindAlivePlayer(storage, out int playerIndex))
             {
-                ref PlayerEntity entity = ref players.entities[playerIndex];
+                ref Entity entity = ref storage.entities[playerIndex];
                 for (int commandIndex = 0; commandIndex < playerUpgradeCommands.Count; commandIndex++)
                 {
-                    Apply(ref entity.upgradeLevels, ref entity.health, ref entity.mana, in entity.weaponSlots, ref progress, in entity.vitals, in entity.upgrade, weapons.entities, playerUpgradeCommands[commandIndex]);
+                    Apply(ref entity.playerUpgradeLevels, ref entity.health, ref entity.mana, in entity.weaponSlots, ref progress, in entity.playerVitals, in entity.playerUpgrade, weapons.entities, playerUpgradeCommands[commandIndex]);
                 }
             }
 
             playerUpgradeCommands.Clear();
         }
 
-        private static bool TryFindAlivePlayer(PlayerStorage players, out int playerIndex)
+        private static bool TryFindAlivePlayer(EntityStorage storage, out int playerIndex)
         {
-            for (playerIndex = 0; playerIndex < players.entities.Length; playerIndex++)
+            for (playerIndex = 0; playerIndex < storage.entities.Length; playerIndex++)
             {
-                if (players.entities[playerIndex].isAlive)
+                if ((storage.entities[playerIndex].mask & ComponentMask.PlayerActionState) != 0)
                 {
                     return true;
                 }

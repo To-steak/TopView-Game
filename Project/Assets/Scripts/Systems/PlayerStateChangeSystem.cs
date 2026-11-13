@@ -11,23 +11,26 @@ namespace TopView.Systems
     // 상태 변경 요청을 받은 플레이어의 행동 상태를 바꾸고, 상태에 들어가고 나갈 때의 값을 정한다.
     public static class PlayerStateChangeSystem
     {
+        // 처리할 플레이어가 가진 컴포넌트
+        private const ComponentMask PLAYER_MASK = ComponentMask.PlayerActionState | ComponentMask.Rotation | ComponentMask.PlayerMovement | ComponentMask.PlayerVitals | ComponentMask.PlayerUpgrade | ComponentMask.PlayerMotion | ComponentMask.Mana | ComponentMask.WeaponSlots | ComponentMask.PlayerUpgradeLevels;
+
         /// <summary>
         /// 쌓인 상태 변경 요청을 모두 처리한다. 없어졌거나 칸이 재사용된 대상은 건너뛴다. 요청을 넣는 System 바로 뒤에 부른다.
         /// </summary>
-        /// <param name="players">플레이어 저장소</param>
+        /// <param name="storage">엔티티 저장소. 플레이어(PlayerActionState, Rotation, PlayerMovement, PlayerVitals, PlayerUpgrade, PlayerMotion, Mana, WeaponSlots, PlayerUpgradeLevels)만 처리한다</param>
         /// <param name="weapons">무기 저장소</param>
         /// <param name="stateChangeRequests">플레이어 상태 변경 요청 큐</param>
         /// <param name="stateRecords">상태 변경 기록</param>
-        public static void Tick(PlayerStorage players, WeaponStorage weapons, Queue<PlayerStateChangeRequest> stateChangeRequests, List<PlayerStateChangedRecord> stateRecords)
+        public static void Tick(EntityStorage storage, WeaponStorage weapons, Queue<PlayerStateChangeRequest> stateChangeRequests, List<PlayerStateChangedRecord> stateRecords)
         {
             while (stateChangeRequests.Count > 0)
             {
                 PlayerStateChangeRequest request = stateChangeRequests.Dequeue();
-                ref PlayerEntity entity = ref players.entities[request.target.index];
-                if (entity.isAlive && entity.generation == request.target.generation)
+                ref Entity entity = ref storage.entities[request.target.index];
+                if ((entity.mask & PLAYER_MASK) == PLAYER_MASK && entity.generation == request.target.generation)
                 {
                     ref readonly WeaponEntity weaponEntity = ref weapons.entities[entity.weaponSlots.weapons[entity.weaponSlots.currentIndex].index];
-                    ChangeState(ref entity.actionState, ref entity.motion, ref entity.rotation, ref entity.mana, in entity.movement, in entity.vitals, in entity.upgrade, in entity.upgradeLevels, in weaponEntity.weapon, weaponEntity.upgradeLevel.level, in request, stateRecords);
+                    ChangeState(ref entity.playerActionState, ref entity.playerMotion, ref entity.rotation, ref entity.mana, in entity.playerMovement, in entity.playerVitals, in entity.playerUpgrade, in entity.playerUpgradeLevels, in weaponEntity.weapon, weaponEntity.upgradeLevel.level, in request, stateRecords);
                 }
             }
         }

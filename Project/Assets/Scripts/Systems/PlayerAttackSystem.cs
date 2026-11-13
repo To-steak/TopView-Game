@@ -11,26 +11,29 @@ namespace TopView.Systems
     // 공격 상태의 플레이어가 공격이 나갈 시간이 되면 공격을 내보낸다.
     public static class PlayerAttackSystem
     {
+        // 처리할 플레이어가 가진 컴포넌트
+        private const ComponentMask PLAYER_MASK = ComponentMask.PlayerActionState | ComponentMask.Position | ComponentMask.Rotation | ComponentMask.PlayerUpgrade | ComponentMask.WeaponSlots;
+
         /// <summary>
         /// Shot, Swing, Throw 상태에서 시점이 지난 발을 내보낸다. Melee는 근접 판정 하나, Ranged와 Throw는 무기의 shots 칸마다 투사체 하나다. PlayerMoveInputSystem 다음에 부른다.
         /// </summary>
-        /// <param name="players">플레이어 저장소</param>
+        /// <param name="storage">엔티티 저장소. 플레이어(PlayerActionState, Position, Rotation, PlayerUpgrade, WeaponSlots)만 처리한다</param>
         /// <param name="weapons">무기 저장소</param>
         /// <param name="straightProjectileSpawnRequests">직선 투사체 생성 요청 큐. Ranged가 넣는다</param>
         /// <param name="arcProjectileSpawnRequests">포물선 투사체 생성 요청 큐. Throw가 넣는다</param>
         /// <param name="meleeSpawnRequests">근접 판정 생성 요청 큐</param>
         /// <param name="attackCommittedRecords">공격을 내보낸 기록 목록. 발이 실제로 나갔을 때만 발마다 남긴다</param>
-        public static void Tick(PlayerStorage players, WeaponStorage weapons, Queue<StraightProjectileSpawnRequest> straightProjectileSpawnRequests, Queue<ArcProjectileSpawnRequest> arcProjectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, List<PlayerAttackCommittedRecord> attackCommittedRecords)
+        public static void Tick(EntityStorage storage, WeaponStorage weapons, Queue<StraightProjectileSpawnRequest> straightProjectileSpawnRequests, Queue<ArcProjectileSpawnRequest> arcProjectileSpawnRequests, Queue<MeleeSpawnRequest> meleeSpawnRequests, List<PlayerAttackCommittedRecord> attackCommittedRecords)
         {
-            for (int index = 0; index < players.entities.Length; index++)
+            for (int index = 0; index < storage.entities.Length; index++)
             {
-                ref PlayerEntity entity = ref players.entities[index];
-                if (!entity.isAlive)
+                ref Entity entity = ref storage.entities[index];
+                if ((entity.mask & PLAYER_MASK) != PLAYER_MASK)
                 {
                     continue;
                 }
 
-                ref PlayerActionStateComponent actionState = ref entity.actionState;
+                ref PlayerActionStateComponent actionState = ref entity.playerActionState;
                 if (actionState.state != PlayerState.Shot && actionState.state != PlayerState.Swing && actionState.state != PlayerState.Throw)
                 {
                     continue;
@@ -41,7 +44,7 @@ namespace TopView.Systems
                 ref readonly WeaponComponent weapon = ref weaponEntity.weapon;
                 EntityIdentifier identifier = new EntityIdentifier { index = index, generation = entity.generation };
                 int weaponLevel = weaponEntity.upgradeLevel.level;
-                float damage = PlayerUpgradeUtility.GetDamage(in weapon, in entity.upgrade, weaponLevel);
+                float damage = PlayerUpgradeUtility.GetDamage(in weapon, in entity.playerUpgrade, weaponLevel);
                 Vector3 position = entity.position.current;
                 Quaternion rotation = entity.rotation.current;
 

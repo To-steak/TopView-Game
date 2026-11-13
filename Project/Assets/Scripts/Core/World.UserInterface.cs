@@ -195,10 +195,10 @@ namespace TopView.Core
 
         private bool TryFindAlivePlayer(out int playerIndex)
         {
-            PlayerEntity[] entities = _players.entities;
+            Entity[] entities = _entities.entities;
             for (playerIndex = 0; playerIndex < entities.Length; playerIndex++)
             {
-                if (entities[playerIndex].isAlive)
+                if ((entities[playerIndex].mask & ComponentMask.PlayerActionState) != 0)
                 {
                     return true;
                 }
@@ -210,7 +210,7 @@ namespace TopView.Core
 
         private void PresentPlayerInterface(int playerIndex)
         {
-            ref readonly PlayerEntity entity = ref _players.entities[playerIndex];
+            ref readonly Entity entity = ref _entities.entities[playerIndex];
 
             if (_playerHealthPresenter != null)
             {
@@ -240,12 +240,12 @@ namespace TopView.Core
 
             if (_upgradePresenter != null && _progress.isUpgradeOpen)
             {
-                PresentUpgradeInterface(in entity.vitals, in entity.upgrade, in entity.upgradeLevels, in entity.weaponSlots, _weapons.entities, _progress.gold);
+                PresentUpgradeInterface(in entity.playerVitals, in entity.playerUpgrade, in entity.playerUpgradeLevels, in entity.weaponSlots, _weapons.entities, _progress.gold);
             }
 
             if (_reloadPresenter != null)
             {
-                _reloadPresenter.Present(entity.actionState.state == PlayerState.Reload, entity.actionState.elapsedTicks, entity.action.reloadTicks);
+                _reloadPresenter.Present(entity.playerActionState.state == PlayerState.Reload, entity.playerActionState.elapsedTicks, entity.playerAction.reloadTicks);
             }
         }
 

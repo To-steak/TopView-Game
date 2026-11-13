@@ -11,17 +11,20 @@ namespace TopView.Systems
         // 조준점이 이보다 가까우면 돌지 않는다(유닛²)
         private const float MIN_AIM_DISTANCE_SQUARED = 0.01f;
 
+        // 처리할 플레이어가 가진 컴포넌트
+        private const ComponentMask PLAYER_MASK = ComponentMask.PlayerActionState | ComponentMask.Position | ComponentMask.Rotation | ComponentMask.PlayerMotion;
+
         /// <summary>
         /// 회전이 잠겨 있지 않고 조준점이 있으면 조준점을 바라본다.
         /// </summary>
-        /// <param name="players">플레이어 저장소</param>
+        /// <param name="storage">엔티티 저장소. 플레이어(PlayerActionState, Position, Rotation, PlayerMotion)만 처리한다</param>
         /// <param name="command">플레이어 입력</param>
-        public static void Tick(PlayerStorage players, in PlayerCommand command)
+        public static void Tick(EntityStorage storage, in PlayerCommand command)
         {
-            for (int index = 0; index < players.entities.Length; index++)
+            for (int index = 0; index < storage.entities.Length; index++)
             {
-                ref PlayerEntity entity = ref players.entities[index];
-                if (entity.isAlive && !entity.motion.isRotationLocked && command.hasAimPoint)
+                ref Entity entity = ref storage.entities[index];
+                if ((entity.mask & PLAYER_MASK) == PLAYER_MASK && !entity.playerMotion.isRotationLocked && command.hasAimPoint)
                 {
                     Aim(ref entity.rotation, entity.position.current, command.aimPoint);
                 }

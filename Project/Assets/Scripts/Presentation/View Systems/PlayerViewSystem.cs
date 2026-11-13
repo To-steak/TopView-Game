@@ -51,7 +51,7 @@ namespace TopView.Presentation.ViewSystems
         /// <param name="rangedLayerBlendInTicks">원거리 레이어 가중치가 0에서 1로 올라오는 시간(틱)</param>
         /// <param name="isPaused">판이 일시정지 중이면 true. Animator와 원거리 레이어 가중치를 멈춘다</param>
         /// <param name="context">플레이어 View 실행 상태</param>
-        public static void Present(PlayerEntity[] entities, WeaponEntity[] weapons, List<PlayerStateChangedRecord> stateRecords, List<PlayerAttackCommittedRecord> attackRecords, GameObject viewPrefab, GameObject[] weaponModelPrefabs, int rangedLayerBlendInTicks, bool isPaused, PlayerViewContext context)
+        public static void Present(Entity[] entities, WeaponEntity[] weapons, List<PlayerStateChangedRecord> stateRecords, List<PlayerAttackCommittedRecord> attackRecords, GameObject viewPrefab, GameObject[] weaponModelPrefabs, int rangedLayerBlendInTicks, bool isPaused, PlayerViewContext context)
         {
             if (!TryFindAlivePlayer(entities, out int playerIndex))
             {
@@ -62,10 +62,10 @@ namespace TopView.Presentation.ViewSystems
                 return;
             }
 
-            ref readonly PlayerEntity entity = ref entities[playerIndex];
+            ref readonly Entity entity = ref entities[playerIndex];
             ref readonly PositionComponent position = ref entity.position;
             ref readonly RotationComponent rotation = ref entity.rotation;
-            ref readonly PlayerActionStateComponent actionState = ref entity.actionState;
+            ref readonly PlayerActionStateComponent actionState = ref entity.playerActionState;
             ref readonly PlayerWeaponSlotsComponent weaponSlot = ref entity.weaponSlots;
             EntityIdentifier identifier = new EntityIdentifier { index = playerIndex, generation = entity.generation };
 
@@ -84,7 +84,7 @@ namespace TopView.Presentation.ViewSystems
             PlayAttackEffects(in identifier, attackRecords, context.weaponViews, context.view.soundEffectSource);
             PlayStateSounds(in identifier, stateRecords, context.view);
             PlayReloadSounds(in identifier, stateRecords, in actionState, weaponSlot.currentIndex, context);
-            ApplyMovementAnimation(in actionState, in entity.motion, animator);
+            ApplyMovementAnimation(in actionState, in entity.playerMotion, animator);
             // 가중치는 프레임 시간만큼 목표로 다가가므로, 일시정지 중에는 Animator와 함께 멈춘다
             if (!isPaused)
             {
@@ -95,11 +95,11 @@ namespace TopView.Presentation.ViewSystems
             ApplyTransform(in position, in rotation, context.view.transform);
         }
 
-        private static bool TryFindAlivePlayer(PlayerEntity[] entities, out int playerIndex)
+        private static bool TryFindAlivePlayer(Entity[] entities, out int playerIndex)
         {
             for (playerIndex = 0; playerIndex < entities.Length; playerIndex++)
             {
-                if (entities[playerIndex].isAlive)
+                if ((entities[playerIndex].mask & ComponentMask.PlayerActionState) != 0)
                 {
                     return true;
                 }

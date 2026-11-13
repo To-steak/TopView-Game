@@ -9,17 +9,20 @@ namespace TopView.Systems
     // 체력이 0이 된 플레이어를 사망 상태로 바꾼다.
     public static class PlayerDeathSystem
     {
+        // 처리할 플레이어가 가진 컴포넌트
+        private const ComponentMask PLAYER_MASK = ComponentMask.PlayerActionState | ComponentMask.Health | ComponentMask.PlayerMotion;
+
         /// <summary>
         /// 체력이 0이고 아직 사망 상태가 아닌 플레이어를 사망 상태로 바꾼다. 움직임을 멈추고 회전을 잠근다.
         /// </summary>
-        /// <param name="players">플레이어 저장소</param>
+        /// <param name="storage">엔티티 저장소. 플레이어(PlayerActionState, Health, PlayerMotion)만 처리한다</param>
         /// <param name="stateRecords">상태 변경 기록</param>
-        public static void Tick(PlayerStorage players, List<PlayerStateChangedRecord> stateRecords)
+        public static void Tick(EntityStorage storage, List<PlayerStateChangedRecord> stateRecords)
         {
-            for (int index = 0; index < players.entities.Length; index++)
+            for (int index = 0; index < storage.entities.Length; index++)
             {
-                ref PlayerEntity entity = ref players.entities[index];
-                if (!entity.isAlive || entity.health.current > 0f || entity.actionState.state == PlayerState.Die)
+                ref Entity entity = ref storage.entities[index];
+                if ((entity.mask & PLAYER_MASK) != PLAYER_MASK || entity.health.current > 0f || entity.playerActionState.state == PlayerState.Die)
                 {
                     continue;
                 }
@@ -28,11 +31,11 @@ namespace TopView.Systems
                 stateRecords.Add(new PlayerStateChangedRecord
                 {
                     player = identifier,
-                    previousState = entity.actionState.state,
+                    previousState = entity.playerActionState.state,
                     state = PlayerState.Die
                 });
 
-                Die(ref entity.actionState, ref entity.motion);
+                Die(ref entity.playerActionState, ref entity.playerMotion);
             }
         }
 

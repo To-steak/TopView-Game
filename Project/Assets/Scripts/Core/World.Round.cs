@@ -103,9 +103,8 @@ namespace TopView.Core
             _enemyHitTargets = new HitTargetComponent[enemyCapacity];
             // 공격하는 쪽 하나는 근접 판정을 동시에 하나만 가지고, 한 판정이 맞힐 대상도 플레이어와 적의 칸 수를 넘지 않는다
             int combatantCapacity = PLAYER_CAPACITY + enemyCapacity;
-            _players = new PlayerStorage(PLAYER_CAPACITY);
             _weapons = new WeaponStorage(PLAYER_CAPACITY * playerSpawnRequest.weapons.Length);
-            _entities = new EntityStorage(gameSettings.lootCapacity, combatantCapacity, combatantCapacity, gameSettings.straightProjectileCapacity, gameSettings.arcProjectileCapacity, enemyKindCount, gameSettings.enemyCapacityPerKind, gameSettings.enemyPathCornerCapacity);
+            _entities = new EntityStorage(gameSettings.lootCapacity, combatantCapacity, combatantCapacity, gameSettings.straightProjectileCapacity, gameSettings.arcProjectileCapacity, enemyKindCount, gameSettings.enemyCapacityPerKind, gameSettings.enemyPathCornerCapacity, PLAYER_CAPACITY);
 
             _progress = new GameProgressComponent
             {

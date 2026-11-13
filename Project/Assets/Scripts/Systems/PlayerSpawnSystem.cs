@@ -10,25 +10,30 @@ namespace TopView.Systems
     // 플레이어 생성 요청을 받아 저장소의 빈 칸을 채우고, 플레이어가 들 무기마다 무기 생성 요청을 넣는다. 틱 마지막에 WeaponSpawnSystem 앞에 부른다.
     public static class PlayerSpawnSystem
     {
+        // 플레이어가 가진 컴포넌트
+        private const ComponentMask PLAYER_MASK = ComponentMask.Position | ComponentMask.Rotation | ComponentMask.Body | ComponentMask.Death | ComponentMask.Health
+            | ComponentMask.PlayerMovement | ComponentMask.PlayerVitals | ComponentMask.PlayerAction | ComponentMask.PlayerUpgrade | ComponentMask.PlayerActionState
+            | ComponentMask.PlayerMotion | ComponentMask.Mana | ComponentMask.WeaponSlots | ComponentMask.ThrowPreview | ComponentMask.PlayerUpgradeLevels;
+
         /// <summary>
         /// 플레이어 생성 요청을 모두 처리한다. 빈 칸이 없으면 요청을 버린다.
         /// </summary>
-        /// <param name="players">플레이어 저장소</param>
+        /// <param name="storage">엔티티 저장소. 플레이어 구간의 칸을 플레이어 컴포넌트로 채운다</param>
         /// <param name="playerSpawnRequests">플레이어 생성 요청 큐</param>
         /// <param name="weaponSpawnRequests">무기 생성 요청 큐. 생성한 플레이어가 들 무기마다 넣는다</param>
-        public static void Tick(PlayerStorage players, Queue<PlayerSpawnRequest> playerSpawnRequests, Queue<WeaponSpawnRequest> weaponSpawnRequests)
+        public static void Tick(EntityStorage storage, Queue<PlayerSpawnRequest> playerSpawnRequests, Queue<WeaponSpawnRequest> weaponSpawnRequests)
         {
             int droppedCount = 0;
             while (playerSpawnRequests.Count > 0)
             {
                 PlayerSpawnRequest request = playerSpawnRequests.Dequeue();
-                if (!SpawnUtility.TryTakeFreeIndex(players.freeIndices, out int index))
+                if (!SpawnUtility.TryTakeFreeIndex(storage.freePlayerIndices, out int index))
                 {
                     droppedCount++;
                     continue;
                 }
 
-                ref PlayerEntity entity = ref players.entities[index];
+                ref Entity entity = ref storage.entities[index];
                 Spawn(ref entity, in request);
                 EntityIdentifier owner = new EntityIdentifier { index = index, generation = entity.generation };
                 for (int weaponIndex = 0; weaponIndex < request.weapons.Length; weaponIndex++)
@@ -39,12 +44,12 @@ namespace TopView.Systems
 
             if (droppedCount > 0)
             {
-                Debug.LogWarning($"PlayerSpawnSystem >> 플레이어 저장소에 빈 칸이 없어 생성 요청 {droppedCount}개를 버렸다.");
+                Debug.LogWarning($"PlayerSpawnSystem >> 플레이어 구간에 빈 칸이 없어 생성 요청 {droppedCount}개를 버렸다.");
             }
         }
 
         // 칸 전체를 새 값으로 바꿔 이전 값이 남지 않게 한다. 무기 식별자 배열과 투척 미리보기 점 배열만 다시 쓴다.
-        private static void Spawn(ref PlayerEntity entity, in PlayerSpawnRequest request)
+        private static void Spawn(ref Entity entity, in PlayerSpawnRequest request)
         {
             int generation = entity.generation + 1;
             WeaponComponent[] weapons = request.weapons;
@@ -56,20 +61,20 @@ namespace TopView.Systems
             System.Array.Clear(weaponIdentifiers, 0, weaponIdentifiers.Length);
             Vector3[] previewPoints = ReusePreviewPointArray(entity.throwPreview.points, GetPreviewPointCapacity(weapons));
 
-            entity = new PlayerEntity
+            entity = new Entity
             {
-                isAlive = true,
+                mask = PLAYER_MASK,
                 generation = generation,
-                movement = request.movement,
-                vitals = request.vitals,
-                action = request.action,
+                playerMovement = request.movement,
+                playerVitals = request.vitals,
+                playerAction = request.action,
                 body = request.body,
                 death = request.death,
-                upgrade = request.upgrade,
+                playerUpgrade = request.upgrade,
                 position = new PositionComponent { previous = request.position, current = request.position },
                 rotation = new RotationComponent { previous = request.rotation, current = request.rotation },
-                actionState = new PlayerActionStateComponent { state = PlayerState.Idle },
-                motion = new PlayerMotionComponent { currentSpeed = request.movement.walkSpeed },
+                playerActionState = new PlayerActionStateComponent { state = PlayerState.Idle },
+                playerMotion = new PlayerMotionComponent { currentSpeed = request.movement.walkSpeed },
                 health = new HealthComponent { current = request.vitals.startingMaxHealth, max = request.vitals.startingMaxHealth },
                 mana = new ManaComponent { current = request.vitals.startingMaxMana, max = request.vitals.startingMaxMana, recoveryElapsedTicks = request.vitals.manaRecoveryDelayTicks },
                 weaponSlots = new PlayerWeaponSlotsComponent

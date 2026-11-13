@@ -56,6 +56,26 @@ namespace TopView.Entities
         // 적의 행동 상태와 공격 진행
         EnemyActionState = 1UL << 22,
         // NavMesh 목적지와 경로
-        NavigationAgent = 1UL << 23
+        NavigationAgent = 1UL << 23,
+        // 플레이어 이동 값
+        PlayerMovement = 1UL << 24,
+        // 플레이어 체력과 마나 값
+        PlayerVitals = 1UL << 25,
+        // 플레이어 행동 상태의 길이
+        PlayerAction = 1UL << 26,
+        // 플레이어 강화 값
+        PlayerUpgrade = 1UL << 27,
+        // 플레이어의 행동 상태와 공격 진행. 플레이어를 가리는 데도 쓴다
+        PlayerActionState = 1UL << 28,
+        // 플레이어 이동 상태
+        PlayerMotion = 1UL << 29,
+        // 마나
+        Mana = 1UL << 30,
+        // 든 무기
+        WeaponSlots = 1UL << 31,
+        // 투척 미리보기
+        ThrowPreview = 1UL << 32,
+        // 플레이어 강화 레벨
+        PlayerUpgradeLevels = 1UL << 33
     }
 }

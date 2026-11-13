@@ -11,43 +11,46 @@ namespace TopView.Systems
     // 탈출 명령을 처리한다. 땅 아래로 빠진 플레이어를 가까운 NavMesh 위로 옮긴다.
     public static class PlayerUnstuckSystem
     {
+        // 처리할 플레이어가 가진 컴포넌트
+        private const ComponentMask PLAYER_MASK = ComponentMask.PlayerActionState | ComponentMask.Position | ComponentMask.Rotation | ComponentMask.PlayerMovement | ComponentMask.PlayerMotion;
+
         /// <summary>
         /// 탈출 명령을 모두 소비해 살아 있는 플레이어를 가까운 NavMesh 위로 옮긴다. 진행 중이 아니면 명령만 버린다.
         /// 일시정지 화면에서 들어온 명령을 처리하므로 PauseSystem 뒤에서 일시정지와 상관없이 부른다.
         /// </summary>
-        /// <param name="players">플레이어 저장소</param>
+        /// <param name="storage">엔티티 저장소. 플레이어(PlayerActionState, Position, Rotation, PlayerMovement, PlayerMotion)만 처리한다</param>
         /// <param name="progress">한 판의 진행 상태</param>
         /// <param name="rule">한 판의 규칙 값</param>
         /// <param name="playerUnstuckCommands">플레이어 탈출 명령 목록</param>
-        public static void Tick(PlayerStorage players, in GameProgressComponent progress, in GameRuleComponent rule, List<PlayerUnstuckCommand> playerUnstuckCommands)
+        public static void Tick(EntityStorage storage, in GameProgressComponent progress, in GameRuleComponent rule, List<PlayerUnstuckCommand> playerUnstuckCommands)
         {
             // 판이 끝난 뒤에 늦게 도착한 명령은 정상적으로 무시한다. 같은 틱에 여러 번 들어와도 한 번 옮긴 뒤에는 이미 NavMesh 위라 한 번만 옮긴다
             if (playerUnstuckCommands.Count > 0 && progress.phase == GamePhase.Playing)
             {
-                MoveAlivePlayers(players, in rule);
+                MoveAlivePlayers(storage, in rule);
             }
             playerUnstuckCommands.Clear();
         }
 
-        private static void MoveAlivePlayers(PlayerStorage players, in GameRuleComponent rule)
+        private static void MoveAlivePlayers(EntityStorage storage, in GameRuleComponent rule)
         {
             bool hasAlivePlayer = false;
-            for (int index = 0; index < players.entities.Length; index++)
+            for (int index = 0; index < storage.entities.Length; index++)
             {
-                ref PlayerEntity entity = ref players.entities[index];
-                if (!entity.isAlive)
+                ref Entity entity = ref storage.entities[index];
+                if ((entity.mask & PLAYER_MASK) != PLAYER_MASK)
                 {
                     continue;
                 }
 
                 hasAlivePlayer = true;
-                if (!TryFindDestination(in entity.position, in entity.movement, entity.rotation.current, in rule, out Vector3 destination))
+                if (!TryFindDestination(in entity.position, in entity.playerMovement, entity.rotation.current, in rule, out Vector3 destination))
                 {
                     Debug.LogWarning($"PlayerUnstuckSystem >> 플레이어 위치 {entity.position.current}에서 {rule.unstuckSampleDistance}유닛 안에 NavMesh가 없어 옮기지 않았다. Game Settings Definition의 Unstuck 값을 확인한다.");
                     continue;
                 }
 
-                Place(ref entity.position, ref entity.motion, destination);
+                Place(ref entity.position, ref entity.playerMotion, destination);
             }
 
             if (!hasAlivePlayer)

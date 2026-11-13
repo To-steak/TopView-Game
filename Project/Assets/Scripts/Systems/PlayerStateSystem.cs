@@ -11,28 +11,31 @@ namespace TopView.Systems
     // 이동 입력과 상태 시간을 보고 플레이어의 다음 행동 상태를 요청한다. 실제 전환은 PlayerStateChangeSystem이 한다.
     public static class PlayerStateSystem
     {
+        // 처리할 플레이어가 가진 컴포넌트
+        private const ComponentMask PLAYER_MASK = ComponentMask.PlayerActionState | ComponentMask.Death | ComponentMask.PlayerAction | ComponentMask.PlayerMotion | ComponentMask.WeaponSlots;
+
         /// <summary>
         /// 상태별로 다음 상태로 넘어갈 때인지 보고, 교체와 재장전을 끝낸다. 사망한 뒤 시간이 되면 게임오버를 요청한다. PlayerAttackSystem 다음, PlayerStateChangeSystem 앞에 부른다.
         /// </summary>
-        /// <param name="players">플레이어 저장소</param>
+        /// <param name="storage">엔티티 저장소. 플레이어(PlayerActionState, Death, PlayerAction, PlayerMotion, WeaponSlots)만 처리한다</param>
         /// <param name="weapons">무기 저장소</param>
         /// <param name="command">플레이어 입력</param>
         /// <param name="stateChangeRequests">플레이어 상태 변경 요청 큐</param>
         /// <param name="gameOverRequests">게임오버 요청 큐</param>
-        public static void Tick(PlayerStorage players, WeaponStorage weapons, in PlayerCommand command, Queue<PlayerStateChangeRequest> stateChangeRequests, Queue<GameOverRequest> gameOverRequests)
+        public static void Tick(EntityStorage storage, WeaponStorage weapons, in PlayerCommand command, Queue<PlayerStateChangeRequest> stateChangeRequests, Queue<GameOverRequest> gameOverRequests)
         {
-            for (int index = 0; index < players.entities.Length; index++)
+            for (int index = 0; index < storage.entities.Length; index++)
             {
-                ref PlayerEntity entity = ref players.entities[index];
-                if (!entity.isAlive)
+                ref Entity entity = ref storage.entities[index];
+                if ((entity.mask & PLAYER_MASK) != PLAYER_MASK)
                 {
                     continue;
                 }
 
-                ref PlayerActionStateComponent actionState = ref entity.actionState;
-                ref readonly PlayerMotionComponent motion = ref entity.motion;
+                ref PlayerActionStateComponent actionState = ref entity.playerActionState;
+                ref readonly PlayerMotionComponent motion = ref entity.playerMotion;
                 ref PlayerWeaponSlotsComponent weaponSlot = ref entity.weaponSlots;
-                ref readonly PlayerActionComponent action = ref entity.action;
+                ref readonly PlayerActionComponent action = ref entity.playerAction;
                 ref readonly DeathComponent death = ref entity.death;
                 ref WeaponEntity weaponEntity = ref weapons.entities[weaponSlot.weapons[weaponSlot.currentIndex].index];
                 ref readonly WeaponComponent weapon = ref weaponEntity.weapon;

@@ -18,12 +18,11 @@ namespace TopView.Systems
         /// 진행 중이면 피해 요청을 반영하고, 진행 중이 아니면 들어온 요청을 버린다. 체력이 이미 0인 대상은 피해를 받지 않는다.
         /// </summary>
         /// <param name="progress">한 판의 진행 상태. 처치 점수를 더한다</param>
-        /// <param name="players">플레이어 저장소</param>
         /// <param name="storage">엔티티 저장소. 적(EnemyKind, Health, Position, Score, Combat)만 피해 대상으로 보고, health를 고친다</param>
         /// <param name="playerDamageRequests">플레이어 피해 요청 큐</param>
         /// <param name="enemyDamageRequests">적 피해 요청 큐</param>
         /// <param name="enemyDamagedRecords">적이 피해를 받은 기록 목록</param>
-        public static void Tick(ref GameProgressComponent progress, PlayerStorage players, EntityStorage storage, Queue<DamageRequest> playerDamageRequests, Queue<DamageRequest> enemyDamageRequests, List<EnemyDamagedRecord> enemyDamagedRecords)
+        public static void Tick(ref GameProgressComponent progress, EntityStorage storage, Queue<DamageRequest> playerDamageRequests, Queue<DamageRequest> enemyDamageRequests, List<EnemyDamagedRecord> enemyDamagedRecords)
         {
             if (progress.phase != GamePhase.Playing)
             {
@@ -42,13 +41,13 @@ namespace TopView.Systems
             while (playerDamageRequests.Count > 0)
             {
                 DamageRequest request = playerDamageRequests.Dequeue();
-                if (!HasPlayerTarget(players.entities, in request.target))
+                if (!HasPlayerTarget(storage.entities, in request.target))
                 {
                     missingCount++;
                     continue;
                 }
 
-                Apply(ref players.entities[request.target.index].health, in request);
+                Apply(ref storage.entities[request.target.index].health, in request);
             }
 
             while (enemyDamageRequests.Count > 0)
@@ -79,10 +78,10 @@ namespace TopView.Systems
             }
         }
 
-        private static bool HasPlayerTarget(PlayerEntity[] players, in EntityIdentifier target)
+        private static bool HasPlayerTarget(Entity[] players, in EntityIdentifier target)
         {
             return target.index >= 0 && target.index < players.Length
-                && players[target.index].isAlive
+                && (players[target.index].mask & ComponentMask.PlayerActionState) != 0
                 && players[target.index].generation == target.generation;
         }
 

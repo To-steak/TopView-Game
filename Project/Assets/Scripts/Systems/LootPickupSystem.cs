@@ -13,23 +13,25 @@ namespace TopView.Systems
         // 획득할 수 있는 전리품이 가진 컴포넌트
         private const ComponentMask LOOT_MASK = ComponentMask.Loot | ComponentMask.Position;
 
+        // 처리할 플레이어가 가진 컴포넌트
+        private const ComponentMask PLAYER_MASK = ComponentMask.PlayerActionState | ComponentMask.Position | ComponentMask.Health | ComponentMask.WeaponSlots;
+
         /// <summary>
         /// 살아 있는 플레이어의 획득 반경 안에 있는 전리품의 효과를 적용하고 소멸을 요청한다. 효과를 받을 수 없는 전리품(원거리 무기가 없을 때의 탄약)은 바닥에 남긴다.
         /// </summary>
         /// <param name="storage">엔티티 저장소. Loot와 Position을 가진 칸만 처리한다</param>
-        /// <param name="players">플레이어 저장소</param>
         /// <param name="weapons">무기 저장소</param>
         /// <param name="progress">한 판의 진행 상태. 골드를 더한다</param>
         /// <param name="pickupRadius">플레이어 중심에서 전리품을 획득하는 반경(유닛, XZ)</param>
         /// <param name="despawnRequests">전리품 소멸 요청 큐</param>
         /// <param name="pickedUpRecords">전리품을 획득한 기록 목록</param>
-        public static void Tick(EntityStorage storage, PlayerStorage players, WeaponStorage weapons, ref GameProgressComponent progress, float pickupRadius, Queue<LootDespawnRequest> despawnRequests, List<LootPickedUpRecord> pickedUpRecords)
+        public static void Tick(EntityStorage storage, WeaponStorage weapons, ref GameProgressComponent progress, float pickupRadius, Queue<LootDespawnRequest> despawnRequests, List<LootPickedUpRecord> pickedUpRecords)
         {
             float sqrPickupRadius = pickupRadius * pickupRadius;
-            for (int playerIndex = 0; playerIndex < players.entities.Length; playerIndex++)
+            for (int playerIndex = 0; playerIndex < storage.entities.Length; playerIndex++)
             {
-                ref PlayerEntity player = ref players.entities[playerIndex];
-                if (!player.isAlive)
+                ref Entity player = ref storage.entities[playerIndex];
+                if ((player.mask & PLAYER_MASK) != PLAYER_MASK)
                 {
                     continue;
                 }

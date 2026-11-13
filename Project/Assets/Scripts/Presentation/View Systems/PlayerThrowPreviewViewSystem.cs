@@ -14,7 +14,7 @@ namespace TopView.Presentation.ViewSystems
         /// <param name="entities">플레이어 엔티티 배열</param>
         /// <param name="view">플레이어 View. 아직 만들지 않았으면 null</param>
         /// <param name="circleHeightOffset">원이 바닥과 겹쳐 깜빡이지 않도록 폭발 위치보다 띄우는 높이(유닛)</param>
-        public static void Present(PlayerEntity[] entities, PlayerView view, float circleHeightOffset)
+        public static void Present(Entity[] entities, PlayerView view, float circleHeightOffset)
         {
             if (view == null)
             {
@@ -40,11 +40,11 @@ namespace TopView.Presentation.ViewSystems
             }
         }
 
-        private static bool TryFindAlivePlayer(PlayerEntity[] entities, out int playerIndex)
+        private static bool TryFindAlivePlayer(Entity[] entities, out int playerIndex)
         {
             for (playerIndex = 0; playerIndex < entities.Length; playerIndex++)
             {
-                if (entities[playerIndex].isAlive)
+                if ((entities[playerIndex].mask & ComponentMask.ThrowPreview) != 0)
                 {
                     return true;
                 }

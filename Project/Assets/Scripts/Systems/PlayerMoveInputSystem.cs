@@ -9,22 +9,25 @@ namespace TopView.Systems
     // 움직일 수 있는 상태의 플레이어에게 이동 입력을 이동 방향과 속도로 반영한다.
     public static class PlayerMoveInputSystem
     {
+        // 처리할 플레이어가 가진 컴포넌트
+        private const ComponentMask PLAYER_MASK = ComponentMask.PlayerActionState | ComponentMask.PlayerMovement | ComponentMask.PlayerVitals | ComponentMask.PlayerUpgrade | ComponentMask.PlayerMotion | ComponentMask.Mana | ComponentMask.PlayerUpgradeLevels;
+
         /// <summary>
         /// Move, 공격, 교체, 재장전, Jump, Land 상태는 방향과 속도를 정하고 달리기 마나를 쓴다. PlayerPressSystem 다음에 부른다.
         /// </summary>
-        /// <param name="players">플레이어 저장소</param>
+        /// <param name="storage">엔티티 저장소. 플레이어(PlayerActionState, PlayerMovement, PlayerVitals, PlayerUpgrade, PlayerMotion, Mana, PlayerUpgradeLevels)만 처리한다</param>
         /// <param name="command">플레이어 입력</param>
-        public static void Tick(PlayerStorage players, in PlayerCommand command)
+        public static void Tick(EntityStorage storage, in PlayerCommand command)
         {
-            for (int index = 0; index < players.entities.Length; index++)
+            for (int index = 0; index < storage.entities.Length; index++)
             {
-                ref PlayerEntity entity = ref players.entities[index];
-                if (!entity.isAlive)
+                ref Entity entity = ref storage.entities[index];
+                if ((entity.mask & PLAYER_MASK) != PLAYER_MASK)
                 {
                     continue;
                 }
 
-                switch (entity.actionState.state)
+                switch (entity.playerActionState.state)
                 {
                     case PlayerState.Move:
                     case PlayerState.Shot:
@@ -35,7 +38,7 @@ namespace TopView.Systems
                     case PlayerState.Reload:
                     case PlayerState.Jump:
                     case PlayerState.Land:
-                        ApplyMoveInput(ref entity.motion, ref entity.mana, in entity.movement, in entity.vitals, in entity.upgrade, in entity.upgradeLevels, in command);
+                        ApplyMoveInput(ref entity.playerMotion, ref entity.mana, in entity.playerMovement, in entity.playerVitals, in entity.playerUpgrade, in entity.playerUpgradeLevels, in command);
                         break;
                 }
             }

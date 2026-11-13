@@ -11,29 +11,31 @@ namespace TopView.Systems
         // 피격 대상이 되는 적이 가진 컴포넌트
         private const ComponentMask ENEMY_MASK = ComponentMask.EnemyKind | ComponentMask.Health | ComponentMask.Position | ComponentMask.Body;
 
+        // 처리할 플레이어가 가진 컴포넌트
+        private const ComponentMask PLAYER_MASK = ComponentMask.PlayerActionState | ComponentMask.Position | ComponentMask.Rotation | ComponentMask.Body | ComponentMask.Health | ComponentMask.PlayerMovement;
+
         /// <summary>
         /// 체력이 남은 엔티티로 두 목록을 처음부터 다시 채운다. 이동이 끝난 뒤, 판정 전에 부른다.
         /// 피해는 틱 맨 앞에서 반영되고 상태 System이 체력 0을 보고 사망 상태로 바꾸므로, 여기서는 체력이 0이면 사망 상태다.
         /// </summary>
-        /// <param name="players">플레이어 저장소</param>
         /// <param name="storage">엔티티 저장소. 적(EnemyKind, Health, Position, Body)을 읽기만 한다</param>
         /// <param name="playerHitTargets">플레이어 피격 대상 목록. 길이는 플레이어 칸 수다</param>
         /// <param name="playerHitTargetCount">플레이어 피격 대상 목록에서 이번 틱에 채운 대상 수</param>
         /// <param name="enemyHitTargets">적 피격 대상 목록. 길이는 적 구간의 칸 수다</param>
         /// <param name="enemyHitTargetCount">적 피격 대상 목록에서 이번 틱에 채운 대상 수</param>
-        public static void Tick(PlayerStorage players, EntityStorage storage, HitTargetComponent[] playerHitTargets, ref int playerHitTargetCount, HitTargetComponent[] enemyHitTargets, ref int enemyHitTargetCount)
+        public static void Tick(EntityStorage storage, HitTargetComponent[] playerHitTargets, ref int playerHitTargetCount, HitTargetComponent[] enemyHitTargets, ref int enemyHitTargetCount)
         {
             playerHitTargetCount = 0;
             enemyHitTargetCount = 0;
 
-            for (int index = 0; index < players.entities.Length; index++)
+            for (int index = 0; index < storage.entities.Length; index++)
             {
-                ref readonly PlayerEntity player = ref players.entities[index];
-                if (player.isAlive && player.health.current > 0f)
+                ref readonly Entity player = ref storage.entities[index];
+                if ((player.mask & PLAYER_MASK) == PLAYER_MASK && player.health.current > 0f)
                 {
                     // 점프로 적 투사체를 피할 수 있도록 플레이어만 이동 충돌 캡슐의 높이로 맞는다
-                    PlayerMovementUtility.GetCapsulePoints(in player.movement, player.rotation.current, player.position.current, out Vector3 top, out Vector3 bottom);
-                    float capsuleRadius = player.movement.capsuleRadius;
+                    PlayerMovementUtility.GetCapsulePoints(in player.playerMovement, player.rotation.current, player.position.current, out Vector3 top, out Vector3 bottom);
+                    float capsuleRadius = player.playerMovement.capsuleRadius;
                     Add(playerHitTargets, ref playerHitTargetCount, index, player.generation, player.position.current, player.body.radius, bottom.y - capsuleRadius, top.y + capsuleRadius);
                 }
             }
