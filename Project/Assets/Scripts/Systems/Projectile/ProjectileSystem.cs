@@ -1,13 +1,11 @@
-using System.Collections.Generic;
 using TopView.Components;
 using TopView.Entities;
-using TopView.Requests;
 using TopView.Utilities;
 using UnityEngine;
 
 namespace TopView.Systems
 {
-    // 투사체를 움직인다. 직선 투사체는 수명이 다하면 소멸을 요청하고, 둘 다 환경에 닿으면 멈춘다. 포물선 투사체는 착탄점에 도착해도 멈춘다. 판정과 폭발, 벽에 막힌 직선 투사체의 소멸은 ProjectileHitSystem이 한다.
+    // 투사체를 움직인다. 둘 다 환경에 닿으면 멈추고, 포물선 투사체는 착탄점에 도착해도 멈춘다. 판정과 폭발, 직선 투사체의 소멸(명중, 벽, 수명)은 ProjectileHitSystem이 한다.
     public static class ProjectileSystem
     {
         // 직선 투사체가 가진 컴포넌트
@@ -16,11 +14,10 @@ namespace TopView.Systems
         private const ComponentMask ARC_MASK = ComponentMask.Position | ComponentMask.ArcFlight | ComponentMask.ArcMotion | ComponentMask.ProjectileHit;
 
         /// <summary>
-        /// 직선 투사체마다 시간을 1틱 늘린 뒤 곧게 움직이고, 수명이 다한 투사체는 소멸을 요청한다. 포물선 투사체마다 시간을 1틱 늘린 뒤, 멈추지 않았으면 포물선을 따라 움직인다.
+        /// 직선 투사체마다 시간을 1틱 늘린 뒤 곧게 움직인다. 포물선 투사체마다 시간을 1틱 늘린 뒤, 멈추지 않았으면 포물선을 따라 움직인다.
         /// </summary>
         /// <param name="storage">엔티티 저장소. 직선 투사체(Position, StraightFlight, StraightMotion, ProjectileHit)와 포물선 투사체(Position, ArcFlight, ArcMotion, ProjectileHit)를 처리하고, 이동 상태와 position을 고친다</param>
-        /// <param name="despawnRequests">투사체 소멸 요청 큐. 수명이 다한 직선 투사체를 넣는다</param>
-        public static void Tick(EntityStorage storage, Queue<ProjectileDespawnRequest> despawnRequests)
+        public static void Tick(EntityStorage storage)
         {
             float deltaTime = Time.fixedDeltaTime;
 
@@ -31,10 +28,6 @@ namespace TopView.Systems
                 {
                     entity.straightMotion.elapsedTicks++;
                     MoveStraight(in entity.projectileHit, ref entity.straightMotion, ref entity.position, deltaTime);
-                    if (entity.straightMotion.elapsedTicks >= entity.straightFlight.lifetimeTicks)
-                    {
-                        despawnRequests.Enqueue(new ProjectileDespawnRequest { target = new EntityIdentifier { index = index, generation = entity.generation } });
-                    }
                 }
                 else if ((entity.mask & ARC_MASK) == ARC_MASK)
                 {

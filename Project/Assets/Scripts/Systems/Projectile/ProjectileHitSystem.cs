@@ -12,16 +12,16 @@ namespace TopView.Systems
     public static class ProjectileHitSystem
     {
         // 직선 투사체가 가진 컴포넌트
-        private const ComponentMask STRAIGHT_MASK = ComponentMask.Position | ComponentMask.StraightMotion | ComponentMask.ProjectileHit | ComponentMask.Explosion | ComponentMask.ProjectileView | ComponentMask.AttackPayload;
+        private const ComponentMask STRAIGHT_MASK = ComponentMask.Position | ComponentMask.StraightFlight | ComponentMask.StraightMotion | ComponentMask.ProjectileHit | ComponentMask.Explosion | ComponentMask.ProjectileView | ComponentMask.AttackPayload;
         // 포물선 투사체가 가진 컴포넌트
         private const ComponentMask ARC_MASK = ComponentMask.Position | ComponentMask.ArcMotion | ComponentMask.Explosion | ComponentMask.ProjectileView | ComponentMask.AttackPayload;
 
         /// <summary>
-        /// 직선 투사체는 이번 틱의 이동 선분에서 가장 먼저 닿은 대상 하나에 피해 요청을 넣고 소멸을 요청한다. 벽에 막혀 멈춘 투사체는 맞은 대상이 없으면 닿은 자리에 명중 기록을 남기고 소멸을 요청한다.
+        /// 직선 투사체는 이번 틱의 이동 선분에서 가장 먼저 닿은 대상 하나에 피해 요청을 넣고 소멸을 요청한다. 벽에 막혀 멈춘 투사체는 맞은 대상이 없으면 닿은 자리에 명중 기록을 남기고 소멸을 요청한다. 아무것도 맞히지 않고 수명이 다한 투사체는 소멸만 요청한다.
         /// 폭발 반지름이 0보다 큰 직선 투사체는 대상이나 벽에 닿은 자리에서 폭발해 반경 안의 대상 모두에게 피해 요청을 넣고 소멸을 요청한다.
         /// 멈춘(착탄점에 도착했거나 땅이나 벽에 닿은) 포물선 투사체는 폭발시켜 반경 안의 대상 모두에게 피해 요청을 넣고 소멸을 요청한다.
         /// </summary>
-        /// <param name="storage">엔티티 저장소. 직선 투사체(Position, StraightMotion, ProjectileHit, Explosion, ProjectileView, AttackPayload)와 포물선 투사체(Position, ArcMotion, Explosion, ProjectileView, AttackPayload)를 읽기만 한다</param>
+        /// <param name="storage">엔티티 저장소. 직선 투사체(Position, StraightFlight, StraightMotion, ProjectileHit, Explosion, ProjectileView, AttackPayload)와 포물선 투사체(Position, ArcMotion, Explosion, ProjectileView, AttackPayload)를 읽기만 한다</param>
         /// <param name="playerHitTargets">플레이어 피격 대상 목록</param>
         /// <param name="playerHitTargetCount">플레이어 피격 대상 목록에서 이번 틱에 채운 대상 수</param>
         /// <param name="enemyHitTargets">적 피격 대상 목록</param>
@@ -55,9 +55,13 @@ namespace TopView.Systems
                 }
 
                 bool hasTarget = TryFindNearest(in entity.projectileHit, in entity.position, hitTargets, hitTargetCount, out int nearestTargetIndex, out float nearestFraction);
-                // 대상에도 벽에도 닿지 않았으면 계속 날아간다
+                // 대상에도 벽에도 닿지 않았으면 계속 날아간다. 수명이 다했으면 이번 틱의 이동 구간까지 판정한 뒤 여기서 소멸한다
                 if (!hasTarget && !entity.straightMotion.isResting)
                 {
+                    if (entity.straightMotion.elapsedTicks >= entity.straightFlight.lifetimeTicks)
+                    {
+                        despawnRequests.Enqueue(new ProjectileDespawnRequest { target = new EntityIdentifier { index = index, generation = entity.generation } });
+                    }
                     continue;
                 }
 

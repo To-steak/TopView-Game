@@ -9,14 +9,14 @@ namespace TopView.Systems
     public static class PlayerThrowPreviewSystem
     {
         // 미리보기를 그릴 무기가 가진 컴포넌트
-        private const ComponentMask THROW_MASK = ComponentMask.ArcAttack | ComponentMask.Throw;
+        private const ComponentMask THROW_MASK = ComponentMask.ArcAttack | ComponentMask.Throw | ComponentMask.UpgradeLevel | ComponentMask.WeaponUpgrade;
         // 처리할 플레이어가 가진 컴포넌트
         private const ComponentMask PLAYER_MASK = ComponentMask.PlayerActionState | ComponentMask.Position | ComponentMask.Rotation | ComponentMask.WeaponSlots | ComponentMask.ThrowPreview;
 
         /// <summary>
         /// 투척 무기로 충전 중인 플레이어는 미리보기를 채우고, 나머지는 숨긴다. 이동과 조준이 끝난 뒤에 부른다.
         /// </summary>
-        /// <param name="storage">엔티티 저장소. 플레이어(PlayerActionState, Position, Rotation, WeaponSlots, ThrowPreview)만 처리한다</param>
+        /// <param name="storage">엔티티 저장소. 플레이어(PlayerActionState, Position, Rotation, WeaponSlots, ThrowPreview)만 처리하고, 든 무기(ArcAttack, Throw, UpgradeLevel, WeaponUpgrade)를 읽어 throwPreview를 고친다</param>
         public static void Tick(EntityStorage storage)
         {
             int shortArrayCount = 0;
@@ -99,7 +99,8 @@ namespace TopView.Systems
             preview.isVisible = true;
             preview.pointCount = pointCount;
             preview.impactPosition = currentPosition;
-            preview.explosionRadius = projectile.explosion.radius;
+            // 실제 수류탄(PlayerArcAttackSystem)과 같이 강화 레벨을 반영한다
+            preview.explosionRadius = PlayerUpgradeUtility.GetExplosionRadius(in weapon, weapon.upgradeLevel.level);
             return true;
         }
     }

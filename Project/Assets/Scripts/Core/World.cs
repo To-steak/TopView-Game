@@ -63,6 +63,8 @@ namespace TopView.Core
             if (isPlaying)
             {
                 PlayerDeathSystem.Tick(_entities, _playerStateChangedRecords);
+                // 근접 판정은 주인이 사망한 틱에 지워야 죽은 주인의 공격에 맞지 않으므로, 두 사망 System을 MeleeOwnerDeathSystem 앞에 둔다
+                EnemyDeathSystem.Tick(_entities, _enemyStateChangedRecords);
                 MeleeOwnerDeathSystem.Tick(_entities, _meleeDespawnRequests);
                 MeleeDespawnSystem.Tick(_entities, _meleeDespawnRequests);
                 WeaponOwnerDeathSystem.Tick(_entities, _weaponDespawnRequests);
@@ -89,7 +91,6 @@ namespace TopView.Core
                 LootDespawnSystem.Tick(_entities, _lootDespawnRequests);
                 LootLifetimeSystem.Tick(_entities, _lootDespawnRequests);
                 LootDespawnSystem.Tick(_entities, _lootDespawnRequests);
-                EnemyDeathSystem.Tick(_entities, _enemyStateChangedRecords);
                 EnemyStateTimerSystem.Tick(_entities);
                 PlayerLocationSystem.Tick(_entities, ref _playerLocation);
                 // 공격 상태는 상태 시간이 0이면 건너뛰므로, 공격이 끝나 Idle이 된 적과 막 공격에 들어온 적 모두 다음 틱부터 움직이도록 이 순서를 지킨다
@@ -99,8 +100,8 @@ namespace TopView.Core
                 EnemyStateChangeSystem.Tick(_entities, _enemyStateChangeRequests, _enemyStateChangedRecords);
                 EnemyDespawnSystem.Tick(_entities, _gameOverRequests, _random, _lootSpawnRequests);
                 EnemyNavigationSystem.Tick(_entities, _navigationPath, _rule.navMeshSampleDistance);
-                ProjectileSystem.Tick(_entities, _projectileDespawnRequests);
-                ProjectileDespawnSystem.Tick(_entities, _projectileDespawnRequests);
+                // 직선 투사체의 소멸(명중, 벽, 수명)은 이번 틱의 이동 구간까지 판정한 뒤 ProjectileHitSystem이 요청한다
+                ProjectileSystem.Tick(_entities);
                 HitTargetSystem.Tick(_entities, _playerHitTargets, ref _playerHitTargetCount, _enemyHitTargets, ref _enemyHitTargetCount);
                 ProjectileHitSystem.Tick(_entities, _playerHitTargets, _playerHitTargetCount, _enemyHitTargets, _enemyHitTargetCount, _playerDamageRequests, _enemyDamageRequests, _projectileHitRecords, _projectileDespawnRequests);
                 ProjectileDespawnSystem.Tick(_entities, _projectileDespawnRequests);
