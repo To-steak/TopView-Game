@@ -5,13 +5,14 @@
 기본은 제목과 본문을 출력만 한다. --create를 주면 gh로 이슈를 열고, --edit 번호를 주면 그 이슈의 본문을 바꾼다.
 
 판정별로 필요한 것:
-    reproduced          --test와 --results(또는 --failure). 결과 파일에서 그 테스트가 실패했어야 한다
-    not-reproduced      --test, --results(또는 --failure), --test-file. 결과 파일에서 그 테스트가 통과했어야 한다.
-                        테스트 코드는 저장소에서 지우고 이슈 본문에만 남긴다
+    reproduced          --test-commit, --test와 --results(또는 --failure). 결과 파일에서 그 테스트가 실패했어야 한다
+    not-reproduced      --test-commit, --test, --results(또는 --failure), --reason. 결과 파일에서 그 테스트가 통과했어야 한다.
+                        테스트 코드는 판정 커밋에서 읽어 본문에 접어 붙인다
     intended            --reason
     not-checked         --reason
     fixed-without-test  --reason (고친 커밋을 적는다)
-출처와 관련 지적은 원본이 든 커밋의 그 지적 줄로 링크한다. 원본이 커밋·푸시되지 않았거나,
+출처와 관련 지적은 원본이 든 커밋의 그 지적 줄로, 확인한 테스트는 판정 커밋(--test-commit)의 테스트 메서드 줄로 링크한다.
+원본이나 판정 커밋이 커밋·푸시되지 않았거나, 판정 커밋에서 테스트 메서드를 하나로 찾지 못하거나,
 같은 지적을 출처나 관련 지적으로 가진 이슈가 이미 있으면 이슈를 만들지 않는다.
 
 예:
@@ -31,6 +32,8 @@ from urllib.parse import quote
 REPOSITORY = 'To-steak/TopView-Game'
 FINDING_LABEL = 'review-finding'
 NO_RESPONSE = '_No response_'
+# 판정 커밋에서 테스트 클래스를 찾을 폴더. 테스트 폴더를 옮긴 적이 있어 스크립트 루트 전체에서 찾는다
+TEST_ROOT = 'Project/Assets/Scripts'
 # 판정마다 결과 파일에서 테스트가 가져야 할 상태와 이슈를 닫는 이유. 닫는 이유가 None이면 열어 둔다
 VERDICTS = {
     'reproduced': {'test_status': 'Failed', 'close_reason': None},
@@ -79,9 +82,36 @@ def find_source_commit(review_path):
     commit = run_command(['git', 'log', '-1', '--format=%h', '--abbrev=8', '--', review_path])
     if not commit:
         sys.exit('원본 %s가 든 커밋이 없다. 원본만 커밋하고 푸시한 뒤 이슈를 등록한다.' % review_path)
-    if not run_command(['git', 'branch', '--remotes', '--contains', commit]):
-        sys.exit('원본이 든 커밋 %s가 푸시되지 않아 출처 링크가 열리지 않는다. 푸시한 뒤 이슈를 등록한다.' % commit)
+    check_pushed(commit, '원본이 든 커밋')
     return commit
+
+
+def check_pushed(commit, what):
+    """커밋이 원격 브랜치에 있는지 본다. 없으면 GitHub 링크가 열리지 않으므로 멈춘다."""
+    if not run_command(['git', 'branch', '--remotes', '--contains', commit]):
+        sys.exit('%s %s가 푸시되지 않아 링크가 열리지 않는다. 푸시한 뒤 이슈를 등록한다.' % (what, commit))
+
+
+def locate_test(test_commit, test):
+    """판정 커밋에서 테스트 메서드가 있는 파일과 줄(1부터)을 찾아 (경로, 줄)로 돌려준다.
+    테스트 이름은 '네임스페이스.클래스.메서드 (모드)' 꼴이다. 파일이나 메서드를 하나로 찾지 못하면 멈춘다."""
+    name = test.split(' (')[0]
+    parts = name.split('.')
+    if len(parts) < 2:
+        sys.exit('테스트 이름 %s에서 클래스와 메서드를 읽지 못했다. 결과 파일의 fullName을 준다.' % test)
+    class_name, method_name = parts[-2], parts[-1].split('(')[0]
+    # git grep의 확장 정규식은 \s와 \b를 모르므로 POSIX 문자 클래스로 쓴다
+    grep = subprocess.run(['git', 'grep', '-l', '-E', 'class[[:space:]]+%s([^[:alnum:]_]|$)' % class_name, test_commit, '--', TEST_ROOT],
+                          text=True, encoding='utf-8', capture_output=True)
+    paths = [line.split(':', 1)[1] for line in grep.stdout.splitlines() if line]
+    if len(paths) != 1:
+        sys.exit('판정 커밋 %s에서 테스트 클래스 %s의 파일을 %d개 찾았다. 하나여야 한다.' % (test_commit, class_name, len(paths)))
+    lines = run_command(['git', 'show', '%s:%s' % (test_commit, paths[0])]).splitlines()
+    method_pattern = re.compile(r'\bpublic\b.*\b%s\s*\(' % re.escape(method_name))
+    matches = [index + 1 for index, line in enumerate(lines) if method_pattern.search(line)]
+    if len(matches) != 1:
+        sys.exit('판정 커밋 %s의 %s에서 테스트 메서드 %s를 %d개 찾았다. 하나여야 한다.' % (test_commit, paths[0], method_name, len(matches)))
+    return paths[0], matches[0]
 
 
 def find_finding_ranges(review_path, count):
@@ -150,18 +180,22 @@ def find_result(results, test, expected_status):
     return '%s (%s)' % (match['fullName'], match['mode']), message or '통과'
 
 
-def build_checked_test(tests, messages, test_files):
+def build_checked_test(tests, messages, test_commit, is_code_attached):
+    """확인한 테스트마다 판정 커밋의 메서드 줄 링크와 결과 메시지를 적는다. is_code_attached면 그 커밋의 테스트 파일을 접어 붙인다."""
     if not tests:
         return NO_RESPONSE
     lines = []
+    attached_paths = []
     for index, test in enumerate(tests):
-        lines.append('- `%s`' % test)
+        path, line = locate_test(test_commit, test)
+        lines.append('- [`%s`](https://github.com/%s/blob/%s/%s#L%d)' % (test, REPOSITORY, test_commit, quote(path), line))
         if index < len(messages) and messages[index]:
             lines.append('  - %s' % messages[index])
-    for test_file in test_files:
-        with open(test_file, encoding='utf-8') as code_file:
-            code = code_file.read().rstrip()
-        lines.append('\n<details><summary>%s (저장소에서 지운 테스트 코드)</summary>\n\n```csharp\n%s\n```\n\n</details>' % (test_file.replace('\\', '/').split('/')[-1], code))
+        if is_code_attached and path not in attached_paths:
+            attached_paths.append(path)
+    for path in attached_paths:
+        code = run_command(['git', 'show', '%s:%s' % (test_commit, path)]).rstrip()
+        lines.append('\n<details><summary>%s (판정 커밋 %s의 코드, 다음 커밋에서 지움)</summary>\n\n```csharp\n%s\n```\n\n</details>' % (path.split('/')[-1], test_commit, code))
     return '\n'.join(lines)
 
 
@@ -191,14 +225,12 @@ def check_arguments(arguments, findings):
         if not 1 <= number <= len(findings):
             sys.exit('지적 번호 %d가 범위(1~%d) 밖이다.' % (number, len(findings)))
     if VERDICTS[arguments.verdict]['test_status']:
-        if not arguments.test:
-            sys.exit('%s 판정에는 --test가 있어야 한다.' % arguments.verdict)
+        if not arguments.test or not arguments.test_commit:
+            sys.exit('%s 판정에는 --test와 --test-commit(판정 커밋)이 있어야 한다.' % arguments.verdict)
         if not arguments.results and len(arguments.failure) != len(arguments.test):
             sys.exit('--results가 없으면 --test마다 --failure로 결과 메시지를 줘야 한다.')
-    elif arguments.test or arguments.test_file:
+    elif arguments.test or arguments.test_commit:
         sys.exit('%s 판정에는 테스트를 붙이지 않는다.' % arguments.verdict)
-    if arguments.verdict == 'not-reproduced' and not arguments.test_file:
-        sys.exit('not-reproduced 판정에는 저장소에서 지울 테스트 코드를 --test-file로 줘야 한다.')
     if arguments.verdict != 'reproduced' and not arguments.reason:
         sys.exit('%s 판정에는 --reason이 있어야 한다.' % arguments.verdict)
 
@@ -216,7 +248,7 @@ def main():
     parser.add_argument('--test', action='append', default=[], help='확인한 테스트 이름. 여러 번 줄 수 있다')
     parser.add_argument('--results', action='append', default=[], help='run_tests.sh가 남긴 결과 파일. 여러 번 줄 수 있다. 주면 --test의 결과를 여기서 읽는다')
     parser.add_argument('--failure', action='append', default=[], help='--results 없이 쓸 때 --test와 같은 순서의 결과 메시지')
-    parser.add_argument('--test-file', action='append', default=[], help='not-reproduced에서 저장소에서 지울 테스트 코드 파일. 본문에 그대로 넣는다')
+    parser.add_argument('--test-commit', help='리뷰 원본과 테스트를 올린 판정 커밋. 확인한 테스트를 이 커밋의 메서드 줄로 링크한다')
     parser.add_argument('--related', action='append', type=int, default=[], help='같은 뿌리라 이 이슈로 함께 다루는 다른 지적 번호')
     parser.add_argument('--create', action='store_true', help='출력하지 않고 gh로 이슈를 열고, 판정대로 라벨을 붙이고 닫는다')
     parser.add_argument('--edit', type=int, help='출력하지 않고 이 번호의 이슈 본문을 바꾼다. 제목, 라벨, 열림 상태는 그대로 둔다')
@@ -243,7 +275,11 @@ def main():
     ranges = find_finding_ranges(review_path, len(findings))
     finding = findings[arguments.finding - 1]
     title = finding['title']
-    checked_test = build_checked_test(tests, messages, arguments.test_file)
+    test_commit = None
+    if arguments.test_commit:
+        test_commit = run_command(['git', 'rev-parse', '--short=8', arguments.test_commit + '^{commit}'])
+        check_pushed(test_commit, '판정 커밋')
+    checked_test = build_checked_test(tests, messages, test_commit, arguments.verdict == 'not-reproduced')
     body = build_body(review_path, arguments.finding, finding, commit, source_commit, ranges, arguments.verdict, arguments.reason, checked_test, arguments.related)
 
     if arguments.edit:

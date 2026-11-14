@@ -1,11 +1,11 @@
 ---
 name: review-to-issues
-description: TopView 코드를 리뷰하고, 지적마다 테스트나 사용자 판단으로 판정을 정한 뒤, 리뷰 원본을 커밋·푸시하고 모든 지적을 판정과 함께 GitHub 이슈로 등록한다. 재현된 버그만 열어 둔다. 기능(feat)을 마친 뒤 그 범위를 리뷰할 때 쓴다. 고치기와 테스트 커밋은 하지 않는다.
+description: TopView 코드를 리뷰하고, 지적마다 테스트나 사용자 판단으로 판정을 정한 뒤, 리뷰 원본과 테스트를 커밋·푸시하고 모든 지적을 판정과 함께 GitHub 이슈로 등록한다. 재현된 버그만 열어 둔다. 기능(feat)을 마친 뒤 그 범위를 리뷰할 때 쓴다. 고치기는 하지 않는다.
 ---
 
-# 리뷰 → 판정(테스트, 질문) → 원본 커밋 → 이슈 등록
+# 리뷰 → 판정(테스트, 질문) → 판정 커밋 → 이슈 등록
 
-코드 리뷰의 지적은 추측이다. 이 스킬은 지적마다 판정을 정해 **모든 지적을 이슈로 남기고**, 고치기 전 코드에서 실패하는 테스트가 있는 지적(`reproduced`)만 열어 둔다. 나머지는 판정과 함께 닫아 기록으로 남긴다. 이슈 등록에서 끝난다. 커밋은 리뷰 원본 하나만 하고 바로 푸시한다. 고치기와 테스트의 커밋은 하지 않는다.
+코드 리뷰의 지적은 추측이다. 이 스킬은 지적마다 판정을 정해 **모든 지적을 이슈로 남기고**, 고치기 전 코드에서 실패하는 테스트가 있는 지적(`reproduced`)만 열어 둔다. 나머지는 판정과 함께 닫아 기록으로 남긴다. 이슈 등록에서 끝난다. 커밋은 판정 커밋(원본과 테스트)과 지우기 커밋(재현되지 않은 테스트)만 하고 바로 푸시한다. 고치기는 하지 않는다.
 
 도구:
 - 리뷰: `Tools/CodeReview/review.workflow.js` (워크플로)
@@ -69,22 +69,29 @@ sh Tools/Testing/run_tests.sh playmode
 
 | 결과 | 판정 | 할 일 |
 |---|---|---|
-| 지적을 재현하는 확인 줄에서 실패 | `reproduced` | 테스트를 남긴다(커밋은 고칠 때) |
-| 통과 | `not-reproduced` | 테스트 코드를 scratchpad에 복사해 둔 뒤 저장소에서 `.meta`까지 지운다. 복사본은 이슈 본문에 넣는다 |
+| 지적을 재현하는 확인 줄에서 실패 | `reproduced` | 테스트를 남긴다. 판정 커밋에 들어가고, 고칠 때까지 실패한 채 남는다 |
+| 통과 | `not-reproduced` | 테스트를 남긴다. 판정 커밋에 들어간 뒤, 다음 커밋에서 지운다 |
 | 씬 로드, 준비 단계, 컴파일에서 실패 | 테스트가 틀림 | 테스트를 고쳐 다시 돌린다. 재현으로 보지 않는다 |
 
-## 5. 리뷰 원본을 커밋하고 푸시한다
+## 5. 판정 커밋과 지우기 커밋을 올린다
 
-이슈의 출처와 관련 지적은 원본이 든 커밋의 그 지적 줄로 링크된다. 그래서 이슈를 등록하기 전에 원본을 GitHub에 올린다. 묻지 않고 한다.
+이슈의 출처와 확인한 테스트는 판정 커밋의 줄로 링크된다. 그래서 이슈를 등록하기 전에 두 커밋을 GitHub에 올린다. 묻지 않고 한다.
+
+브랜치: 리뷰한 기능 브랜치에서 한다. main에 있으면 먼저 `review/<날짜-주제>` 브랜치를 만든다.
 
 ```sh
-git add Docs/Reviews/날짜-주제.json
-git commit -m "docs: <리뷰 범위> 리뷰 원본을 남김"
+# 판정 커밋: 원본과 이번에 쓴 테스트 전부(테스트 도우미의 변경 포함)
+git add Docs/Reviews/날짜-주제.json Project/Assets/Scripts/Tests/...
+git commit -m "test: <리뷰 범위> 리뷰 원본과 지적을 확인한 테스트를 남김"
+# 지우기 커밋: not-reproduced 테스트만(.meta까지)
+git rm Project/Assets/Scripts/Tests/.../<NotReproduced>Tests.cs Project/Assets/Scripts/Tests/.../<NotReproduced>Tests.cs.meta
+git commit -m "test: 재현되지 않은 지적의 테스트를 지움"
 git push
 ```
 
-- 원본 하나만 커밋한다. 남긴 실패 테스트는 넣지 않는다(고치는 커밋에 함께 넣는다).
-- 재현된 지적이 없어도 원본은 커밋한다. 무엇을 리뷰했는지의 기록이다.
+- 판정 커밋의 해시를 기억해 둔다. 6단계에서 `--test-commit`으로 넘긴다.
+- 한 테스트 파일에 reproduced 테스트와 not-reproduced 테스트가 함께 있으면, 지우기 커밋에서는 not-reproduced 메서드만 지운다.
+- 재현된 지적이 없어도 원본은 커밋한다. `not-reproduced` 테스트가 없으면 지우기 커밋은 만들지 않는다.
 - 지금 브랜치에 푸시하지 않은 다른 커밋이 있으면 함께 올라간다. 보고할 때 알린다.
 
 ## 6. 모든 지적을 판정과 함께 이슈로 등록한다
@@ -94,24 +101,25 @@ git push
 ```sh
 # reproduced
 python Tools/ReviewIssues/review_issue.py --review Docs/Reviews/날짜-주제.json --finding <번호> [--related <번호>] \
-    --verdict reproduced --test <테스트 이름> [--test ...] \
+    --verdict reproduced --test-commit <판정 커밋> --test <테스트 이름> [--test ...] \
     --results Project/Temp/TestResults/editmode.json [--results Project/Temp/TestResults/playmode.json] --create
-# not-reproduced
+# not-reproduced (테스트 코드는 도구가 판정 커밋에서 읽어 본문에 접어 붙인다)
 python Tools/ReviewIssues/review_issue.py --review ... --finding <번호> --verdict not-reproduced \
-    --test <테스트 이름> --results <결과 파일> --test-file <scratchpad에 복사한 테스트 코드> --reason "<무엇을 만들어 봤는지>" --create
+    --test-commit <판정 커밋> --test <테스트 이름> --results <결과 파일> --reason "<무엇을 만들어 봤는지>" --create
 # intended, not-checked
 python Tools/ReviewIssues/review_issue.py --review ... --finding <번호> --verdict intended --reason "<사용자가 답한 내용>" --create
 ```
 
 - 테스트 이름은 결과 파일의 `fullName` 끝부분만 줘도 된다.
 - 결과 파일에서 그 테스트의 상태가 판정과 맞지 않으면(reproduced인데 통과, not-reproduced인데 실패) 도구가 등록을 거부한다. 이때는 4단계 판정으로 돌아간다.
+- 판정 커밋이 푸시되지 않았거나, 그 커밋에서 테스트 메서드를 하나로 찾지 못하면 도구가 등록을 거부한다. 이때는 5단계로 돌아간다.
 - 같은 지적을 출처나 관련 지적으로 가진 이슈가 이미 있으면 도구가 등록을 거부한다.
-- 원본이 커밋되지 않았거나, 고친 채이거나, 원본이 든 커밋이 푸시되지 않았으면 도구가 등록을 거부한다. 이때는 5단계로 돌아간다.
+- 원본이 커밋되지 않았거나, 고친 채이거나, 원본이 든 커밋이 푸시되지 않았으면 도구가 등록을 거부한다.
 - 2026-11-14 리뷰처럼 원본에 커밋이 없으면 `--commit`을 준다.
 
 ## 7. 보고한다
 
-- 리뷰 원본 경로와 지적 수, 원본을 커밋한 커밋(함께 푸시된 다른 커밋이 있으면 그것도)
+- 리뷰 원본 경로와 지적 수, 판정 커밋과 지우기 커밋(함께 푸시된 다른 커밋이 있으면 그것도)
 - 판정별 이슈 수와, 열어 둔 이슈(`reproduced`)의 번호, 제목, 증거가 된 테스트
 - `not-reproduced`로 닫은 이슈와 지운 테스트
-- 남긴 테스트 파일은 커밋하지 않은 상태다. 고칠 때 수정과 함께 `Fixes #번호`로 커밋한다고 알린다.
+- `reproduced` 테스트는 고칠 때까지 실패한 채 남는다. 고칠 때는 main에서 `fix/issue-<번호>` 브랜치를 만들어 `Fixes #번호`로 커밋한다고 알린다(리뷰 브랜치가 main에 머지된 뒤).
