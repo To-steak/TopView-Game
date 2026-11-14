@@ -1,1 +1,3 @@
-/.claude
+# Claude Code의 로컬 설정과 워크 트리는 올리지 않는다. 프로젝트 스킬은 저장소에 함께 둔다
+/.claude/*
+!/.claude/skills/

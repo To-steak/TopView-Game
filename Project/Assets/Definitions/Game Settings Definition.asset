@@ -18,12 +18,8 @@ MonoBehaviour:
     enemyLevelUpIntervalTicks: 3000
     randomSeed: 1234
     navMeshSampleDistance: 3
+    navigationRetryIntervalTicks: 50
     unstuckSampleMinimumHeight: 1
     unstuckSampleDistance: 5
   targetFrameRate: 144
   crosshairCursor: {fileID: 2800000, guid: f30868bff5489e34fb9f6e0020a5e622, type: 3}
-  enemyCapacityPerKind: 1024
-  enemyPathCornerCapacity: 8
-  straightProjectileCapacity: 2048
-  arcProjectileCapacity: 128
-  lootCapacity: 1024

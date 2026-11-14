@@ -1,5 +1,5 @@
 # TopView Game
-![Thumbnail](./Image/Thumbnail.png)
+![Thumbnail](/Docs/Image/Thumbnail.png)
 
 TopView 싱글플레이 액션 게임입니다.
 

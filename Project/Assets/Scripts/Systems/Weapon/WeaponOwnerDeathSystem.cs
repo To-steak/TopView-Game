@@ -35,7 +35,7 @@ namespace TopView.Systems
             }
         }
 
-        // 주인의 칸에 그 주인이 아직 살아 있는지
+        // 주인의 칸에 그 주인이 아직 있는지(칸이 비지 않았고 generation이 같은지). 사망 상태는 보지 않는다
         private static bool HasOwner(in OwnerComponent owner, Entity[] players)
         {
             ref readonly Entity player = ref players[owner.owner.index];

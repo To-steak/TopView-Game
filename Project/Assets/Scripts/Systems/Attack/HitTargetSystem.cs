@@ -18,7 +18,7 @@ namespace TopView.Systems
         /// 체력이 남은 엔티티로 두 목록을 처음부터 다시 채운다. 이동이 끝난 뒤, 판정 전에 부른다.
         /// 피해는 틱 맨 앞에서 반영되고 상태 System이 체력 0을 보고 사망 상태로 바꾸므로, 여기서는 체력이 0이면 사망 상태다.
         /// </summary>
-        /// <param name="storage">엔티티 저장소. 적(EnemyKind, Health, Position, Body)을 읽기만 한다</param>
+        /// <param name="storage">엔티티 저장소. 플레이어(PlayerActionState, Position, Rotation, Body, Health, PlayerMovement)와 적(EnemyKind, Health, Position, Body)을 읽기만 한다</param>
         /// <param name="playerHitTargets">플레이어 피격 대상 목록. 길이는 플레이어 칸 수다</param>
         /// <param name="playerHitTargetCount">플레이어 피격 대상 목록에서 이번 틱에 채운 대상 수</param>
         /// <param name="enemyHitTargets">적 피격 대상 목록. 길이는 적 구간의 칸 수다</param>

@@ -86,7 +86,7 @@ namespace TopView.Entities
 
         // 이 엔티티를 든 주인
         public OwnerComponent owner;
-        // 모든 무기에 있는 값. damage와 aimHeight만 읽는다
+        // 모든 무기에 있는 값(피해, 조준 높이)
         public WeaponComponent weapon;
         // 강화 레벨
         public UpgradeLevelComponent upgradeLevel;

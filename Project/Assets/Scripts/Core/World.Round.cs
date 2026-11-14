@@ -75,6 +75,11 @@ namespace TopView.Core
                 return;
             }
 
+            if (gameSettings.rule.navigationRetryIntervalTicks <= 0)
+            {
+                Debug.LogWarning("World >> Game Settings Definition의 Navigation Retry Interval Ticks가 0 이하라, 경로를 구하지 못한 적이 기다리지 않고 바로 다시 길을 찾는다. 적이 Idle과 Walk를 매 틱 오갈 수 있다.");
+            }
+
             if (gameSettings.rule.unstuckSampleDistance <= 0f)
             {
                 Debug.LogError("World >> Game Settings Definition의 Unstuck Sample Distance가 0 이하라 판을 시작할 수 없다.");
@@ -127,7 +132,6 @@ namespace TopView.Core
 
             _navigationPath = new NavMeshPath();
 
-            Application.targetFrameRate = gameSettings.targetFrameRate;
             _isRoundReady = true;
             _playerViewPrefab = playerDefinition.viewPrefab;
             _playerCameraPriority = playerDefinition.cameraPriority;
@@ -149,7 +153,7 @@ namespace TopView.Core
             BindPresenters();
         }
 
-        // 판을 멈추고 View 실행 상태를 비운다. 씬을 다시 불러오기 전에 불러, 씬이 바뀌기까지 남은 프레임에 판이 돌지 않게 한다.
+        // 판을 멈추고 View 실행 상태를 비운다. 씬을 내리며 OnDestroy에서 부른다. 씬이 바뀌기까지 남은 프레임에 판이 돌지 않게 하는 일은 App이 World 등록을 먼저 풀어서 한다.
         private void ClearRound()
         {
             if (_viewContext != null)

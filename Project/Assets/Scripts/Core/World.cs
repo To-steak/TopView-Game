@@ -85,7 +85,7 @@ namespace TopView.Core
                 PlayerAimSystem.Tick(_entities, in _commandBuffer.playerCommand);
                 // 미리보기는 이번 틱의 충전량과 이동·조준이 끝난 위치와 회전을 읽으므로 조준 뒤에 둔다
                 PlayerThrowPreviewSystem.Tick(_entities);
-                PlayerStaminaSystem.Tick(_entities);
+                PlayerManaSystem.Tick(_entities);
                 // 획득은 이동이 끝난 위치를 읽고, 이번 틱 피해가 반영된 체력을 보므로 이 자리에 둔다
                 LootPickupSystem.Tick(_entities, ref _progress, _lootRule.pickupRadius, _lootDespawnRequests, _lootPickedUpRecords);
                 LootDespawnSystem.Tick(_entities, _lootDespawnRequests);
@@ -98,8 +98,9 @@ namespace TopView.Core
                 EnemyStateChangeSystem.Tick(_entities, _enemyStateChangeRequests, _enemyStateChangedRecords);
                 EnemyAttackStateSystem.Tick(_entities, in _playerLocation, _enemyStateChangeRequests, _straightProjectileSpawnRequests, _meleeSpawnRequests, _enemyAttackCommittedRecords);
                 EnemyStateChangeSystem.Tick(_entities, _enemyStateChangeRequests, _enemyStateChangedRecords);
-                EnemyDespawnSystem.Tick(_entities, _gameOverRequests, _random, _lootSpawnRequests);
-                EnemyNavigationSystem.Tick(_entities, _navigationPath, _rule.navMeshSampleDistance);
+                EnemyDeathEndSystem.Tick(_entities, _gameOverRequests, _random, _lootSpawnRequests, _enemyDespawnRequests);
+                EnemyDespawnSystem.Tick(_entities, _enemyDespawnRequests);
+                EnemyNavigationSystem.Tick(_entities, _navigationPath, _rule.navMeshSampleDistance, _rule.navigationRetryIntervalTicks);
                 // 직선 투사체의 소멸(명중, 벽, 수명)은 이번 틱의 이동 구간까지 판정한 뒤 ProjectileHitSystem이 요청한다
                 ProjectileSystem.Tick(_entities);
                 HitTargetSystem.Tick(_entities, _playerHitTargets, ref _playerHitTargetCount, _enemyHitTargets, ref _enemyHitTargetCount);
@@ -110,6 +111,8 @@ namespace TopView.Core
             }
 
             GameRuleSystem.Tick(ref _progress, _gameOverRequests);
+            // 판이 끝난 틱에는 새 엔티티를 만들지 않도록, GameRuleSystem이 바꾼 진행 단계로 다시 구한다
+            isPlaying = _progress.phase == GamePhase.Playing && !_progress.isPaused;
             if (isPlaying)
             {
                 PlayerDetectorSystem.Tick(_entities, in _playerLocation, _enemySpawnerActivationRequests);
@@ -169,7 +172,9 @@ namespace TopView.Core
             bool isPaused = _progress.isPaused;
             // 이번 프레임에 일시정지가 걸리거나 풀리면 소리와 DOTween에 먼저 반영한다
             PauseViewSystem.Present(isPaused, _viewContext.pause);
-            CursorViewSystem.Present(isPaused, _gameSettingsDefinition.crosshairCursor, _viewContext.cursor);
+            // 판이 끝나면 게임 오버 화면의 버튼을 기본 커서로 누르게 한다
+            bool isCrosshairHidden = isPaused || _progress.phase != GamePhase.Playing;
+            CursorViewSystem.Present(isCrosshairHidden, _gameSettingsDefinition.crosshairCursor, _viewContext.cursor);
             PlayerViewSystem.Present(_entities.entities, _playerStateChangedRecords, _playerAttackCommittedRecords, _playerViewPrefab, _playerWeaponModelPrefabs, _playerRangedLayerBlendInTicks, isPaused, _viewContext.player);
             PlayerThrowPreviewViewSystem.Present(_entities.entities, _viewContext.player.view, _playerThrowPreviewCircleHeightOffset);
             EnemyViewSystem.Present(_entities.entities, _enemyStateChangedRecords, _enemyAttackCommittedRecords, _enemyDamagedRecords, _enemyViewPrefabs, _enemyAttackAnimations, _enemyAttackClips, isPaused, _viewContext.enemy);

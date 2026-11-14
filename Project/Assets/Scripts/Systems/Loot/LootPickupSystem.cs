@@ -3,6 +3,7 @@ using TopView.Components;
 using TopView.Entities;
 using TopView.Records;
 using TopView.Requests;
+using TopView.Utilities;
 using UnityEngine;
 
 namespace TopView.Systems
@@ -21,7 +22,7 @@ namespace TopView.Systems
         /// <summary>
         /// 살아 있는 플레이어의 획득 반경 안에 있는 전리품의 효과를 적용하고 소멸을 요청한다. 효과를 받을 수 없는 전리품(원거리 무기가 없을 때의 탄약)은 바닥에 남긴다.
         /// </summary>
-        /// <param name="storage">엔티티 저장소. Loot와 Position을 가진 칸만 처리한다</param>
+        /// <param name="storage">엔티티 저장소. 플레이어(PlayerActionState, Position, Health, WeaponSlots)와 전리품(Loot, Position)을 처리하고, 플레이어의 health와 탄약을 받는 무기(Magazine, ReserveAmmoState)의 reserveAmmoState를 고친다</param>
         /// <param name="progress">한 판의 진행 상태. 골드를 더한다</param>
         /// <param name="pickupRadius">플레이어 중심에서 전리품을 획득하는 반경(유닛, XZ)</param>
         /// <param name="despawnRequests">전리품 소멸 요청 큐</param>
@@ -71,7 +72,8 @@ namespace TopView.Systems
             switch (loot.kind)
             {
                 case LootKind.Gold:
-                    progress.gold += loot.amount;
+                    // 디버그 명령과 같이 int 최댓값을 넘으면 음수가 되지 않게 멈춘다. 한 판에 넘을 일은 없어 경고하지 않는다
+                    GoldUtility.Add(ref progress, loot.amount);
                     return true;
                 case LootKind.Health:
                     // 체력이 가득 차 있어도 획득한다. 남기면 처음 하는 사람이 못 줍는 버그로 오해한다

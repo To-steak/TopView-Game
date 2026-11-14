@@ -83,6 +83,8 @@ namespace TopView.Core
         private readonly Queue<MeleeDespawnRequest> _meleeDespawnRequests = new Queue<MeleeDespawnRequest>();
         // 전리품 소멸 요청 큐
         private readonly Queue<LootDespawnRequest> _lootDespawnRequests = new Queue<LootDespawnRequest>();
+        // 적 소멸 요청 큐
+        private readonly Queue<EnemyDespawnRequest> _enemyDespawnRequests = new Queue<EnemyDespawnRequest>();
         // 플레이어 피해 요청 큐. 적의 공격이 넣는다
         private readonly Queue<DamageRequest> _playerDamageRequests = new Queue<DamageRequest>();
         // 적 피해 요청 큐. 플레이어의 공격이 넣는다

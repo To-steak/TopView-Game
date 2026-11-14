@@ -1,5 +1,6 @@
 using TopView.Components;
 using TopView.Entities;
+using TopView.Utilities;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -17,12 +18,13 @@ namespace TopView.Systems
         private const float MIN_TURN_SPEED_SQUARED = 0.0001f;
 
         /// <summary>
-        /// 목적지가 바뀐 적은 경로를 다시 구한 뒤 경로를 따라 옮긴다.
+        /// 목적지가 바뀐 적은 경로를 다시 구한 뒤 경로를 따라 옮긴다. 경로를 구하지 못하면 멈추고 경로 실패로 표시해, 다시 찾기까지 기다리게 한다.
         /// </summary>
         /// <param name="storage">엔티티 저장소. Position, Rotation, NavigationMovement, NavigationAgent를 가진 칸만 처리하고, 경로와 위치, 회전을 고친다</param>
         /// <param name="path">경로 계산에 다시 쓰는 NavMeshPath</param>
         /// <param name="navMeshSampleDistance">목적지를 NavMesh 위로 맞출 때 찾는 최대 거리(유닛)</param>
-        public static void Tick(EntityStorage storage, NavMeshPath path, float navMeshSampleDistance)
+        /// <param name="retryIntervalTicks">경로를 구하지 못한 적이 다시 길을 찾기까지 기다리는 시간(틱)</param>
+        public static void Tick(EntityStorage storage, NavMeshPath path, float navMeshSampleDistance, int retryIntervalTicks)
         {
             Entity[] entities = storage.entities;
             float deltaTime = Time.fixedDeltaTime;
@@ -36,21 +38,31 @@ namespace TopView.Systems
                     continue;
                 }
 
-                if (entity.navigationAgent.hasDestination && entity.navigationAgent.isPathDirty && !TryRecalculatePath(ref entity.navigationAgent, entity.position.current, path, navMeshSampleDistance))
+                ref NavigationAgentComponent agent = ref entity.navigationAgent;
+                if (agent.pathRetryRemainingTicks > 0)
                 {
+                    agent.pathRetryRemainingTicks--;
+                }
+
+                if (agent.hasDestination && agent.isPathDirty && !TryRecalculatePath(ref agent, entity.position.current, path, navMeshSampleDistance))
+                {
+                    // 경로가 없는 것을 도착으로 보면 Walk와 Idle을 매 틱 오가므로, 멈추고 실패로 표시해 EnemyBehaviorSystem이 기다리게 한다
+                    EnemyNavigationUtility.StopMove(ref agent);
+                    agent.isPathFailed = true;
+                    agent.pathRetryRemainingTicks = retryIntervalTicks;
                     failedPathCount++;
                 }
 
-                Move(ref entity.navigationAgent, in entity.navigationMovement, ref entity.position, ref entity.rotation, deltaTime);
+                Move(ref agent, in entity.navigationMovement, ref entity.position, ref entity.rotation, deltaTime);
             }
 
             if (failedPathCount > 0)
             {
-                Debug.LogWarning($"EnemyNavigationSystem >> 경로를 찾지 못해 바로 도착한 것으로 본 적 {failedPathCount}마리가 있다.");
+                Debug.LogWarning($"EnemyNavigationSystem >> 경로를 찾지 못해 멈추고 {retryIntervalTicks}틱 뒤 다시 찾을 적 {failedPathCount}마리가 있다.");
             }
         }
 
-        // 목적지까지의 경로를 다시 구한다. 구하지 못하면 꺾이는 점이 없는 채로 false를 돌려주고, Move가 도착한 것으로 본다.
+        // 목적지까지의 경로를 다시 구한다. 구하지 못하면 꺾이는 점이 없는 채로 false를 돌려준다.
         private static bool TryRecalculatePath(ref NavigationAgentComponent agent, Vector3 position, NavMeshPath path, float navMeshSampleDistance)
         {
             agent.isPathDirty = false;

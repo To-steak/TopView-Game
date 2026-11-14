@@ -15,7 +15,7 @@ namespace TopView.Systems
         private const ComponentMask ENEMY_MASK = ComponentMask.EnemyKind | ComponentMask.Health | ComponentMask.Position | ComponentMask.Score | ComponentMask.Combat;
 
         /// <summary>
-        /// 진행 중이면 피해 요청을 반영하고, 진행 중이 아니면 들어온 요청을 버린다. 체력이 이미 0인 대상은 피해를 받지 않는다.
+        /// 진행 중이면 피해 요청을 반영하고, 진행 중이 아니면 들어온 요청을 버린다. 일시정지 중이면 요청을 반영하지 않고 남겨 둔다. 체력이 이미 0인 대상은 피해를 받지 않는다.
         /// </summary>
         /// <param name="progress">한 판의 진행 상태. 처치 점수를 더한다</param>
         /// <param name="storage">엔티티 저장소. 적(EnemyKind, Health, Position, Score, Combat)만 피해 대상으로 보고, health를 고친다</param>
@@ -33,6 +33,12 @@ namespace TopView.Systems
                     playerDamageRequests.Clear();
                     enemyDamageRequests.Clear();
                 }
+                return;
+            }
+
+            // 사망 판정 System은 일시정지 중에 돌지 않으므로, 여기서 체력을 깎으면 사망 판정 없이 체력만 0이 된다. 요청을 남겨 두었다가 재개한 틱에 반영한다
+            if (progress.isPaused)
+            {
                 return;
             }
 

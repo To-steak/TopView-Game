@@ -49,7 +49,7 @@ namespace TopView.Systems
 
                 if (isRestingArc)
                 {
-                    Explode(in entity.explosion, entity.projectileView.hitEffectIndex, entity.position.current, in entity.payload, hitTargets, hitTargetCount, damageRequests, hitRecords);
+                    Explode(in entity.explosion, entity.projectileView.hitEffectIndex, entity.position.current, in entity.payload, hitTargets, hitTargetCount, -1, damageRequests, hitRecords);
                     despawnRequests.Enqueue(new ProjectileDespawnRequest { target = new EntityIdentifier { index = index, generation = entity.generation } });
                     continue;
                 }
@@ -69,7 +69,8 @@ namespace TopView.Systems
                 Vector3 impactPosition = hasTarget ? Vector3.Lerp(entity.position.previous, entity.position.current, nearestFraction) : entity.position.current;
                 if (entity.explosion.radius > 0f)
                 {
-                    Explode(in entity.explosion, entity.projectileView.hitEffectIndex, impactPosition, in entity.payload, hitTargets, hitTargetCount, damageRequests, hitRecords);
+                    // 맞힌 대상은 폭발 반지름이 판정 반지름보다 작아 폭발 원 밖에 있어도 피해를 받는다
+                    Explode(in entity.explosion, entity.projectileView.hitEffectIndex, impactPosition, in entity.payload, hitTargets, hitTargetCount, hasTarget ? nearestTargetIndex : -1, damageRequests, hitRecords);
                 }
                 else if (hasTarget)
                 {
@@ -112,13 +113,13 @@ namespace TopView.Systems
             return nearestTargetIndex >= 0;
         }
 
-        // center에서 폭발해 반지름 안(XZ)의 대상 모두에게 피해를 준다.
-        private static void Explode(in ExplosionComponent explosion, int hitEffectIndex, Vector3 center, in AttackPayloadComponent payload, HitTargetComponent[] hitTargets, int hitTargetCount, Queue<DamageRequest> damageRequests, List<ProjectileHitRecord> hitRecords)
+        // center에서 폭발해 반지름 안(XZ)의 대상 모두에게 피해를 준다. directTargetIndex의 대상(투사체가 직접 맞힌 대상, 없으면 -1)은 반지름과 상관없이 피해를 준다.
+        private static void Explode(in ExplosionComponent explosion, int hitEffectIndex, Vector3 center, in AttackPayloadComponent payload, HitTargetComponent[] hitTargets, int hitTargetCount, int directTargetIndex, Queue<DamageRequest> damageRequests, List<ProjectileHitRecord> hitRecords)
         {
             for (int targetIndex = 0; targetIndex < hitTargetCount; targetIndex++)
             {
                 ref readonly HitTargetComponent hitTarget = ref hitTargets[targetIndex];
-                if (TargetingUtility.IsWithin(center, hitTarget.position, explosion.radius + hitTarget.radius))
+                if (targetIndex == directTargetIndex || TargetingUtility.IsWithin(center, hitTarget.position, explosion.radius + hitTarget.radius))
                 {
                     damageRequests.Enqueue(new DamageRequest { target = hitTarget.target, amount = payload.damage });
                 }
@@ -135,17 +136,44 @@ namespace TopView.Systems
                 && height - hit.radius <= hitTarget.topHeight;
         }
 
-        // 선분 from→to(XZ)가 center를 중심으로 한 반지름 radius의 원에 닿는지. 닿으면 선분에서 가장 가까운 점의 비율(0~1)을 돌려준다.
+        // 선분 from→to(XZ)가 center를 중심으로 한 반지름 radius의 원에 닿는지. 닿으면 원에 처음 들어가는 점의 비율(0~1)을 돌려준다.
+        // 가장 가까운 점의 비율로 고르면, 큰 원에 먼저 들어가도 가장 가까운 점이 뒤쪽이라 뒤의 작은 원을 먼저 맞힌 것으로 본다.
         private static bool TryHitSegment(Vector3 from, Vector3 to, Vector3 center, float radius, out float hitFraction)
         {
             Vector2 start = new Vector2(from.x, from.z);
             Vector2 segment = new Vector2(to.x, to.z) - start;
             Vector2 toCenter = new Vector2(center.x, center.z) - start;
-            float segmentLengthSquared = segment.sqrMagnitude;
+            hitFraction = 0f;
 
-            hitFraction = segmentLengthSquared > 0f ? Mathf.Clamp01(Vector2.Dot(toCenter, segment) / segmentLengthSquared) : 0f;
-            Vector2 closestOffset = toCenter - segment * hitFraction;
-            return closestOffset.sqrMagnitude <= radius * radius;
+            // 시작점이 이미 원 안이면 시작점에서 닿는다
+            float startOutside = toCenter.sqrMagnitude - radius * radius;
+            if (startOutside <= 0f)
+            {
+                return true;
+            }
+
+            float segmentLengthSquared = segment.sqrMagnitude;
+            if (segmentLengthSquared <= 0f)
+            {
+                return false;
+            }
+
+            // |start + segment × t - center|² = radius²의 작은 근이 원에 들어가는 비율이다
+            float projection = Vector2.Dot(toCenter, segment);
+            float discriminant = projection * projection - segmentLengthSquared * startOutside;
+            if (discriminant < 0f)
+            {
+                return false;
+            }
+
+            float entryFraction = (projection - Mathf.Sqrt(discriminant)) / segmentLengthSquared;
+            if (entryFraction < 0f || entryFraction > 1f)
+            {
+                return false;
+            }
+
+            hitFraction = entryFraction;
+            return true;
         }
     }
 }

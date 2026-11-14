@@ -82,7 +82,7 @@ namespace TopView.Systems
 
                 case PlayerState.Jump:
                     motion.verticalVelocity = movement.jumpPower;
-                    PlayerStaminaUtility.UseMana(ref mana, PlayerUpgradeUtility.GetJumpManaCost(in vital, in upgrade, in upgradeLevels));
+                    PlayerManaUtility.UseMana(ref mana, PlayerUpgradeUtility.GetJumpManaCost(in vital, in upgrade, in upgradeLevels));
                     break;
 
                 case PlayerState.Dodge:
@@ -105,7 +105,7 @@ namespace TopView.Systems
                     {
                         rotation.current = Quaternion.LookRotation(motion.moveDirection);
                     }
-                    PlayerStaminaUtility.UseMana(ref mana, PlayerUpgradeUtility.GetDodgeManaCost(in vital, in upgrade, in upgradeLevels));
+                    PlayerManaUtility.UseMana(ref mana, PlayerUpgradeUtility.GetDodgeManaCost(in vital, in upgrade, in upgradeLevels));
                     break;
 
                 case PlayerState.Shot:
@@ -128,6 +128,12 @@ namespace TopView.Systems
             switch (actionState.state)
             {
                 case PlayerState.Dodge:
+                    motion.isRotationLocked = false;
+                    // 회피가 끝나는 틱에는 PlayerMoveInputSystem이 이미 지나갔으므로, 회피 방향과 속도를 남기면 그 틱에 회피 속도로 한 번 더 간다.
+                    // 어느 상태로 끝나든 그 틱은 멈추고, 이동 입력은 다음 틱에 반영한다
+                    motion.moveDirection = Vector3.zero;
+                    break;
+
                 case PlayerState.Swing:
                 case PlayerState.Throw:
                     motion.isRotationLocked = false;
