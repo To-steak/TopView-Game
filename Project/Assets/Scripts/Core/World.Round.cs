@@ -132,7 +132,6 @@ namespace TopView.Core
 
             _navigationPath = new NavMeshPath();
 
-            Application.targetFrameRate = gameSettings.targetFrameRate;
             _isRoundReady = true;
             _playerViewPrefab = playerDefinition.viewPrefab;
             _playerCameraPriority = playerDefinition.cameraPriority;

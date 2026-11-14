@@ -9,8 +9,6 @@ namespace TopView.Definitions
     {
         // 게임 규칙 값
         public GameRuleComponent rule;
-        // Application.targetFrameRate에 넣을 값. Logic은 쓰지 않는다
-        public int targetFrameRate;
         // 플레이 중에 쓸 OS 커서 텍스처. 일시정지 중에는 기본 커서를 쓴다. Logic은 쓰지 않는다
         public Texture2D crosshairCursor;
     }
