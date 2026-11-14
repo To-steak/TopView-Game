@@ -13,7 +13,7 @@ namespace TopView.Utilities
         /// <param name="random">시드 고정 난수 생성기</param>
         /// <param name="kind">뽑힌 전리품 종류</param>
         /// <param name="amount">뽑힌 전리품의 양</param>
-        /// <returns>떨어뜨릴 전리품이 있으면 true. None이 뽑혔으면 false</returns>
+        /// <returns>떨어뜨릴 전리품이 있으면 true. None이 뽑혔거나 양이 0 이하면 false</returns>
         public static bool TryRoll(EnemyLootComponent[] loots, int level, System.Random random, out LootKind kind, out int amount)
         {
             kind = LootKind.None;
@@ -46,7 +46,7 @@ namespace TopView.Utilities
                 {
                     kind = loot.kind;
                     amount = loot.baseAmount + level * loot.amountIncrement;
-                    return kind != LootKind.None;
+                    return kind != LootKind.None && amount > 0;
                 }
 
                 remainingWeight -= loot.weight;

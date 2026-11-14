@@ -67,6 +67,11 @@ namespace TopView.Core
                 {
                     Debug.LogWarning($"World >> {definitionName} 드롭 표 {lootIndex}번({loot.kind})의 Base Amount가 {loot.baseAmount}라 얻는 양이 없을 수 있다.");
                 }
+
+                if (loot.kind != LootKind.None && loot.amountIncrement < 0)
+                {
+                    Debug.LogWarning($"World >> {definitionName} 드롭 표 {lootIndex}번({loot.kind})의 Amount Increment가 {loot.amountIncrement}라 레벨이 오르면 양이 0 이하가 되어 떨어지지 않을 수 있다.");
+                }
             }
 
             if (totalWeight <= 0)
