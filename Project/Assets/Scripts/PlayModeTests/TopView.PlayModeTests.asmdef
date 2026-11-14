@@ -5,7 +5,11 @@
         "UnityEngine.TestRunner",
         "TopView.Entity",
         "TopView.Systems",
-        "TopView.Core"
+        "TopView.Core",
+        "TopView.Presentation",
+        "TopView.UserInterface",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
