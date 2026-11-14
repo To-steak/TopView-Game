@@ -34,11 +34,13 @@ namespace TopView.Systems
             playerUpgradeCommands.Clear();
         }
 
+        // 사망한(Die) 플레이어는 찾지 않는다. 최대 체력 강화가 체력 0인 플레이어의 체력을 다시 채우지 않게 하기 위해서다
         private static bool TryFindAlivePlayer(EntityStorage storage, out int playerIndex)
         {
             for (playerIndex = 0; playerIndex < storage.entities.Length; playerIndex++)
             {
-                if ((storage.entities[playerIndex].mask & ComponentMask.PlayerActionState) != 0)
+                ref readonly Entity entity = ref storage.entities[playerIndex];
+                if ((entity.mask & ComponentMask.PlayerActionState) != 0 && entity.playerActionState.state != PlayerState.Die)
                 {
                     return true;
                 }
