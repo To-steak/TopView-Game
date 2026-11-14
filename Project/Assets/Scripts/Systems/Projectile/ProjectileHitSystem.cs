@@ -135,17 +135,44 @@ namespace TopView.Systems
                 && height - hit.radius <= hitTarget.topHeight;
         }
 
-        // 선분 from→to(XZ)가 center를 중심으로 한 반지름 radius의 원에 닿는지. 닿으면 선분에서 가장 가까운 점의 비율(0~1)을 돌려준다.
+        // 선분 from→to(XZ)가 center를 중심으로 한 반지름 radius의 원에 닿는지. 닿으면 원에 처음 들어가는 점의 비율(0~1)을 돌려준다.
+        // 가장 가까운 점의 비율로 고르면, 큰 원에 먼저 들어가도 가장 가까운 점이 뒤쪽이라 뒤의 작은 원을 먼저 맞힌 것으로 본다.
         private static bool TryHitSegment(Vector3 from, Vector3 to, Vector3 center, float radius, out float hitFraction)
         {
             Vector2 start = new Vector2(from.x, from.z);
             Vector2 segment = new Vector2(to.x, to.z) - start;
             Vector2 toCenter = new Vector2(center.x, center.z) - start;
-            float segmentLengthSquared = segment.sqrMagnitude;
+            hitFraction = 0f;
 
-            hitFraction = segmentLengthSquared > 0f ? Mathf.Clamp01(Vector2.Dot(toCenter, segment) / segmentLengthSquared) : 0f;
-            Vector2 closestOffset = toCenter - segment * hitFraction;
-            return closestOffset.sqrMagnitude <= radius * radius;
+            // 시작점이 이미 원 안이면 시작점에서 닿는다
+            float startOutside = toCenter.sqrMagnitude - radius * radius;
+            if (startOutside <= 0f)
+            {
+                return true;
+            }
+
+            float segmentLengthSquared = segment.sqrMagnitude;
+            if (segmentLengthSquared <= 0f)
+            {
+                return false;
+            }
+
+            // |start + segment × t - center|² = radius²의 작은 근이 원에 들어가는 비율이다
+            float projection = Vector2.Dot(toCenter, segment);
+            float discriminant = projection * projection - segmentLengthSquared * startOutside;
+            if (discriminant < 0f)
+            {
+                return false;
+            }
+
+            float entryFraction = (projection - Mathf.Sqrt(discriminant)) / segmentLengthSquared;
+            if (entryFraction < 0f || entryFraction > 1f)
+            {
+                return false;
+            }
+
+            hitFraction = entryFraction;
+            return true;
         }
     }
 }
