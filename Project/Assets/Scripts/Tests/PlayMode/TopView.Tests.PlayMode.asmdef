@@ -5,9 +5,12 @@
         "UnityEngine.TestRunner",
         "TopView.Entity",
         "TopView.Systems",
-        "TopView.Core",
+        "TopView.Definitions",
+        "TopView.Authoring",
+        "TopView.Persistence",
         "TopView.Presentation",
         "TopView.UserInterface",
+        "TopView.Core",
         "UnityEngine.UI",
         "Unity.TextMeshPro"
     ],

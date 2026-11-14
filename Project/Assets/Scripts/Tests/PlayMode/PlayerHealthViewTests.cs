@@ -26,8 +26,8 @@ namespace TopView.Tests.PlayMode
             RectMask2D mask = new GameObject("Health Mask", typeof(RectTransform)).AddComponent<RectMask2D>();
             mask.transform.SetParent(_view.transform, false);
             mask.rectTransform.sizeDelta = new Vector2(100f, 10f);
-            SerializedFieldWriter.Write(_view, "_healthText", _healthText);
-            SerializedFieldWriter.Write(_view, "_healthMask", mask);
+            PrivateFieldAccess.Write(_view, "_healthText", _healthText);
+            PrivateFieldAccess.Write(_view, "_healthMask", mask);
         }
 
         /// <summary>

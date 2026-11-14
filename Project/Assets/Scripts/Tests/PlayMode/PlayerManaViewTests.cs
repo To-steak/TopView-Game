@@ -28,8 +28,8 @@ namespace TopView.Tests.PlayMode
             _mask = new GameObject("Mana Mask", typeof(RectTransform)).AddComponent<RectMask2D>();
             _mask.transform.SetParent(_view.transform, false);
             _mask.rectTransform.sizeDelta = new Vector2(MASK_WIDTH, 10f);
-            SerializedFieldWriter.Write(_view, "_manaText", manaText);
-            SerializedFieldWriter.Write(_view, "_manaMask", _mask);
+            PrivateFieldAccess.Write(_view, "_manaText", manaText);
+            PrivateFieldAccess.Write(_view, "_manaMask", _mask);
         }
 
         /// <summary>

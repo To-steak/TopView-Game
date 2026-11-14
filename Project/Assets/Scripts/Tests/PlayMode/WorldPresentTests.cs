@@ -46,14 +46,18 @@ namespace TopView.Tests.PlayMode
         [UnityTest]
         public IEnumerator CrosshairIsReleasedWhenRoundEnds()
         {
-            Assert.IsTrue(_scene.world.IsTestCrosshairAssigned, "Game Settings Definition에 크로스헤어 커서가 연결되어 있어야 이 테스트가 뜻이 있다.");
+            Assert.IsTrue(_scene.IsCrosshairAssigned, "Game Settings Definition에 크로스헤어 커서가 연결되어 있어야 이 테스트가 뜻이 있다.");
             yield return null;
-            Assert.IsTrue(_scene.world.IsTestCrosshairApplied, "플레이 중에는 크로스헤어가 걸려 있어야 한다.");
+            Assert.IsTrue(_scene.IsCrosshairApplied, "플레이 중에는 크로스헤어가 걸려 있어야 한다.");
 
-            _scene.world.TestProgress.phase = GamePhase.Lost;
+            GameProgressComponent progress = _scene.Progress;
+
+            progress.phase = GamePhase.Lost;
+
+            _scene.Progress = progress;
             yield return null;
 
-            Assert.IsFalse(_scene.world.IsTestCrosshairApplied, "판이 끝났는데 크로스헤어가 남아 있다.");
+            Assert.IsFalse(_scene.IsCrosshairApplied, "판이 끝났는데 크로스헤어가 남아 있다.");
         }
 
         /// <summary>
@@ -63,9 +67,9 @@ namespace TopView.Tests.PlayMode
         [UnityTest]
         public IEnumerator ThrowPreviewIsHiddenAfterRoundEnds()
         {
-            EntityStorage storage = _scene.world.TestEntities;
+            EntityStorage storage = _scene.Entities;
             // 씬의 플레이어가 생기면 View가 그 칸을 먼저 찾을 수 있어 테스트가 놓는 플레이어만 남긴다
-            _scene.world.TestPlayerSpawnRequests.Clear();
+            _scene.PlayerSpawnRequests.Clear();
             PlaceChargingPlayer(storage, TEST_ORIGIN);
             PlayerView view = CreatePlayerView();
 
@@ -73,9 +77,9 @@ namespace TopView.Tests.PlayMode
             PresentThrowPreview(storage, view);
             Assert.IsTrue(view.throwPreviewLine.gameObject.activeSelf, "판이 진행 중이고 투척 충전 중이면 궤도선이 보여야 이 테스트가 뜻이 있다.");
 
-            _scene.world.TestGameOverRequests.Enqueue(new GameOverRequest { isVictory = false });
+            _scene.GameOverRequests.Enqueue(new GameOverRequest { isVictory = false });
             _scene.world.Tick();
-            Assert.AreEqual(GamePhase.Lost, _scene.world.TestProgress.phase);
+            Assert.AreEqual(GamePhase.Lost, _scene.Progress.phase);
             _scene.world.Tick();
             PresentThrowPreview(storage, view);
 
@@ -123,7 +127,7 @@ namespace TopView.Tests.PlayMode
         // World.Present처럼 진행 단계로 판이 끝났는지 구해 미리보기를 그린다. 테스트가 놓는 플레이어 칸에는 PlayerViewSystem이 읽는 컴포넌트가 없어 World.Present를 부르지 않는다.
         private void PresentThrowPreview(EntityStorage storage, PlayerView view)
         {
-            bool isRoundEnded = _scene.world.TestProgress.phase != GamePhase.Playing;
+            bool isRoundEnded = _scene.Progress.phase != GamePhase.Playing;
             PlayerThrowPreviewViewSystem.Present(storage.entities, isRoundEnded, view, 0f);
         }
 

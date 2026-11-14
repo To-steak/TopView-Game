@@ -50,7 +50,7 @@ namespace TopView.Tests.PlayMode
         [UnityTest]
         public IEnumerator StraightProjectileHitsOnLastLifetimeTick()
         {
-            EntityStorage storage = _scene.world.TestEntities;
+            EntityStorage storage = _scene.Entities;
             float stepDistance = PROJECTILE_SPEED * Time.fixedDeltaTime;
             // 한 틱 이동 구간의 끝 가까이에 적을 둔다
             int enemyIndex = PlaceEnemy(storage, TEST_ORIGIN + Vector3.forward * stepDistance * 0.9f);
@@ -58,8 +58,8 @@ namespace TopView.Tests.PlayMode
 
             _scene.world.Tick();
 
-            Assert.AreEqual(1, _scene.world.TestEnemyDamageRequests.Count, "수명 마지막 틱의 이동 구간에 있던 적에게 피해 요청이 들어가야 한다.");
-            Assert.AreEqual(enemyIndex, _scene.world.TestEnemyDamageRequests.Peek().target.index);
+            Assert.AreEqual(1, _scene.EnemyDamageRequests.Count, "수명 마지막 틱의 이동 구간에 있던 적에게 피해 요청이 들어가야 한다.");
+            Assert.AreEqual(enemyIndex, _scene.EnemyDamageRequests.Peek().target.index);
             yield break;
         }
 
@@ -70,14 +70,14 @@ namespace TopView.Tests.PlayMode
         [UnityTest]
         public IEnumerator NothingSpawnsOnTickTheRoundEnds()
         {
-            Assert.Greater(_scene.world.TestPlayerSpawnRequests.Count, 0, "씬의 플레이어 생성 요청이 있어야 이 테스트가 뜻이 있다.");
-            Assert.AreEqual(0, CountEntities(_scene.world.TestEntities), "판 준비 직후의 저장소가 비어 있어야 한다.");
-            _scene.world.TestGameOverRequests.Enqueue(new GameOverRequest { isVictory = false });
+            Assert.Greater(_scene.PlayerSpawnRequests.Count, 0, "씬의 플레이어 생성 요청이 있어야 이 테스트가 뜻이 있다.");
+            Assert.AreEqual(0, CountEntities(_scene.Entities), "판 준비 직후의 저장소가 비어 있어야 한다.");
+            _scene.GameOverRequests.Enqueue(new GameOverRequest { isVictory = false });
 
             _scene.world.Tick();
 
-            Assert.AreEqual(GamePhase.Lost, _scene.world.TestProgress.phase);
-            Assert.AreEqual(0, CountEntities(_scene.world.TestEntities), "판이 끝난 틱에 엔티티가 새로 생겼다.");
+            Assert.AreEqual(GamePhase.Lost, _scene.Progress.phase);
+            Assert.AreEqual(0, CountEntities(_scene.Entities), "판이 끝난 틱에 엔티티가 새로 생겼다.");
             yield break;
         }
 
@@ -88,8 +88,10 @@ namespace TopView.Tests.PlayMode
         [UnityTest]
         public IEnumerator EnemyDoesNotFlipStatesWithoutPath()
         {
-            EntityStorage storage = _scene.world.TestEntities;
-            _scene.world.TestRule.navigationRetryIntervalTicks = NAVIGATION_RETRY_INTERVAL_TICKS;
+            EntityStorage storage = _scene.Entities;
+            GameRuleComponent rule = _scene.Rule;
+            rule.navigationRetryIntervalTicks = NAVIGATION_RETRY_INTERVAL_TICKS;
+            _scene.Rule = rule;
             PlaceLocatedPlayer(storage, TEST_ORIGIN);
             int enemyIndex = PlaceChasingEnemy(storage, TEST_ORIGIN + Vector3.right * 10f);
 
@@ -99,7 +101,7 @@ namespace TopView.Tests.PlayMode
             }
 
             int stateChangeCount = 0;
-            foreach (EnemyStateChangedRecord record in _scene.world.TestEnemyStateChangedRecords)
+            foreach (EnemyStateChangedRecord record in _scene.EnemyStateChangedRecords)
             {
                 if (record.enemy.index == enemyIndex)
                 {

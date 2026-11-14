@@ -38,12 +38,12 @@ namespace TopView.Tests.PlayMode
             _mask = new GameObject("Mana Mask", typeof(RectTransform)).AddComponent<RectMask2D>();
             _mask.transform.SetParent(view.content, false);
             _mask.rectTransform.sizeDelta = new Vector2(MASK_WIDTH, 10f);
-            SerializedFieldWriter.Write(view, "_manaText", manaText);
-            SerializedFieldWriter.Write(view, "_manaMask", _mask);
-            SerializedFieldWriter.Write(view, "_tweenTicks", TWEEN_TICKS);
+            PrivateFieldAccess.Write(view, "_manaText", manaText);
+            PrivateFieldAccess.Write(view, "_manaMask", _mask);
+            PrivateFieldAccess.Write(view, "_tweenTicks", TWEEN_TICKS);
 
             _presenter = view.gameObject.AddComponent<PlayerManaPresenter>();
-            SerializedFieldWriter.Write(_presenter, "_view", view);
+            PrivateFieldAccess.Write(_presenter, "_view", view);
             _presenter.Initialize();
             _presenter.Present(true, MAX_MANA, MAX_MANA);
         }
