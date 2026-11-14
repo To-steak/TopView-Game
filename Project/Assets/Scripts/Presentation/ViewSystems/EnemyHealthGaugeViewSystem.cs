@@ -69,7 +69,9 @@ namespace TopView.Presentation.ViewSystems
                     if (isNewEnemy || context.healthGaugeRatios[index] != healthRatio)
                     {
                         context.healthGaugeRatios[index] = healthRatio;
-                        gauge.healthText.text = $"{health.current:F0} / {health.max:F0}";
+                        // 반올림하면 1 미만으로 남은 살아 있는 적이 0으로 보이므로, 체력이 남아 있으면 1 이상으로 보인다
+                        int shownHealth = health.current > 0f ? Mathf.Max(1, Mathf.RoundToInt(health.current)) : 0;
+                        gauge.healthText.text = $"{shownHealth} / {health.max:F0}";
 
                         RectTransform gaugeFrontTransform = gauge.gaugeFront.rectTransform;
                         Vector2 anchorMax = new Vector2(healthRatio, 1f);

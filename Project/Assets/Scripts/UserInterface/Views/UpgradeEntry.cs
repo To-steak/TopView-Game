@@ -69,7 +69,7 @@ namespace TopView.UserInterface.Views
         private const int LABEL_OWN_LINE_LENGTH = 5;
 
         /// <summary>
-        /// 소유한 View를 정한다. UpgradeView가 항목을 만들 때 부른다.
+        /// 소유한 View를 정하고, 값을 받을 때까지 버튼을 누르지 못하게 둔다. UpgradeView가 항목을 만들 때 부른다.
         /// </summary>
         /// <param name="owner">이 항목을 소유한 View</param>
         public void Initialize(UpgradeView owner)
@@ -77,6 +77,8 @@ namespace TopView.UserInterface.Views
             _owner = owner;
             _nextValueColorTag = $"<color=#{ColorUtility.ToHtmlStringRGB(_nextValueColor)}>";
             _hasPresented = false;
+            // 값을 받기 전에는 강화할 수 있는지 모르므로 누르지 못하게 둔다. 값을 받으면 SetLevelAndCost가 받은 대로 맞춘다
+            _button.interactable = false;
         }
 
         /// <summary>

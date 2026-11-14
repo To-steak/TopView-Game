@@ -13,6 +13,7 @@
   - `TopView.Presentation` → `Unity.Cinemachine`, `UnityEngine.UI`, `Unity.TextMeshPro`, `DOTween.Modules`
   - `TopView.UserInterface` → `UnityEngine.UI`, `Unity.TextMeshPro`, `DOTween.Modules`
   - `TopView.Editor` → `UnityEngine.UI`
+  - `TopView.PlayModeTests` → `UnityEngine.UI`, `Unity.TextMeshPro`
 
 ## 대화
 - 응답은 항상 한국어로 한다.

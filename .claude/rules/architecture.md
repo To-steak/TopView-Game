@@ -78,7 +78,7 @@ Unity의 FixedUpdate / Update / LateUpdate는 App만 받고, App이 지금 씬�
 | `Core/` | 데이터 보관과 실행 순서 | App(앱 수명의 일, 부트스트랩, 로딩, 씬 전환), 씬의 대표(World, `Menu`) | `<접두사>.Core` | 전부 |
 | `Editor/` | 에디터 도구 | 에디터 도구 (Gizmo, PropertyDrawer, Custom Editor) | `<접두사>.Editor` (플랫폼: Editor 전용) | 전부 |
 | `Tests/` | 동작 확인 | `~Tests` (EditMode 테스트) | `<접두사>.Tests` (플랫폼: Editor 전용) | Entity, Systems |
-| `PlayModeTests/` | 씬과 틱 순서의 동작 확인 | `~Tests` (PlayMode 테스트) | `<접두사>.PlayModeTests` | Entity, Systems, Core |
+| `PlayModeTests/` | 씬과 틱 순서, 표시의 동작 확인 | `~Tests` (PlayMode 테스트) | `<접두사>.PlayModeTests` | Entity, Systems, Core, Presentation, UserInterface |
 
 - 같은 종류의 타입은 한 폴더에, 역할은 이름 접미사로 드러낸다.
   - 이유: 이름만 보고 그 타입이 어느 어셈블리에 있고 어떤 규칙을 따르는지 안다.
@@ -266,14 +266,14 @@ public static void Tick(EntityStorage storage, Queue<LootDespawnRequest> despawn
   - 이유: 규칙을 잊어도 컴파일 오류로 잡힌다.
 - Presentation은 게임 결과를 바꾸지 않으므로 읽을 대상(Definition의 프리팹·연출 값, 저장된 설정)을 넓게 허용한다. 단 Systems는 참조하지 않는다.
   - 이유: Systems를 참조하면 View가 `Tick`을 부를 수 있게 되어 상태를 바꾸는 길이 생긴다.
-- `Presentation/`은 타입 역할별 하위 폴더로 나눈다. `Views/`(`~View` MonoBehaviour), `View Systems/`(`~ViewSystem`), `View Contexts/`(`ViewContext`, `~ViewContext`)에 둔다. 여러 영역이 함께 쓰는 도구는 역할 이름의 하위 폴더에 둔다.
+- `Presentation/`은 타입 역할별 하위 폴더로 나눈다. `Views/`(`~View` MonoBehaviour), `ViewSystems/`(`~ViewSystem`), `ViewContexts/`(`ViewContext`, `~ViewContext`)에 둔다. 여러 영역이 함께 쓰는 도구는 역할 이름의 하위 폴더에 둔다.
   - 이유: 타입의 접미사만 알면 그 파일의 위치를 안다.
 
 ```
 Presentation/
 ├── Views/              PlayerView, EnemyView
-├── View Systems/       PlayerViewSystem, EnemyViewSystem
-├── View Contexts/      ViewContext, PlayerViewContext
+├── ViewSystems/        PlayerViewSystem, EnemyViewSystem
+├── ViewContexts/       ViewContext, PlayerViewContext
 ├── Audio/              오디오 재생
 └── Pooling/            오브젝트 풀
 ```
@@ -366,9 +366,11 @@ System의 동작을 Unity Test Framework의 EditMode 테스트로 확인한다.
   - 이유: 실패를 먼저 보지 않으면 테스트가 그 버그를 잡는지 알 수 없다. 남은 테스트가 같은 버그가 다시 생기는 것을 막는다.
 
 ### PlayModeTests/
-World의 호출 순서와 씬(지형, NavMesh)에 달린 동작을 PlayMode 테스트로 확인한다.
+World의 호출 순서와 씬(지형, NavMesh)에 달린 동작, 표시(ViewSystem, UI)의 동작을 PlayMode 테스트로 확인한다.
 
-- **System 하나로 드러나지 않는 버그만 PlayMode로 쓴다.** 실제 `World` 씬을 불러와 판이 준비되면 `Time.timeScale`을 0으로 두어 App의 자동 틱을 멈추고, 테스트가 `World.Tick`을 직접 부른다. 테스트 클래스는 확인하는 대상에 `Tests`를 붙인다(`WorldTickTests`).
+- **Logic은 System 하나로 드러나지 않는 버그만 PlayMode로 쓴다.** 실제 `World` 씬을 불러와 판이 준비되면 `Time.timeScale`을 0으로 두어 App의 자동 틱을 멈추고, 테스트가 `World.Tick`을 직접 부른다. 테스트 클래스는 확인하는 대상에 `Tests`를 붙인다(`WorldTickTests`).
   - 이유: 틱을 테스트가 부르면 몇 번째 틱에 무엇이 일어나는지 정확히 셀 수 있다. 한 틱 차이로 생기는 버그는 사람이 에디터에서 재현할 수 없다.
 - **테스트가 놓는 엔티티의 값은 테스트가 직접 넣는다.** 씬의 배치나 Definition 수치에 기대지 않는다. 씬에서 쓰는 것은 지형, NavMesh처럼 테스트가 만들 수 없는 것뿐이다.
   - 이유: 씬을 고칠 때마다 테스트가 깨지면 테스트를 믿을 수 없다.
+- **표시(ViewSystem, UI View, Presenter)의 버그는 World 씬 없이 그 대상 하나를 단위로 쓴다.** 테스트가 필요한 참조만 붙인 View 오브젝트를 직접 만들고 `Present`나 표시 메서드를 불러 결과(글자, 켜짐, 여백 등)를 확인한다. 인스펙터에서 받는 private 직렬화 필드는 리플렉션으로 채운다. 테스트 클래스는 대상 이름에 `Tests`를 붙인다(`PlayerHealthViewTests`). 트윈과 파티클처럼 프레임이 흘러야 하는 동작이 있어 PlayMode로 쓴다.
+  - 이유: 표시는 System처럼 받은 데이터만으로 결과가 정해져, 씬과 프리팹 없이도 상황을 정확히 만들 수 있다. 씬의 UI 배치에 기대면 화면을 고칠 때마다 테스트가 깨진다.

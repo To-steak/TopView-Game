@@ -172,11 +172,12 @@ namespace TopView.Core
             bool isPaused = _progress.isPaused;
             // 이번 프레임에 일시정지가 걸리거나 풀리면 소리와 DOTween에 먼저 반영한다
             PauseViewSystem.Present(isPaused, _viewContext.pause);
+            bool isRoundEnded = _progress.phase != GamePhase.Playing;
             // 판이 끝나면 게임 오버 화면의 버튼을 기본 커서로 누르게 한다
-            bool isCrosshairHidden = isPaused || _progress.phase != GamePhase.Playing;
+            bool isCrosshairHidden = isPaused || isRoundEnded;
             CursorViewSystem.Present(isCrosshairHidden, _gameSettingsDefinition.crosshairCursor, _viewContext.cursor);
             PlayerViewSystem.Present(_entities.entities, _playerStateChangedRecords, _playerAttackCommittedRecords, _playerViewPrefab, _playerWeaponModelPrefabs, _playerRangedLayerBlendInTicks, isPaused, _viewContext.player);
-            PlayerThrowPreviewViewSystem.Present(_entities.entities, _viewContext.player.view, _playerThrowPreviewCircleHeightOffset);
+            PlayerThrowPreviewViewSystem.Present(_entities.entities, isRoundEnded, _viewContext.player.view, _playerThrowPreviewCircleHeightOffset);
             EnemyViewSystem.Present(_entities.entities, _enemyStateChangedRecords, _enemyAttackCommittedRecords, _enemyDamagedRecords, _enemyViewPrefabs, _enemyAttackAnimations, _enemyAttackClips, isPaused, _viewContext.enemy);
             EnemyHealthGaugeViewSystem.Present(_entities.entities, _enemyHealthGaugePrefabs, _viewContext.camera.mainCamera, _viewContext.enemy);
             WorldInformationViewSystem.Present(_viewContext.camera.mainCamera, _viewContext.worldInformation);

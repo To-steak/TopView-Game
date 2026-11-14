@@ -16,8 +16,19 @@ namespace TopView.UserInterface.Views
         /// <param name="max">최대 체력</param>
         public void SetHealth(float current, float max)
         {
+            float ratio = 0f;
+            // 최대값이 0 이하면 나눌 수 없어 빈 게이지로 보인다. 값이 바뀔 때만 불리므로 경고가 매 프레임 쌓이지 않는다
+            if (max <= 0f)
+            {
+                Debug.LogWarning($"BossHealthView >> 최대 체력이 {max}라 게이지를 비워 보인다. 최대 체력은 0보다 커야 한다.");
+            }
+            else
+            {
+                ratio = current / max;
+            }
+
             Vector4 padding = _healthMask.padding;
-            padding.z = _healthMask.rectTransform.rect.width * (1f - current / max);
+            padding.z = _healthMask.rectTransform.rect.width * (1f - ratio);
             _healthMask.padding = padding;
         }
     }
