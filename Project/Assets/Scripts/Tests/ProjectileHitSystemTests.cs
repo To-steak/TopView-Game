@@ -76,6 +76,36 @@ namespace TopView.Tests
             Assert.AreEqual(BIG_ENEMY_INDEX, _enemyDamageRequests.Peek().target.index, "원에 먼저 들어간 큰 적이 아니라 뒤의 작은 적을 맞혔다.");
         }
 
+        /// <summary>
+        /// 폭발하는 투사체는 반지름이 커서 폭발 범위 안에 든 대상 모두에게 피해를 준다.
+        /// </summary>
+        [Test]
+        public void ExplosionDamagesTargetsInRadius()
+        {
+            SetExplosion(PROJECTILE_RADIUS, 3f);
+            AddEnemyTarget(BIG_ENEMY_INDEX, new Vector3(0f, 0f, 1f), 0.3f);
+            AddEnemyTarget(SMALL_ENEMY_INDEX, new Vector3(1.5f, 0f, 1f), 0.3f);
+
+            Tick();
+
+            Assert.AreEqual(2, _enemyDamageRequests.Count);
+        }
+
+        /// <summary>
+        /// 폭발 반지름이 투사체 판정 반지름보다 작아도, 투사체가 직접 맞힌 대상은 피해를 받는다.
+        /// 맞힌 자리는 대상 원의 가장자리(중심에서 판정 반지름 + 대상 반지름)라, 그보다 작은 폭발 원 안에는 대상이 들지 않는다.
+        /// </summary>
+        [Test]
+        public void ExplosionDamagesDirectlyHitTarget()
+        {
+            SetExplosion(0.5f, 0.2f);
+            AddEnemyTarget(BIG_ENEMY_INDEX, new Vector3(0f, 0f, 1f), 0.3f);
+
+            Tick();
+
+            Assert.AreEqual(1, _enemyDamageRequests.Count, "투사체가 직접 맞힌 대상이 폭발 피해를 받지 않았다.");
+        }
+
         private void Tick()
         {
             ProjectileHitSystem.Tick(_storage, _playerHitTargets, 0, _enemyHitTargets, _enemyHitTargetCount, _playerDamageRequests, _enemyDamageRequests, _hitRecords, _despawnRequests);
@@ -92,6 +122,13 @@ namespace TopView.Tests
             projectile.payload = new AttackPayloadComponent { faction = Faction.Player, damage = 10f };
             projectile.straightFlight = new StraightFlightComponent { lifetimeTicks = 100 };
             projectile.straightMotion = new StraightProjectileMotionComponent { elapsedTicks = 1 };
+        }
+
+        private void SetExplosion(float hitRadius, float explosionRadius)
+        {
+            ref Entity projectile = ref _storage.entities[PROJECTILE_INDEX];
+            projectile.projectileHit.radius = hitRadius;
+            projectile.explosion = new ExplosionComponent { radius = explosionRadius };
         }
 
         private void AddEnemyTarget(int index, Vector3 position, float radius)

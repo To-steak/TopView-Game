@@ -49,7 +49,7 @@ namespace TopView.Systems
 
                 if (isRestingArc)
                 {
-                    Explode(in entity.explosion, entity.projectileView.hitEffectIndex, entity.position.current, in entity.payload, hitTargets, hitTargetCount, damageRequests, hitRecords);
+                    Explode(in entity.explosion, entity.projectileView.hitEffectIndex, entity.position.current, in entity.payload, hitTargets, hitTargetCount, -1, damageRequests, hitRecords);
                     despawnRequests.Enqueue(new ProjectileDespawnRequest { target = new EntityIdentifier { index = index, generation = entity.generation } });
                     continue;
                 }
@@ -69,7 +69,8 @@ namespace TopView.Systems
                 Vector3 impactPosition = hasTarget ? Vector3.Lerp(entity.position.previous, entity.position.current, nearestFraction) : entity.position.current;
                 if (entity.explosion.radius > 0f)
                 {
-                    Explode(in entity.explosion, entity.projectileView.hitEffectIndex, impactPosition, in entity.payload, hitTargets, hitTargetCount, damageRequests, hitRecords);
+                    // 맞힌 대상은 폭발 반지름이 판정 반지름보다 작아 폭발 원 밖에 있어도 피해를 받는다
+                    Explode(in entity.explosion, entity.projectileView.hitEffectIndex, impactPosition, in entity.payload, hitTargets, hitTargetCount, hasTarget ? nearestTargetIndex : -1, damageRequests, hitRecords);
                 }
                 else if (hasTarget)
                 {
@@ -112,13 +113,13 @@ namespace TopView.Systems
             return nearestTargetIndex >= 0;
         }
 
-        // center에서 폭발해 반지름 안(XZ)의 대상 모두에게 피해를 준다.
-        private static void Explode(in ExplosionComponent explosion, int hitEffectIndex, Vector3 center, in AttackPayloadComponent payload, HitTargetComponent[] hitTargets, int hitTargetCount, Queue<DamageRequest> damageRequests, List<ProjectileHitRecord> hitRecords)
+        // center에서 폭발해 반지름 안(XZ)의 대상 모두에게 피해를 준다. directTargetIndex의 대상(투사체가 직접 맞힌 대상, 없으면 -1)은 반지름과 상관없이 피해를 준다.
+        private static void Explode(in ExplosionComponent explosion, int hitEffectIndex, Vector3 center, in AttackPayloadComponent payload, HitTargetComponent[] hitTargets, int hitTargetCount, int directTargetIndex, Queue<DamageRequest> damageRequests, List<ProjectileHitRecord> hitRecords)
         {
             for (int targetIndex = 0; targetIndex < hitTargetCount; targetIndex++)
             {
                 ref readonly HitTargetComponent hitTarget = ref hitTargets[targetIndex];
-                if (TargetingUtility.IsWithin(center, hitTarget.position, explosion.radius + hitTarget.radius))
+                if (targetIndex == directTargetIndex || TargetingUtility.IsWithin(center, hitTarget.position, explosion.radius + hitTarget.radius))
                 {
                     damageRequests.Enqueue(new DamageRequest { target = hitTarget.target, amount = payload.damage });
                 }
