@@ -100,8 +100,8 @@ namespace TopView.Core
                 EnemyStateChangeSystem.Tick(_entities, _enemyStateChangeRequests, _enemyStateChangedRecords);
                 EnemyDespawnSystem.Tick(_entities, _gameOverRequests, _random, _lootSpawnRequests);
                 EnemyNavigationSystem.Tick(_entities, _navigationPath, _rule.navMeshSampleDistance);
-                ProjectileSystem.Tick(_entities, _projectileDespawnRequests);
-                ProjectileDespawnSystem.Tick(_entities, _projectileDespawnRequests);
+                // 직선 투사체의 소멸(명중, 벽, 수명)은 이번 틱의 이동 구간까지 판정한 뒤 ProjectileHitSystem이 요청한다
+                ProjectileSystem.Tick(_entities);
                 HitTargetSystem.Tick(_entities, _playerHitTargets, ref _playerHitTargetCount, _enemyHitTargets, ref _enemyHitTargetCount);
                 ProjectileHitSystem.Tick(_entities, _playerHitTargets, _playerHitTargetCount, _enemyHitTargets, _enemyHitTargetCount, _playerDamageRequests, _enemyDamageRequests, _projectileHitRecords, _projectileDespawnRequests);
                 ProjectileDespawnSystem.Tick(_entities, _projectileDespawnRequests);
