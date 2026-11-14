@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TopView.Commands;
 using TopView.Components;
+using TopView.Utilities;
 using UnityEngine;
 
 namespace TopView.Systems
@@ -39,18 +40,10 @@ namespace TopView.Systems
         // int 범위를 넘으면 음수가 되지 않도록 최댓값에서 멈춘다
         private static void AddGold(ref GameProgressComponent progress, int amount)
         {
-            long gold = (long)progress.gold + amount;
-            if (gold > int.MaxValue)
+            if (GoldUtility.Add(ref progress, amount))
             {
                 Debug.LogWarning($"DebugCommandSystem >> 골드가 int 최댓값을 넘어 {int.MaxValue}에서 멈췄다.");
-                gold = int.MaxValue;
             }
-            else if (gold < 0)
-            {
-                gold = 0;
-            }
-
-            progress.gold = (int)gold;
         }
     }
 }

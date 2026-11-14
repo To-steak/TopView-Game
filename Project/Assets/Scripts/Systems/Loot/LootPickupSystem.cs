@@ -3,6 +3,7 @@ using TopView.Components;
 using TopView.Entities;
 using TopView.Records;
 using TopView.Requests;
+using TopView.Utilities;
 using UnityEngine;
 
 namespace TopView.Systems
@@ -71,7 +72,8 @@ namespace TopView.Systems
             switch (loot.kind)
             {
                 case LootKind.Gold:
-                    progress.gold += loot.amount;
+                    // 디버그 명령과 같이 int 최댓값을 넘으면 음수가 되지 않게 멈춘다. 한 판에 넘을 일은 없어 경고하지 않는다
+                    GoldUtility.Add(ref progress, loot.amount);
                     return true;
                 case LootKind.Health:
                     // 체력이 가득 차 있어도 획득한다. 남기면 처음 하는 사람이 못 줍는 버그로 오해한다
