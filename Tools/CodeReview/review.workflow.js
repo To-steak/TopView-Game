@@ -28,9 +28,30 @@ const FINDINGS_SCHEMA = {
         properties: {
           file: { type: 'string', description: '저장소 루트 기준 경로' },
           line: { type: 'integer' },
-          category: { type: 'string', enum: ['bug', 'inconsistency', 'rule', 'cleanup'] },
-          severity: { type: 'string', enum: ['high', 'medium', 'low'] },
-          confidence: { type: 'string', enum: ['high', 'medium', 'low'] },
+          category: {
+            type: 'string',
+            enum: ['bug', 'inconsistency', 'rule', 'cleanup'],
+            description: 'bug: 잘못된 결과가 실제로 화면이나 판정에 나온다. '
+              + 'inconsistency: 같은 일을 하는 두 경로가 다르게 동작한다. '
+              + 'rule: .claude/rules/의 규칙 위반이지만 동작은 맞다. '
+              + 'cleanup: 동작과 무관한 정리(주석, 이름, 중복). 주석이나 문서가 코드와 다른 것도 여기다.',
+          },
+          severity: {
+            type: 'string',
+            enum: ['high', 'medium', 'low'],
+            description: 'high: 판이 진행되지 않거나 결과(승패, 점수)가 틀린다. '
+              + 'medium: 플레이어가 알아챌 만큼 동작이나 표시가 틀리지만 판은 계속된다. '
+              + 'low: 특정 설정이나 드문 상황에서만 보이고, 알아채기 어렵다.',
+          },
+          confidence: {
+            type: 'string',
+            enum: ['high', 'medium', 'low'],
+            description: '코드를 읽고 한 추론이 맞는지. '
+              + 'high: 실패 경로를 코드에서 처음부터 끝까지 따라가 확인했다. '
+              + 'medium: 경로를 따라갔지만 확인하지 못한 고리가 하나 있다(Unity API 동작 등). '
+              + 'low: 경로의 일부를 짐작으로 메웠다. '
+              + '에디터나 Definition 값, 기획 의도에 달린 것은 confidence를 낮추지 말고 description에 전제로 적는다.',
+          },
           title: { type: 'string', description: '한국어 한 줄' },
           description: { type: 'string', description: '한국어. 무엇이 왜 잘못인지' },
           failureScenario: { type: 'string', description: '한국어. 구체적인 상황 → 잘못된 결과' },
@@ -55,7 +76,7 @@ ${args.context ? '\n이번 리뷰의 상황:\n' + args.context + '\n' : ''}
 - 읽기만 한다. 파일을 만들거나 고치지 않는다. 빌드·Unity 명령을 실행하지 않는다.
 - 맡은 범위의 .cs 파일을 모두 끝까지 읽는다. 범위 밖 코드는 호출·데이터 흐름을 확인하려고 따라가 읽어도 되지만, 지적은 맡은 범위 안의 위치에만 단다.
 - 우선순위: 실제로 잘못 동작하는 버그(bug) > 경로 간 불일치(inconsistency) > 규칙(rule) > 정리(cleanup). 스타일 취향은 적지 않는다.
-- 각 지적은 실제 코드를 근거로 구체적 상황과 잘못된 결과를 적는다. 추측이면 confidence를 낮추고 그 이유를 description에 쓴다. 확인 못 한 것을 확신처럼 쓰지 않는다.
+- 각 지적은 실제 코드를 근거로 구체적 상황과 잘못된 결과를 적는다. 추론의 일부를 짐작으로 메웠으면 confidence를 낮추고 그 이유를 description에 쓴다. 에디터나 Definition 값, 기획 의도에 달린 것은 confidence가 아니라 description의 전제로 밝힌다. 확인 못 한 것을 확신처럼 쓰지 않는다.
 - Unity 에디터 쪽 설정(씬, 프리팹 값)에 따라 달라지는 것은 그 전제를 밝힌다.
 - 글은 한국어로 쓴다.
 `

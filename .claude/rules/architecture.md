@@ -334,8 +334,8 @@ Presentation/
   - 이유: World가 씬과 함께 새로 생겨야 새 판에 이전 판의 값이 남지 않는다.
 - 예외: `Editor/`의 Gizmo는 World가 `#if UNITY_EDITOR`로 연 통로(`Editor~` 프로퍼티, bool은 `IsEditor~`)로 World의 데이터를 읽을 수 있다. 통로는 필요한 값만 열고, Gizmo는 값을 바꾸지 않고 읽기만 한다.
   - 이유: 디버그 표시는 게임 결과를 바꾸지 않고, 통로가 빌드에 포함되지 않아 Logic과 View가 World의 데이터에 닿는 길이 생기지 않는다.
-- 예외: `PlayModeTests/`의 테스트는 World가 `World.Test.cs`(파일 전체를 `#if UNITY_INCLUDE_TESTS`로 감쌈)에 연 통로(`Test~` 프로퍼티, bool은 `IsTest~`)로 World의 데이터를 읽고 쓸 수 있다. 통로는 테스트가 필요한 값만 연다.
-  - 이유: 틱 순서에서 생기는 버그는 실제 `World.Tick`을 돌려야 재현되고, 그러려면 테스트가 상황(엔티티, 진행 상태, 요청)을 직접 만들어야 한다. 통로가 빌드에 포함되지 않아 Logic과 View가 World의 데이터에 닿는 길이 생기지 않는다.
+- 예외: `PlayModeTests/`의 테스트는 World가 `World.Test.cs`, App이 `App.Test.cs`(파일 전체를 `#if UNITY_INCLUDE_TESTS`로 감쌈)에 연 통로(`Test~` 프로퍼티, bool은 `IsTest~`)로 그 데이터를 읽고 쓸 수 있다. 통로는 테스트가 필요한 값만 연다.
+  - 이유: 틱 순서와 앱 수명(설정 화면, 저장, 종료)에서 생기는 버그는 실제 `World`와 `App`을 돌려야 재현되고, 그러려면 테스트가 상황(엔티티, 진행 상태, 요청, 명령)을 직접 만들어야 한다. 통로가 빌드에 포함되지 않아 Logic과 View가 World와 App의 데이터에 닿는 길이 생기지 않는다.
 - **World가 필요한 데이터만 꺼내 System, ViewSystem, Presenter에 넘긴다.** 이들은 World를 받지 않는다.
   - 이유: World를 통째로 받으면 시그니처만 보고 무엇을 읽고 쓰는지 알 수 없다.
 - 한 판 안의 틱 순서와 호출 순서는 World가 관리한다. App은 World의 함수를 부를 뿐 판 안의 순서에 끼어들지 않는다.
