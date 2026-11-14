@@ -109,7 +109,9 @@ namespace TopView.Systems
                         break;
 
                     case PlayerState.Die:
-                        if (death.isGameOverOnDeath && actionState.elapsedTicks == death.dieTicks)
+                        // 경과 틱은 PlayerStateTimerSystem을 거쳐 1부터 읽히므로, dieTicks가 0이어도 걸리도록 ==가 아니라 >=로 본다.
+                        // 요청한 틱에 GameRuleSystem이 판을 끝내 다음 틱부터 이 System이 돌지 않으므로 요청은 한 번만 들어간다
+                        if (death.isGameOverOnDeath && actionState.elapsedTicks >= death.dieTicks)
                         {
                             gameOverRequests.Enqueue(new GameOverRequest { isVictory = false });
                         }
