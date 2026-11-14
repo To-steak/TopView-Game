@@ -17,6 +17,10 @@ namespace TopView.Components
         public bool isPathDirty;
         // 지난 이동 틱에 목적지의 멈추는 거리 안에 들었는지. 목적지를 새로 정하면 false가 된다
         public bool hasReachedDestination;
+        // 지난 이동 틱에 경로를 구하지 못해 멈췄는지. 목적지를 새로 정하면 false가 된다
+        public bool isPathFailed;
+        // 경로를 구하지 못한 뒤 다시 길을 찾기까지 남은 틱. 0보다 크면 Idle에서 쫓지 않고 기다린다
+        public int pathRetryRemainingTicks;
         // 경로의 꺾이는 점. 재사용하는 배열이며 pathCornerCount까지만 쓴다
         public Vector3[] pathCorners;
         // 경로의 꺾이는 점 수

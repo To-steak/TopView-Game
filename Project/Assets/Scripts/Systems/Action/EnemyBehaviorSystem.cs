@@ -56,8 +56,14 @@ namespace TopView.Systems
                         break;
 
                     case EnemyState.Walk:
-                        // SetDestination이 도착 여부를 지우므로 먼저 읽어 둔다
+                        // SetDestination이 도착 여부와 경로 실패 여부를 지우므로 먼저 읽어 둔다
                         bool hasReachedDestination = agent.hasReachedDestination;
+                        if (agent.isPathFailed)
+                        {
+                            // 경로를 구하지 못했으면 Idle로 서서, 다시 찾을 때까지 기다린다
+                            stateChangeRequests.Enqueue(new EnemyStateChangeRequest { target = identifier, state = EnemyState.Idle });
+                            break;
+                        }
                         if (hasPlayer)
                         {
                             if (TryBeginAttackInRange(ref actionState, position, attacks, in identifier, playerPosition, playerRadius, random, stateChangeRequests))
@@ -85,7 +91,7 @@ namespace TopView.Systems
             }
         }
 
-        // 고를 수 있는 공격을 하고, 없으면 멈추는 거리 밖일 때만 쫓는다. 멈추는 거리 안이면 플레이어 쪽으로 돌며 대기시간이 끝나기를 제자리에서 기다린다.
+        // 고를 수 있는 공격을 하고, 없으면 멈추는 거리 밖일 때만 쫓는다. 멈추는 거리 안이거나 경로를 다시 찾기까지 남은 틱이 있으면 플레이어 쪽으로 돌며 제자리에서 기다린다.
         private static void UpdateIdle(ref EnemyActionStateComponent actionState, ref NavigationAgentComponent agent, ref RotationComponent rotation, Vector3 position, in NavigationMovementComponent movement, EnemyAttackComponent[] attacks, in EntityIdentifier identifier, Vector3 playerPosition, float playerRadius, float deltaTime, System.Random random, Queue<EnemyStateChangeRequest> stateChangeRequests)
         {
             if (TryBeginAttackInRange(ref actionState, position, attacks, in identifier, playerPosition, playerRadius, random, stateChangeRequests))
@@ -93,7 +99,8 @@ namespace TopView.Systems
                 return;
             }
 
-            if (TargetingUtility.IsWithin(position, playerPosition, movement.stopDistance))
+            // 경로를 구하지 못한 뒤 다시 찾을 때까지는 쫓지 않고 서서 바라본다
+            if (TargetingUtility.IsWithin(position, playerPosition, movement.stopDistance) || agent.pathRetryRemainingTicks > 0)
             {
                 TargetingUtility.RotateToward(ref rotation.current, position, playerPosition, movement.angularSpeed * deltaTime);
             }

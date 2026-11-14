@@ -2,6 +2,7 @@ using System.Collections;
 using NUnit.Framework;
 using TopView.Components;
 using TopView.Entities;
+using TopView.Records;
 using TopView.Requests;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -17,6 +18,10 @@ namespace TopView.PlayModeTests
         private static readonly Vector3 TEST_ORIGIN = new Vector3(1000f, 1f, 1000f);
         private const float PROJECTILE_SPEED = 50f;
         private const float DAMAGE = 10f;
+        // 적이 쫓는 동안 지켜볼 틱 수
+        private const int CHASE_TICKS = 20;
+        // 경로를 구하지 못한 적이 다시 길을 찾기까지 기다리는 틱. 지켜보는 틱보다 길게 둔다
+        private const int NAVIGATION_RETRY_INTERVAL_TICKS = 50;
 
         /// <summary>
         /// 틱을 멈춘 채 World 씬을 불러와 판을 준비한다.
@@ -76,6 +81,35 @@ namespace TopView.PlayModeTests
             yield break;
         }
 
+        /// <summary>
+        /// 길을 구할 수 없는 곳에서도 적이 Idle과 Walk를 매 틱 오가지 않는다. 테스트 자리(TEST_ORIGIN)에는 NavMesh가 없다.
+        /// </summary>
+        /// <returns>테스트 코루틴</returns>
+        [UnityTest]
+        public IEnumerator EnemyDoesNotFlipStatesWithoutPath()
+        {
+            EntityStorage storage = _scene.world.TestEntities;
+            _scene.world.TestRule.navigationRetryIntervalTicks = NAVIGATION_RETRY_INTERVAL_TICKS;
+            PlaceLocatedPlayer(storage, TEST_ORIGIN);
+            int enemyIndex = PlaceChasingEnemy(storage, TEST_ORIGIN + Vector3.right * 10f);
+
+            for (int tick = 0; tick < CHASE_TICKS; tick++)
+            {
+                _scene.world.Tick();
+            }
+
+            int stateChangeCount = 0;
+            foreach (EnemyStateChangedRecord record in _scene.world.TestEnemyStateChangedRecords)
+            {
+                if (record.enemy.index == enemyIndex)
+                {
+                    stateChangeCount++;
+                }
+            }
+            Assert.LessOrEqual(stateChangeCount, 2, $"{CHASE_TICKS}틱 동안 적의 상태가 {stateChangeCount}번 바뀌었다.");
+            yield break;
+        }
+
         private static int CountEntities(EntityStorage storage)
         {
             int count = 0;
@@ -87,6 +121,42 @@ namespace TopView.PlayModeTests
                 }
             }
             return count;
+        }
+
+        // 적이 쫓을 위치(PlayerLocationSystem이 읽는 것)만 가진 플레이어를 놓는다. 플레이어 System은 이 칸을 움직이지 않는다.
+        private static int PlaceLocatedPlayer(EntityStorage storage, Vector3 position)
+        {
+            int index = WorldTestScene.TakeFreeIndex(storage.freePlayerIndices);
+            storage.entities[index] = new Entity
+            {
+                mask = ComponentMask.PlayerActionState | ComponentMask.Position | ComponentMask.Body,
+                generation = storage.entities[index].generation + 1,
+                position = new PositionComponent { previous = position, current = position },
+                body = new BodyComponent { radius = 0.5f }
+            };
+            return index;
+        }
+
+        // 공격 없이 플레이어를 쫓기만 하는 적을 Idle로 놓는다.
+        private static int PlaceChasingEnemy(EntityStorage storage, Vector3 position)
+        {
+            int index = WorldTestScene.TakeFreeIndex(storage.freeEnemyIndicesByKind[0]);
+            storage.entities[index] = new Entity
+            {
+                mask = ComponentMask.Position | ComponentMask.Rotation | ComponentMask.EnemyKind | ComponentMask.Health | ComponentMask.Body
+                    | ComponentMask.NavigationMovement | ComponentMask.AttackList | ComponentMask.EnemyActionState | ComponentMask.NavigationAgent,
+                generation = storage.entities[index].generation + 1,
+                position = new PositionComponent { previous = position, current = position },
+                rotation = new RotationComponent { previous = Quaternion.identity, current = Quaternion.identity },
+                enemyKind = new EnemyKindComponent { kind = 0 },
+                health = new HealthComponent { current = 100f, max = 100f },
+                body = new BodyComponent { radius = 0.5f },
+                navigationMovement = new NavigationMovementComponent { stopDistance = 1f, acceleration = 10f, angularSpeed = 360f },
+                attackList = new AttackListComponent { attacks = new EnemyAttackComponent[0] },
+                enemyActionState = new EnemyActionStateComponent { state = EnemyState.Idle, attackCooldownRemainingTicks = new int[0] },
+                navigationAgent = new NavigationAgentComponent { maxSpeed = 3f, pathCorners = storage.entities[index].navigationAgent.pathCorners }
+            };
+            return index;
         }
 
         // 피격 대상이 되는 데 필요한 컴포넌트만 가진 적을 놓는다. 행동 상태가 없어 적 System은 움직이지 않는다.

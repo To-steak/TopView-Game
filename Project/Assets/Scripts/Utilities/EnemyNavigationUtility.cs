@@ -7,7 +7,7 @@ namespace TopView.Utilities
     public static class EnemyNavigationUtility
     {
         /// <summary>
-        /// 새 목적지를 정한다. 경로는 다음 Tick에 다시 구하고, 도착 여부를 지운다.
+        /// 새 목적지를 정한다. 경로는 다음 Tick에 다시 구하고, 도착 여부와 경로 실패 여부를 지운다. 다시 찾기까지 남은 틱은 그대로 둔다.
         /// </summary>
         /// <param name="agent">목적지와 경로</param>
         /// <param name="destination">목적지(월드)</param>
@@ -19,6 +19,7 @@ namespace TopView.Utilities
             agent.stoppingDistance = stoppingDistance;
             agent.isPathDirty = true;
             agent.hasReachedDestination = false;
+            agent.isPathFailed = false;
         }
 
         /// <summary>

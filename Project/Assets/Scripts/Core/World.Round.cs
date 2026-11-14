@@ -75,6 +75,11 @@ namespace TopView.Core
                 return;
             }
 
+            if (gameSettings.rule.navigationRetryIntervalTicks <= 0)
+            {
+                Debug.LogWarning("World >> Game Settings Definition의 Navigation Retry Interval Ticks가 0 이하라, 경로를 구하지 못한 적이 기다리지 않고 바로 다시 길을 찾는다. 적이 Idle과 Walk를 매 틱 오갈 수 있다.");
+            }
+
             if (gameSettings.rule.unstuckSampleDistance <= 0f)
             {
                 Debug.LogError("World >> Game Settings Definition의 Unstuck Sample Distance가 0 이하라 판을 시작할 수 없다.");
