@@ -132,6 +132,17 @@ namespace TopView.Core
             }
         }
 
+        // 설정 화면을 연 채로 창을 닫거나 Alt+F4로 끝내면 Close나 Exit 명령 없이 앱이 끝나므로, 여기서 바꾼 볼륨을 저장한다
+        private void OnApplicationQuit()
+        {
+            if (Instance != this)
+            {
+                return;
+            }
+
+            SaveVolume();
+        }
+
         private void FixedUpdate()
         {
             if (Instance != this)
