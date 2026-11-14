@@ -7,7 +7,7 @@ using TopView.Requests;
 using TopView.Systems;
 using UnityEngine;
 
-namespace TopView.Tests
+namespace TopView.Tests.EditMode
 {
     // 직선 투사체가 이동 구간에서 가장 먼저 닿은 대상을 맞히는지 확인한다.
     public class ProjectileHitSystemTests

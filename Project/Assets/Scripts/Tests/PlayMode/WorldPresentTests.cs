@@ -8,7 +8,7 @@ using TopView.Requests;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace TopView.PlayModeTests
+namespace TopView.Tests.PlayMode
 {
     // World.Present가 ViewSystem에 넘기는 값에서 생기는 동작을 실제 World로 확인한다. Present는 App이 LateUpdate에서 부르므로 한 프레임을 넘겨 본다.
     public class WorldPresentTests

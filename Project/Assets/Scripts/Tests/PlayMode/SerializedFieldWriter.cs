@@ -1,7 +1,7 @@
 using System.Reflection;
 using NUnit.Framework;
 
-namespace TopView.PlayModeTests
+namespace TopView.Tests.PlayMode
 {
     // 표시 테스트가 만든 View와 Presenter에, 인스펙터에서 받는 private 직렬화 필드를 채운다.
     public static class SerializedFieldWriter

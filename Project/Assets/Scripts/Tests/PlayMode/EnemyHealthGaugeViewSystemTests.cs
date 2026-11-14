@@ -9,7 +9,7 @@ using TopView.Presentation.Views;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace TopView.PlayModeTests
+namespace TopView.Tests.PlayMode
 {
     // 적 머리 위 체력 게이지가 적의 체력을 글자로 맞게 보여 주는지 확인한다.
     public class EnemyHealthGaugeViewSystemTests

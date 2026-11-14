@@ -4,7 +4,7 @@ using TopView.Entities;
 using TopView.Systems;
 using UnityEngine;
 
-namespace TopView.Tests
+namespace TopView.Tests.EditMode
 {
     // 적이 쫓을 플레이어 위치에 살아 있는 플레이어만 기록하는지 확인한다.
     public class PlayerLocationSystemTests

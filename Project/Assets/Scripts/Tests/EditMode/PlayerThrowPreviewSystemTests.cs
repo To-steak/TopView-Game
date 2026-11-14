@@ -4,7 +4,7 @@ using TopView.Entities;
 using TopView.Systems;
 using UnityEngine;
 
-namespace TopView.Tests
+namespace TopView.Tests.EditMode
 {
     // 투척 미리보기가 실제로 던질 수류탄과 같은 폭발 반지름을 보여 주는지 확인한다.
     public class PlayerThrowPreviewSystemTests

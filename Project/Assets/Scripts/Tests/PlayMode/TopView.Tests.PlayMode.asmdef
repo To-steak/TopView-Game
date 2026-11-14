@@ -1,15 +1,17 @@
 {
-    "name": "TopView.Tests",
-    "rootNamespace": "TopView.Tests",
+    "name": "TopView.Tests.PlayMode",
+    "rootNamespace": "TopView.Tests.PlayMode",
     "references": [
         "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner",
         "TopView.Entity",
-        "TopView.Systems"
+        "TopView.Systems",
+        "TopView.Core",
+        "TopView.Presentation",
+        "TopView.UserInterface",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro"
     ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,

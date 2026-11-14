@@ -6,7 +6,7 @@ using TopView.UserInterface.Views;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace TopView.PlayModeTests
+namespace TopView.Tests.PlayMode
 {
     // 강화 화면의 항목이 받은 값대로 버튼을 누를 수 있게 하는지 확인한다.
     public class UpgradeViewTests

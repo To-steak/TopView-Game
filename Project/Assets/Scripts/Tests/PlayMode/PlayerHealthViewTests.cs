@@ -4,7 +4,7 @@ using TopView.UserInterface.Views;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace TopView.PlayModeTests
+namespace TopView.Tests.PlayMode
 {
     // 플레이어 체력 HUD가 받은 체력을 글자로 맞게 보여 주는지 확인한다.
     public class PlayerHealthViewTests

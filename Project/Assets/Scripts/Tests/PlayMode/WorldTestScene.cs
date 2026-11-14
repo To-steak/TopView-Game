@@ -6,7 +6,7 @@ using TopView.Utilities;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace TopView.PlayModeTests
+namespace TopView.Tests.PlayMode
 {
     // 실제 World 씬을 불러와 틱을 멈춘 채 판을 준비하고, 테스트가 엔티티를 놓을 빈 칸을 꺼내 준다.
     // 씬을 불러오기 전에 Time.timeScale을 0으로 두어 App의 FixedUpdate가 한 번도 돌지 않게 한다. 그래서 판 준비 직후의 저장소는 비어 있고, 씬의 생성 요청은 테스트가 처음 부르는 Tick의 끝에서야 처리된다.

@@ -4,7 +4,7 @@ using TopView.Entities;
 using TopView.Requests;
 using TopView.Systems;
 
-namespace TopView.Tests
+namespace TopView.Tests.EditMode
 {
     // 근접 판정의 주인이 사망 상태가 되면 그 판정의 소멸을 요청하는지 확인한다.
     public class MeleeOwnerDeathSystemTests

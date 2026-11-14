@@ -7,7 +7,7 @@ using TopView.Requests;
 using TopView.Systems;
 using UnityEngine;
 
-namespace TopView.Tests
+namespace TopView.Tests.EditMode
 {
     // 회피가 끝날 때 회피 방향의 이동이 남지 않는지 확인한다.
     // 회피가 끝나는 틱에는 PlayerMoveInputSystem이 이미 지나가서, 여기서 남긴 이동 방향과 속도로 PlayerMovementSystem이 그 틱을 움직인다.

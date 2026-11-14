@@ -6,7 +6,7 @@ using TopView.Core;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace TopView.PlayModeTests
+namespace TopView.Tests.PlayMode
 {
     // App의 앱 수명 일(설정 화면, 볼륨 저장)을 실제 App으로 확인한다. App은 World 씬을 불러올 때 에디터 부트스트랩이 만든다.
     // 볼륨은 에디터와 같은 저장소(PlayerPrefs)에 저장되므로, 테스트 전의 값을 기억했다가 끝나면 되돌린다.

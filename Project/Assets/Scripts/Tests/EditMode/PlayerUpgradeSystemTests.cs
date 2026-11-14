@@ -5,7 +5,7 @@ using TopView.Components;
 using TopView.Entities;
 using TopView.Systems;
 
-namespace TopView.Tests
+namespace TopView.Tests.EditMode
 {
     // 강화가 살아 있는 플레이어에게만 적용되는지 확인한다.
     public class PlayerUpgradeSystemTests

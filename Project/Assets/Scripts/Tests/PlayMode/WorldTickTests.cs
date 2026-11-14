@@ -7,7 +7,7 @@ using TopView.Requests;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace TopView.PlayModeTests
+namespace TopView.Tests.PlayMode
 {
     // World.Tick의 System 호출 순서에서 생기는 동작을 실제 World로 확인한다.
     public class WorldTickTests

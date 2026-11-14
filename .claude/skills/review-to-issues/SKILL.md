@@ -50,10 +50,10 @@ description: TopView 코드를 리뷰하고, 지적마다 테스트나 사용자
 
 ## 4. 지적마다 실패하는 테스트를 쓰고 돌린다
 
-지적의 `failureScenario`를 재현하는 테스트를 쓴다. 규칙은 `.claude/rules/architecture.md`의 `Tests/`, `PlayModeTests/` 항목을 따른다.
+지적의 `failureScenario`를 재현하는 테스트를 쓴다. 규칙은 `.claude/rules/architecture.md`의 `Tests/EditMode/`, `Tests/PlayMode/` 항목을 따른다.
 
-- **System 하나로 드러나면 EditMode** (`Project/Assets/Scripts/Tests/`): 필요한 칸만 채운 `EntityStorage`와 큐를 만들어 `Tick`을 부른다. 클래스 이름은 `<System 이름>Tests`.
-- **World의 호출 순서, 씬(지형, NavMesh)에 달리면 PlayMode** (`Project/Assets/Scripts/PlayModeTests/`): `WorldTestScene`으로 씬을 불러와 `World.Test.cs` 통로로 상황을 만들고 `world.Tick()`을 직접 부른다. 통로에 필요한 값이 없으면 `World.Test.cs`에 더한다.
+- **System 하나로 드러나면 EditMode** (`Project/Assets/Scripts/Tests/EditMode/`): 필요한 칸만 채운 `EntityStorage`와 큐를 만들어 `Tick`을 부른다. 클래스 이름은 `<System 이름>Tests`.
+- **World의 호출 순서, 씬(지형, NavMesh)에 달리면 PlayMode** (`Project/Assets/Scripts/Tests/PlayMode/`): `WorldTestScene`으로 씬을 불러와 `World.Test.cs` 통로로 상황을 만들고 `world.Tick()`을 직접 부른다. 통로에 필요한 값이 없으면 `World.Test.cs`에 더한다.
 - **표시(ViewSystem, UI View, Presenter)에 달리면 PlayMode에서 대상 하나 단위로**: 필요한 참조만 붙인 View를 테스트가 만들고 `Present`나 표시 메서드를 부른다. private 직렬화 필드는 `SerializedFieldWriter`로 채운다. 클래스 이름은 `<대상 이름>Tests`.
 - 확인 줄에는 무엇이 틀렸는지 알 수 있는 메시지를 단다. 이 메시지가 이슈의 증거로 들어간다.
 - 정상 동작을 지키는 대조 테스트를 함께 쓰면, 테스트가 버그만 골라 잡는지 보인다.

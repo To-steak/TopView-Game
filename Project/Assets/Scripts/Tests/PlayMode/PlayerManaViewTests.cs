@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 
-namespace TopView.PlayModeTests
+namespace TopView.Tests.PlayMode
 {
     // 플레이어 마나 HUD가 받은 마나로 게이지 마스크를 맞게 맞추는지 확인한다.
     public class PlayerManaViewTests

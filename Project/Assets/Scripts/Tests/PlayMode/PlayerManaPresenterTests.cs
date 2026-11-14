@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 
-namespace TopView.PlayModeTests
+namespace TopView.Tests.PlayMode
 {
     // 마나가 줄었다가 회복으로 돌아설 때 게이지가 이어지게 움직이는지 확인한다. 게이지 트윈이 흘러야 해서 실제 시간을 기다린다.
     public class PlayerManaPresenterTests
