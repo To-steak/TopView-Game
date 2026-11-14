@@ -30,7 +30,7 @@ namespace TopView.UserInterface.Views
         {
             _manaText.text = $"{current:F0} / {max:F0}";
 
-            float ratio = current / max;
+            float ratio = GetRatio(current, max);
             _manaMask.DOKill();
             if (isInstant)
             {
@@ -44,6 +44,17 @@ namespace TopView.UserInterface.Views
                 _setDisplayedRatio = SetDisplayedRatio;
             }
             DOTween.To(_getDisplayedRatio, _setDisplayedRatio, ratio, _tweenTicks * Time.fixedDeltaTime).SetTarget(_manaMask).SetLink(_manaMask.gameObject);
+        }
+
+        // 최대값이 0 이하면 나눌 수 없어 빈 게이지로 보인다. 값이 바뀔 때만 불리므로 경고가 매 프레임 쌓이지 않는다
+        private static float GetRatio(float current, float max)
+        {
+            if (max <= 0f)
+            {
+                Debug.LogWarning($"PlayerManaView >> 최대 마나가 {max}라 게이지를 비워 보인다. 최대 마나는 0보다 커야 한다.");
+                return 0f;
+            }
+            return current / max;
         }
 
         private float GetDisplayedRatio()

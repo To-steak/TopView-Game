@@ -32,7 +32,7 @@ namespace TopView.UserInterface.Views
             int shownHealth = current > 0f ? Mathf.Max(1, Mathf.RoundToInt(current)) : 0;
             _healthText.text = $"{shownHealth} / {max:F0}";
 
-            float ratio = current / max;
+            float ratio = GetRatio(current, max);
             _healthMask.DOKill();
             if (isInstant)
             {
@@ -46,6 +46,17 @@ namespace TopView.UserInterface.Views
                 _setDisplayedRatio = SetDisplayedRatio;
             }
             DOTween.To(_getDisplayedRatio, _setDisplayedRatio, ratio, _tweenTicks * Time.fixedDeltaTime).SetTarget(_healthMask).SetLink(_healthMask.gameObject);
+        }
+
+        // 최대값이 0 이하면 나눌 수 없어 빈 게이지로 보인다. 값이 바뀔 때만 불리므로 경고가 매 프레임 쌓이지 않는다
+        private static float GetRatio(float current, float max)
+        {
+            if (max <= 0f)
+            {
+                Debug.LogWarning($"PlayerHealthView >> 최대 체력이 {max}라 게이지를 비워 보인다. 최대 체력은 0보다 커야 한다.");
+                return 0f;
+            }
+            return current / max;
         }
 
         private float GetDisplayedRatio()
