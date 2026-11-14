@@ -37,13 +37,13 @@ namespace TopView.Systems
                 ref readonly Entity weapon = ref storage.entities[weaponSlot.weapons[weaponSlot.currentIndex].index];
                 EntityIdentifier identifier = new EntityIdentifier { index = index, generation = entity.generation };
 
-                if (command.isJumpPressed && motion.isGrounded && PlayerStaminaUtility.HasEnoughMana(in mana, PlayerUpgradeUtility.GetJumpManaCost(in vital, in entity.playerUpgrade, in entity.playerUpgradeLevels)))
+                if (command.isJumpPressed && motion.isGrounded && PlayerManaUtility.HasEnoughMana(in mana, PlayerUpgradeUtility.GetJumpManaCost(in vital, in entity.playerUpgrade, in entity.playerUpgradeLevels)))
                 {
                     stateChangeRequests.Enqueue(new PlayerStateChangeRequest { target = identifier, state = PlayerState.Jump, moveInput = command.moveDirection });
                     continue;
                 }
 
-                if (command.isDodgePressed && motion.isGrounded && PlayerStaminaUtility.HasEnoughMana(in mana, PlayerUpgradeUtility.GetDodgeManaCost(in vital, in entity.playerUpgrade, in entity.playerUpgradeLevels)))
+                if (command.isDodgePressed && motion.isGrounded && PlayerManaUtility.HasEnoughMana(in mana, PlayerUpgradeUtility.GetDodgeManaCost(in vital, in entity.playerUpgrade, in entity.playerUpgradeLevels)))
                 {
                     stateChangeRequests.Enqueue(new PlayerStateChangeRequest { target = identifier, state = PlayerState.Dodge, moveInput = command.moveDirection });
                     continue;

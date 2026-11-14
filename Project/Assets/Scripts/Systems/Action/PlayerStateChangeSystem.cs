@@ -82,7 +82,7 @@ namespace TopView.Systems
 
                 case PlayerState.Jump:
                     motion.verticalVelocity = movement.jumpPower;
-                    PlayerStaminaUtility.UseMana(ref mana, PlayerUpgradeUtility.GetJumpManaCost(in vital, in upgrade, in upgradeLevels));
+                    PlayerManaUtility.UseMana(ref mana, PlayerUpgradeUtility.GetJumpManaCost(in vital, in upgrade, in upgradeLevels));
                     break;
 
                 case PlayerState.Dodge:
@@ -105,7 +105,7 @@ namespace TopView.Systems
                     {
                         rotation.current = Quaternion.LookRotation(motion.moveDirection);
                     }
-                    PlayerStaminaUtility.UseMana(ref mana, PlayerUpgradeUtility.GetDodgeManaCost(in vital, in upgrade, in upgradeLevels));
+                    PlayerManaUtility.UseMana(ref mana, PlayerUpgradeUtility.GetDodgeManaCost(in vital, in upgrade, in upgradeLevels));
                     break;
 
                 case PlayerState.Shot:

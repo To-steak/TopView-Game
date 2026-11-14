@@ -85,7 +85,7 @@ namespace TopView.Core
                 PlayerAimSystem.Tick(_entities, in _commandBuffer.playerCommand);
                 // 미리보기는 이번 틱의 충전량과 이동·조준이 끝난 위치와 회전을 읽으므로 조준 뒤에 둔다
                 PlayerThrowPreviewSystem.Tick(_entities);
-                PlayerStaminaSystem.Tick(_entities);
+                PlayerManaSystem.Tick(_entities);
                 // 획득은 이동이 끝난 위치를 읽고, 이번 틱 피해가 반영된 체력을 보므로 이 자리에 둔다
                 LootPickupSystem.Tick(_entities, ref _progress, _lootRule.pickupRadius, _lootDespawnRequests, _lootPickedUpRecords);
                 LootDespawnSystem.Tick(_entities, _lootDespawnRequests);

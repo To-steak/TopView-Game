@@ -57,9 +57,9 @@ namespace TopView.Systems
             if (isRunning)
             {
                 float requiredMana = PlayerUpgradeUtility.GetRunManaCost(in vital, in upgrade, in upgradeLevels);
-                if (PlayerStaminaUtility.HasEnoughMana(in mana, requiredMana))
+                if (PlayerManaUtility.HasEnoughMana(in mana, requiredMana))
                 {
-                    PlayerStaminaUtility.UseMana(ref mana, requiredMana);
+                    PlayerManaUtility.UseMana(ref mana, requiredMana);
                 }
                 else
                 {

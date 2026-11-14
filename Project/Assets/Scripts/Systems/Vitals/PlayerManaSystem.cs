@@ -5,7 +5,7 @@ using UnityEngine;
 namespace TopView.Systems
 {
     // 플레이어 마나를 회복한다.
-    public static class PlayerStaminaSystem
+    public static class PlayerManaSystem
     {
         // 처리할 플레이어가 가진 컴포넌트
         private const ComponentMask PLAYER_MASK = ComponentMask.PlayerActionState | ComponentMask.PlayerVitals | ComponentMask.Mana;

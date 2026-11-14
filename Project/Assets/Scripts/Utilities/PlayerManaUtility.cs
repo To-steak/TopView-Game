@@ -4,7 +4,7 @@ using UnityEngine;
 namespace TopView.Utilities
 {
     // 플레이어 마나의 확인과 소모 도구.
-    public static class PlayerStaminaUtility
+    public static class PlayerManaUtility
     {
         /// <summary>
         /// 마나가 충분한지 돌려준다.
