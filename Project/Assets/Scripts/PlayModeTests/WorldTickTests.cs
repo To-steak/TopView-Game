@@ -2,6 +2,7 @@ using System.Collections;
 using NUnit.Framework;
 using TopView.Components;
 using TopView.Entities;
+using TopView.Requests;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -55,6 +56,37 @@ namespace TopView.PlayModeTests
             Assert.AreEqual(1, _scene.world.TestEnemyDamageRequests.Count, "수명 마지막 틱의 이동 구간에 있던 적에게 피해 요청이 들어가야 한다.");
             Assert.AreEqual(enemyIndex, _scene.world.TestEnemyDamageRequests.Peek().target.index);
             yield break;
+        }
+
+        /// <summary>
+        /// 판이 끝난 틱에는 새 엔티티가 생기지 않는다. 판 준비 직후의 저장소는 비어 있고, 씬의 생성 요청은 첫 틱의 끝에서 처리된다. 그 첫 틱에 판이 끝나면 아무것도 생기지 않아야 한다.
+        /// </summary>
+        /// <returns>테스트 코루틴</returns>
+        [UnityTest]
+        public IEnumerator NothingSpawnsOnTickTheRoundEnds()
+        {
+            Assert.Greater(_scene.world.TestPlayerSpawnRequests.Count, 0, "씬의 플레이어 생성 요청이 있어야 이 테스트가 뜻이 있다.");
+            Assert.AreEqual(0, CountEntities(_scene.world.TestEntities), "판 준비 직후의 저장소가 비어 있어야 한다.");
+            _scene.world.TestGameOverRequests.Enqueue(new GameOverRequest { isVictory = false });
+
+            _scene.world.Tick();
+
+            Assert.AreEqual(GamePhase.Lost, _scene.world.TestProgress.phase);
+            Assert.AreEqual(0, CountEntities(_scene.world.TestEntities), "판이 끝난 틱에 엔티티가 새로 생겼다.");
+            yield break;
+        }
+
+        private static int CountEntities(EntityStorage storage)
+        {
+            int count = 0;
+            for (int index = 0; index < storage.entities.Length; index++)
+            {
+                if (storage.entities[index].mask != ComponentMask.None)
+                {
+                    count++;
+                }
+            }
+            return count;
         }
 
         // 피격 대상이 되는 데 필요한 컴포넌트만 가진 적을 놓는다. 행동 상태가 없어 적 System은 움직이지 않는다.

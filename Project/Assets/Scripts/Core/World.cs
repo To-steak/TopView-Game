@@ -110,6 +110,8 @@ namespace TopView.Core
             }
 
             GameRuleSystem.Tick(ref _progress, _gameOverRequests);
+            // 판이 끝난 틱에는 새 엔티티를 만들지 않도록, GameRuleSystem이 바꾼 진행 단계로 다시 구한다
+            isPlaying = _progress.phase == GamePhase.Playing && !_progress.isPaused;
             if (isPlaying)
             {
                 PlayerDetectorSystem.Tick(_entities, in _playerLocation, _enemySpawnerActivationRequests);

@@ -42,10 +42,19 @@ namespace TopView.PlayModeTests
         }
 
         /// <summary>
-        /// 멈춘 틱을 되돌린다. 테스트가 끝날 때 부른다.
+        /// 저장소를 비우고 멈춘 틱을 되돌린다. 테스트가 끝날 때 부른다.
+        /// 테스트가 놓은 엔티티는 View에 필요한 컴포넌트가 빠져 있을 수 있어, 다음 테스트가 씬을 다시 불러오기 전의 프레임에 View가 읽지 않게 비운다.
         /// </summary>
         public void Unload()
         {
+            if (world != null && world.IsTestRoundReady)
+            {
+                Entity[] entities = world.TestEntities.entities;
+                for (int index = 0; index < entities.Length; index++)
+                {
+                    entities[index].mask = ComponentMask.None;
+                }
+            }
             Time.timeScale = 1f;
         }
 
