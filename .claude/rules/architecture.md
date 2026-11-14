@@ -266,14 +266,14 @@ public static void Tick(EntityStorage storage, Queue<LootDespawnRequest> despawn
   - 이유: 규칙을 잊어도 컴파일 오류로 잡힌다.
 - Presentation은 게임 결과를 바꾸지 않으므로 읽을 대상(Definition의 프리팹·연출 값, 저장된 설정)을 넓게 허용한다. 단 Systems는 참조하지 않는다.
   - 이유: Systems를 참조하면 View가 `Tick`을 부를 수 있게 되어 상태를 바꾸는 길이 생긴다.
-- `Presentation/`은 타입 역할별 하위 폴더로 나눈다. `Views/`(`~View` MonoBehaviour), `View Systems/`(`~ViewSystem`), `View Contexts/`(`ViewContext`, `~ViewContext`)에 둔다. 여러 영역이 함께 쓰는 도구는 역할 이름의 하위 폴더에 둔다.
+- `Presentation/`은 타입 역할별 하위 폴더로 나눈다. `Views/`(`~View` MonoBehaviour), `ViewSystems/`(`~ViewSystem`), `ViewContexts/`(`ViewContext`, `~ViewContext`)에 둔다. 여러 영역이 함께 쓰는 도구는 역할 이름의 하위 폴더에 둔다.
   - 이유: 타입의 접미사만 알면 그 파일의 위치를 안다.
 
 ```
 Presentation/
 ├── Views/              PlayerView, EnemyView
-├── View Systems/       PlayerViewSystem, EnemyViewSystem
-├── View Contexts/      ViewContext, PlayerViewContext
+├── ViewSystems/        PlayerViewSystem, EnemyViewSystem
+├── ViewContexts/       ViewContext, PlayerViewContext
 ├── Audio/              오디오 재생
 └── Pooling/            오브젝트 풀
 ```
