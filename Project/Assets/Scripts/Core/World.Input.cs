@@ -140,6 +140,22 @@ namespace TopView.Core
             return true;
         }
 
+        // 살아 있는(Die가 아닌) 플레이어를 찾는다. 사망한 플레이어는 조준하지 않는다
+        private bool TryFindAlivePlayer(out int playerIndex)
+        {
+            Entity[] entities = _entities.entities;
+            for (playerIndex = 0; playerIndex < entities.Length; playerIndex++)
+            {
+                if ((entities[playerIndex].mask & ComponentMask.PlayerActionState) != 0 && entities[playerIndex].playerActionState.state != PlayerState.Die)
+                {
+                    return true;
+                }
+            }
+
+            playerIndex = -1;
+            return false;
+        }
+
         // 든 무기의 조준 높이(월드). 플레이어 발 높이에 무기의 aimHeight를 더한다. 든 무기가 없으면 플레이어 위치의 높이
         private static float GetAimHeight(in Entity entity, Entity[] weapons)
         {

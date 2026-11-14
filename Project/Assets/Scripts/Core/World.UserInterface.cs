@@ -166,7 +166,7 @@ namespace TopView.Core
                 _upgradePresenter.Present(_progress.isUpgradeOpen && phase == GamePhase.Playing);
             }
 
-            if (!TryFindAlivePlayer(out int playerIndex))
+            if (!TryFindPlayer(out int playerIndex))
             {
                 if (_playerHealthPresenter != null)
                 {
@@ -193,7 +193,8 @@ namespace TopView.Core
             PresentEnemyInterface();
         }
 
-        private bool TryFindAlivePlayer(out int playerIndex)
+        // 플레이어를 찾는다. HUD는 사망한 뒤에도 체력 0을 보여 주도록 사망한 플레이어도 찾는다
+        private bool TryFindPlayer(out int playerIndex)
         {
             Entity[] entities = _entities.entities;
             for (playerIndex = 0; playerIndex < entities.Length; playerIndex++)
