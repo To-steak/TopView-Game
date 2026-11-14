@@ -15,9 +15,9 @@ namespace TopView.Systems
         private const ComponentMask PLAYER_MASK = ComponentMask.PlayerActionState | ComponentMask.Death | ComponentMask.PlayerAction | ComponentMask.PlayerMotion | ComponentMask.WeaponSlots;
 
         /// <summary>
-        /// 상태별로 다음 상태로 넘어갈 때인지 보고, 교체와 재장전을 끝낸다. 사망한 뒤 시간이 되면 게임오버를 요청한다. PlayerAttackSystem 다음, PlayerStateChangeSystem 앞에 부른다.
+        /// 상태별로 다음 상태로 넘어갈 때인지 보고, 교체와 재장전을 끝낸다. 사망한 뒤 시간이 되면 게임오버를 요청한다. PlayerMeleeAttackSystem, PlayerStraightAttackSystem, PlayerArcAttackSystem 다음, PlayerStateChangeSystem 앞에 부른다.
         /// </summary>
-        /// <param name="storage">엔티티 저장소. 플레이어(PlayerActionState, Death, PlayerAction, PlayerMotion, WeaponSlots)만 처리한다</param>
+        /// <param name="storage">엔티티 저장소. 플레이어(PlayerActionState, Death, PlayerAction, PlayerMotion, WeaponSlots)만 처리하고, 행동 상태(투척 충전량 포함)와 weaponSlots를 고친다. 재장전이 끝나면 든 무기의 magazineState와 reserveAmmoState를 고친다</param>
         /// <param name="command">플레이어 입력</param>
         /// <param name="stateChangeRequests">플레이어 상태 변경 요청 큐</param>
         /// <param name="gameOverRequests">게임오버 요청 큐</param>

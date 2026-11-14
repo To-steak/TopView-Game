@@ -16,7 +16,7 @@ namespace TopView.Systems
         /// <summary>
         /// 강화 명령을 모두 소비한다. 강화 화면이 열려 있을 때만 살아 있는 첫 플레이어를 강화한다. 일시정지 중에도 돌도록 PauseSystem 바로 뒤에서 부른다.
         /// </summary>
-        /// <param name="storage">엔티티 저장소. PlayerActionState를 가진 첫 칸의 health, mana, playerUpgradeLevels를 고치고 playerVitals, playerUpgrade, weaponSlots를 읽는다</param>
+        /// <param name="storage">엔티티 저장소. 살아 있는(Die가 아닌) 첫 플레이어(PlayerActionState)의 health, mana, playerUpgradeLevels를 고치고 playerVitals, playerUpgrade, weaponSlots를 읽는다. 무기 강화면 그 무기의 upgradeLevel과 탄창이 있는 무기(Magazine, MagazineState, WeaponUpgrade)의 magazineState를 고친다</param>
         /// <param name="progress">한 판의 진행 상태. 골드를 쓴다</param>
         /// <param name="playerUpgradeCommands">플레이어 강화 명령 목록</param>
         public static void Tick(EntityStorage storage, ref GameProgressComponent progress, List<PlayerUpgradeCommand> playerUpgradeCommands)

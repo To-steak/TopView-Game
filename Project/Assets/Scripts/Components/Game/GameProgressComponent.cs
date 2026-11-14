@@ -1,6 +1,6 @@
 namespace TopView.Components
 {
-    // 한 판의 진행 상태. 판 시작 때 Core가 만들고 System이 바꾼다.
+    // 런타임 값. 한 판의 진행 상태. 판 시작 때 Core가 만들고 System이 바꾼다.
     public struct GameProgressComponent
     {
         // 진행 단계
