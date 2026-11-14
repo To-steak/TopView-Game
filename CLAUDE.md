@@ -13,7 +13,7 @@
   - `TopView.Presentation` → `Unity.Cinemachine`, `UnityEngine.UI`, `Unity.TextMeshPro`, `DOTween.Modules`
   - `TopView.UserInterface` → `UnityEngine.UI`, `Unity.TextMeshPro`, `DOTween.Modules`
   - `TopView.Editor` → `UnityEngine.UI`
-  - `TopView.PlayModeTests` → `UnityEngine.UI`, `Unity.TextMeshPro`
+  - `TopView.Tests.PlayMode` → `UnityEngine.UI`, `Unity.TextMeshPro`
 
 ## 대화
 - 응답은 항상 한국어로 한다.
@@ -61,17 +61,23 @@ Unity 프로젝트 밖에서는 정적 분석기 소스 `Tools/TopView.Analyzers
 
 코드 리뷰의 지적은 다음 순서로 처리한다. 리뷰부터 3까지는 스킬 `/review-to-issues`(`.claude/skills/review-to-issues/`)가 한다.
 1. 지적마다 판정을 정한다. 판정은 `reproduced`, `not-reproduced`, `intended`, `not-checked`, `fixed-without-test` 다섯 가지이고, 뜻은 이슈 폼의 판정 칸에 있다.
-   - `bug`, `inconsistency` 지적은 그 버그로 실패하는 테스트(EditMode 또는 PlayMode)를 쓰고 `Tools/Testing/run_tests.sh`로 돌린다. 실패하면 `reproduced`다. 통과하면 `not-reproduced`이고, 그 테스트는 저장소에서 지우되 코드는 이슈 본문에 남긴다.
+   - `bug`, `inconsistency` 지적은 그 버그로 실패하는 테스트(EditMode 또는 PlayMode)를 쓰고 `Tools/Testing/run_tests.sh`로 돌린다. 실패하면 `reproduced`다. 통과하면 `not-reproduced`다. 테스트는 판정에 상관없이 2의 판정 커밋에 남긴다.
    - 지적대로 동작해도 기획 의도일 수 있는 지적은 테스트를 쓰기 전에 사용자에게 묻는다. 의도라고 하면 `intended`다.
    - `rule`, `cleanup` 지적은 `not-checked`로 둔다. 나중에 고치면 판정을 `fixed-without-test`로 바꾼다.
-2. 리뷰 원본 JSON 하나만 커밋하고 바로 푸시한다. 재현된 지적이 없어도 원본은 남긴다. 이 커밋과 푸시는 묻지 않고 한다. 지금 브랜치에 푸시하지 않은 다른 커밋이 있으면 함께 올라간다.
-   - 이유: 이슈의 출처와 관련 지적이 원본의 그 지적으로 링크되려면, 원본이 든 커밋이 GitHub에 있어야 한다. 원본은 고치지 않는 파일이라 테스트 결과를 기다릴 필요가 없다.
-3. 모든 지적을 판정과 함께 이슈로 등록한다. 같은 뿌리의 지적은 대표 하나만 이슈로 만들고 나머지는 그 이슈의 관련 지적으로 넣는다. 도구는 `Tools/ReviewIssues/`이고, 테스트 결과는 테스트 결과 파일에서 읽는다. 본문은 이슈 폼 `.github/ISSUE_TEMPLATE/review-finding.yml`과 같은 모양이다. 출처와 관련 지적은 원본이 든 커밋의 그 지적 줄로 링크한다. 이슈에는 `review-finding`과 판정 라벨을 붙이고, `reproduced`만 열어 두고 나머지는 닫는다(`fixed-without-test`는 completed, 그 밖은 not planned). 원본이 커밋·푸시되지 않았거나 같은 지적의 이슈가 이미 있으면 도구가 등록을 거부한다. 본문을 따로 보여 주거나 확인받지 않고 등록한다.
-4. 고친 커밋의 메시지에 `Fixes #번호`를 적어, 머지되면 이슈가 닫히게 한다. 1에서 남긴 실패 테스트는 이 커밋에 함께 넣는다.
-   - 이유: 테스트와 수정이 한 커밋에 있어야 "고치기 전에 실패한 테스트가 이 수정으로 통과한다"가 한 곳에서 보인다.
+2. 판정이 나면 리뷰 원본 JSON과 이번에 쓴 테스트 전부(`reproduced`, `not-reproduced` 모두, 테스트가 쓰는 테스트 도우미의 변경 포함)를 한 커밋(판정 커밋)으로 올린다. 바로 다음 커밋에서 `not-reproduced` 테스트만 지운다. 두 커밋 모두 묻지 않고 푸시한다. 재현된 지적이 없어도 원본은 남긴다. 지금 브랜치에 푸시하지 않은 다른 커밋이 있으면 함께 올라간다.
+   - 이유: 이슈의 출처와 확인한 테스트가 판정 커밋의 줄로 링크되려면 그 커밋이 GitHub에 있어야 한다. `not-reproduced` 테스트는 그때의 게임 코드와 테스트 도우미에 기대서 돈 것이라, 나중에 "테스트가 틀렸던 것 아닌가"를 확인하려면 판정 커밋을 체크아웃해 그대로 다시 돌릴 수 있어야 한다. 본문에 붙인 코드만으로는 시간이 지나면 컴파일되지 않거나 다른 것을 테스트한다.
+3. 모든 지적을 판정과 함께 이슈로 등록한다. 같은 뿌리의 지적은 대표 하나만 이슈로 만들고 나머지는 그 이슈의 관련 지적으로 넣는다. 도구는 `Tools/ReviewIssues/`이고, 테스트 결과는 테스트 결과 파일에서 읽는다. 본문은 이슈 폼 `.github/ISSUE_TEMPLATE/review-finding.yml`과 같은 모양이다. 출처와 관련 지적은 원본이 든 커밋의 그 지적 줄로, 확인한 테스트는 판정 커밋의 테스트 메서드 줄로 링크한다. `not-reproduced`는 테스트 코드를 본문에도 접어서 붙인다. 이슈에는 `review-finding`과 판정 라벨을 붙이고, `reproduced`만 열어 두고 나머지는 닫는다(`fixed-without-test`는 completed, 그 밖은 not planned). 원본이나 판정 커밋이 커밋·푸시되지 않았거나, 테스트가 판정 커밋에 없거나, 같은 지적의 이슈가 이미 있으면 도구가 등록을 거부한다. 본문을 따로 보여 주거나 확인받지 않고 등록한다.
+4. 고친 커밋의 메시지에 `Fixes #번호`를 적어, 머지되면 이슈가 닫히게 한다. 판정 커밋에서 실패하던 `reproduced` 테스트가 이 커밋에서 통과로 바뀐다. 테스트 커밋(본문의 링크)과 수정 커밋(`Fixes #번호`)은 이슈가 잇는다.
+   - 고치지 않은 `reproduced` 테스트는 저장소에서 계속 실패한다. 열린 `reproduced` 이슈 수만큼 실패가 있는 것이 정상이다.
 - 이유: 지적 하나의 결말(재현됨, 아니었음, 의도, 넘김, 고침)이 그 지적의 이슈 하나에 출처, 증거와 함께 남는다. 재현하지 못한 지적도 무엇을 확인했는지 기록이 남아, 리뷰 도구가 얼마나 맞았는지 셀 수 있다. 열린 이슈는 `reproduced`뿐이라 추측이 할 일로 섞이지 않는다.
 - 한 틱 차이로 생기는 버그는 사람이 에디터에서 재현할 수 없으므로, 확인 방법은 테스트뿐이다.
 - 리뷰는 보통 기능(feat)을 마친 뒤 그 범위를 대상으로 한다. 2026-11-14의 전체 리뷰는 1.0.0 출시 뒤 쌓인 버그를 한 번에 찾은 예외다.
+
+브랜치:
+- 리뷰 작업(판정 커밋, 지우기 커밋)은 리뷰한 기능 브랜치에서 한다. main에 있으면 `review/<날짜-주제>`(원본 JSON의 파일 이름) 브랜치를 만든다.
+- 이슈를 고치는 작업은 항상 main에서 `fix/issue-<번호>` 브랜치를 만들어 한다. `reproduced` 테스트가 main에 있어야 하므로, 리뷰 브랜치가 main에 머지된 뒤에 만든다.
+- 리뷰 기록이 든 브랜치는 squash나 rebase가 아니라 merge commit으로 합친다. 저장소 설정에서도 squash와 rebase 머지를 막는다.
+  - 이유: squash나 rebase로 합치면 지우기 전의 `not-reproduced` 테스트가 든 판정 커밋이 main 기록에서 빠지거나 해시가 바뀌어, 이슈의 링크가 가리키는 커밋을 다시 돌릴 수 없다.
 
 리뷰 도구는 `Tools/CodeReview/`에, 테스트 실행 도구는 `Tools/Testing/`에, 이슈 폼은 `.github/ISSUE_TEMPLATE/`에, 이슈 본문을 만드는 도구는 `Tools/ReviewIssues/`에, 프로젝트 스킬은 `.claude/skills/`에 만들고 수정한다.
 

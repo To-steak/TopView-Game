@@ -1,11 +1,17 @@
 {
-    "name": "TopView.Tests",
-    "rootNamespace": "TopView.Tests",
+    "name": "TopView.Tests.EditMode",
+    "rootNamespace": "TopView.Tests.EditMode",
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "TopView.Entity",
-        "TopView.Systems"
+        "TopView.Systems",
+        "TopView.Definitions",
+        "TopView.Authoring",
+        "TopView.Persistence",
+        "TopView.Presentation",
+        "TopView.UserInterface",
+        "TopView.Core"
     ],
     "includePlatforms": [
         "Editor"

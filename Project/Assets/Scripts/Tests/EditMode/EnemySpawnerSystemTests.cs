@@ -6,7 +6,7 @@ using TopView.Systems;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace TopView.Tests
+namespace TopView.Tests.EditMode
 {
     // 적 스포너가 실제로 만들 수 있는 적만 만든 것으로 세는지 확인한다.
     public class EnemySpawnerSystemTests

@@ -1,0 +1,141 @@
+{
+  "summary": "TopView 코드를 영역별 리뷰 에이전트로 나눠 읽고, 정해진 JSON 형식으로 지적을 모은다",
+  "agentCount": 1,
+  "logs": [],
+  "result": {
+    "date": "2026-11-15",
+    "commit": "854748a2",
+    "context": "fix/review-bugs 브랜치에서 Systems·Core의 버그를 고치고 테스트를 Tests/EditMode·PlayMode로 정리했다. 이번에는 여러 System이 함께 쓰는 Utilities(공격 내보내기, 무기, 강화, 전리품, 골드, 마나, 스폰, 조준 등)만 따로 리뷰한다.",
+    "request": [
+      {
+        "key": "T1",
+        "name": "T1. Utilities",
+        "scope": [
+          "Project/Assets/Scripts/Utilities/"
+        ],
+        "focus": "여러 System이 같은 Utility를 부를 때 호출 쪽마다 전제(살아 있는 엔티티, 컴포넌트 마스크, 한 틱 안의 순서)가 맞는지. 경계값(0, 음수, 최대 레벨), 레벨 스케일링·강화 계산, 같은 일을 하는 두 경로가 다르게 동작하는지. 호출처(Systems/, Core/)는 전제를 확인하는 데 필요한 만큼 읽는다."
+      }
+    ],
+    "areas": [
+      {
+        "area": "T1. Utilities",
+        "filesRead": [
+          "Project/Assets/Scripts/Utilities/AttackUtility.cs",
+          "Project/Assets/Scripts/Utilities/AudioVolumeUtility.cs",
+          "Project/Assets/Scripts/Utilities/EnemyAttackUtility.cs",
+          "Project/Assets/Scripts/Utilities/EnemyNavigationUtility.cs",
+          "Project/Assets/Scripts/Utilities/GoldUtility.cs",
+          "Project/Assets/Scripts/Utilities/LevelScalingUtility.cs",
+          "Project/Assets/Scripts/Utilities/LootUtility.cs",
+          "Project/Assets/Scripts/Utilities/MeleeShapeUtility.cs",
+          "Project/Assets/Scripts/Utilities/PlayerManaUtility.cs",
+          "Project/Assets/Scripts/Utilities/PlayerMovementUtility.cs",
+          "Project/Assets/Scripts/Utilities/PlayerUpgradeUtility.cs",
+          "Project/Assets/Scripts/Utilities/PlayerWeaponUtility.cs",
+          "Project/Assets/Scripts/Utilities/SpawnUtility.cs",
+          "Project/Assets/Scripts/Utilities/TargetingUtility.cs",
+          "Project/Assets/Scripts/Utilities/ThrowableUtility.cs",
+          "Project/Assets/Scripts/Systems/Attack/PlayerStraightAttackSystem.cs",
+          "Project/Assets/Scripts/Systems/Attack/PlayerArcAttackSystem.cs",
+          "Project/Assets/Scripts/Systems/Attack/PlayerMeleeAttackSystem.cs",
+          "Project/Assets/Scripts/Systems/Upgrade/PlayerUpgradeSystem.cs",
+          "Project/Assets/Scripts/Systems/Action/PlayerStateSystem.cs",
+          "Project/Assets/Scripts/Systems/Action/PlayerPressSystem.cs",
+          "Project/Assets/Scripts/Systems/Action/PlayerStateChangeSystem.cs",
+          "Project/Assets/Scripts/Systems/Movement/PlayerMoveInputSystem.cs",
+          "Project/Assets/Scripts/Systems/Projectile/ProjectileSystem.cs",
+          "Project/Assets/Scripts/Entities/EntityArchetype.cs",
+          "Project/Assets/Scripts/Components/Upgrade/PlayerUpgradeComponent.cs"
+        ],
+        "findings": [
+          {
+            "file": "Project/Assets/Scripts/Utilities/PlayerManaUtility.cs",
+            "line": 25,
+            "category": "bug",
+            "severity": "low",
+            "confidence": "high",
+            "title": "소모량이 0인 마나 사용도 회복 지연을 처음부터 다시 세게 해, 공짜 달리기 중 마나가 회복되지 않음",
+            "description": "UseMana는 amount와 상관없이 recoveryElapsedTicks를 0으로 되돌린다. PlayerUpgradeUtility.Decrease는 비율 × 레벨이 1 이상이면 소모량을 0으로 맞추므로, 달리기 마나 소모 강화를 끝까지 올리면 GetRunManaCost가 0을 돌려줄 수 있다. 이때 PlayerMoveInputSystem은 HasEnoughMana(mana, 0)가 늘 true라 달리는 동안 매 틱 UseMana(ref mana, 0)를 부르고, 회복 지연이 매 틱 0으로 돌아간다. PlayerManaSystem은 같은 틱 뒤에 이 값을 1로만 올리므로 manaRecoveryDelayTicks가 2 이상이면 마나가 전혀 차지 않는다. 마나를 쓰지 않는 행동이 회복을 막는 셈이다. 전제: runManaCostRatioPerLevel × maxLevel ≥ 1(또는 Definition의 runManaCostPerTick이 0)이고 manaRecoveryDelayTicks ≥ 2일 때만 나타난다. 점프와 회피도 소모량이 0이 되면 같은 일이 생긴다.",
+            "failureScenario": "runManaCostRatioPerLevel 0.2, maxLevel 5로 달리기 소모 강화를 5레벨까지 올림 → 달리기 소모량 0 → 달리는 동안 매 틱 recoveryElapsedTicks = 0 → manaRecoveryDelayTicks 30이면 달리는 동안 마나가 회복되지 않아, 회피나 점프에 쓸 마나가 걸을 때만 찬다",
+            "evidence": "PlayerManaUtility.cs:27-28 `mana.current = Mathf.Max(mana.current - amount, 0f); mana.recoveryElapsedTicks = 0;` / PlayerUpgradeUtility.cs:42 `baseValue * Mathf.Max(0f, 1f - ratioPerLevel * level)` / PlayerMoveInputSystem.cs:59-62 `if (PlayerManaUtility.HasEnoughMana(in mana, requiredMana)) { PlayerManaUtility.UseMana(ref mana, requiredMana); }` / PlayerManaSystem.cs:31-36 (지연을 한 틱에 1씩만 올리고, 지연이 지나야 회복)"
+          },
+          {
+            "file": "Project/Assets/Scripts/Utilities/PlayerUpgradeUtility.cs",
+            "line": 116,
+            "category": "bug",
+            "severity": "low",
+            "confidence": "high",
+            "title": "최대 탄약 수와 공격 간격의 '반올림'이 실제로는 짝수 쪽 반올림(banker's rounding)이라 .5에서 값이 덜 오르거나 덜 줄어듦",
+            "description": "GetMaxAmmo와 GetAttackIntervalTicks는 문서 주석에 '반올림한다'고 적었지만 Mathf.RoundToInt를 쓴다. 이 함수는 .NET Math.Round와 같이 .5를 가까운 짝수로 보낸다. 그래서 정확히 .5가 나오는 레벨에서는 값이 내려가거나(4.5 → 4) 올라가서(2.5 → 2) 사사오입으로 기대한 값과 다르다. 강화 화면(World.UserInterface)과 실제 로직이 같은 함수를 써서 둘 사이는 어긋나지 않는다. 하지만 기획 수치와 다르게 나오고, 레벨에 따라 오르는 폭이 들쭉날쭉하다. 전제: 기획 의도가 사사오입일 때 버그다. 짝수 쪽 반올림이 의도라면 주석만 고치면 된다.",
+            "failureScenario": "magazine.max 3, maxAmmoRatioPerLevel 0.5 → 1레벨: 3 × 1.5 = 4.5 → RoundToInt = 4 (사사오입이면 5), 3레벨: 7.5 → 8. 1레벨 강화로 탄약이 2발이 아니라 1발만 늘고, 레벨마다 오르는 폭이 1, 2, 2로 고르지 않다. 공격 간격 10틱, attackIntervalRatioPerLevel 0.25, 3레벨이면 2.5 → 2틱(사사오입이면 3틱)",
+            "evidence": "PlayerUpgradeUtility.cs:94 `반올림하며, 최소 공격 간격 아래로는 줄지 않는다` / :103 `Mathf.RoundToInt(Decrease(...))` / :108 `반올림한다` / :116 `return Mathf.RoundToInt(Increase(magazine.max, weaponUpgrade.maxAmmoRatioPerLevel, weaponLevel));`"
+          },
+          {
+            "file": "Project/Assets/Scripts/Utilities/LootUtility.cs",
+            "line": 48,
+            "category": "bug",
+            "severity": "low",
+            "confidence": "medium",
+            "title": "뽑힌 전리품의 양이 0 이하여도 떨어뜨릴 전리품이 있다고 돌려줌",
+            "description": "TryRoll은 kind가 None이 아니면 amount = baseAmount + level × amountIncrement를 그대로 담아 true를 돌려준다. 양이 0이거나 음수인지는 보지 않는다. EnemyDeathEndSystem은 true면 그 양 그대로 LootSpawnRequest를 넣는다. LootPickupSystem은 Gold를 GoldUtility.Add(음수면 뺀다)로, Health를 health.current + amount로 적용하므로, 음수 양의 전리품을 주우면 골드나 체력이 줄고, 양이 0이면 아무 효과 없는 전리품이 바닥에 생긴다. 전제: Definition에서 amountIncrement가 음수이거나 baseAmount가 0 이하일 때만 생긴다. LootPickupSystem의 Ammo 처리는 끝까지 따라가 보지 않았다.",
+            "failureScenario": "Health 전리품을 baseAmount 20, amountIncrement -3으로 둠 → 적 레벨 7에서 양 -1 → 플레이어가 주우면 체력이 1 준다. 양이 0인 레벨에서는 효과 없는 전리품이 떨어진다",
+            "evidence": "LootUtility.cs:47-49 `kind = loot.kind; amount = loot.baseAmount + level * loot.amountIncrement; return kind != LootKind.None;` / EnemyDeathEndSystem.cs:36-43 (true면 lootAmount 그대로 요청) / LootPickupSystem.cs:76 `GoldUtility.Add(ref progress, loot.amount);`, :80 `health.current = Mathf.Min(health.max, health.current + loot.amount);` / GoldUtility.cs:12 `더할 골드. 음수면 뺀다`"
+          },
+          {
+            "file": "Project/Assets/Scripts/Utilities/MeleeShapeUtility.cs",
+            "line": 9,
+            "category": "cleanup",
+            "severity": "low",
+            "confidence": "high",
+            "title": "근접 판정을 '구'라고 적었지만 실제 판정은 XZ 평면의 원(높이 무시)",
+            "description": "MeleeShapeUtility의 클래스와 메서드 주석은 근접 판정을 '구'라고 부른다. 하지만 같은 판정을 만드는 AttackUtility.CreateSpawnRequest는 '판정 원'이라고 적었고, 판정하는 MeleeHitSystem은 TargetingUtility.IsWithin(XZ 거리)만 써서 높이를 보지 않는다. 같은 판정을 두 Utility가 다른 모양으로 적어, 점프 중인 대상이 근접 판정에 맞는지를 주석만 보고 잘못 짐작하게 된다.",
+            "failureScenario": "주석의 '구'를 믿고 점프하면 근접 공격을 피한다고 생각하지만, 실제로는 높이와 상관없이 XZ 원 안이면 맞는다",
+            "evidence": "MeleeShapeUtility.cs:5 `근접 판정 구를 놓는 도구`, :9 `근접 판정 구의 중심을 구한다` / AttackUtility.cs:99 `판정 원의 중심은 center에 있다` / MeleeHitSystem.cs:67 `TargetingUtility.IsWithin(center, hitTarget.position, melee.radius + hitTarget.radius)` / TargetingUtility.cs:37-39 (x, z만 비교)"
+          },
+          {
+            "file": "Project/Assets/Scripts/Utilities/SpawnUtility.cs",
+            "line": 41,
+            "category": "cleanup",
+            "severity": "low",
+            "confidence": "high",
+            "title": "ReuseArray의 Array.Clear는 바로 뒤의 전체 복사로 덮여 하는 일이 없음",
+            "description": "array는 언제나 requestArray와 길이가 같다(같지 않으면 새로 만든다). 그래서 바로 다음 줄의 Array.Copy(requestArray, array, requestArray.Length)가 모든 칸을 덮어쓰고, 그 앞의 Array.Clear는 결과에 영향이 없다. 주석의 '비운 뒤'도 동작에 필요한 단계로 읽혀 오해를 부른다.",
+            "failureScenario": "동작은 맞다. 칸을 비워야 하는 이유가 있는 것처럼 보여, 읽는 사람이 이전 값이 남을 수 있는 경로를 찾게 된다",
+            "evidence": "SpawnUtility.cs:37-42 `if (array == null || array.Length != requestArray.Length) { array = new T[requestArray.Length]; } Array.Clear(array, 0, array.Length); Array.Copy(requestArray, array, requestArray.Length);`"
+          }
+        ]
+      }
+    ],
+    "failed": []
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Review"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "review:T1",
+      "phaseIndex": 1,
+      "phaseTitle": "Review",
+      "agentId": "a1dc2f4466757fa8e",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1794681892968,
+      "queuedAt": 1794681892601,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "promptPreview": "너는 Unity 6 탑뷰 게임(TopView) 코드의 리뷰어다. 저장소 루트는 현재 작업 디렉터리다.\n배경:\n- 게임 로직은 고정 시간 간격 틱으로 돈다. 틱 길이는 Project Settings > Time > Fixed Timestep이다.\n- 엔티티는 공유 저장소 EntityStorage에 있다. 칸 하나 = Entity struct 하나(AoS), 컴포넌트 필드 + mask(ComponentMask) + generation. mask None = 빈 칸. 종류별 마스크 상수는 Entities/EntityArchetype에 있다.\n- System은 처리하는 마스크와 읽고 쓰는 컴포넌트를 storage 인자의 문서 주석에 적는다.\n- 프로젝트 규칙은 .claude/rules/에 있다. 규칙 위반은 cat…",
+      "promptFramed": true,
+      "lastProgressAt": 1794682136458,
+      "tokens": 165587,
+      "toolCalls": 21,
+      "durationMs": 243489,
+      "resultPreview": "{\"filesRead\":[\"Project/Assets/Scripts/Utilities/AttackUtility.cs\",\"Project/Assets/Scripts/Utilities/AudioVolumeUtility.cs\",\"Project/Assets/Scripts/Utilities/EnemyAttackUtility.cs\",\"Project/Assets/Scripts/Utilities/EnemyNavigationUtility.cs\",\"Project/Assets/Scripts/Utilities/GoldUtility.cs\",\"Project/Assets/Scripts/Utilities/LevelScalingUtility.cs\",\"Project/Assets/Scripts/Utilities/LootUtility.cs\",\"…"
+    }
+  ],
+  "totalTokens": 165587,
+  "totalToolCalls": 21
+}

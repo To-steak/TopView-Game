@@ -6,7 +6,7 @@ using TopView.Records;
 using TopView.Requests;
 using TopView.Systems;
 
-namespace TopView.Tests
+namespace TopView.Tests.EditMode
 {
     // 일시정지 중에는 피해가 체력에 반영되지 않고, 재개한 뒤에 반영되는지 확인한다.
     public class DamageSystemTests

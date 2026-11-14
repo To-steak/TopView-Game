@@ -4,7 +4,7 @@ using TopView.UserInterface.Views;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace TopView.PlayModeTests
+namespace TopView.Tests.PlayMode
 {
     // 플레이어 체력 HUD가 받은 체력을 글자로 맞게 보여 주는지 확인한다.
     public class PlayerHealthViewTests
@@ -26,8 +26,8 @@ namespace TopView.PlayModeTests
             RectMask2D mask = new GameObject("Health Mask", typeof(RectTransform)).AddComponent<RectMask2D>();
             mask.transform.SetParent(_view.transform, false);
             mask.rectTransform.sizeDelta = new Vector2(100f, 10f);
-            SerializedFieldWriter.Write(_view, "_healthText", _healthText);
-            SerializedFieldWriter.Write(_view, "_healthMask", mask);
+            PrivateFieldAccess.Write(_view, "_healthText", _healthText);
+            PrivateFieldAccess.Write(_view, "_healthMask", mask);
         }
 
         /// <summary>

@@ -6,7 +6,7 @@ using TopView.UserInterface.Views;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace TopView.PlayModeTests
+namespace TopView.Tests.PlayMode
 {
     // 강화 화면의 항목이 받은 값대로 버튼을 누를 수 있게 하는지 확인한다.
     public class UpgradeViewTests
@@ -37,9 +37,9 @@ namespace TopView.PlayModeTests
             closeButton.transform.SetParent(root.transform, false);
             _entryParent = new GameObject("Entry Parent", typeof(RectTransform)).GetComponent<RectTransform>();
             _entryParent.SetParent(root.transform, false);
-            SerializedFieldWriter.Write(_view, "_closeButton", closeButton);
-            SerializedFieldWriter.Write(_view, "_entryParent", _entryParent);
-            SerializedFieldWriter.Write(_view, "_entryPrefabs", entryPrefabs);
+            PrivateFieldAccess.Write(_view, "_closeButton", closeButton);
+            PrivateFieldAccess.Write(_view, "_entryParent", _entryParent);
+            PrivateFieldAccess.Write(_view, "_entryPrefabs", entryPrefabs);
             root.SetActive(true);
             _view.BuildEntries();
         }
@@ -106,14 +106,14 @@ namespace TopView.PlayModeTests
             GameObject prefab = new GameObject($"Test Weapon {weaponIndex} Entry", typeof(RectTransform));
             prefab.transform.SetParent(_prefabHolder.transform, false);
             UpgradeEntry entry = prefab.AddComponent<UpgradeEntry>();
-            SerializedFieldWriter.Write(entry, "_type", PlayerUpgradeCommandType.Weapon);
-            SerializedFieldWriter.Write(entry, "_weaponIndex", weaponIndex);
-            SerializedFieldWriter.Write(entry, "_levelText", CreateText(prefab.transform, "Level Text"));
-            SerializedFieldWriter.Write(entry, "_costText", CreateText(prefab.transform, "Cost Text"));
-            SerializedFieldWriter.Write(entry, "_descriptionText", CreateText(prefab.transform, "Description Text"));
+            PrivateFieldAccess.Write(entry, "_type", PlayerUpgradeCommandType.Weapon);
+            PrivateFieldAccess.Write(entry, "_weaponIndex", weaponIndex);
+            PrivateFieldAccess.Write(entry, "_levelText", CreateText(prefab.transform, "Level Text"));
+            PrivateFieldAccess.Write(entry, "_costText", CreateText(prefab.transform, "Cost Text"));
+            PrivateFieldAccess.Write(entry, "_descriptionText", CreateText(prefab.transform, "Description Text"));
             Button button = new GameObject("Button", typeof(RectTransform)).AddComponent<Button>();
             button.transform.SetParent(prefab.transform, false);
-            SerializedFieldWriter.Write(entry, "_button", button);
+            PrivateFieldAccess.Write(entry, "_button", button);
             return entry;
         }
 

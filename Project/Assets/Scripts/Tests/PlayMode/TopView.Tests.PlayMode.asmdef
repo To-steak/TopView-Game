@@ -1,13 +1,16 @@
 {
-    "name": "TopView.PlayModeTests",
-    "rootNamespace": "TopView.PlayModeTests",
+    "name": "TopView.Tests.PlayMode",
+    "rootNamespace": "TopView.Tests.PlayMode",
     "references": [
         "UnityEngine.TestRunner",
         "TopView.Entity",
         "TopView.Systems",
-        "TopView.Core",
+        "TopView.Definitions",
+        "TopView.Authoring",
+        "TopView.Persistence",
         "TopView.Presentation",
         "TopView.UserInterface",
+        "TopView.Core",
         "UnityEngine.UI",
         "Unity.TextMeshPro"
     ],

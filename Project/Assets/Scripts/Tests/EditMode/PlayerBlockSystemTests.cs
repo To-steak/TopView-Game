@@ -5,7 +5,7 @@ using TopView.Systems;
 using TopView.Utilities;
 using UnityEngine;
 
-namespace TopView.Tests
+namespace TopView.Tests.EditMode
 {
     // 적에게서 플레이어를 밀어낼 때 지형(벽) 속으로 밀어 넣지 않는지 확인한다.
     // 적은 원점에, 벽은 x = WALL_FACE_X부터 +X 쪽에 둔다. 플레이어는 벽면을 따라(벽에 캡슐이 닿은 채) 적 쪽으로 다가간다.

@@ -5,7 +5,7 @@ using TopView.Entities;
 using TopView.Requests;
 using TopView.Systems;
 
-namespace TopView.Tests
+namespace TopView.Tests.EditMode
 {
     // 사망한 플레이어가 사망 시간을 채우면 패배를 요청하는지 확인한다.
     public class PlayerStateSystemTests

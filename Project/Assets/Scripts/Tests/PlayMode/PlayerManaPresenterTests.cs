@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 
-namespace TopView.PlayModeTests
+namespace TopView.Tests.PlayMode
 {
     // 마나가 줄었다가 회복으로 돌아설 때 게이지가 이어지게 움직이는지 확인한다. 게이지 트윈이 흘러야 해서 실제 시간을 기다린다.
     public class PlayerManaPresenterTests
@@ -38,12 +38,12 @@ namespace TopView.PlayModeTests
             _mask = new GameObject("Mana Mask", typeof(RectTransform)).AddComponent<RectMask2D>();
             _mask.transform.SetParent(view.content, false);
             _mask.rectTransform.sizeDelta = new Vector2(MASK_WIDTH, 10f);
-            SerializedFieldWriter.Write(view, "_manaText", manaText);
-            SerializedFieldWriter.Write(view, "_manaMask", _mask);
-            SerializedFieldWriter.Write(view, "_tweenTicks", TWEEN_TICKS);
+            PrivateFieldAccess.Write(view, "_manaText", manaText);
+            PrivateFieldAccess.Write(view, "_manaMask", _mask);
+            PrivateFieldAccess.Write(view, "_tweenTicks", TWEEN_TICKS);
 
             _presenter = view.gameObject.AddComponent<PlayerManaPresenter>();
-            SerializedFieldWriter.Write(_presenter, "_view", view);
+            PrivateFieldAccess.Write(_presenter, "_view", view);
             _presenter.Initialize();
             _presenter.Present(true, MAX_MANA, MAX_MANA);
         }

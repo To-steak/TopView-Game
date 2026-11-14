@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 
-namespace TopView.PlayModeTests
+namespace TopView.Tests.PlayMode
 {
     // 플레이어 마나 HUD가 받은 마나로 게이지 마스크를 맞게 맞추는지 확인한다.
     public class PlayerManaViewTests
@@ -28,8 +28,8 @@ namespace TopView.PlayModeTests
             _mask = new GameObject("Mana Mask", typeof(RectTransform)).AddComponent<RectMask2D>();
             _mask.transform.SetParent(_view.transform, false);
             _mask.rectTransform.sizeDelta = new Vector2(MASK_WIDTH, 10f);
-            SerializedFieldWriter.Write(_view, "_manaText", manaText);
-            SerializedFieldWriter.Write(_view, "_manaMask", _mask);
+            PrivateFieldAccess.Write(_view, "_manaText", manaText);
+            PrivateFieldAccess.Write(_view, "_manaMask", _mask);
         }
 
         /// <summary>
