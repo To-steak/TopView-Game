@@ -91,7 +91,7 @@ namespace TopView.Utilities
         }
 
         /// <summary>
-        /// 강화가 반영된 공격 간격(틱)을 돌려준다. 반올림하며, 최소 공격 간격 아래로는 줄지 않는다. 처음부터 최소보다 짧으면 처음 값을 돌려준다.
+        /// 강화가 반영된 공격 간격(틱)을 돌려준다. 사사오입하며, 최소 공격 간격 아래로는 줄지 않는다. 처음부터 최소보다 짧으면 처음 값을 돌려준다.
         /// </summary>
         /// <param name="attackInterval">무기의 공격 간격</param>
         /// <param name="weaponUpgrade">무기 강화 효과</param>
@@ -100,12 +100,12 @@ namespace TopView.Utilities
         /// <returns>공격 간격(틱)</returns>
         public static int GetAttackIntervalTicks(in AttackIntervalComponent attackInterval, in WeaponUpgradeRuleComponent weaponUpgrade, in PlayerUpgradeComponent upgrade, int weaponLevel)
         {
-            int intervalTicks = Mathf.RoundToInt(Decrease(attackInterval.intervalTicks, weaponUpgrade.attackIntervalRatioPerLevel, weaponLevel));
+            int intervalTicks = RoundHalfUp(Decrease(attackInterval.intervalTicks, weaponUpgrade.attackIntervalRatioPerLevel, weaponLevel));
             return Mathf.Max(intervalTicks, Mathf.Min(attackInterval.intervalTicks, upgrade.minAttackIntervalTicks));
         }
 
         /// <summary>
-        /// 강화가 반영된 최대 탄약 수를 돌려준다. 반올림한다.
+        /// 강화가 반영된 최대 탄약 수를 돌려준다. 사사오입한다.
         /// </summary>
         /// <param name="magazine">무기의 탄창 값</param>
         /// <param name="weaponUpgrade">무기 강화 효과</param>
@@ -113,7 +113,7 @@ namespace TopView.Utilities
         /// <returns>장전할 수 있는 최대 탄약 수</returns>
         public static int GetMaxAmmo(in MagazineComponent magazine, in WeaponUpgradeRuleComponent weaponUpgrade, int weaponLevel)
         {
-            return Mathf.RoundToInt(Increase(magazine.max, weaponUpgrade.maxAmmoRatioPerLevel, weaponLevel));
+            return RoundHalfUp(Increase(magazine.max, weaponUpgrade.maxAmmoRatioPerLevel, weaponLevel));
         }
 
         /// <summary>
@@ -150,6 +150,16 @@ namespace TopView.Utilities
         public static float GetMeleeRangeScale(in WeaponUpgradeRuleComponent weaponUpgrade, int weaponLevel)
         {
             return Increase(1f, weaponUpgrade.meleeRangeRatioPerLevel, weaponLevel);
+        }
+
+        /// <summary>
+        /// 0 이상의 값을 사사오입해 정수로 돌려준다. Mathf.RoundToInt는 .5를 짝수 쪽으로 보내 4.5가 4가 되므로 쓰지 않는다.
+        /// </summary>
+        /// <param name="value">0 이상의 값</param>
+        /// <returns>사사오입한 정수</returns>
+        private static int RoundHalfUp(float value)
+        {
+            return Mathf.FloorToInt(value + 0.5f);
         }
     }
 }
