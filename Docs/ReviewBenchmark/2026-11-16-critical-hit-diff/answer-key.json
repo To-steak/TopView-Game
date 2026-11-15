@@ -1,0 +1,36 @@
+{
+  "branch": "benchmark/critical-hit (로컬, 푸시하지 않음)",
+  "parent": "71ccbf2b (feat/diff-review)",
+  "base": "3b2ad38c (대조군 커밋 A, 메시지 'refactor: 비교식 정리')",
+  "commit": "00ecdfed (가짜 feat + feat 안의 버그, 커밋 B)",
+  "feature": "무기마다 치명타 확률(criticalChance, 0~1)과 치명타 배율(criticalDamageMultiplier, Definition)을 둔다. 공격 한 번마다 첫 발이 나갈 때 World의 시드 고정 난수로 치명타를 정하고(PlayerActionStateComponent.isCriticalAttack), 치명타면 그 공격의 모든 발의 피해(강화 반영 후)에 배율을 곱한다. 근접, 직선 투사체, 포물선 투사체 모두. 표시는 없다.",
+  "note": "줄 번호는 커밋 B 기준.",
+  "featBugs": [
+    { "id": "F1", "difficulty": "easy", "file": "Project/Assets/Scripts/Utilities/PlayerWeaponUtility.cs", "line": 186,
+      "change": "random.NextDouble() < criticalChance → > criticalChance",
+      "effect": "치명타 확률이 1 - criticalChance가 된다. 확률 0이면 거의 늘 치명타, 1이면 치명타가 없다." },
+    { "id": "F2", "difficulty": "easy", "file": "Project/Assets/Scripts/Utilities/PlayerWeaponUtility.cs", "line": 198,
+      "change": "damage * criticalDamageMultiplier → damage + criticalDamageMultiplier",
+      "effect": "치명타가 배율(2배)이 아니라 배율 값(2)만큼 더한 피해가 된다." },
+    { "id": "F3", "difficulty": "medium", "file": "Project/Assets/Scripts/Systems/Attack/PlayerArcAttackSystem.cs", "line": 66,
+      "change": "치명타 배율을 피해가 아니라 폭발 반지름에 곱하고, 피해는 강화 반영값 그대로(64줄)",
+      "effect": "포물선 투사체는 치명타여도 피해가 그대로이고 폭발 범위만 커진다. 결과는 바뀌지 않은 ProjectileHitSystem의 폭발 판정에서 드러난다." },
+    { "id": "F4", "difficulty": "medium", "file": "Project/Assets/Scripts/Systems/Attack/PlayerStraightAttackSystem.cs", "line": 54,
+      "change": "치명타 판정을 첫 발 블록(committedShotCount == 0) 밖으로 옮김",
+      "effect": "공격 중 매 틱 치명타를 다시 정한다. 여러 틱에 걸쳐 나가는 발이 서로 다른 치명타 결과를 갖고, 공격 상태 동안 난수를 매 틱 소비한다." },
+    { "id": "F5", "difficulty": "hard", "file": "Project/Assets/Scripts/Systems/Attack/PlayerMeleeAttackSystem.cs", "line": 60,
+      "change": "치명타 판정을 피해 계산과 생성 요청 뒤로 옮김",
+      "effect": "피해는 판정 전의 isCriticalAttack을 쓰는데, PlayerStateChangeSystem이 공격 상태에 들어갈 때 false로 지우므로 근접 공격은 치명타가 피해에 반영되지 않는다(판정 결과는 쓰이지 않고 다음 상태 전환에 지워진다)." },
+    { "id": "F6", "difficulty": "medium", "file": "Project/Assets/Scripts/Core/World.cs", "line": 79,
+      "change": "PlayerArcAttackSystem에 _random 대신 매 틱 new System.Random(_rule.randomSeed)를 넘김",
+      "effect": "같은 시드의 첫 값만 쓰므로 포물선 투사체의 치명타 결과가 늘 같다(늘 치명타이거나 늘 아님). 판 전체의 난수 흐름과도 따로 논다." }
+  ],
+  "controls": [
+    { "id": "C1", "placement": "경로 위(치명타 피해를 따라가면 읽는 DamageSystem)", "file": "Project/Assets/Scripts/Systems/Vitals/DamageSystem.cs", "line": 70,
+      "change": "enemy.health.current > 0f → >= 0f (커밋 A, diff 밖)",
+      "effect": "이미 죽은(체력 0) 적에 대한 피해도 기록해 시체 위에 피해 글자가 뜬다. diff 리뷰라면 적지 않아야 한다." },
+    { "id": "C2", "placement": "경로 밖", "file": "Project/Assets/Scripts/Systems/Loot/LootLifetimeSystem.cs", "line": 35,
+      "change": "remainingTicks <= 0 → < 0 (커밋 A, diff 밖)",
+      "effect": "전리품이 수명보다 한 틱 더 남는다. diff 리뷰라면 읽지도 적지도 않아야 한다." }
+  ]
+}

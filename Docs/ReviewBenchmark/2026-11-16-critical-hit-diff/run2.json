@@ -1,0 +1,139 @@
+{
+  "summary": "TopView의 두 커밋 사이 diff를 영역별 리뷰 에이전트로 나눠, 바뀐 코드와 그 참조를 따라 읽고 정해진 JSON 형식으로 지적을 모은다",
+  "agentCount": 1,
+  "logs": [],
+  "result": {
+    "date": "2026-11-16",
+    "base": "3b2ad38c",
+    "commit": "00ecdfed",
+    "context": "치명타 기능을 마쳤다. 무기마다 치명타 확률(0~1)과 치명타 배율을 Definition에 두고, 플레이어의 공격 한 번마다 첫 발이 나갈 때 World의 시드 고정 난수로 치명타를 정한다. 치명타면 그 공격의 모든 발의 피해(강화가 반영된 피해)에 배율을 곱한다. 근접, 직선 투사체, 포물선 투사체 공격 모두 해당하고, 적의 공격과 화면 표시는 바꾸지 않는다.",
+    "request": [
+      {
+        "key": "D1",
+        "name": "D1. 치명타",
+        "files": [
+          "Project/Assets/Scripts/Components/Action/PlayerActionStateComponent.cs",
+          "Project/Assets/Scripts/Components/Weapon/WeaponComponent.cs",
+          "Project/Assets/Scripts/Core/World.cs",
+          "Project/Assets/Scripts/Systems/Action/PlayerStateChangeSystem.cs",
+          "Project/Assets/Scripts/Systems/Attack/PlayerArcAttackSystem.cs",
+          "Project/Assets/Scripts/Systems/Attack/PlayerMeleeAttackSystem.cs",
+          "Project/Assets/Scripts/Systems/Attack/PlayerStraightAttackSystem.cs",
+          "Project/Assets/Scripts/Utilities/PlayerWeaponUtility.cs"
+        ],
+        "focus": "치명타가 설계대로 동작하는지."
+      }
+    ],
+    "areas": [
+      {
+        "area": "D1. 치명타",
+        "filesRead": [
+          "Project/Assets/Scripts/Components/Action/PlayerActionStateComponent.cs",
+          "Project/Assets/Scripts/Systems/Attack/PlayerArcAttackSystem.cs",
+          "Project/Assets/Scripts/Systems/Attack/PlayerMeleeAttackSystem.cs",
+          "Project/Assets/Scripts/Systems/Attack/PlayerStraightAttackSystem.cs",
+          "Project/Assets/Scripts/Systems/Action/PlayerStateChangeSystem.cs"
+        ],
+        "findings": [
+          {
+            "file": "Project/Assets/Scripts/Utilities/PlayerWeaponUtility.cs",
+            "line": 186,
+            "category": "bug",
+            "severity": "high",
+            "confidence": "high",
+            "title": "RollCritical의 비교가 뒤집혀 치명타 확률이 1-확률이 된다",
+            "description": "random.NextDouble()은 [0,1) 값을 낸다. 확률 p로 true가 되려면 NextDouble() < p여야 하는데 `>`로 비교해 true일 확률이 1-p가 된다. 문서 주석의 '확률이 0 이하면 늘 false, 1 이상이면 늘 true'와도 정반대로 동작한다. 근접·직선·포물선 세 경로가 모두 이 함수를 쓴다.",
+            "failureScenario": "criticalChance = 0(치명타 없는 무기)으로 둔 무기 → NextDouble()이 0이 아닌 한 늘 true라 거의 모든 공격이 치명타가 된다. criticalChance = 1 → NextDouble()은 1보다 클 수 없어 치명타가 한 번도 나지 않는다. 0.1로 두면 90%가 치명타다.",
+            "evidence": "PlayerWeaponUtility.cs:186 `return random.NextDouble() > weapon.criticalChance;` / 같은 파일 183줄 주석 '확률이 0 이하면 늘 false, 1 이상이면 늘 true'"
+          },
+          {
+            "file": "Project/Assets/Scripts/Utilities/PlayerWeaponUtility.cs",
+            "line": 198,
+            "category": "bug",
+            "severity": "high",
+            "confidence": "high",
+            "title": "치명타 피해에 배율을 곱하지 않고 더한다",
+            "description": "설계와 필드 주석(WeaponComponent.cs:13 '치명타일 때 피해에 곱하는 배율(배)')은 강화가 반영된 피해에 배율을 곱하라고 하지만, GetCriticalDamage는 damage + criticalDamageMultiplier를 돌려준다.",
+            "failureScenario": "강화 반영 피해 30, criticalDamageMultiplier 2인 무기로 치명타 → 기대 60, 실제 32. 배율 1(효과 없음 의도)이어도 치명타마다 피해가 1 늘어난다.",
+            "evidence": "PlayerWeaponUtility.cs:198 `return isCritical ? damage + weapon.criticalDamageMultiplier : damage;` / WeaponComponent.cs:13 '치명타일 때 피해에 곱하는 배율(배). 강화가 반영된 피해에 곱한다'"
+          },
+          {
+            "file": "Project/Assets/Scripts/Systems/Attack/PlayerMeleeAttackSystem.cs",
+            "line": 239,
+            "category": "bug",
+            "severity": "high",
+            "confidence": "high",
+            "title": "근접 공격은 판정을 만든 뒤에 치명타를 정해 치명타가 피해에 반영되지 않는다",
+            "description": "근접 공격은 236줄에서 actionState.isCriticalAttack으로 피해를 정해 요청을 넣은 뒤, 239줄에서야 RollCritical을 부른다. 공격 상태에 들어갈 때 PlayerStateChangeSystem.cs:71이 isCriticalAttack을 false로 되돌리고, 근접은 상태당 판정이 한 번뿐(AttackUtility.IsShotDue: committedShotCount == 0)이므로 피해 계산 시점의 값은 늘 false다. 239줄에서 정한 값은 다음 공격 상태 진입 때 다시 false로 지워져 어디에도 쓰이지 않는다.",
+            "failureScenario": "치명타 확률이 얼마든(비교 버그를 고쳐 1로 두어도) 근접 무기의 판정 피해는 늘 강화 반영 피해 그대로이고 치명타가 나지 않는다. 그러면서 근접 공격마다 World의 _random을 하나 소비해 적 행동·전리품 난수열만 바뀐다.",
+            "evidence": "PlayerMeleeAttackSystem.cs:236 `float damage = PlayerWeaponUtility.GetCriticalDamage(upgradedDamage, in weapon.weapon, actionState.isCriticalAttack);` → 238 Enqueue → 239 `actionState.isCriticalAttack = PlayerWeaponUtility.RollCritical(...)`; PlayerStateChangeSystem.cs:71 `actionState.isCriticalAttack = false;`; AttackUtility.cs:51 `return committedShotCount == 0 && ...`"
+          },
+          {
+            "file": "Project/Assets/Scripts/Systems/Attack/PlayerStraightAttackSystem.cs",
+            "line": 54,
+            "category": "bug",
+            "severity": "high",
+            "confidence": "high",
+            "title": "직선 투사체는 첫 발이 아니라 공격 상태의 매 틱마다 치명타를 다시 정한다",
+            "description": "RollCritical 호출이 `committedShotCount == 0 && IsShotDue(...)` 블록 밖(54줄)에 있어, 공격 상태에서 이 System이 도는 모든 틱(첫 발 전 대기 틱, 발과 발 사이 틱, 모든 발을 쏜 뒤 남은 틱 포함)에 치명타를 새로 정한다. 설계는 첫 발이 나갈 때 한 번 정하고 그 공격의 모든 발이 따르는 것이다. 또 공격 중 매 틱 World의 공유 _random을 소비해, 같은 _random을 쓰는 EnemyBehaviorSystem·EnemyDeathEndSystem(World.cs:97,101)의 난수열이 공격 길이에 따라 달라진다.",
+            "failureScenario": "shots가 3발이고 startTicks가 0, 5, 10인 무기 → 첫 발은 치명타, 둘째 발은 일반, 셋째 발은 치명타처럼 발마다 치명타 여부가 갈린다. 한 틱에 겹친 발은 같은 값이지만 다른 틱의 발은 독립이다. 공격 상태가 20틱이면 탄약 한 번에 난수를 20번 소비한다.",
+            "evidence": "PlayerStraightAttackSystem.cs:45-53 첫 발 블록이 53줄에서 닫힘, 54줄 `actionState.isCriticalAttack = PlayerWeaponUtility.RollCritical(in weapon.weapon, random);`; World.cs:78,97,101이 같은 _random을 넘김"
+          },
+          {
+            "file": "Project/Assets/Scripts/Systems/Attack/PlayerArcAttackSystem.cs",
+            "line": 152,
+            "category": "bug",
+            "severity": "high",
+            "confidence": "high",
+            "title": "포물선 투사체는 치명타 배율을 피해가 아니라 폭발 반지름에 적용한다",
+            "description": "150줄에서 damage = upgradedDamage로 치명타를 반영하지 않고, 152줄에서 GetCriticalDamage를 폭발 반지름에 적용한다. 설계는 피해에 배율을 곱하는 것이며 반지름은 바꾸지 않아야 한다.",
+            "failureScenario": "포물선 무기로 치명타가 난 공격 → 피해는 일반 공격과 같고, 폭발 반지름만 (GetCriticalDamage의 덧셈 버그와 겹쳐) 반지름 + 배율만큼 커져 더 넓은 범위의 적이 일반 피해를 받는다.",
+            "evidence": "PlayerArcAttackSystem.cs:150 `float damage = upgradedDamage;` / 152 `arc.projectile.explosion.radius = PlayerWeaponUtility.GetCriticalDamage(PlayerUpgradeUtility.GetExplosionRadius(in weapon, weaponLevel), in weapon.weapon, actionState.isCriticalAttack);`"
+          },
+          {
+            "file": "Project/Assets/Scripts/Core/World.cs",
+            "line": 79,
+            "category": "bug",
+            "severity": "high",
+            "confidence": "high",
+            "title": "포물선 공격에 매 틱 같은 시드로 새 난수를 만들어 넘겨 치명타 결과가 늘 같다",
+            "description": "World는 근접·직선에는 판 시작 때 만든 _random(World.Round.cs:104)을 넘기지만, 포물선에는 매 틱 new System.Random(_rule.randomSeed)를 넘긴다. 같은 시드로 새로 만든 난수의 첫 NextDouble()은 늘 같은 값이라, 포물선 공격의 치명타 여부는 판 내내(시드가 같으면 판이 바뀌어도) 고정된다. 세 경로가 같은 난수를 쓰지 않는 불일치이기도 하다.",
+            "failureScenario": "randomSeed가 정해진 판에서 포물선 무기의 첫 NextDouble이 0.3이고 criticalChance가 0.5라면 → (비교 방향과 상관없이) 모든 포물선 공격이 치명타이거나 모두 일반 공격이 된다. 확률대로 섞여 나오지 않는다.",
+            "evidence": "World.cs:79 `PlayerArcAttackSystem.Tick(..., new System.Random(_rule.randomSeed));` / World.cs:77-78 `_random` / World.Round.cs:104 `_random = new System.Random(_rule.randomSeed);`"
+          }
+        ]
+      }
+    ],
+    "failed": []
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Review"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "diff-review:D1",
+      "phaseIndex": 1,
+      "phaseTitle": "Review",
+      "agentId": "acce39c0df8b44247",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1794773685316,
+      "queuedAt": 1794773684861,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "promptPreview": "너는 Unity 6 탑뷰 게임(TopView) 코드의 리뷰어다. 저장소 루트는 현재 작업 디렉터리이고, 작업 트리는 커밋 00ecdfed과 같다.\n이번 리뷰는 커밋 3b2ad38c에서 00ecdfed까지 바뀐 코드만 본다.\n배경:\n- 게임 로직은 고정 시간 간격 틱으로 돈다. 틱 길이는 Project Settings > Time > Fixed Timestep이다.\n- 엔티티는 공유 저장소 EntityStorage에 있다. 칸 하나 = Entity struct 하나(AoS), 컴포넌트 필드 + mask(ComponentMask) + generation. mask None = 빈 칸. 종류별 마스크 상수는 Entities/EntityArchetype에 있다.\n- System은 처리하는 마스크와 읽고 쓰는 컴포넌…",
+      "promptFramed": true,
+      "lastProgressAt": 1794773748595,
+      "tokens": 87723,
+      "toolCalls": 4,
+      "durationMs": 59975,
+      "resultPreview": "{\"filesRead\":[\"Project/Assets/Scripts/Components/Action/PlayerActionStateComponent.cs\",\"Project/Assets/Scripts/Systems/Attack/PlayerArcAttackSystem.cs\",\"Project/Assets/Scripts/Systems/Attack/PlayerMeleeAttackSystem.cs\",\"Project/Assets/Scripts/Systems/Attack/PlayerStraightAttackSystem.cs\",\"Project/Assets/Scripts/Systems/Action/PlayerStateChangeSystem.cs\"],\"findings\":[{\"file\":\"Project/Assets/Scripts…"
+    }
+  ],
+  "totalTokens": 87723,
+  "totalToolCalls": 4
+}
