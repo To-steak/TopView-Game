@@ -12,6 +12,7 @@ export const meta = {
 //   args.context  이번 리뷰의 상황 설명. 없으면 빈 문자열
 //   args.areas    영역 목록. 영역마다 { key, name, scope: [폴더나 파일 경로], focus: 특히 볼 것 }
 // 결과에는 args를 그대로 함께 남겨, 무엇을 어떻게 리뷰했는지 결과만 보고 알 수 있게 한다.
+// 지적의 형식(FINDINGS_SCHEMA)은 diff-review.workflow.js와 같다. 이슈 도구가 두 결과를 같은 방식으로 읽으므로, 한쪽을 바꾸면 다른 쪽도 함께 바꾼다.
 
 if (!args || !args.date || !args.commit || !Array.isArray(args.areas) || args.areas.length === 0) {
   throw new Error('args에 date, commit, areas(한 개 이상)가 있어야 한다.')

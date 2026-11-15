@@ -1,0 +1,115 @@
+export const meta = {
+  name: 'topview-diff-review',
+  description: 'TopView의 두 커밋 사이 diff를 영역별 리뷰 에이전트로 나눠, 바뀐 코드와 그 참조를 따라 읽고 정해진 JSON 형식으로 지적을 모은다',
+  whenToUse: '기능(feat)을 마친 뒤 그 기능이 바꾼 코드만 리뷰해서 결과를 Docs/Reviews/에 JSON으로 남기고 이슈로 이어 갈 때. 폴더 전체를 읽는 리뷰는 review.workflow.js를 쓴다',
+  phases: [{ title: 'Review', detail: '영역마다 리뷰 에이전트 하나' }],
+}
+
+// 이 스크립트는 바뀌지 않는 부분(결과 형식, 공통 지침)만 가진다.
+// 리뷰마다 바뀌는 값은 실행할 때 args로 받는다.
+//   args.date     리뷰한 날짜 (예: '2026-11-16')
+//   args.base     diff의 시작 커밋. 보통 기능 브랜치가 갈라진 main의 커밋이다
+//   args.commit   리뷰한 커밋(diff의 끝). 위치 링크가 이 커밋의 줄을 가리킨다
+//   args.context  이번 리뷰의 상황 설명(어떤 기능인지). 없으면 빈 문자열
+//   args.areas    영역 목록. 영역마다 { key, name, files: [base..commit에서 바뀐 파일 경로], focus: 특히 볼 것 }
+// 결과에는 args를 그대로 함께 남겨, 무엇을 어떻게 리뷰했는지 결과만 보고 알 수 있게 한다.
+// 지적의 형식(FINDINGS_SCHEMA)은 review.workflow.js와 같다. 이슈 도구가 두 결과를 같은 방식으로 읽으므로, 한쪽을 바꾸면 다른 쪽도 함께 바꾼다.
+
+if (!args || !args.date || !args.base || !args.commit || !Array.isArray(args.areas) || args.areas.length === 0) {
+  throw new Error('args에 date, base, commit, areas(한 개 이상)가 있어야 한다.')
+}
+for (const area of args.areas) {
+  if (!Array.isArray(area.files) || area.files.length === 0) {
+    throw new Error(`영역 ${area.key}에 files(바뀐 파일 한 개 이상)가 있어야 한다.`)
+  }
+}
+
+const FINDINGS_SCHEMA = {
+  type: 'object',
+  properties: {
+    filesRead: { type: 'array', items: { type: 'string' }, description: '실제로 끝까지 읽은 파일 경로' },
+    findings: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          file: { type: 'string', description: '저장소 루트 기준 경로' },
+          line: { type: 'integer' },
+          category: {
+            type: 'string',
+            enum: ['bug', 'inconsistency', 'rule', 'cleanup'],
+            description: 'bug: 잘못된 결과가 실제로 화면이나 판정에 나온다. '
+              + 'inconsistency: 같은 일을 하는 두 경로가 다르게 동작한다. '
+              + 'rule: .claude/rules/의 규칙 위반이지만 동작은 맞다. '
+              + 'cleanup: 동작과 무관한 정리(주석, 이름, 중복). 주석이나 문서가 코드와 다른 것도 여기다.',
+          },
+          severity: {
+            type: 'string',
+            enum: ['high', 'medium', 'low'],
+            description: 'high: 판이 진행되지 않거나 결과(승패, 점수)가 틀린다. '
+              + 'medium: 플레이어가 알아챌 만큼 동작이나 표시가 틀리지만 판은 계속된다. '
+              + 'low: 특정 설정이나 드문 상황에서만 보이고, 알아채기 어렵다.',
+          },
+          confidence: {
+            type: 'string',
+            enum: ['high', 'medium', 'low'],
+            description: '코드를 읽고 한 추론이 맞는지. '
+              + 'high: 실패 경로를 코드에서 처음부터 끝까지 따라가 확인했다. '
+              + 'medium: 경로를 따라갔지만 확인하지 못한 고리가 하나 있다(Unity API 동작 등). '
+              + 'low: 경로의 일부를 짐작으로 메웠다. '
+              + '에디터나 Definition 값, 기획 의도에 달린 것은 confidence를 낮추지 말고 description에 전제로 적는다.',
+          },
+          title: { type: 'string', description: '한국어 한 줄' },
+          description: { type: 'string', description: '한국어. 무엇이 왜 잘못인지' },
+          failureScenario: { type: 'string', description: '한국어. 구체적인 상황 → 잘못된 결과' },
+          evidence: { type: 'string', description: '근거가 되는 코드 위치들(file:line)과 짧은 인용' },
+        },
+        required: ['file', 'line', 'category', 'severity', 'confidence', 'title', 'description', 'failureScenario', 'evidence'],
+      },
+    },
+  },
+  required: ['filesRead', 'findings'],
+}
+
+const COMMON = `
+너는 Unity 6 탑뷰 게임(TopView) 코드의 리뷰어다. 저장소 루트는 현재 작업 디렉터리이고, 작업 트리는 커밋 ${args.commit}과 같다.
+이번 리뷰는 커밋 ${args.base}에서 ${args.commit}까지 바뀐 코드만 본다.
+배경:
+- 게임 로직은 고정 시간 간격 틱으로 돈다. 틱 길이는 Project Settings > Time > Fixed Timestep이다.
+- 엔티티는 공유 저장소 EntityStorage에 있다. 칸 하나 = Entity struct 하나(AoS), 컴포넌트 필드 + mask(ComponentMask) + generation. mask None = 빈 칸. 종류별 마스크 상수는 Entities/EntityArchetype에 있다.
+- System은 처리하는 마스크와 읽고 쓰는 컴포넌트를 storage 인자의 문서 주석에 적는다.
+- 데이터는 컴포넌트 → 그것을 읽고 쓰는 System(과 Utility) → World의 호출 순서(Core/World*.cs)로 이어진다. 표시는 World가 넘기는 데이터 → ViewSystem, Presenter로 이어진다.
+- 프로젝트 규칙은 .claude/rules/에 있다. 규칙 위반은 category: rule로 낮은 우선순위로만 적는다.
+${args.context ? '\n이번 리뷰의 상황:\n' + args.context + '\n' : ''}
+읽는 순서:
+1. 맡은 파일의 diff를 \`git diff ${args.base} ${args.commit} -- <파일>\`로 본다.
+2. 맡은 파일을 끝까지 읽는다.
+3. 바뀐 코드가 정의하거나 읽고 쓰는 것(컴포넌트 필드, 마스크, Request, Record, Command, Utility 함수, View 표시 메서드)마다, 그것을 쓰는 곳을 찾아 따라 읽는다. 따라간 곳이 또 다른 것에 넘기면 계속 따라간다. System은 World의 호출 순서까지 확인한다. 바뀐 것과 관계없는 코드는 읽지 않는다.
+
+엄격한 지침:
+- 읽기만 한다. 파일을 만들거나 고치지 않는다. 빌드·Unity 명령을 실행하지 않는다. git은 diff와 show만 쓴다.
+- 지적은 두 가지만 단다. (1) 바뀐 줄의 잘못. (2) 바뀐 줄 때문에 잘못 동작하게 된 곳. 바뀌지 않은 파일이어도 된다. 이때 description에 원인이 된 바뀐 줄(file:line)을 적는다.
+- diff와 무관한 기존 코드의 버그, 규칙 위반, 정리는 적지 않는다. 따라 읽다 보았더라도 적지 않는다.
+- 우선순위: 실제로 잘못 동작하는 버그(bug) > 경로 간 불일치(inconsistency) > 규칙(rule) > 정리(cleanup). 스타일 취향은 적지 않는다.
+- 각 지적은 실제 코드를 근거로 구체적 상황과 잘못된 결과를 적는다. 추론의 일부를 짐작으로 메웠으면 confidence를 낮추고 그 이유를 description에 쓴다. 에디터나 Definition 값, 기획 의도에 달린 것은 confidence가 아니라 description의 전제로 밝힌다. 확인 못 한 것을 확신처럼 쓰지 않는다.
+- Unity 에디터 쪽 설정(씬, 프리팹 값)에 따라 달라지는 것은 그 전제를 밝힌다.
+- 글은 한국어로 쓴다.
+`
+
+phase('Review')
+const results = await parallel(args.areas.map(area => () =>
+  agent(`${COMMON}
+너의 영역: ${area.name}
+맡은 파일(${args.base}..${args.commit}에서 바뀐 파일):
+${area.files.map(path => '- ' + path).join('\n')}
+${area.focus ? '특히 볼 것: ' + area.focus : ''}
+
+맡은 파일의 diff와 파일을 모두 읽고, 바뀐 것의 참조를 따라간 뒤 지적을 정리해라. 지적 수에 제한은 없지만, 근거 없는 지적은 넣지 않는다.`,
+    { label: `diff-review:${area.key}`, phase: 'Review', schema: FINDINGS_SCHEMA })
+    .then(result => result ? { area: area.name, ...result } : null)
+))
+
+const areas = results.filter(Boolean)
+const failed = args.areas.filter((area, index) => !results[index]).map(area => area.name)
+if (failed.length) log(`실패한 영역: ${failed.join(', ')}`)
+return { date: args.date, base: args.base, commit: args.commit, context: args.context || '', request: args.areas, areas, failed }

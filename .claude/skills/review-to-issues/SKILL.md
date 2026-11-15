@@ -1,6 +1,6 @@
 ---
 name: review-to-issues
-description: TopView 코드를 리뷰하고, 지적마다 테스트나 사용자 판단으로 판정을 정한 뒤, 리뷰 원본과 테스트를 커밋·푸시하고 모든 지적을 판정과 함께 GitHub 이슈로 등록한다. 재현된 버그만 열어 둔다. 기능(feat)을 마친 뒤 그 범위를 리뷰할 때 쓴다. 고치기는 하지 않는다.
+description: TopView 코드를 리뷰하고, 지적마다 테스트나 사용자 판단으로 판정을 정한 뒤, 리뷰 원본과 테스트를 커밋·푸시하고 모든 지적을 판정과 함께 GitHub 이슈로 등록한다. 재현된 버그만 열어 둔다. 기능(feat)을 마친 뒤 그 기능의 diff를 리뷰할 때 쓴다(폴더 전체 리뷰도 고를 수 있다). 고치기는 하지 않는다.
 ---
 
 # 리뷰 → 판정(테스트, 질문) → 판정 커밋 → 이슈 등록
@@ -8,7 +8,7 @@ description: TopView 코드를 리뷰하고, 지적마다 테스트나 사용자
 코드 리뷰의 지적은 추측이다. 이 스킬은 지적마다 판정을 정해 **모든 지적을 이슈로 남기고**, 고치기 전 코드에서 실패하는 테스트가 있는 지적(`reproduced`)만 열어 둔다. 나머지는 판정과 함께 닫아 기록으로 남긴다. 이슈 등록에서 끝난다. 커밋은 판정 커밋(원본과 테스트)과 지우기 커밋(재현되지 않은 테스트)만 하고 바로 푸시한다. 고치기는 하지 않는다.
 
 도구:
-- 리뷰: `Tools/CodeReview/review.workflow.js` (워크플로)
+- 리뷰: `Tools/CodeReview/diff-review.workflow.js`(diff 리뷰, 기본) 또는 `Tools/CodeReview/review.workflow.js`(전체 리뷰) (워크플로)
 - 테스트 실행: `sh Tools/Testing/run_tests.sh editmode|playmode [필터]` → 결과 `Project/Temp/TestResults/<mode>.json`
 - 이슈 등록: `python Tools/ReviewIssues/review_issue.py ... --results <결과 파일> --create`
 
@@ -16,26 +16,37 @@ description: TopView 코드를 리뷰하고, 지적마다 테스트나 사용자
 
 ## 1. 리뷰 범위를 정하고 보여 준다
 
-사용자가 말한 범위로 `args`를 만든다. 범위가 없으면 묻는다. 보통은 방금 끝낸 기능이 건드린 폴더다.
+어느 도구로 리뷰할지 정한다. 기능(feat)을 마친 뒤의 리뷰는 diff 리뷰다. 사용자가 전체 리뷰(폴더 전체)를 말했을 때만 전체 리뷰를 쓴다.
+
+**diff 리뷰** (`diff-review.workflow.js`): 기능이 바꾼 코드만 본다. `base`는 기능 브랜치가 갈라진 커밋(`git merge-base main HEAD`)이다. 사용자가 다른 범위를 말하면 그것을 쓴다.
 
 ```json
 {
   "date": "YYYY-MM-DD (오늘)",
+  "base": "git merge-base main HEAD의 짧은 해시",
   "commit": "git rev-parse --short HEAD의 값",
   "context": "이번 리뷰의 상황 (어떤 기능을 마쳤는지 등). 없으면 빈 문자열",
   "areas": [
-    { "key": "A1", "name": "A1. 영역 이름", "scope": ["Project/Assets/Scripts/..."], "focus": "특히 볼 것" }
+    { "key": "A1", "name": "A1. 영역 이름", "files": ["Project/Assets/Scripts/... (base..commit에서 바뀐 .cs 파일)"], "focus": "특히 볼 것" }
   ]
 }
 ```
 
+- 바뀐 파일은 `git diff --name-only --diff-filter=AMR <base> <commit> -- Project/Assets/Scripts`로 구하고(지운 파일은 읽을 수 없어 뺀다), 크기는 `git diff --stat`으로 본다. 테스트(`Tests/`)와 에디터 도구(`Editor/`)는 넣지 않는다. 생성 코드(`Core/PlayerActions.cs`)도 넣지 않는다.
+- 바뀐 파일을 개념 폴더(Systems의 하위 폴더, Utilities, Core, Presentation, UserInterface 등)로 묶어 영역을 만든다. 바뀐 줄이 1,000줄 안팎이 될 때마다 영역을 하나씩 나눈다. diff가 작으면 영역 하나로 둔다.
+- 바뀐 파일이 없으면 리뷰하지 않고 알린다.
+
+**전체 리뷰** (`review.workflow.js`): 폴더 전체를 본다. `areas`의 영역마다 `files` 대신 `scope`(폴더나 파일 경로)를 주고, `base`는 없다.
+
 - 영역 하나는 끝까지 읽을 수 있는 양(대략 2,500~5,000줄)으로 나눈다. 에이전트 수는 영역 수와 같다.
+
+두 도구 모두:
 - 리뷰할 커밋은 작업 트리가 깨끗한 상태여야 한다. 커밋하지 않은 변경이 있으면 리뷰 결과의 줄 번호가 커밋과 어긋나므로 사용자에게 알리고 멈춘다.
 - `args`와 리뷰 결과 파일 이름(`Docs/Reviews/날짜-주제.json`)을 보여 주고 확인받은 뒤 실행한다. 워크플로는 비용이 커서 이 확인은 생략하지 않는다.
 
 ## 2. 리뷰를 실행하고 원본을 저장한다
 
-- `Workflow({ scriptPath: "Tools/CodeReview/review.workflow.js", args })`로 실행한다. 백그라운드로 돌고, 끝나면 알림이 온다.
+- `Workflow({ scriptPath: "Tools/CodeReview/diff-review.workflow.js", args })`(전체 리뷰는 `review.workflow.js`)로 실행한다. 백그라운드로 돌고, 끝나면 알림이 온다.
 - 알림의 결과 파일(task output)을 그대로 `Docs/Reviews/날짜-주제.json`으로 복사한다. 원본은 고치지 않는다.
 - 지적 번호는 원본의 `result.areas[].findings[]`를 순서대로 이어 센 번호(1부터)다.
 
