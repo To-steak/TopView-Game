@@ -95,6 +95,6 @@ Unity 프로젝트 밖에서는 정적 분석기 소스 `Tools/TopView.Analyzers
 - 예외: PlayMode 테스트는 테스트 전용 워크 트리 `../TopView-Game-Test`에서 배치 모드 에디터로 돌린다(`unity test "C:/Users/duddn/Repository/TopView-Game-Test/Project" --mode PlayMode`, 상대 경로를 주면 같은 이름의 다른 프로젝트와 헷갈려 실패한다). 사용자가 연 에디터는 건드리지 않는다. 오래 걸리므로 백그라운드로 돌린다.
   - 이유: 다른 폴더의 배치 모드 에디터는 사용자의 에디터와 씬을 끊지 않는다. 같은 프로젝트 폴더는 에디터 둘이 동시에 열 수 없다.
   - 워크 트리는 지우지 않고 계속 쓴다. `Library/`는 처음 한 번 원본에서 복사했고, 그 뒤로는 워크 트리의 Unity가 자기 `Assets/`를 보고 맞춘다.
-  - 테스트 전에 git이 무시하는 에셋 폴더(`Project/Assets/Local Assets/`, `Project/Packages/com.occasoftware.super-simple-skybox/`)와 스크립트 폴더를 원본에서 `robocopy /MIR`로 맞춘다. 커밋하지 않은 코드도 함께 맞춰진다. `run_tests.sh playmode`가 이 일을 한다.
+  - 테스트 전에 git이 무시하는 에셋 폴더(`Project/Assets/Local Assets/`, `Project/Packages/com.occasoftware.super-simple-skybox/`)와 스크립트 폴더를 원본에서 `robocopy /MIR`로 맞추고, 패키지 목록(`Project/Packages/manifest.json`, `packages-lock.json`)을 복사한다. 커밋하지 않은 코드와 패키지 변경도 함께 맞춰진다. `run_tests.sh playmode`가 이 일을 한다.
 - **파일을 옮길 때는 짝인 `.meta`와 함께 `git mv`로 옮긴다.** 새 폴더의 `.meta`는 만들지 않고 Unity가 만들게 둔다. 파일 이름은 바꾸지 않는다. 클래스 이름을 바꿔야 하면 사용자가 에디터에서 파일 이름을 먼저 바꾼 뒤 코드를 고친다.
   - 이유: GUID는 `.meta`에 있어서, `.cs`만 옮기거나 `.meta`를 새로 만들면 GUID가 끊어져 에셋과 씬의 참조가 사라진다. 짝을 함께 옮기면 GUID가 그대로 따라간다.
