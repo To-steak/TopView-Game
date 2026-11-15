@@ -7,7 +7,7 @@
 
 ### 대상
 - 기준 커밋은 [a16a4b78](https://github.com/To-steak/TopView-Game/commit/a16a4b78)(main)이다.
-- 버그는 커밋하지 않은 작업 트리에 심고, 측정이 끝난 뒤 되돌렸다. 심은 내용은 `planted-bugs.patch`, 버그마다의 위치와 결과는 `answer-key.json`에 있다.
+- 버그는 커밋하지 않은 작업 트리에 심고, 측정이 끝난 뒤 되돌렸다. 심은 코드는 남기지 않았다. 버그마다의 위치, 바꾼 내용, 결과는 `answer-key.json`에 있다.
 
 ### 심은 버그
 - 기능(feat) 작업이 게임 코드 전체에 흩어지는 것처럼 버그도 흩어 심었다. Systems 5개, Utilities 2개, UserInterface 2개, Presentation 1개 파일이다.
