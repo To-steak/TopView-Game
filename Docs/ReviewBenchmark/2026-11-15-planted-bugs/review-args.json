@@ -1,0 +1,65 @@
+{
+  "date": "2026-11-15",
+  "commit": "a16a4b78",
+  "context": "기능 작업을 마친 뒤 게임 코드 전체를 리뷰한다. git 명령(log, diff, show, status, blame 등)은 쓰지 말고 작업 트리의 파일만 읽는다. 줄 번호는 지금 작업 트리의 파일 기준으로 적는다. Core/PlayerActions.cs는 Input System이 생성한 코드라 리뷰하지 않는다.",
+  "areas": [
+    {
+      "key": "A1",
+      "name": "A1. Core (World·App)",
+      "scope": [
+        "Project/Assets/Scripts/Core/"
+      ],
+      "focus": "World의 틱 순서와 호출 순서, 판 준비와 정리, App의 앱 수명 일, Presenter와 ViewSystem에 넘기는 데이터."
+    },
+    {
+      "key": "A2",
+      "name": "A2. 엔티티와 데이터",
+      "scope": [
+        "Project/Assets/Scripts/Entities/",
+        "Project/Assets/Scripts/Components/",
+        "Project/Assets/Scripts/Requests/",
+        "Project/Assets/Scripts/Records/",
+        "Project/Assets/Scripts/Commands/",
+        "Project/Assets/Scripts/Definitions/",
+        "Project/Assets/Scripts/Authoring/",
+        "Project/Assets/Scripts/Persistence/"
+      ],
+      "focus": "저장소의 칸 할당·반납과 generation, 마스크 상수와 실제로 채우는 컴포넌트, 필드 주석과 쓰는 쪽의 일치, 저장과 불러오기."
+    },
+    {
+      "key": "B1",
+      "name": "B1. 시스템: 행동·공격·이동",
+      "scope": [
+        "Project/Assets/Scripts/Systems/Action/",
+        "Project/Assets/Scripts/Systems/Attack/",
+        "Project/Assets/Scripts/Systems/Melee/",
+        "Project/Assets/Scripts/Systems/Movement/",
+        "Project/Assets/Scripts/Systems/Projectile/",
+        "Project/Assets/Scripts/Systems/Weapon/"
+      ],
+      "focus": "각 System이 맡은 상태 변경이 맞는지. 호출 순서와 다른 System이 전제하는 것을 필요한 만큼 따라가 확인한다."
+    },
+    {
+      "key": "B2",
+      "name": "B2. 시스템: 판·전리품·생성·강화·체력 + Utilities",
+      "scope": [
+        "Project/Assets/Scripts/Systems/Game/",
+        "Project/Assets/Scripts/Systems/Loot/",
+        "Project/Assets/Scripts/Systems/Spawning/",
+        "Project/Assets/Scripts/Systems/Upgrade/",
+        "Project/Assets/Scripts/Systems/Vitals/",
+        "Project/Assets/Scripts/Utilities/"
+      ],
+      "focus": "각 System과 Utility가 맡은 계산이 맞는지. 호출처를 필요한 만큼 따라가 전제를 확인한다."
+    },
+    {
+      "key": "C1",
+      "name": "C1. 표시 (Presentation·UserInterface)",
+      "scope": [
+        "Project/Assets/Scripts/Presentation/",
+        "Project/Assets/Scripts/UserInterface/"
+      ],
+      "focus": "ViewSystem, View, Presenter가 받은 데이터를 맞게 보여 주는지. 넘겨주는 쪽(Core/World.*)을 필요한 만큼 따라가 확인한다."
+    }
+  ]
+}
