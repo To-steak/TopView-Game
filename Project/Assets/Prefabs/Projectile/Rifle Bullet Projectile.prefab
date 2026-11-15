@@ -99,8 +99,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5914036252617628633}
-  - component: {fileID: 3250196645098199015}
   - component: {fileID: 5276967004449942712}
+  - component: {fileID: 3250196645098199015}
   m_Layer: 0
   m_Name: Rifle Bullet Projectile
   m_TagString: Untagged
@@ -124,6 +124,23 @@ Transform:
   - {fileID: 8224734101838536049}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5276967004449942712
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8751706380067456088}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 966a928007ce9f44e859e694e65a0813, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TopView.Presentation::TopView.Presentation.Projectile.Views.ProjectileView
+  trail: {fileID: 3250196645098199015}
+  rotationPivot: {fileID: 8224734101838536049}
+  pitchSpeed: 0
+  yawSpeed: 0
+  rollSpeed: 0
 --- !u!96 &3250196645098199015
 TrailRenderer:
   serializedVersion: 4
@@ -243,20 +260,3 @@ TrailRenderer:
   m_Autodestruct: 0
   m_Emitting: 1
   m_ApplyActiveColorSpace: 1
---- !u!114 &5276967004449942712
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8751706380067456088}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 966a928007ce9f44e859e694e65a0813, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: TopView.Presentation::TopView.Presentation.Projectile.Views.ProjectileView
-  trail: {fileID: 3250196645098199015}
-  rotationPivot: {fileID: 8224734101838536049}
-  pitchSpeed: 0
-  yawSpeed: 0
-  rollSpeed: 0
