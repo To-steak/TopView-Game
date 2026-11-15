@@ -1,0 +1,23 @@
+{
+  "date": "2026-11-16",
+  "base": "3b2ad38c",
+  "commit": "00ecdfed",
+  "context": "치명타 기능을 마쳤다. 무기마다 치명타 확률(0~1)과 치명타 배율을 Definition에 두고, 플레이어의 공격 한 번마다 첫 발이 나갈 때 World의 시드 고정 난수로 치명타를 정한다. 치명타면 그 공격의 모든 발의 피해(강화가 반영된 피해)에 배율을 곱한다. 근접, 직선 투사체, 포물선 투사체 공격 모두 해당하고, 적의 공격과 화면 표시는 바꾸지 않는다.",
+  "areas": [
+    {
+      "key": "D1",
+      "name": "D1. 치명타",
+      "files": [
+        "Project/Assets/Scripts/Components/Action/PlayerActionStateComponent.cs",
+        "Project/Assets/Scripts/Components/Weapon/WeaponComponent.cs",
+        "Project/Assets/Scripts/Core/World.cs",
+        "Project/Assets/Scripts/Systems/Action/PlayerStateChangeSystem.cs",
+        "Project/Assets/Scripts/Systems/Attack/PlayerArcAttackSystem.cs",
+        "Project/Assets/Scripts/Systems/Attack/PlayerMeleeAttackSystem.cs",
+        "Project/Assets/Scripts/Systems/Attack/PlayerStraightAttackSystem.cs",
+        "Project/Assets/Scripts/Utilities/PlayerWeaponUtility.cs"
+      ],
+      "focus": "치명타가 설계대로 동작하는지."
+    }
+  ]
+}
