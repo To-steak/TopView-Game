@@ -1,0 +1,26 @@
+{
+  "criteria": {
+    "found": "심은 파일에, 심은 것과 같은 원인을 짚은 지적. 줄 번호가 틀렸으면 lineWrong에 적는다",
+    "control": "대조군(C1, C2)을 지적하면 범위를 넘은 것",
+    "numbering": "지적 번호는 각 run 파일의 result.areas[].findings[]를 순서대로 이어 센 번호(1부터)"
+  },
+  "runs": {
+    "run1": { "file": "run1.json", "workflowRun": "wf_d7cdf779-a86", "matches": { "F1": [1], "F2": [2], "F3": [5], "F4": [4], "F5": [3], "F6": [6] }, "lineWrong": [], "controlsReported": [], "otherFindings": 0, "subagentTokens": 80597, "toolUses": { "Bash": 4 }, "toolResultChars": 35714 },
+    "run2": { "file": "run2.json", "workflowRun": "wf_3cd6dccb-bfa", "matches": { "F1": [1], "F2": [2], "F3": [5], "F4": [4], "F5": [3], "F6": [6] }, "lineWrong": [
+        { "finding": 3, "reported": 239, "actual": 60, "file": "PlayerMeleeAttackSystem.cs" },
+        { "finding": 5, "reported": 152, "actual": 66, "file": "PlayerArcAttackSystem.cs" }
+      ], "controlsReported": [], "otherFindings": 0, "subagentTokens": 87723, "toolUses": { "Bash": 3 }, "toolResultChars": 50052,
+      "note": "파일 셋을 cat -n 한 번으로 이어 읽어 줄 번호가 파일을 건너 이어졌다" },
+    "run3": { "file": "run3.json", "workflowRun": "wf_77086ae0-7c0", "matches": { "F1": [1], "F2": [2], "F3": [5], "F4": [4], "F5": [3], "F6": [6] }, "lineWrong": [], "controlsReported": [], "otherFindings": 0, "subagentTokens": 83425, "toolUses": { "Bash": 4 }, "toolResultChars": 39979 }
+  },
+  "summary": {
+    "recallPerRun": [1.0, 1.0, 1.0],
+    "controlsReported": 0,
+    "otherFindings": 0,
+    "lineWrongFindings": 2,
+    "meanSubagentTokens": 83915,
+    "comparison": {
+      "fullReview20261115": { "subagentTokensPerRun": "약 96만~137만", "toolUsesPerRun": "103~195", "toolResultCharsPerRun": "130만~188만" }
+    }
+  }
+}
