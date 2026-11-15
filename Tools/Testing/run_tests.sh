@@ -29,10 +29,11 @@ kind, source, mode, output = sys.argv[1:5]
 sys.stdout.reconfigure(encoding='utf-8')
 results = []
 if kind == 'editmode-json':
+    # --format json은 테스트 하나를 한 줄의 JSON 객체로 낸다
     for line in open(source, encoding='utf-8'):
-        if line.startswith('Results:'):
-            for item in json.loads(line[len('Results:'):].strip()):
-                results.append({'fullName': item['FullName'], 'mode': mode, 'status': item['Status'], 'message': (item['Message'] or '').strip()})
+        if line.startswith('{"fullName"'):
+            item = json.loads(line)
+            results.append({'fullName': item['fullName'], 'mode': mode, 'status': item['status'], 'message': (item['message'] or '').strip()})
 else:
     for case in ElementTree.parse(source).getroot().iter('test-case'):
         message = case.findtext('failure/message') or ''
@@ -78,8 +79,8 @@ editmode)
     wait_editor_ready || { echo "에디터가 준비되지 않아 테스트를 돌리지 못했다."; exit 2; }
     sleep 3
     RAW="$RESULT_DIR/editmode.raw.txt"
-    unity cmd --project-path "$ROOT/Project" test run --mode editor --filter "$FILTER" > "$RAW" 2>&1
-    grep -q "^Results:" "$RAW" || { cat "$RAW"; echo "테스트 결과를 받지 못했다."; exit 2; }
+    unity cmd --project-path "$ROOT/Project" test run --mode editor --filter "$FILTER" --format json > "$RAW" 2>&1
+    grep -q '^{"fullName"' "$RAW" || { cat "$RAW"; echo "테스트 결과를 받지 못했다."; exit 2; }
     summarize editmode-json "$RAW" EditMode editmode
     ;;
 playmode)
