@@ -281,10 +281,10 @@ MonoBehaviour:
   - {fileID: 3559622512548453873, guid: 473fc781f7584fc49add38f6d7ae3256, type: 3}
   - {fileID: 6489545494425738666, guid: f7b394437a9ee854cb3d455ac8e06bb8, type: 3}
   - {fileID: 7928575122053964336, guid: 1a3b6823e71497b4b8592bf1344edb3a, type: 3}
-  propMinimumScale: 3
-  propMaximumScale: 3
-  propSpacing: 1
-  propScatterCount: 1
+  propMinimumScale: 1
+  propMaximumScale: 1.5
+  propSpacing: 3
+  propScatterCount: 3
   propSurfaceLayers:
     serializedVersion: 2
     m_Bits: 576
@@ -312,4 +312,4 @@ MonoBehaviour:
     upperSidePrefab: {fileID: 631756237484819784, guid: 7105882617476f049b4843732a94377c, type: 3}
     upperCornerPrefab: {fileID: 1845904049730234313, guid: 0aa89184479b358438534fa9fb38f7ca, type: 3}
     capPrefab: {fileID: 3206409509365242496, guid: 25908afa12e135c4b9cb13b821a3b667, type: 3}
-  markTilesStatic: 1
+  isPaintedStatic: 1
