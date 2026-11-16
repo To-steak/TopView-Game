@@ -96803,7 +96803,7 @@ PlayableDirector:
   m_Enabled: 1
   serializedVersion: 3
   m_PlayableAsset: {fileID: 11400000, guid: f5e22bde6985b9849b2049ba30019caa, type: 2}
-  m_InitialState: 0
+  m_InitialState: 1
   m_WrapMode: 2
   m_DirectorUpdateMode: 1
   m_InitialTime: 0
@@ -99327,7 +99327,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 927159346}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.0187178, y: -0.16353354, z: 0.0031033307, w: 0.98635536}
+  m_LocalRotation: {x: 0.0070112147, y: -0.96832705, z: 0.027366541, w: 0.24808203}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -237625,6 +237625,7 @@ GameObject:
   m_Component:
   - component: {fileID: 155022759852490695}
   - component: {fileID: 7743304756272078882}
+  - component: {fileID: 7743304756272078883}
   m_Layer: 0
   m_Name: Simple Enemy A AnimTest
   m_TagString: Untagged
@@ -238103,8 +238104,8 @@ AudioSource:
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
-  MinDistance: 15
-  MaxDistance: 500
+  MinDistance: 0
+  MaxDistance: 15
   Pan2D: 0
   rolloffMode: 1
   BypassEffects: 0
@@ -238887,6 +238888,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4133336770914871930}
   - component: {fileID: 4809375363609282494}
+  - component: {fileID: 4809375363609282495}
   m_Layer: 0
   m_Name: Simple Enemy C
   m_TagString: Untagged
@@ -239578,6 +239580,24 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &4809375363609282495
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3609458390641717440}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0eaa58d742085b6489ee6d0ac0ce9c7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TopView.Trailer::TopView.Trailer.FootstepSound
+  _source: {fileID: 1793749519803809435}
+  _clips:
+  - {fileID: 8300000, guid: 718c58f00cac5114fafe0a112f87379e, type: 3}
+  - {fileID: 8300000, guid: 6feaf5b39ebfa8b409b741c185453731, type: 3}
+  - {fileID: 8300000, guid: 788f546a4cdb56d4a8a90f920d8b99b2, type: 3}
+  - {fileID: 8300000, guid: c4b9c3ae91b849a479eab3629870ca0f, type: 3}
 --- !u!4 &4846410849893713910
 Transform:
   m_ObjectHideFlags: 0
@@ -239753,8 +239773,8 @@ AudioSource:
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
-  MinDistance: 15
-  MaxDistance: 500
+  MinDistance: 0
+  MaxDistance: 15
   Pan2D: 0
   rolloffMode: 1
   BypassEffects: 0
@@ -240862,6 +240882,24 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &7743304756272078883
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 679217589035722109}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0eaa58d742085b6489ee6d0ac0ce9c7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TopView.Trailer::TopView.Trailer.FootstepSound
+  _source: {fileID: 9125647176650084156}
+  _clips:
+  - {fileID: 8300000, guid: 718c58f00cac5114fafe0a112f87379e, type: 3}
+  - {fileID: 8300000, guid: 6feaf5b39ebfa8b409b741c185453731, type: 3}
+  - {fileID: 8300000, guid: 788f546a4cdb56d4a8a90f920d8b99b2, type: 3}
+  - {fileID: 8300000, guid: c4b9c3ae91b849a479eab3629870ca0f, type: 3}
 --- !u!1 &7763437814569785005
 GameObject:
   m_ObjectHideFlags: 0
@@ -241096,6 +241134,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9132887557672018346}
   - component: {fileID: 7943247963510029631}
+  - component: {fileID: 9132887557672018347}
   m_Layer: 0
   m_Name: Simple Enemy A AnimTest
   m_TagString: Untagged
@@ -241634,8 +241673,8 @@ AudioSource:
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
-  MinDistance: 15
-  MaxDistance: 500
+  MinDistance: 0
+  MaxDistance: 18
   Pan2D: 0
   rolloffMode: 1
   BypassEffects: 0
@@ -241750,6 +241789,24 @@ Transform:
   - {fileID: 4846410849893713910}
   m_Father: {fileID: 7921462316391961343}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
+--- !u!114 &9132887557672018347
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8499797130763860752}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0eaa58d742085b6489ee6d0ac0ce9c7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TopView.Trailer::TopView.Trailer.FootstepSound
+  _source: {fileID: 5153736072139829964}
+  _clips:
+  - {fileID: 8300000, guid: 718c58f00cac5114fafe0a112f87379e, type: 3}
+  - {fileID: 8300000, guid: 6feaf5b39ebfa8b409b741c185453731, type: 3}
+  - {fileID: 8300000, guid: 788f546a4cdb56d4a8a90f920d8b99b2, type: 3}
+  - {fileID: 8300000, guid: c4b9c3ae91b849a479eab3629870ca0f, type: 3}
 --- !u!1 &9164677848776722432
 GameObject:
   m_ObjectHideFlags: 0
