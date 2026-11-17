@@ -1918,7 +1918,7 @@ GameObject:
   - component: {fileID: 15023457}
   - component: {fileID: 15023458}
   m_Layer: 0
-  m_Name: Cut 07
+  m_Name: Cut 05
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1984,7 +1984,7 @@ PlayableDirector:
   m_Enabled: 1
   serializedVersion: 3
   m_PlayableAsset: {fileID: 11400000, guid: d80a45c593908ff4298b2780c7232774, type: 2}
-  m_InitialState: 0
+  m_InitialState: 1
   m_WrapMode: 2
   m_DirectorUpdateMode: 1
   m_InitialTime: 0
@@ -7174,7 +7174,7 @@ GameObject:
   - component: {fileID: 58323315}
   - component: {fileID: 58323314}
   m_Layer: 0
-  m_Name: Cut 06
+  m_Name: Cut 04
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7190,7 +7190,7 @@ PlayableDirector:
   m_Enabled: 1
   serializedVersion: 3
   m_PlayableAsset: {fileID: 11400000, guid: e58ddff621a028943ad4216b2d004e06, type: 2}
-  m_InitialState: 0
+  m_InitialState: 1
   m_WrapMode: 2
   m_DirectorUpdateMode: 1
   m_InitialTime: 0
@@ -34232,7 +34232,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 290599468}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.39377064, z: -0, w: 0.91920877}
+  m_LocalRotation: {x: -0, y: 0.24044555, z: -0, w: 0.97066265}
   m_LocalPosition: {x: 43.03, y: 0, z: -48.73}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -60167,7 +60167,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 502672132}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.43966702, z: -0, w: 0.8981609}
+  m_LocalRotation: {x: -0, y: 0.24754974, z: -0, w: 0.96887517}
   m_LocalPosition: {x: 44.74, y: 0, z: -44.229996}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -70987,7 +70987,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 615297740}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.5023632, z: -0, w: 0.8646567}
+  m_LocalRotation: {x: -0, y: 0.29301605, z: -0, w: 0.95610756}
   m_LocalPosition: {x: 41, y: 0, z: -43}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -104283,7 +104283,7 @@ GameObject:
   - component: {fileID: 904460547}
   - component: {fileID: 904460548}
   m_Layer: 0
-  m_Name: Cut 01 to 03
+  m_Name: Cut 01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -104320,7 +104320,7 @@ PlayableDirector:
   m_Enabled: 1
   serializedVersion: 3
   m_PlayableAsset: {fileID: 11400000, guid: f5e22bde6985b9849b2049ba30019caa, type: 2}
-  m_InitialState: 0
+  m_InitialState: 1
   m_WrapMode: 2
   m_DirectorUpdateMode: 1
   m_InitialTime: 0
@@ -123248,7 +123248,7 @@ GameObject:
   - component: {fileID: 1056088570}
   - component: {fileID: 1056088569}
   m_Layer: 0
-  m_Name: Cut 05
+  m_Name: Cut 03
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -123264,7 +123264,7 @@ PlayableDirector:
   m_Enabled: 1
   serializedVersion: 3
   m_PlayableAsset: {fileID: 11400000, guid: 2a028408958704f49aeff9d5a484972c, type: 2}
-  m_InitialState: 0
+  m_InitialState: 1
   m_WrapMode: 2
   m_DirectorUpdateMode: 1
   m_InitialTime: 0
@@ -168495,7 +168495,7 @@ GameObject:
   - component: {fileID: 1430144122}
   - component: {fileID: 1430144123}
   m_Layer: 0
-  m_Name: Cut 08
+  m_Name: Cut 06
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -210246,7 +210246,7 @@ GameObject:
   - component: {fileID: 1790772462}
   - component: {fileID: 1790772461}
   m_Layer: 0
-  m_Name: Cut 04
+  m_Name: Cut 02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -234170,7 +234170,7 @@ MonoBehaviour:
   priority: 0
   blendDistance: 0
   weight: 1
-  sharedProfile: {fileID: 11400000, guid: 014bea643755ae540895b123588d6fd2, type: 2}
+  sharedProfile: {fileID: 11400000, guid: 099972bbe38e3ea458d2a61c81e5309c, type: 2}
 --- !u!4 &1982783287
 Transform:
   m_ObjectHideFlags: 0
