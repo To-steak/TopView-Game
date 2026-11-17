@@ -163735,7 +163735,7 @@ MonoBehaviour:
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
   m_RenderPostProcessing: 1
-  m_Antialiasing: 1
+  m_Antialiasing: 2
   m_AntialiasingQuality: 2
   m_StopNaN: 0
   m_Dithering: 0
@@ -164022,7 +164022,7 @@ MonoBehaviour:
   priority: 0
   blendDistance: 0
   weight: 1
-  sharedProfile: {fileID: 11400000, guid: b94cf26fb3e9ae84da069a6e70d7ee6c, type: 2}
+  sharedProfile: {fileID: 11400000, guid: 014bea643755ae540895b123588d6fd2, type: 2}
 --- !u!4 &1982783287
 Transform:
   m_ObjectHideFlags: 0
@@ -177873,6 +177873,7 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1979046065}
+  - {fileID: 1982783287}
   - {fileID: 1481447820}
   - {fileID: 246628384}
   - {fileID: 27587466}
@@ -177895,4 +177896,3 @@ SceneRoots:
   - {fileID: 1176521520}
   - {fileID: 168813408}
   - {fileID: 2012257784}
-  - {fileID: 1982783287}
