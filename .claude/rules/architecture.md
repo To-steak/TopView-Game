@@ -76,6 +76,7 @@ Unity의 FixedUpdate / Update / LateUpdate는 App만 받고, App이 지금 씬�
 | `Presentation/` | 게임 세계의 연출 | `~ViewSystem`, `~View`, `ViewContext`, `~ViewContext`, 오디오, 오브젝트 풀 | `<접두사>.Presentation` | Entity, Definitions, Persistence |
 | `UserInterface/` | 화면 UI | UI View, View가 소유하는 부품(`~Entry`), Presenter | `<접두사>.UserInterface` | Entity, Persistence |
 | `Core/` | 데이터 보관과 실행 순서 | App(앱 수명의 일, 부트스트랩, 로딩, 씬 전환), 씬의 대표(World, `Menu`) | `<접두사>.Core` | 전부 |
+| `Trailer/` | 트레일러 촬영 | 촬영 씬에서만 쓰는 MonoBehaviour | `<접두사>.Trailer` | 없음 |
 | `Editor/` | 에디터 도구 | 에디터 도구 (Gizmo, PropertyDrawer, Custom Editor) | `<접두사>.Editor` (플랫폼: Editor 전용) | 전부 |
 | `Tests/EditMode/` | 동작 확인 | `~Tests` (EditMode 테스트) | `<접두사>.Tests.EditMode` (플랫폼: Editor 전용) | 전부 |
 | `Tests/PlayMode/` | 씬과 틱 순서, 표시의 동작 확인 | `~Tests` (PlayMode 테스트) | `<접두사>.Tests.PlayMode` | 전부 |
@@ -348,6 +349,14 @@ Presentation/
   - 이유: 같은 씬을 두 곳이 돌리면 호출 순서가 다시 흩어진다.
 - **로딩:** Core가 `~Definition`의 struct를 World에 대입한다. 판 시작 시 Core는 `~Authoring`마다 Transform 위치 등 씬 값을 채운 생성 요청을 큐에 넣고, 엔티티는 첫 틱의 `~SpawnSystem`이 만든다. Core는 World에 엔티티를 직접 넣지 않는다. System은 Definition과 Authoring을 참조하지 않는다.
   - 이유: 씬에 놓인 엔티티와 게임 중 생긴 엔티티가 같은 경로로 만들어진다. Logic이 에셋에 묶이지 않는다.
+
+### Trailer/
+게임 로직(World)을 끈 촬영 씬(Trailer)에서 Timeline 장면에 붙는 연출을 둔다.
+
+- **이 폴더는 View 규칙의 예외다.** MonoBehaviour가 메서드를 두고, 애니메이션 이벤트처럼 Unity가 부르는 콜백을 직접 받는다. 단 게임 결과에 닿지 않도록 프로젝트의 다른 어셈블리를 참조하지 않는다.
+  - 이유: View 규칙(View는 메서드를 두지 않는다, 이벤트 금지, Unity 콜백은 App만 받는다)은 연출 흐름을 World/App의 호출 순서 한곳에서 보려고 둔 것이다. 촬영 씬에는 World가 없어 그 흐름 자체가 없고, Timeline이 재생 순서를 정한다.
+- 게임 씬의 프리팹과 애니메이션 클립에는 이 폴더의 스크립트나 그것을 부르는 애니메이션 이벤트를 붙이지 않는다. 이벤트가 필요하면 클립을 복제해 촬영용 복사본에 꽂는다.
+  - 이유: 게임 쪽 클립에 이벤트를 꽂으면 받는 스크립트가 없어 발을 디딜 때마다 "no receiver" 오류가 쌓이고, 받는 스크립트를 붙이면 예외가 게임 코드로 번진다.
 
 ### Editor/
 Gizmo, PropertyDrawer, Custom Editor 등 에디터 도구를 둔다. 플랫폼을 Editor 전용으로 두어 빌드에 포함되지 않는다.
