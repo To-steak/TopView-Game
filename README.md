@@ -190,6 +190,9 @@ graph TD
     Persistence --> Entity
 ```
 
+<details>
+<summary><b>어셈블리별 설명</b></summary>
+
 **실행**: 언제 무엇을 부를지 정합니다
 - `Core`: App(씬 전환, 설정, 배경음악 같은 앱 수명의 일)과 World(한 판의 데이터와 틱·호출 순서)
 
@@ -209,6 +212,8 @@ graph TD
 **도구**: 게임 밖에서 씁니다
 - `Editor`: 수치 편집 창, 타일 배치 도구 같은 에디터 도구. 빌드에 포함되지 않습니다
 - `Trailer`: 트레일러 촬영 씬 전용 연출. 게임 어셈블리를 참조하지 않습니다
+
+</details>
 
 사용한 패키지: Input System · Cinemachine · DOTween · TextMeshPro · uGUI
 
