@@ -116,7 +116,10 @@ TODO: 항목마다 한두 줄 요약 + Notion의 해당 사례 링크 + 저장�
 <details>
 <summary><b>트레일러 영상 제작 과정</b></summary>
 
-기획, 트레일러 편집, 썸네일, 빌드와 릴리스 배포까지 직접 했습니다.
+- 시네마틱 영상도 게임 세계관을 보여 주고 흥미를 끄는 중요한 장치라고 보고, 해보고 싶었던 트레일러 영상 제작을 시도했습니다.
+- Unity Timeline으로 컷마다 연출을 짜고, Unity Recorder로 녹화했습니다.
+- 영상 편집 도구(FilmCraft)를 CLI 제어 모드와 MCP 커넥터로 Claude Code에 연결했습니다. 컷 구성과 연출은 제가 정하고, 컷 배치와 편집 명령은 AI가 실행했습니다.
+- 3일 만에 1분 20초 트레일러를 완성해 YouTube에 올렸습니다([트레일러](https://youtu.be/7fyoxN1xmZw)).
 
 </details>
 
