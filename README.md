@@ -33,7 +33,7 @@
 
 <img src="Docs/Image/counter_3_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> AI가 쓴 코드는 프로젝트 규칙으로 만든 정적 분석기([Roslyn](/Tools/TopView.Analyzers/README.md)), 코드를 작성한 세션과 다른 새 세션의 AI 리뷰([Claude Code Workflow](/Tools/CodeReview/README.md)), 지적마다 재현 테스트([Unity Test Framework](/Tools/Testing/README.md))를 거쳐 확인하고, 재현된 버그만 이슈([GitHub Issues](/Tools/ReviewIssues/README.md))로 남겼습니다.
 
-## <img src="Docs/Image/history_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> 개발 과정
+## <a href="#-개발-과정"><img src="Docs/Image/history_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"></a> 개발 과정
 자세한 이야기는 Notion에 있습니다.
 
 <details>
@@ -48,7 +48,7 @@
 **AI(Claude Code)**
 - 게임 코드를 작성하고 리뷰했습니다.
 - 제가 요청한 대로 [수치 편집 창](/Project/Assets/Scripts/Editor/DefinitionEditorWindow.cs#L6-L7), [타일 배치 도구](/Project/Assets/Scripts/Editor/LevelTilePainterWindow.cs#L8-L17) 같은 Custom Editor를 만들었습니다.
-- Unity CLI로 컴파일 오류와 테스트 결과를 직접 확인하고, GitHub CLI로 리뷰 지적을 이슈로 등록했습니다([AI가 일할 수 있는 환경](#ai가-일할-수-있는-환경)).
+- Unity CLI로 컴파일 오류와 테스트 결과를 직접 확인하고, GitHub CLI로 리뷰 지적을 이슈로 등록했습니다([AI가 일할 수 있는 환경](#-ai가-일할-수-있는-환경)).
 
 <img src="Docs/Image/Definition%20Editor.png" width="49%" alt="수치 편집 창"> <img src="Docs/Image/Level%20Tile%20Painter.png" width="49%" alt="타일 배치 도구">
 
@@ -102,7 +102,7 @@
 
 </details>
 
-## <img src="Docs/Image/smart_toy_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> AI가 일할 수 있는 환경
+## <a href="#-ai가-일할-수-있는-환경"><img src="Docs/Image/smart_toy_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"></a> AI가 일할 수 있는 환경
 AI가 일을 맡을 때마다 결과를 사람에게 묻지 않고, 스스로 확인하고 고칠 수 있게 도구를 연결했습니다.
 
 | 도구 | AI가 스스로 할 수 있게 된 일 |
@@ -120,7 +120,7 @@ AI가 일을 맡을 때마다 결과를 사람에게 묻지 않고, 스스로 �
 
 AI가 하지 않는 일도 함께 정했습니다. 에디터를 열거나 Play 모드에 들어가지 않고, 씬·프리팹·에셋·`.meta`는 건드리지 않습니다([에디터와 파일](/CLAUDE.md#에디터와-파일), [작업 범위](/CLAUDE.md#작업-범위)). 에디터 상태는 사용자의 작업을 끊을 수 있어 사람이 정합니다.
 
-## <img src="Docs/Image/verified_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> 검증 체계
+## <a href="#-검증-체계"><img src="Docs/Image/verified_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"></a> 검증 체계
 AI가 쓴 코드는 네 단계를 거칩니다. 앞 단계가 놓친 것을 다음 단계가 잡고, 각 단계의 결과는 저장소에 남습니다.
 
 | 단계 | 언제 | 무엇을 확인하나 | 근거 |
@@ -140,7 +140,7 @@ AI가 쓴 코드는 네 단계를 거칩니다. 앞 단계가 놓친 것을 다�
 **리뷰가 놓치는 것**
 버그를 심어 리뷰 도구를 측정했을 때, 한 틱 차이로 생기는 버그는 세 번 모두 놓쳤습니다([전체 리뷰 측정](/Docs/ReviewBenchmark/2026-11-15-planted-bugs/README.md)). 이런 버그는 사람도 에디터에서 재현할 수 없어서 테스트로만 확인합니다.
 
-## <img src="Docs/Image/account_tree_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> 기술 구조
+## <a href="#-기술-구조"><img src="Docs/Image/account_tree_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"></a> 기술 구조
 DOTS 패키지 없이 순수 C#으로 데이터 지향 구조를 만들었습니다. 데이터는 컴포넌트에, 로직은 상태 없는 System에 두는 ECS의 원칙을 따르되, 저장은 모든 컴포넌트를 필드로 가진 엔티티 struct 하나를 고정 배열에 담는 단순한 방식으로 했습니다. 칸이 가진 컴포넌트는 마스크로 표시합니다. 자세한 규칙과 이유는 [아키텍처 규칙](/.claude/rules/architecture.md)에 있습니다.
 
 ```
@@ -215,7 +215,7 @@ graph TD
 
 사용한 패키지: Input System · Cinemachine · DOTween · TextMeshPro · uGUI
 
-## <img src="Docs/Image/folder_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> 저장소 구성
+## <a href="#-저장소-구성"><img src="Docs/Image/folder_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"></a> 저장소 구성
 ```
 TopView-Game/
 ├── Project/          Unity 프로젝트
@@ -227,7 +227,7 @@ TopView-Game/
 ```
 
 **게임**
-- [`Project/Assets/Scripts/`](/Project/Assets/Scripts/): 게임 코드. 폴더 구성은 [기술 구조](#기술-구조)와 같습니다
+- [`Project/Assets/Scripts/`](/Project/Assets/Scripts/): 게임 코드. 폴더 구성은 [기술 구조](#-기술-구조)와 같습니다
 - [`Project/Assets/Scripts/Tests/`](/Project/Assets/Scripts/Tests/): EditMode, PlayMode 테스트
 
 **AI 작업 규칙**
@@ -246,7 +246,7 @@ TopView-Game/
 - [`Docs/Reviews/`](/Docs/Reviews/): 리뷰 도구가 낸 리뷰 원본(고치지 않음)
 - [`Docs/ReviewBenchmark/`](/Docs/ReviewBenchmark/): 버그를 심어 리뷰 도구를 측정한 기록
 
-## <img src="Docs/Image/sports_esports_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> 실행 방법
+## <a href="#-실행-방법"><img src="Docs/Image/sports_esports_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"></a> 실행 방법
 **플레이** (Windows 전용)
 1. [Release](https://github.com/To-steak/TopView-Game/releases/latest)에서 `TopView_Game.zip`을 받아 압축을 풉니다.
 2. 압축을 푼 폴더의 실행 파일을 엽니다.
@@ -274,7 +274,7 @@ TopView-Game/
 - Unity 6000.3.27f2 (URP)에서 `Project/` 폴더를 엽니다.
 - 에셋 스토어 에셋(`Project/Assets/Local Assets/`)과 스카이박스 패키지는 재배포할 수 없어 저장소에 넣지 않았습니다. 저장소만 받아서는 모델, 사운드, 폰트가 빠진 채로 열립니다. 플레이는 Release의 빌드로 해 주세요.
 
-## <img src="Docs/Image/license_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> License
+## <a href="#-license"><img src="Docs/Image/license_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"></a> License
 프로젝트에 사용한 외부 에셋과 라이선스입니다. 저장소에 넣지 않은 에셋의 라이선스 파일은 [`Docs/License/`](/Docs/License/)에 복사해 두었습니다.
 
 **CC0 (저장소에 포함)**
