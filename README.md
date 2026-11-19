@@ -26,7 +26,7 @@
 ![GitHub Issues](https://img.shields.io/badge/GitHub_Issues-181717?style=flat-square&logo=github&logoColor=white)
 
 
-## 프로젝트 세 줄 요약
+## <a href="#-프로젝트-세-줄-요약"><img src="Docs/Image/summarize_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"></a> 프로젝트 세 줄 요약
 <img src="Docs/Image/counter_1_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> Unity 6로 탑다운 액션 게임을 팀원 없이 AI(Claude Code)와 함께 기획부터 구현, 트레일러 제작, 배포까지 완성했습니다.
 
 <img src="Docs/Image/counter_2_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> 기획·설계와 플레이 확인은 제가 맡고 구현과 리뷰는 AI(Claude)에게 맡겼으며, 그 경계를 규칙 문서([CLAUDE.md](/CLAUDE.md#작업-범위))로 정해 AI가 규칙과 어긋나면 [먼저 묻게](/CLAUDE.md#대화) 했습니다.
