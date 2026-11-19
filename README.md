@@ -2,7 +2,7 @@
 [![TopView Game 트레일러](Docs/Image/YouTube_Thumbnail.png)](https://youtu.be/7fyoxN1xmZw)
 
 > [!IMPORTANT]
-> 적을 물리치고 강화를 하며 최종적으로 보스를 쓰러뜨리는 탑다운 액션 게임을 기획하고 Claude와 함께 작업하였습니다.
+> 적을 물리치고 강화를 하며 최종적으로 보스를 쓰러뜨리는 탑다운 액션 게임을 기획하고 Claude Code와 함께 작업하였습니다.
 > 2026년 8월에 올려 두고 멈췄던 프로젝트를, 10월 30일부터 Claude Code와 데이터 지향 구조로 다시 짜서 11월 12일 1.0.0을 출시했습니다.
 
 <img src="Docs/Image/smart_display_24dp_FF6666_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> [TopView Game 트레일러 영상 보러가기 - YouTube](https://youtu.be/7fyoxN1xmZw)
@@ -59,7 +59,7 @@
 <summary><b>AI의 코드 리뷰</b></summary>
 
 - Claude Code의 기본 `/code-review`를 써 보고, 영역을 나눠 에이전트가 읽고 지적마다 실패 시나리오를 적는 구조를 참고했습니다.
-- 리뷰의 지적은 추측이라고 보고, 버그 지적은 테스트를 써서 재현되는지, 기획 의도일 수 있는 지적은 제가 판단해 판정하는 흐름을 더했습니다.
+- 리뷰의 지적은 추측이라고 보고, 버그 지적은 테스트를 써서 재현되는지, 의도일 수 있는 지적은 제가 판단해 판정하는 흐름을 더했습니다.
 - 모든 지적을 판정 라벨과 함께 GitHub 이슈로 남기고, 테스트로 재현된 버그만 열어 둡니다.
 - 이 흐름을 설계하고 구현은 AI에게 맡겨 [리뷰 워크플로](/Tools/CodeReview/README.md), [이슈 등록 도구](/Tools/ReviewIssues/README.md), 두 도구를 묶는 스킬([`/review-to-issues`](/.claude/skills/review-to-issues/SKILL.md))을 만들었습니다.
 - 버그를 심어 리뷰 도구를 측정해 보니([전체 리뷰 측정](/Docs/ReviewBenchmark/2026-11-15-planted-bugs/README.md)) 재현율은 평균 86.7%였지만, 폴더 전체를 읽는 방식이라 한 번에 에이전트 토큰이 약 100만 들었습니다.
@@ -93,7 +93,6 @@
 <details>
 <summary><b>트레일러 영상 제작 과정</b></summary>
 
-- 시네마틱 영상도 게임 세계관을 보여 주고 흥미를 끄는 중요한 장치라고 보고, 해 보고 싶었던 트레일러 영상 제작을 시도했습니다.
 - Unity Timeline으로 컷마다 연출을 짜고, Unity Recorder로 녹화했습니다.
 - ArtCraft의 영상 편집기를 CLI 제어 모드와 MCP 커넥터로 Claude Code에 연결했습니다. 컷 구성과 연출은 제가 정하고, 컷 배치와 편집 명령은 AI가 실행했습니다.
 - 3일 만에 1분 20초 트레일러를 완성해 YouTube에 올렸습니다([트레일러](https://youtu.be/7fyoxN1xmZw)).
@@ -127,7 +126,7 @@ AI가 쓴 코드는 네 단계를 거칩니다. 앞 단계가 놓친 것을 다�
 |---|---|---|---|
 | 1. 정적 분석기 | 컴파일할 때마다 | 코드 규칙 25개를 Unity Console 경고로 띄웁니다. 규칙의 동작은 예시 문서가 정하고, 그 예시가 곧 분석기의 테스트입니다 | [분석기](/Tools/TopView.Analyzers/README.md), [예시 문서](/Tools/TopView.Analyzers.Tests/Examples/) |
 | 2. 코드 리뷰 | 기능을 마친 뒤 | 코드를 작성한 세션과 다른 새 세션의 에이전트들이 바뀐 코드를 영역별로 읽고, 지적마다 실패 상황을 적습니다 | [리뷰 워크플로](/Tools/CodeReview/README.md), [리뷰 원본](/Docs/Reviews/) |
-| 3. 판정 | 지적마다 | 리뷰의 지적은 추측으로 봅니다. 버그 지적은 고치기 전 코드에서 실패하는 테스트를 써서 실제 버그인지 판정하고, 기획 의도일 수 있는 지적은 제가 판단하며, 규칙·정리·불일치 지적은 테스트 없이 기록합니다 | [테스트 실행 도구](/Tools/Testing/README.md), [테스트](/Project/Assets/Scripts/Tests/) |
+| 3. 판정 | 지적마다 | 리뷰의 지적은 추측으로 봅니다. 버그 지적은 고치기 전 코드에서 실패하는 테스트를 써서 실제 버그인지 판정하고, 의도일 수 있는 지적은 제가 판단하며, 규칙·정리·불일치 지적은 테스트 없이 기록합니다 | [테스트 실행 도구](/Tools/Testing/README.md), [테스트](/Project/Assets/Scripts/Tests/) |
 | 4. 이슈와 수정 | 판정한 뒤 | 모든 지적을 판정 라벨과 함께 이슈로 남기고, 재현된 버그만 열어 둡니다. 실패하던 테스트가 통과로 바뀌면 고친 것으로 봅니다 | [이슈 등록 도구](/Tools/ReviewIssues/README.md), [리뷰 이슈](https://github.com/To-steak/TopView-Game/issues?q=label%3Areview-finding) |
 
 ![규칙을 어긴 코드에 Unity Console이 띄운 분석기 경고 TV0002](Docs/Image/Analyzer_Warning.png)
