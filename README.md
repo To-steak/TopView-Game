@@ -7,19 +7,42 @@ TODO: 위 링크 줄 아래에 한 줄 소개(장르, 플레이 방식), 영상 
 -->
 [![TopView Game 트레일러](Docs/Image/YouTube_Thumbnail.png)](https://youtu.be/7fyoxN1xmZw)
 
+> 적을 물리치고 강화를 하며 최종적으로 보스를 쓰러뜨리는 탑다운 액션 게임을 기획하고 CLAUDE 함께 작업하였습니다.
+
 <img src="Docs/Image/smart_display_24dp_FF6666_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> [TopView Game 트레일러 영상 보러가기 - YouTube](https://youtu.be/7fyoxN1xmZw)
 
 <img src="Docs/Image/smart_display_24dp_FF6666_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> [TopView Game 플레이 영상 보러가기 - YouTube](https://youtu.be/7VS9hrIHz_A)
 
 <img src="Docs/Image/download_24dp_8B949E_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> [다운로드 (Release)](https://github.com/To-steak/TopView-Game/releases)
 
-## 한눈에 보기
+
+**Engine**  
+![Unity](https://img.shields.io/badge/Unity-6000.3-000000?style=flat-square&logo=unity&logoColor=white)
+![URP](https://img.shields.io/badge/URP-000000?style=flat-square&logo=unity&logoColor=white)
+![C#](https://img.shields.io/badge/C%23-512BD4?style=flat-square&logo=dotnet&logoColor=white)
+
+**AI**  
+![Claude Code](https://img.shields.io/badge/Claude_Code-D97757?style=flat-square&logo=claude&logoColor=white)
+![Unity CLI](https://img.shields.io/badge/Unity_CLI-000000?style=flat-square&logo=unity&logoColor=white)
+
+**Verification**  
+![Roslyn Analyzer](https://img.shields.io/badge/Roslyn_Analyzer-512BD4?style=flat-square&logo=dotnet&logoColor=white)
+![Unity Test Framework](https://img.shields.io/badge/Unity_Test_Framework-000000?style=flat-square&logo=unity&logoColor=white)
+![GitHub Issues](https://img.shields.io/badge/GitHub_Issues-181717?style=flat-square&logo=github&logoColor=white)
+
+
+## 프로젝트 세 줄 요약
 <!--
 TODO: 세 줄 요약 - 무엇을 만들었는지, AI와 어떻게 나눠 일했는지, 무엇으로 결과를 검증했는지
 - 역할: 양쪽 공통. Notion과 같은 세 줄을 써도 된다.
 - 출처: "탁월한 인턴, 성장 가이드" - "바쁘신 분을 위해 먼저, 딱 세 줄로"
 - 출처: 성장 가이드 01 - "무언가를 끝까지 만들어 내고 그 과정을 자기 말로 설명할 수 있는 사람"
 -->
+<img src="Docs/Image/counter_1_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> Unity 6로 탑다운 액션 게임을 기획부터 구현, 트레일러 제작, 배포까지 혼자 완성했습니다.
+
+<img src="Docs/Image/counter_2_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> 기획·설계와 플레이 확인은 제가 맡고 구현과 리뷰는 AI(Claude)에게 맡겼으며, 그 경계를 규칙 문서([CLAUDE.md](/CLAUDE.md))로 정해 AI가 규칙과 어긋나면 먼저 묻게 했습니다.
+
+<img src="Docs/Image/counter_3_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> AI가 쓴 코드는 직접 만든 정적 분석기([Roslyn](/Tools/TopView.Analyzers/)), 구현과 분리된 리뷰 에이전트([Claude Code Workflow](/Tools/CodeReview/README.md)), 지적마다 재현 테스트([Unity Test Framework](/Tools/Testing/README.md))를 거쳐 확인하고, 재현된 버그만 이슈([GitHub Issues](/Tools/ReviewIssues/README.md))로 남겼습니다.
 
 ## 개발 과정
 <!--
