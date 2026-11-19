@@ -63,7 +63,7 @@
 - 모든 지적을 판정 라벨과 함께 GitHub 이슈로 남기고, 테스트로 재현된 버그만 열어 둡니다.
 - 이 흐름을 설계하고 구현은 AI에게 맡겨 [리뷰 워크플로](/Tools/CodeReview/README.md), [이슈 등록 도구](/Tools/ReviewIssues/README.md), 두 도구를 묶는 스킬([`/review-to-issues`](/.claude/skills/review-to-issues/SKILL.md))을 만들었습니다.
 - 게임 코드에 버그 10개를 심고 리뷰 도구를 세 번 돌려 보니 평균 86.7%를 찾았지만, 폴더 전체를 읽는 방식이라 한 번에 에이전트 토큰이 100만 가까이 들었습니다([전체 리뷰 측정](/Docs/ReviewBenchmark/2026-11-15-planted-bugs/README.md)).
-- 바뀐 코드만 읽는 diff 리뷰 워크플로를 새로 만들었습니다. 버그 6개를 심은 가짜 기능으로 세 번 돌려 보니 매번 6개를 모두 찾았고, 토큰은 8만 남짓 들었습니다([diff 리뷰 측정](/Docs/ReviewBenchmark/2026-11-16-critical-hit-diff/README.md)). 다만 심은 버그가 모두 바뀐 코드 안에 있어 찾기 쉬운 조건이었습니다.
+- 바뀐 코드만 읽는 diff 리뷰 워크플로를 새로 만들었습니다. 버그 6개를 심은 가짜 기능으로 세 번 돌려 보니 매번 6개를 모두 찾았고, 토큰은 8만 남짓 들었습니다([diff 리뷰 측정](/Docs/ReviewBenchmark/2026-11-16-critical-hit-diff/README.md)). 원인이 바뀌지 않은 파일에 있어 참조를 따라가야 보이는 버그는 아직 측정하지 않았습니다.
 
 ![판정 라벨과 함께 등록된 리뷰 지적 이슈 목록](Docs/Image/Review_Issues.png)
 
