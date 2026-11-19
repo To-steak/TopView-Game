@@ -13,21 +13,6 @@ TODO: 위 링크 줄 아래에 한 줄 소개(장르, 플레이 방식), 영상 
 
 <img src="Docs/Image/download_24dp_8B949E_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> [다운로드 (Release)](https://github.com/To-steak/TopView-Game/releases)
 
-> [!NOTE]
-> 설명
-
-> [!TIP]
-> 팁
-
-> [!IMPORTANT]
-> 중요
-
-> [!WARNING]
-> 주의
-
-> [!CAUTION]
-> 위험
-
 ## 한눈에 보기
 <!--
 TODO: 세 줄 요약 - 무엇을 만들었는지, AI와 어떻게 나눠 일했는지, 무엇으로 결과를 검증했는지
