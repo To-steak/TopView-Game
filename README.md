@@ -2,7 +2,7 @@
 [![TopView Game 트레일러](Docs/Image/YouTube_Thumbnail.png)](https://youtu.be/7fyoxN1xmZw)
 
 > [!IMPORTANT]
-> 적을 물리치고 강화를 하며 최종적으로 보스를 쓰러뜨리는 탑다운 액션 게임을 기획하고 CLAUDE 함께 작업하였습니다.
+> 적을 물리치고 강화를 하며 최종적으로 보스를 쓰러뜨리는 탑다운 액션 게임을 기획하고 Claude와 함께 작업하였습니다.
 
 <img src="Docs/Image/smart_display_24dp_FF6666_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> [TopView Game 트레일러 영상 보러가기 - YouTube](https://youtu.be/7fyoxN1xmZw)
 
@@ -27,7 +27,7 @@
 
 
 ## <a href="#-프로젝트-세-줄-요약"><img src="Docs/Image/summarize_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"></a> 프로젝트 세 줄 요약
-<img src="Docs/Image/counter_1_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> Unity 6로 탑다운 액션 게임을 팀원 없이 AI(Claude Code)와 함께 기획부터 구현, 트레일러 제작, 배포까지 완성했습니다.
+<img src="Docs/Image/counter_1_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> Unity 6으로 탑다운 액션 게임을 팀원 없이 AI(Claude Code)와 함께 기획부터 구현, 트레일러 제작, 배포까지 완성했습니다.
 
 <img src="Docs/Image/counter_2_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> 기획·설계와 플레이 확인은 제가 맡고 구현과 리뷰는 AI(Claude)에게 맡겼으며, 그 경계를 규칙 문서([CLAUDE.md](/CLAUDE.md#작업-범위))로 정해 AI가 규칙과 어긋나면 [먼저 묻게](/CLAUDE.md#대화) 했습니다.
 
@@ -72,7 +72,7 @@
 <summary><b>문제를 나누고 정리한 방법</b></summary>
 
 - 기능 하나를 구현 → 리뷰 → 판정 → 이슈 → 수정의 다섯 단계로 나눴습니다.
-- 리뷰의 지적은 CLAUDE의 추측으로 여기고, 지적마다 테스트를 써서 재현되는지 먼저 판정했습니다.
+- 리뷰의 지적은 Claude의 추측으로 여기고, 지적마다 테스트를 써서 재현되는지 먼저 판정했습니다.
 - 판정과 상관없이 모든 지적을 이슈로 남기고, 재현된 버그는 수정 브랜치에서 고쳐 PR로 합쳤습니다. 커밋마다 `Fixes #번호`로 이슈를 닫았습니다.
 - 지금까지 지적 49개를 판정했고, 재현된 23개를 모두 고쳤습니다.
 
@@ -93,7 +93,7 @@
 <details>
 <summary><b>트레일러 영상 제작 과정</b></summary>
 
-- 시네마틱 영상도 게임 세계관을 보여 주고 흥미를 끄는 중요한 장치라고 보고, 해보고 싶었던 트레일러 영상 제작을 시도했습니다.
+- 시네마틱 영상도 게임 세계관을 보여 주고 흥미를 끄는 중요한 장치라고 보고, 해 보고 싶었던 트레일러 영상 제작을 시도했습니다.
 - Unity Timeline으로 컷마다 연출을 짜고, Unity Recorder로 녹화했습니다.
 - ArtCraft의 영상 편집기를 CLI 제어 모드와 MCP 커넥터로 Claude Code에 연결했습니다. 컷 구성과 연출은 제가 정하고, 컷 배치와 편집 명령은 AI가 실행했습니다.
 - 3일 만에 1분 20초 트레일러를 완성해 YouTube에 올렸습니다([트레일러](https://youtu.be/7fyoxN1xmZw)).
