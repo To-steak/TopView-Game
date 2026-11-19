@@ -74,7 +74,7 @@ TODO: 항목마다 한두 줄 요약 + Notion의 해당 사례 링크 + 저장�
 > - 코드 구현
 > - 코드 리뷰
 > - 규칙과 어긋나는 지시를 받으면 작업 전에 먼저 되묻기
->
+
 > [!TIP]
 > <img src="Docs/Image/code_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> [코드 규칙](/.claude/rules/csharp-style.md)
 >
