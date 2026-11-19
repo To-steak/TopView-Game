@@ -18,7 +18,8 @@
 예:
     python Tools/ReviewIssues/review_issue.py \
         --review Docs/Reviews/2026-11-14-game-code-review.json --finding 15 --commit 45ba8812 \
-        --verdict reproduced --test MeleeOwnerDeathSystemTests.RequestsDespawnWhenEnemyOwnerIsDead \
+        --verdict reproduced --test-commit <판정 커밋> \
+        --test MeleeOwnerDeathSystemTests.RequestsDespawnWhenEnemyOwnerIsDead \
         --results Project/Temp/TestResults/editmode.json --create
 """
 
