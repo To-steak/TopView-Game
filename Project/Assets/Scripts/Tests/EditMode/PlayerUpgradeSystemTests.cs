@@ -86,6 +86,20 @@ namespace TopView.Tests.EditMode
             Assert.AreEqual(6, _storage.entities[WEAPON_INDEX].magazineState.current);
         }
 
+        /// <summary>
+        /// 무기를 0레벨에서 1레벨로 올려 최대 탄약 수가 30 × 1.05 = 31.5가 되면, 사사오입한 32발에 맞춰 늘어난 2발을 탄창에 넣는다.
+        /// 0.05는 2진수로 딱 떨어지지 않아 float 곱이 31.499998이 되면 내림되어 31발이 된다.
+        /// </summary>
+        [Test]
+        public void RoundsHalfMaxAmmoUpWhenRatioIsNotExactInBinary()
+        {
+            PlacePlayerWithWeapon(30, 0.05f);
+
+            PlayerUpgradeSystem.Tick(_storage, ref _progress, _commands);
+
+            Assert.AreEqual(32, _storage.entities[WEAPON_INDEX].magazineState.current, "최대 탄약 30 × 1.05 = 31.5발이 float 오차로 31.499998이 되어 사사오입되지 않고 31발로 내림됐다.");
+        }
+
         // 플레이어 칸 하나와 무기 칸 하나가 있는 저장소에, 탄창이 가득 찬 0레벨 무기를 든 플레이어를 놓고 무기 강화 명령을 넣는다
         private void PlacePlayerWithWeapon(int maxAmmo, float maxAmmoRatioPerLevel)
         {
