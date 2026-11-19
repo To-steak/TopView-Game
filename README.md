@@ -30,7 +30,7 @@
 ## <a href="#-프로젝트-세-줄-요약"><img src="Docs/Image/summarize_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"></a> 프로젝트 세 줄 요약
 <img src="Docs/Image/counter_1_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> Unity 6으로 탑다운 액션 게임을 팀원 없이 AI(Claude Code)와 함께 기획부터 구현, 트레일러 제작, 배포까지 완성했습니다.
 
-<img src="Docs/Image/counter_2_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> 기획·설계와 플레이 확인은 제가 맡고 구현과 리뷰는 AI(Claude)에게 맡겼으며, 그 경계를 규칙 문서([CLAUDE.md](/CLAUDE.md#작업-범위))로 정해 AI가 규칙과 어긋나면 [먼저 묻게](/CLAUDE.md#대화) 했습니다.
+<img src="Docs/Image/counter_2_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> 기획·설계와 플레이 확인은 제가 맡고 구현과 리뷰는 AI(Claude Code)에게 맡겼으며, 그 경계를 규칙 문서([CLAUDE.md](/CLAUDE.md#작업-범위))로 정해 AI가 규칙과 어긋나면 [먼저 묻게](/CLAUDE.md#대화) 했습니다.
 
 <img src="Docs/Image/counter_3_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> AI가 쓴 코드는 프로젝트 규칙으로 만든 정적 분석기([Roslyn](/Tools/TopView.Analyzers/README.md)), 코드를 작성한 세션과 다른 새 세션의 AI 리뷰([Claude Code Workflow](/Tools/CodeReview/README.md)), 버그 지적의 재현 테스트([Unity Test Framework](/Tools/Testing/README.md))를 거쳐 확인하고, 모든 지적을 판정과 함께 이슈로 기록해 재현된 버그만 열어 두었습니다([GitHub Issues](/Tools/ReviewIssues/README.md)).
 
@@ -73,7 +73,7 @@
 <summary><b>문제를 나누고 정리한 방법</b></summary>
 
 - 기능 하나를 구현 → 리뷰 → 판정 → 이슈 → 수정의 다섯 단계로 나눴습니다.
-- 리뷰의 지적은 Claude의 추측으로 여기고, 버그 지적은 테스트를 써서 재현되는지 먼저 판정했습니다.
+- 리뷰의 지적은 Claude Code의 추측으로 여기고, 버그 지적은 테스트를 써서 재현되는지 먼저 판정했습니다.
 - 판정과 상관없이 모든 지적을 이슈로 남기고, 재현된 버그는 수정 브랜치에서 고쳐 PR로 합쳤습니다. 커밋마다 `Fixes #번호`로 이슈를 닫았습니다.
 - 지금까지 지적 49개를 판정했습니다(재현 23, 테스트 없이 고침 12, 의도된 사항 8, 확인 안 함 4, 재현 안 됨 2). 재현된 23개는 모두 고쳤습니다.
 
