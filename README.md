@@ -42,7 +42,7 @@ TODO: 세 줄 요약 - 무엇을 만들었는지, AI와 어떻게 나눠 일했�
 
 <img src="Docs/Image/counter_2_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> 기획·설계와 플레이 확인은 제가 맡고 구현과 리뷰는 AI(Claude)에게 맡겼으며, 그 경계를 규칙 문서([CLAUDE.md](/CLAUDE.md))로 정해 AI가 규칙과 어긋나면 먼저 묻게 했습니다.
 
-<img src="Docs/Image/counter_3_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> AI가 쓴 코드는 직접 만든 정적 분석기([Roslyn](/Tools/TopView.Analyzers/README.md)), 코드를 짠 세션과 다른 새 세션의 AI 리뷰([Claude Code Workflow](/Tools/CodeReview/README.md)), 지적마다 재현 테스트([Unity Test Framework](/Tools/Testing/README.md))를 거쳐 확인하고, 재현된 버그만 이슈([GitHub Issues](/Tools/ReviewIssues/README.md))로 남겼습니다.
+<img src="Docs/Image/counter_3_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> AI가 쓴 코드는 직접 만든 정적 분석기([Roslyn](/Tools/TopView.Analyzers/README.md)), 코드를 작성한 세션과 다른 새 세션의 AI 리뷰([Claude Code Workflow](/Tools/CodeReview/README.md)), 지적마다 재현 테스트([Unity Test Framework](/Tools/Testing/README.md))를 거쳐 확인하고, 재현된 버그만 이슈([GitHub Issues](/Tools/ReviewIssues/README.md))로 남겼습니다.
 
 ## 개발 과정
 <!--
@@ -62,6 +62,18 @@ TODO: 항목마다 한두 줄 요약 + Notion의 해당 사례 링크 + 저장�
   - 의사결정 기록: 근거로 결정이 담긴 커밋이나 문서 링크
     출처: 성장 가이드 02 - "왜 그렇게 결정했는지와 어떤 흐름으로 생각했는지" / Q7 - "어떤 고민을 담았는가"
 -->
+자세한 이야기는 Notion에 있습니다.
+
+### AI와 개발자의 역할 분담
+**개발자**
+
+프로젝트 코드 구조 설계와 유니티 에디터 작업은 제가, 코드 구현과 리뷰는 AI가 맡고, AI의 작업 범위와 규칙을 문서로 정해 규칙과 어긋나는 지신는 AI가 먼저 되물게 했습니다.
+**AI(Cluade Code)**
+
+> [!NOTE]
+> <img src="Docs/Image/code_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> [코드 규칙](/.claude/rules/csharp-style.md)
+>
+> <img src="Docs/Image/architecture_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle">[아키텍처 규칙](/.claude/rules/architecture.md) 
 
 ## AI가 일할 수 있는 환경
 <!--
