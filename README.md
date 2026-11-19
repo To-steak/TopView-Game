@@ -58,7 +58,6 @@
 <details>
 <summary><b>AI의 코드 리뷰</b></summary>
 
-- Claude Code의 기본 `/code-review`를 써 보고, 영역을 나눠 에이전트가 읽고 지적마다 실패 시나리오를 적는 구조를 참고했습니다.
 - 리뷰의 지적은 추측으로 보고, 버그 지적은 테스트를 써서 재현되는지 확인했습니다. 의도한 동작을 버그로 본 지적은 제가 직접 판단해 '의도된 사항'으로 닫았습니다.
 - 모든 지적을 판정 라벨과 함께 GitHub 이슈로 남기고, 테스트로 재현된 버그만 열어 둡니다.
 - 이 흐름을 설계하고 구현은 AI에게 맡겨 [리뷰 워크플로](/Tools/CodeReview/README.md), [이슈 등록 도구](/Tools/ReviewIssues/README.md), 두 도구를 묶는 스킬([`/review-to-issues`](/.claude/skills/review-to-issues/SKILL.md))을 만들었습니다.
