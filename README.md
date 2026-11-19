@@ -118,7 +118,7 @@ TODO: 항목마다 한두 줄 요약 + Notion의 해당 사례 링크 + 저장�
 
 - 시네마틱 영상도 게임 세계관을 보여 주고 흥미를 끄는 중요한 장치라고 보고, 해보고 싶었던 트레일러 영상 제작을 시도했습니다.
 - Unity Timeline으로 컷마다 연출을 짜고, Unity Recorder로 녹화했습니다.
-- 영상 편집 도구(FilmCraft)를 CLI 제어 모드와 MCP 커넥터로 Claude Code에 연결했습니다. 컷 구성과 연출은 제가 정하고, 컷 배치와 편집 명령은 AI가 실행했습니다.
+- ArtCraft의 영상 편집기를 CLI 제어 모드와 MCP 커넥터로 Claude Code에 연결했습니다. 컷 구성과 연출은 제가 정하고, 컷 배치와 편집 명령은 AI가 실행했습니다.
 - 3일 만에 1분 20초 트레일러를 완성해 YouTube에 올렸습니다([트레일러](https://youtu.be/7fyoxN1xmZw)).
 
 </details>
@@ -142,7 +142,7 @@ AI가 일을 맡을 때마다 결과를 사람에게 묻지 않고, 스스로 �
 | PlayMode 전용 워크 트리 ([동기화와 실행](/Tools/Testing/run_tests.sh#L86-L106)) | 원본 코드를 다른 폴더로 맞춘 뒤 배치 모드 에디터로 PlayMode 테스트를 돌려, 사용자가 작업 중인 에디터를 끊지 않습니다 |
 | 스킬 [`/review-to-issues`](/.claude/skills/review-to-issues/SKILL.md) | 리뷰 → 판정 → 판정 커밋 → 이슈 등록이라는 반복 절차를 정해진 순서대로 수행합니다 |
 | GitHub CLI (`gh`) | 리뷰 지적을 판정 라벨과 함께 이슈로 등록합니다([이슈 등록 도구](/Tools/ReviewIssues/README.md)) |
-| ArtCraft (CLI 제어 모드, MCP 커넥터) | 트레일러 편집에서 컷 배치와 편집 명령을 실행합니다 |
+| [ArtCraft](https://github.com/storytold/artcraft) (CLI 제어 모드, MCP 커넥터) | 트레일러 편집과 텍스처·썸네일 같은 이미지 가공 명령을 실행합니다 |
 
 AI가 하지 않는 일도 함께 정했습니다. 에디터를 열거나 Play 모드에 들어가지 않고, 씬·프리팹·에셋·`.meta`는 건드리지 않습니다([에디터와 파일](/CLAUDE.md#에디터와-파일), [작업 범위](/CLAUDE.md#작업-범위)). 에디터 상태는 사용자의 작업을 끊을 수 있어 사람이 정합니다.
 
