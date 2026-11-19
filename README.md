@@ -183,6 +183,79 @@ TODO: 어셈블리 구성(TopView.Core, Presentation, UserInterface 등)과 주�
 - 출처: Q5 - "Unity, Unreal 등 상용 엔진을 다뤄보았거나 프로그래밍 기본 지식이 있다면" 도움이 됨
 - 출처: "우대 사항" - "프로그래밍에 대한 이해를 바탕으로 AI와 능숙하게 협업하고 결과물을 만들어 본 경험"
 -->
+DOTS 패키지 없이 순수 C#으로 데이터 지향 구조를 만들었습니다. 데이터는 컴포넌트에, 로직은 상태 없는 System에 두는 ECS의 원칙을 따르되, 저장은 모든 컴포넌트를 필드로 가진 엔티티 struct 하나를 고정 배열에 담는 단순한 방식으로 했습니다. 칸이 가진 컴포넌트는 마스크로 표시합니다. 자세한 규칙과 이유는 [아키텍처 규칙](/.claude/rules/architecture.md)에 있습니다.
+
+```
+입력 → Command → System(FixedUpdate) → Entity 변경 → Record
+                                                       ↓
+              View ← ViewSystem / Presenter(LateUpdate) ← Entity, Record
+```
+
+**주요 설계**
+- **Logic과 View 분리**: 게임 상태는 FixedUpdate(50Hz)의 System에서만 바꾸고, 화면은 LateUpdate에서 그 상태를 읽어 보간해 그립니다. 프레임레이트가 달라도 판정과 결과가 같습니다.
+- **이벤트 대신 기록**: C# 이벤트를 쓰지 않고, 그 틱에 일어난 일을 기록(`~Record`)으로 남겨 View가 정해진 시점에 읽습니다. 호출 흐름이 코드에 그대로 보입니다(UI 버튼 입력만 예외).
+- **실행 순서는 한 곳에서**: Unity의 Update 계열 함수는 App만 받고, 한 판 안의 틱 순서와 호출 순서는 World가 정합니다.
+- **재현할 수 있는 판**: 시간은 정수 틱으로, 랜덤은 World의 시드 고정 난수로 다뤄 같은 입력이면 같은 결과가 나옵니다. 그래서 한 틱 차이 버그도 테스트로 다시 만들 수 있습니다.
+- **데이터와 수치 분리**: 수치는 ScriptableObject(`~Definition`)에 두고 에디터에서 조정합니다. 생성할 때 칸의 컴포넌트로 복사해, 매 틱 로직은 컴포넌트만 읽습니다.
+- **할당 줄이기**: 게임 중에는 `Instantiate`/`Destroy`를 반복하지 않고 View 오브젝트를 풀에서 꺼내 씁니다.
+
+**어셈블리 구성**
+
+화살표는 참조 방향입니다. Presentation과 UserInterface는 Systems를 참조하지 못해서, View가 게임 상태를 바꾸는 코드는 컴파일되지 않습니다.
+
+```mermaid
+graph TD
+    subgraph RunLayer["실행: 언제 무엇을 부를지 정함"]
+        Core["Core (App, World)"]
+    end
+    subgraph LogicLayer["로직: 게임 상태를 바꾸는 유일한 곳"]
+        Systems
+    end
+    subgraph ViewLayer["화면: 상태를 읽어 그리기만 함"]
+        Presentation
+        UserInterface
+    end
+    subgraph DataLayer["데이터: 게임에 무엇이 있는지"]
+        Entity["Entity (컴포넌트, 요청, 기록, 명령)"]
+        Definitions
+        Authoring
+        Persistence
+    end
+    Core --> Systems
+    Core --> Presentation
+    Core --> UserInterface
+    Core --> Authoring
+    Core --> Persistence
+    Systems --> Entity
+    Presentation --> Entity
+    UserInterface --> Entity
+    Authoring --> Definitions
+    Authoring --> Entity
+    Definitions --> Entity
+    Persistence --> Entity
+```
+
+**실행**: 언제 무엇을 부를지 정합니다
+- `Core`: App(씬 전환, 설정, 배경음악 같은 앱 수명의 일)과 World(한 판의 데이터와 틱·호출 순서)
+
+**로직**: 게임 상태를 바꾸는 유일한 곳입니다
+- `Systems`: System과 값 계산 도구(Utility)
+
+**화면**: 상태를 읽어 그리기만 합니다
+- `Presentation`: 게임 세계의 연출(ViewSystem, View, 오브젝트 풀)
+- `UserInterface`: MVP 구조의 화면 UI(View, Presenter)
+
+**데이터**: 게임에 무엇이 있는지 담습니다
+- `Entity`: 엔티티, 컴포넌트, 요청, 기록, 명령. 다른 프로젝트 어셈블리를 참조하지 않습니다
+- `Definitions`: 에디터에서 조정하는 수치(ScriptableObject)
+- `Authoring`: 씬에 놓인 엔티티의 종류와 위치
+- `Persistence`: 설정과 기록 저장
+
+**도구**: 게임 밖에서 씁니다
+- `Editor`: 수치 편집 창, 타일 배치 도구 같은 에디터 도구. 빌드에 포함되지 않습니다
+- `Trailer`: 트레일러 촬영 씬 전용 연출. 게임 어셈블리를 참조하지 않습니다
+
+사용한 패키지: Input System · Cinemachine · DOTween · TextMeshPro · uGUI
 
 ## 저장소 구성
 <!--
