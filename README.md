@@ -299,6 +299,30 @@ TODO: 플레이 방법(Release 다운로드)과 프로젝트 여는 방법(Unity
 - 역할: 원본은 README.
 - 출처: 공고에 직접 없음. "AI Game Maker" - 플레이할 수 있는 결과물을 직접 확인하게 하는 항목
 -->
+**플레이** (Windows 전용)
+1. [Release](https://github.com/To-steak/TopView-Game/releases/latest)에서 `TopView_Game.zip`을 받아 압축을 풉니다.
+2. 압축을 푼 폴더의 실행 파일을 엽니다.
+
+**조작**
+
+| 키 | 동작 |
+|---|---|
+| W A S D | 이동 |
+| Left Shift (누르는 동안) | 달리기 |
+| Space | 점프 |
+| 마우스 이동 | 조준 |
+| 마우스 왼쪽 | 공격 |
+| 마우스 오른쪽 | 회피 |
+| 1 ~ 4 | 무기 바꾸기 |
+| R | 재장전 |
+| X | 투척 조준, 재장전 취소 |
+| Q / E | 카메라 회전 |
+| Tab | 강화 |
+| Esc | 일시정지 |
+
+**프로젝트 열기**
+- Unity 6000.3.27f2 (URP)에서 `Project/` 폴더를 엽니다.
+- 에셋 스토어 에셋(`Project/Assets/Local Assets/`)과 스카이박스 패키지는 재배포할 수 없어 저장소에 넣지 않았습니다. 저장소만 받아서는 모델, 사운드, 폰트가 빠진 채로 열립니다. 플레이는 Release의 빌드로 해 주세요.
 
 ## License
 <!--
