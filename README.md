@@ -66,9 +66,14 @@ TODO: 항목마다 한두 줄 요약 + Notion의 해당 사례 링크 + 저장�
 
 ### AI와 개발자의 역할 분담
 **개발자**
+- 프로젝트 코드 구조 설계
+- 유니티 에디터 작업
+- 플레이 후 기획 수정과 기능 추가
 
-프로젝트 코드 구조 설계와 유니티 에디터 작업은 제가, 코드 구현과 리뷰는 AI가 맡고, AI의 작업 범위와 규칙을 문서로 정해 규칙과 어긋나는 지신는 AI가 먼저 되물게 했습니다.
-**AI(Cluade Code)**
+**AI(Claude Code)**
+- 코드 구현
+- 코드 리뷰
+- 규칙과 어긋나는 지시를 받으면 작업 전에 먼저 되묻기
 
 > [!TIP]
 > <img src="Docs/Image/code_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> [코드 규칙](/.claude/rules/csharp-style.md)
