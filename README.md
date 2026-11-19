@@ -33,11 +33,7 @@
 
 <img src="Docs/Image/counter_3_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> AI가 쓴 코드는 프로젝트 규칙으로 만든 정적 분석기([Roslyn](/Tools/TopView.Analyzers/README.md)), 코드를 작성한 세션과 다른 새 세션의 AI 리뷰([Claude Code Workflow](/Tools/CodeReview/README.md)), 지적마다 재현 테스트([Unity Test Framework](/Tools/Testing/README.md))를 거쳐 확인하고, 재현된 버그만 이슈([GitHub Issues](/Tools/ReviewIssues/README.md))로 남겼습니다.
 
-## 개발 과정
-<!--
-TODO: 제목 앞 아이콘 - Material Symbols "history" (개발 과정)
-- 위쪽 아이콘처럼 Docs/Image/history_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg를 받아 <img ... align="absmiddle">로 제목 앞에 붙인다
--->
+## <img src="Docs/Image/history_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> 개발 과정
 자세한 이야기는 Notion에 있습니다.
 
 <details>
@@ -53,12 +49,8 @@ TODO: 제목 앞 아이콘 - Material Symbols "history" (개발 과정)
 - 게임 코드를 작성하고 리뷰했습니다.
 - 제가 요청한 대로 [수치 편집 창](/Project/Assets/Scripts/Editor/DefinitionEditorWindow.cs#L6-L7), [타일 배치 도구](/Project/Assets/Scripts/Editor/LevelTilePainterWindow.cs#L8-L17) 같은 Custom Editor를 만들었습니다.
 - Unity CLI로 컴파일 오류와 테스트 결과를 직접 확인하고, GitHub CLI로 리뷰 지적을 이슈로 등록했습니다([AI가 일할 수 있는 환경](#ai가-일할-수-있는-환경)).
-<!--
-TODO: PNG - AI에게 요청해 만든 Custom Editor 스크린샷 두 장(수치 편집 창, 타일 배치 도구)
-- 무엇을 보여 주나: "AI(Claude Code)" 목록의 Custom Editor 줄을 눈으로 증명한다
-- 찍는 법: Tools → Definition Editor, Tools → Level Tile Painter 창을 열고 창만 캡처. 두 장을 나란히 두려면 표나 <img width="49%">를 쓴다
-- 파일 이름 예: Docs/Image/Definition_Editor.png, Docs/Image/Level_Tile_Painter.png
--->
+
+<img src="Docs/Image/Definition%20Editor.png" width="49%" alt="수치 편집 창"> <img src="Docs/Image/Level%20Tile%20Painter.png" width="49%" alt="타일 배치 도구">
 
 </details>
 
@@ -71,12 +63,8 @@ TODO: PNG - AI에게 요청해 만든 Custom Editor 스크린샷 두 장(수치 
 - 이 흐름을 설계하고 구현은 AI에게 맡겨 [리뷰 워크플로](/Tools/CodeReview/README.md), [이슈 등록 도구](/Tools/ReviewIssues/README.md), 두 도구를 묶는 스킬([`/review-to-issues`](/.claude/skills/review-to-issues/SKILL.md))을 만들었습니다.
 - 버그를 심어 리뷰 도구를 측정해 보니([전체 리뷰 측정](/Docs/ReviewBenchmark/2026-11-15-planted-bugs/README.md)) 재현율은 평균 86.7%였지만, 폴더 전체를 읽는 방식이라 한 번에 에이전트 토큰이 약 100만 들었습니다.
 - 바뀐 코드만 읽는 diff 리뷰 워크플로를 새로 만들어 토큰을 약 8만(12분의 1)으로 줄였고, 심은 버그 6개는 세 번 모두 찾았습니다([diff 리뷰 측정](/Docs/ReviewBenchmark/2026-11-16-critical-hit-diff/README.md)).
-<!--
-TODO: PNG - GitHub 이슈 목록 캡처 (label:review-finding 검색 결과)
-- 무엇을 보여 주나: 지적마다 판정 라벨(reproduced, not-reproduced, intended …)이 붙어 이슈로 쌓인 모습
-- 찍는 법: https://github.com/To-steak/TopView-Game/issues?q=label%3Areview-finding 에서 열린 것과 닫힌 것이 함께 보이게 캡처
-- 파일 이름 예: Docs/Image/Review_Issues.png
--->
+
+![판정 라벨과 함께 등록된 리뷰 지적 이슈 목록](Docs/Image/Review_Issues.png)
 
 </details>
 
@@ -87,12 +75,8 @@ TODO: PNG - GitHub 이슈 목록 캡처 (label:review-finding 검색 결과)
 - 리뷰의 지적은 CLAUDE의 추측으로 여기고, 지적마다 테스트를 써서 재현되는지 먼저 판정했습니다.
 - 판정과 상관없이 모든 지적을 이슈로 남기고, 재현된 버그는 수정 브랜치에서 고쳐 PR로 합쳤습니다. 커밋마다 `Fixes #번호`로 이슈를 닫았습니다.
 - 지금까지 지적 49개를 판정했고, 재현된 23개를 모두 고쳤습니다.
-<!--
-TODO: PNG - 재현된 지적 하나의 이슈 화면 캡처
-- 무엇을 보여 주나: 출처(리뷰 원본의 지적 링크), 판정, 확인한 테스트 링크가 한 이슈에 모인 모습. 단계마다 근거가 남는다는 말을 증명한다
-- 찍는 법: reproduced 라벨이 붙은 이슈 하나를 열어 본문 위쪽(출처 ~ 확인한 테스트)을 캡처
-- 파일 이름 예: Docs/Image/Review_Issue_Detail.png
--->
+
+![출처, 위치, 판정이 담긴 리뷰 지적 이슈](Docs/Image/Review_Issue_Detail.png)
 
 </details>
 
@@ -113,20 +97,12 @@ TODO: PNG - 재현된 지적 하나의 이슈 화면 캡처
 - Unity Timeline으로 컷마다 연출을 짜고, Unity Recorder로 녹화했습니다.
 - ArtCraft의 영상 편집기를 CLI 제어 모드와 MCP 커넥터로 Claude Code에 연결했습니다. 컷 구성과 연출은 제가 정하고, 컷 배치와 편집 명령은 AI가 실행했습니다.
 - 3일 만에 1분 20초 트레일러를 완성해 YouTube에 올렸습니다([트레일러](https://youtu.be/7fyoxN1xmZw)).
-<!--
-TODO: PNG 또는 GIF - 트레일러 제작 화면
-- 추천 1 (PNG): Unity Timeline 창에 컷별 트랙이 보이는 캡처. 연출을 직접 짰다는 증거
-- 추천 2 (GIF): 트레일러의 인상적인 컷 3~5초. 5MB 이하로 줄인다
-- 파일 이름 예: Docs/Image/Trailer_Timeline.png, Docs/Image/Trailer_Cut.gif
--->
+
+![Timeline으로 컷을 재생하는 화면](Docs/Image/Trailer_Timeline.gif)
 
 </details>
 
-## AI가 일할 수 있는 환경
-<!--
-TODO: 제목 앞 아이콘 - Material Symbols "smart_toy" (AI가 일할 수 있는 환경)
-- 위쪽 아이콘처럼 Docs/Image/smart_toy_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg를 받아 <img ... align="absmiddle">로 제목 앞에 붙인다
--->
+## <img src="Docs/Image/smart_toy_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> AI가 일할 수 있는 환경
 AI가 일을 맡을 때마다 결과를 사람에게 묻지 않고, 스스로 확인하고 고칠 수 있게 도구를 연결했습니다.
 
 | 도구 | AI가 스스로 할 수 있게 된 일 |
@@ -139,20 +115,12 @@ AI가 일을 맡을 때마다 결과를 사람에게 묻지 않고, 스스로 �
 | GitHub CLI (`gh`) | 리뷰 지적을 판정 라벨과 함께 이슈로 등록합니다([이슈 등록 도구](/Tools/ReviewIssues/README.md)) |
 | [ArtCraft](https://github.com/storytold/artcraft) (CLI 제어 모드, MCP 커넥터) | 트레일러 편집과 텍스처·썸네일 같은 이미지 가공 명령을 실행합니다 |
 
-<!--
-TODO: PNG - AI가 테스트를 직접 돌린 결과 화면
-- 무엇을 보여 주나: 사람이 손대지 않고 AI가 sh Tools/Testing/run_tests.sh editmode를 실행해 통과·실패 요약을 받은 장면
-- 찍는 법: Claude Code 세션(터미널)에서 run_tests.sh 실행 결과가 보이는 부분을 캡처
-- 파일 이름 예: Docs/Image/Run_Tests.png
--->
+
+![AI가 테스트 실행 도구로 EditMode 테스트를 돌린 결과](Docs/Image/Run_Tests.png)
 
 AI가 하지 않는 일도 함께 정했습니다. 에디터를 열거나 Play 모드에 들어가지 않고, 씬·프리팹·에셋·`.meta`는 건드리지 않습니다([에디터와 파일](/CLAUDE.md#에디터와-파일), [작업 범위](/CLAUDE.md#작업-범위)). 에디터 상태는 사용자의 작업을 끊을 수 있어 사람이 정합니다.
 
-## 검증 체계
-<!--
-TODO: 제목 앞 아이콘 - Material Symbols "verified" (검증 체계)
-- 위쪽 아이콘처럼 Docs/Image/verified_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg를 받아 <img ... align="absmiddle">로 제목 앞에 붙인다
--->
+## <img src="Docs/Image/verified_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> 검증 체계
 AI가 쓴 코드는 네 단계를 거칩니다. 앞 단계가 놓친 것을 다음 단계가 잡고, 각 단계의 결과는 저장소에 남습니다.
 
 | 단계 | 언제 | 무엇을 확인하나 | 근거 |
@@ -162,12 +130,7 @@ AI가 쓴 코드는 네 단계를 거칩니다. 앞 단계가 놓친 것을 다�
 | 3. 재현 테스트 | 지적마다 | 리뷰의 지적은 추측으로 보고, 고치기 전 코드에서 실패하는 테스트를 써서 실제 버그인지 판정합니다 | [테스트 실행 도구](/Tools/Testing/README.md), [테스트](/Project/Assets/Scripts/Tests/) |
 | 4. 이슈와 수정 | 판정한 뒤 | 모든 지적을 판정 라벨과 함께 이슈로 남기고, 재현된 버그만 열어 둡니다. 실패하던 테스트가 통과로 바뀌면 고친 것으로 봅니다 | [이슈 등록 도구](/Tools/ReviewIssues/README.md), [리뷰 이슈](https://github.com/To-steak/TopView-Game/issues?q=label%3Areview-finding) |
 
-<!--
-TODO: PNG - Unity Console에 분석기 경고(TV0001~)가 뜬 화면
-- 무엇을 보여 주나: 규칙을 어긴 코드가 컴파일할 때 바로 경고로 잡히는 1단계
-- 찍는 법: 일부러 var를 쓰는 등 규칙을 어긴 줄을 잠깐 넣고 Console의 warning TV0002를 캡처한 뒤 되돌린다
-- 파일 이름 예: Docs/Image/Analyzer_Warning.png
--->
+![규칙을 어긴 코드에 Unity Console이 띄운 분석기 경고 TV0002](Docs/Image/Analyzer_Warning.png)
 
 **판정 규칙**
 - 재현된 버그의 테스트는 고칠 때까지 실패한 채 저장소에 남깁니다. 지우거나 건너뛰게 하지 않아서, 열린 이슈 수만큼 실패하는 테스트가 있는 것이 정상입니다.
@@ -177,14 +140,7 @@ TODO: PNG - Unity Console에 분석기 경고(TV0001~)가 뜬 화면
 **리뷰가 놓치는 것**
 버그를 심어 리뷰 도구를 측정했을 때, 한 틱 차이로 생기는 버그는 세 번 모두 놓쳤습니다([전체 리뷰 측정](/Docs/ReviewBenchmark/2026-11-15-planted-bugs/README.md)). 이런 버그는 사람도 에디터에서 재현할 수 없어서 테스트로만 확인합니다.
 
-## 기술 구조
-<!--
-TODO: 제목 앞 아이콘 - Material Symbols "account_tree" (기술 구조)
-- 위쪽 아이콘처럼 Docs/Image/account_tree_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg를 받아 <img ... align="absmiddle">로 제목 앞에 붙인다
--->
-<!--
-TODO: 이미지 없음 - Mermaid 다이어그램이 이미 그림 역할을 한다
--->
+## <img src="Docs/Image/account_tree_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> 기술 구조
 DOTS 패키지 없이 순수 C#으로 데이터 지향 구조를 만들었습니다. 데이터는 컴포넌트에, 로직은 상태 없는 System에 두는 ECS의 원칙을 따르되, 저장은 모든 컴포넌트를 필드로 가진 엔티티 struct 하나를 고정 배열에 담는 단순한 방식으로 했습니다. 칸이 가진 컴포넌트는 마스크로 표시합니다. 자세한 규칙과 이유는 [아키텍처 규칙](/.claude/rules/architecture.md)에 있습니다.
 
 ```
@@ -259,11 +215,7 @@ graph TD
 
 사용한 패키지: Input System · Cinemachine · DOTween · TextMeshPro · uGUI
 
-## 저장소 구성
-<!--
-TODO: 제목 앞 아이콘 - Material Symbols "folder" (저장소 구성)
-- 위쪽 아이콘처럼 Docs/Image/folder_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg를 받아 <img ... align="absmiddle">로 제목 앞에 붙인다
--->
+## <img src="Docs/Image/folder_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> 저장소 구성
 ```
 TopView-Game/
 ├── Project/          Unity 프로젝트
@@ -294,11 +246,7 @@ TopView-Game/
 - [`Docs/Reviews/`](/Docs/Reviews/): 리뷰 도구가 낸 리뷰 원본(고치지 않음)
 - [`Docs/ReviewBenchmark/`](/Docs/ReviewBenchmark/): 버그를 심어 리뷰 도구를 측정한 기록
 
-## 실행 방법
-<!--
-TODO: 제목 앞 아이콘 - Material Symbols "sports_esports" (실행 방법)
-- 위쪽 아이콘처럼 Docs/Image/sports_esports_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg를 받아 <img ... align="absmiddle">로 제목 앞에 붙인다
--->
+## <img src="Docs/Image/sports_esports_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> 실행 방법
 **플레이** (Windows 전용)
 1. [Release](https://github.com/To-steak/TopView-Game/releases/latest)에서 `TopView_Game.zip`을 받아 압축을 풉니다.
 2. 압축을 푼 폴더의 실행 파일을 엽니다.
@@ -320,21 +268,13 @@ TODO: 제목 앞 아이콘 - Material Symbols "sports_esports" (실행 방법)
 | Tab | 강화 |
 | Esc | 일시정지 |
 
-<!--
-TODO: GIF - 플레이 장면 3~5초
-- 무엇을 보여 주나: 조작키 표 바로 아래에서 이동, 공격, 회피가 실제로 어떻게 보이는지
-- 이미 있는 Docs/Image/GIF_001.gif를 쓰거나, 5MB 이하로 새로 녹화한다
--->
+![이동, 점프, 카메라 회전, 달리기를 하는 플레이 장면](Docs/Image/Gameplay.gif)
 
 **프로젝트 열기**
 - Unity 6000.3.27f2 (URP)에서 `Project/` 폴더를 엽니다.
 - 에셋 스토어 에셋(`Project/Assets/Local Assets/`)과 스카이박스 패키지는 재배포할 수 없어 저장소에 넣지 않았습니다. 저장소만 받아서는 모델, 사운드, 폰트가 빠진 채로 열립니다. 플레이는 Release의 빌드로 해 주세요.
 
-## License
-<!--
-TODO: 제목 앞 아이콘 - Material Symbols "license" (License)
-- 위쪽 아이콘처럼 Docs/Image/license_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg를 받아 <img ... align="absmiddle">로 제목 앞에 붙인다
--->
+## <img src="Docs/Image/license_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> License
 프로젝트에 사용한 외부 에셋과 라이선스입니다. 저장소에 넣지 않은 에셋의 라이선스 파일은 [`Docs/License/`](/Docs/License/)에 복사해 두었습니다.
 
 **CC0 (저장소에 포함)**
