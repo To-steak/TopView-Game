@@ -56,15 +56,11 @@
 </details>
 
 <details>
-<summary><b>AI의 코드 리뷰</b></summary>
+<summary><b>새로 배워서 적용한 내용</b></summary>
 
-- 리뷰의 지적은 추측으로 보고, 버그 지적은 테스트를 써서 재현되는지 확인했습니다. 의도한 동작을 버그로 본 지적은 제가 직접 판단해 '의도된 사항'으로 닫았습니다.
-- 모든 지적을 판정 라벨과 함께 GitHub 이슈로 남기고, 테스트로 재현된 버그만 열어 둡니다.
-- 이 흐름을 설계하고 구현은 AI에게 맡겨 [리뷰 워크플로](/Tools/CodeReview/README.md), [이슈 등록 도구](/Tools/ReviewIssues/README.md), 두 도구를 묶는 스킬([`/review-to-issues`](/.claude/skills/review-to-issues/SKILL.md))을 만들었습니다.
-- 게임 코드에 버그 10개를 심고 리뷰 도구를 세 번 돌려 보니 평균 86.7%를 찾았지만, 폴더 전체를 읽는 방식이라 한 번에 에이전트 토큰이 100만 가까이 들었습니다([전체 리뷰 측정](/Docs/ReviewBenchmark/2026-11-15-planted-bugs/README.md)).
-- 바뀐 코드만 읽는 diff 리뷰 워크플로를 새로 만들었습니다. 버그 6개를 심은 가짜 기능으로 세 번 돌려 보니 매번 6개를 모두 찾았고, 토큰은 8만 남짓 들었습니다([diff 리뷰 측정](/Docs/ReviewBenchmark/2026-11-16-critical-hit-diff/README.md)). 원인이 바뀌지 않은 파일에 있어 참조를 따라가야 보이는 버그는 아직 측정하지 않았습니다.
-
-![판정 라벨과 함께 등록된 리뷰 지적 이슈 목록](Docs/Image/Review_Issues.png)
+- **Roslyn 분석기**: 코드 규칙을 Unity Console의 경고로 띄우려고 처음 도입했습니다. 규칙과 그 동작을 보여 주는 예시 문서는 제가 정하고 분석기 구현은 AI에게 맡겨, 규칙 25개를 만들었습니다. Unity 6000.3의 컴파일러가 Roslyn 4.3이라 그 버전에 맞춰 빌드했습니다([분석기](/Tools/TopView.Analyzers/README.md)).
+- **Unity Test Framework**: 리뷰 지적을 재현하려고 처음 도입했습니다. 열려 있는 에디터를 끊지 않으려고 PlayMode 테스트는 별도 워크 트리에서 배치 모드로 돌리게 했습니다([테스트 실행 도구](/Tools/Testing/README.md)).
+- **Claude Code Workflow**: 기본 `/code-review`의 구조를 참고해 리뷰 흐름과 결과 형식을 정하고, 스크립트 구현은 AI에게 맡겼습니다([리뷰 워크플로](/Tools/CodeReview/README.md)).
 
 </details>
 
@@ -79,11 +75,15 @@
 </details>
 
 <details>
-<summary><b>새로 배워서 적용한 내용</b></summary>
+<summary><b>AI의 코드 리뷰</b></summary>
 
-- **Roslyn 분석기**: 코드 규칙을 Unity Console의 경고로 띄우려고 처음 도입했습니다. 규칙과 그 동작을 보여 주는 예시 문서는 제가 정하고 분석기 구현은 AI에게 맡겨, 규칙 25개를 만들었습니다. Unity 6000.3의 컴파일러가 Roslyn 4.3이라 그 버전에 맞춰 빌드했습니다([분석기](/Tools/TopView.Analyzers/README.md)).
-- **Unity Test Framework**: 리뷰 지적을 재현하려고 처음 도입했습니다. 열려 있는 에디터를 끊지 않으려고 PlayMode 테스트는 별도 워크 트리에서 배치 모드로 돌리게 했습니다([테스트 실행 도구](/Tools/Testing/README.md)).
-- **Claude Code Workflow**: 기본 `/code-review`의 구조를 참고해 리뷰 흐름과 결과 형식을 정하고, 스크립트 구현은 AI에게 맡겼습니다. 버그를 심어 성능을 측정한 뒤 diff 리뷰로 바꿨습니다([리뷰 워크플로](/Tools/CodeReview/README.md)).
+- 리뷰의 지적은 추측으로 보고, 버그 지적은 테스트를 써서 재현되는지 확인했습니다. 의도한 동작을 버그로 본 지적은 제가 직접 판단해 '의도된 사항'으로 닫았습니다.
+- 모든 지적을 판정 라벨과 함께 GitHub 이슈로 남기고, 테스트로 재현된 버그만 열어 둡니다.
+- 이 흐름을 설계하고 구현은 AI에게 맡겨 [리뷰 워크플로](/Tools/CodeReview/README.md), [이슈 등록 도구](/Tools/ReviewIssues/README.md), 두 도구를 묶는 스킬([`/review-to-issues`](/.claude/skills/review-to-issues/SKILL.md))을 만들었습니다.
+- 게임 코드에 버그 10개를 심고 리뷰 도구를 세 번 돌려 보니 평균 86.7%를 찾았지만, 폴더 전체를 읽는 방식이라 한 번에 에이전트 토큰이 100만 가까이 들었습니다([전체 리뷰 측정](/Docs/ReviewBenchmark/2026-11-15-planted-bugs/README.md)).
+- 바뀐 코드만 읽는 diff 리뷰 워크플로를 새로 만들었습니다. 버그 6개를 심은 가짜 기능으로 세 번 돌려 보니 매번 6개를 모두 찾았고, 토큰은 8만 남짓 들었습니다([diff 리뷰 측정](/Docs/ReviewBenchmark/2026-11-16-critical-hit-diff/README.md)). 원인이 바뀌지 않은 파일에 있어 참조를 따라가야 보이는 버그는 아직 측정하지 않았습니다.
+
+![판정 라벨과 함께 등록된 리뷰 지적 이슈 목록](Docs/Image/Review_Issues.png)
 
 </details>
 
