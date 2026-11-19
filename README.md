@@ -263,6 +263,35 @@ TODO: 최상위 폴더가 무엇을 담는지 표로 (Project/, Tools/, Docs/, .
 - 역할: 원본은 README. 코드를 처음 연 사람이 증거를 찾아갈 수 있게 하는 지도.
 - 출처: 공고에 직접 없음. "검증 체계"와 "개발 과정"의 근거 링크를 따라가기 쉽게 하려는 항목
 -->
+```
+TopView-Game/
+├── Project/          Unity 프로젝트
+├── Tools/            정적 분석기, 리뷰·이슈·테스트 도구
+├── Docs/             리뷰 원본, 리뷰 도구 측정, 이미지
+├── .claude/          AI 작업 규칙과 스킬
+├── .github/          이슈 폼
+└── CLAUDE.md         AI 작업 범위와 프로젝트 규칙
+```
+
+**게임**
+- [`Project/Assets/Scripts/`](/Project/Assets/Scripts/): 게임 코드. 폴더 구성은 [기술 구조](#기술-구조)와 같습니다
+- [`Project/Assets/Scripts/Tests/`](/Project/Assets/Scripts/Tests/): EditMode, PlayMode 테스트
+
+**AI 작업 규칙**
+- [`CLAUDE.md`](/CLAUDE.md): 작업 범위, 대화 규칙, 프로젝트 값
+- [`.claude/rules/`](/.claude/rules/): 아키텍처 규칙, C# 코드 규칙
+- [`.claude/skills/review-to-issues/`](/.claude/skills/review-to-issues/SKILL.md): 리뷰부터 이슈 등록까지의 절차
+
+**도구**
+- [`Tools/TopView.Analyzers/`](/Tools/TopView.Analyzers/README.md): 정적 분석기. 테스트와 규칙별 예시 문서는 [`Tools/TopView.Analyzers.Tests/`](/Tools/TopView.Analyzers.Tests/Examples/)
+- [`Tools/CodeReview/`](/Tools/CodeReview/README.md): 리뷰 워크플로
+- [`Tools/ReviewIssues/`](/Tools/ReviewIssues/README.md): 이슈 등록 도구
+- [`Tools/Testing/`](/Tools/Testing/README.md): 테스트 실행 도구
+- [`.github/ISSUE_TEMPLATE/`](/.github/ISSUE_TEMPLATE/review-finding.yml): 리뷰 지적 이슈 폼
+
+**기록**
+- [`Docs/Reviews/`](/Docs/Reviews/): 리뷰 도구가 낸 리뷰 원본(고치지 않음)
+- [`Docs/ReviewBenchmark/`](/Docs/ReviewBenchmark/): 버그를 심어 리뷰 도구를 측정한 기록
 
 ## 실행 방법
 <!--
