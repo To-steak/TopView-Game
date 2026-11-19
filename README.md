@@ -77,7 +77,7 @@ TODO: 항목마다 한두 줄 요약 + Notion의 해당 사례 링크 + 저장�
 **AI(Claude Code)**
 - 게임 코드를 작성하고 리뷰했습니다.
 - 제가 요청한 대로 [수치 편집 창](/Project/Assets/Scripts/Editor/DefinitionEditorWindow.cs#L6-L7), [타일 배치 도구](/Project/Assets/Scripts/Editor/LevelTilePainterWindow.cs#L8-L17) 같은 Custom Editor를 만들었습니다.
-- Unity CLI로 컴파일 오류와 테스트 결과를 직접 확인하고([테스트 실행 도구](/Tools/Testing/README.md)), GitHub CLI로 리뷰 지적을 이슈로 등록했습니다([이슈 등록 도구](/Tools/ReviewIssues/README.md)).
+- Unity CLI로 컴파일 오류와 테스트 결과를 직접 확인하고, GitHub CLI로 리뷰 지적을 이슈로 등록했습니다([AI가 일할 수 있는 환경](#ai가-일할-수-있는-환경)).
 
 </details>
 
@@ -132,6 +132,19 @@ TODO: AI가 직접 일하고 스스로 확인할 수 있게 만든 도구와 사
 - 출처: 현직자 게임 기획 Q2 - "AI가 스스로 일하는 환경부터 만들어 보세요"
 - 출처: 성장 가이드 03 - "반복되는 일을 시스템으로 만들어 두는 습관"
 -->
+AI가 일을 맡을 때마다 결과를 사람에게 묻지 않고, 스스로 확인하고 고칠 수 있게 도구를 연결했습니다.
+
+| 도구 | AI가 스스로 할 수 있게 된 일 |
+|---|---|
+| [`CLAUDE.md`](/CLAUDE.md), [`.claude/rules/`](/.claude/rules/) | 매번 설명하지 않아도 프로젝트 규칙과 작업 범위를 알고 시작합니다 |
+| Unity CLI (`unity recompile`, [컴파일 확인](/Tools/Testing/run_tests.sh#L69-L73)) | 코드를 고친 뒤 열려 있는 에디터에서 컴파일 오류와 분석기 경고를 확인하고 고칩니다 |
+| [테스트 실행 도구](/Tools/Testing/README.md) (`run_tests.sh`) | EditMode/PlayMode 테스트를 돌리고, 결과를 JSON으로 읽어 판정에 씁니다 |
+| PlayMode 전용 워크 트리 ([동기화와 실행](/Tools/Testing/run_tests.sh#L86-L106)) | 원본 코드를 다른 폴더로 맞춘 뒤 배치 모드 에디터로 PlayMode 테스트를 돌려, 사용자가 작업 중인 에디터를 끊지 않습니다 |
+| 스킬 [`/review-to-issues`](/.claude/skills/review-to-issues/SKILL.md) | 리뷰 → 판정 → 판정 커밋 → 이슈 등록이라는 반복 절차를 정해진 순서대로 수행합니다 |
+| GitHub CLI (`gh`) | 리뷰 지적을 판정 라벨과 함께 이슈로 등록합니다([이슈 등록 도구](/Tools/ReviewIssues/README.md)) |
+| ArtCraft (CLI 제어 모드, MCP 커넥터) | 트레일러 편집에서 컷 배치와 편집 명령을 실행합니다 |
+
+AI가 하지 않는 일도 함께 정했습니다. 에디터를 열거나 Play 모드에 들어가지 않고, 씬·프리팹·에셋·`.meta`는 건드리지 않습니다([에디터와 파일](/CLAUDE.md#에디터와-파일), [작업 범위](/CLAUDE.md#작업-범위)). 에디터 상태는 사용자의 작업을 끊을 수 있어 사람이 정합니다.
 
 ## 검증 체계
 <!--
