@@ -70,7 +70,7 @@ TODO: 항목마다 한두 줄 요약 + Notion의 해당 사례 링크 + 저장�
 프로젝트 코드 구조 설계와 유니티 에디터 작업은 제가, 코드 구현과 리뷰는 AI가 맡고, AI의 작업 범위와 규칙을 문서로 정해 규칙과 어긋나는 지신는 AI가 먼저 되물게 했습니다.
 **AI(Cluade Code)**
 
-> [!NOTE]
+> [!INFORMATION]
 > <img src="Docs/Image/code_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> [코드 규칙](/.claude/rules/csharp-style.md)
 >
 > <img src="Docs/Image/architecture_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle">[아키텍처 규칙](/.claude/rules/architecture.md) 
