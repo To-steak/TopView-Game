@@ -65,31 +65,43 @@ TODO: 항목마다 한두 줄 요약 + Notion의 해당 사례 링크 + 저장�
 -->
 자세한 이야기는 Notion에 있습니다.
 
-> ### AI와 개발자의 역할 분담
-> **개발자**
-> - 프로젝트의 코드 구조를 설계했습니다([아키텍처 규칙](/.claude/rules/architecture.md)).
-> - 씬, 프리팹, 에셋 같은 유니티 에디터 작업을 맡았습니다.
-> - 직접 플레이해 보고 기획을 고치거나 기능을 더했습니다.
-> - AI의 작업 범위와 규칙을 문서로 정해, 규칙과 어긋나는 지시는 AI가 먼저 되묻게 했습니다([작업 범위](/CLAUDE.md#작업-범위), [되묻기 규칙](/CLAUDE.md#대화), [코드 규칙](/.claude/rules/csharp-style.md)).
->
-> **AI(Claude Code)**
-> - 게임 코드를 작성하고 리뷰했습니다.
-> - 제가 요청한 대로 [수치 편집 창](/Project/Assets/Scripts/Editor/DefinitionEditorWindow.cs#L6-L7), [타일 배치 도구](/Project/Assets/Scripts/Editor/LevelTilePainterWindow.cs#L8-L17) 같은 Custom Editor를 만들었습니다.
-> - Unity CLI로 컴파일 오류와 테스트 결과를 직접 확인하고([테스트 실행 도구](/Tools/Testing/README.md)), GitHub CLI로 리뷰 지적을 이슈로 등록했습니다([이슈 등록 도구](/Tools/ReviewIssues/README.md)).
+<details>
+<summary><b>AI와 개발자의 역할 분담</b></summary>
 
-> ### AI의 코드 리뷰
-> - Claude Code의 기본 `/code-review`를 써 보고, 영역을 나눠 에이전트가 읽고 지적마다 실패 시나리오를 적는 구조를 참고했습니다.
-> - 리뷰의 지적은 추측이라고 보고, 지적마다 테스트를 써서 재현되는지 판정하는 흐름을 더했습니다.
-> - 모든 지적을 판정 라벨과 함께 GitHub 이슈로 남기고, 테스트로 재현된 버그만 열어 둡니다.
-> - 이를 위해 [리뷰 워크플로](/Tools/CodeReview/README.md), [이슈 등록 도구](/Tools/ReviewIssues/README.md), 두 도구를 묶는 스킬([`/review-to-issues`](/.claude/skills/review-to-issues/SKILL.md))을 만들었습니다.
-> - 버그를 심어 리뷰 도구를 측정해 보니([전체 리뷰 측정](/Docs/ReviewBenchmark/2026-11-15-planted-bugs/README.md)) 재현율은 평균 86.7%였지만, 폴더 전체를 읽는 방식이라 한 번에 에이전트 토큰이 약 100만 들었습니다.
-> - 바뀐 코드만 읽는 diff 리뷰 워크플로를 새로 만들어 토큰을 약 8만(12분의 1)으로 줄였고, 심은 버그 6개는 세 번 모두 찾았습니다([diff 리뷰 측정](/Docs/ReviewBenchmark/2026-11-16-critical-hit-diff/README.md)).
+**개발자**
+- 프로젝트의 코드 구조를 설계했습니다([아키텍처 규칙](/.claude/rules/architecture.md)).
+- 씬, 프리팹, 에셋 같은 유니티 에디터 작업을 맡았습니다.
+- 직접 플레이해 보고 기획을 고치거나 기능을 더했습니다.
+- AI의 작업 범위와 규칙을 문서로 정해, 규칙과 어긋나는 지시는 AI가 먼저 되묻게 했습니다([작업 범위](/CLAUDE.md#작업-범위), [되묻기 규칙](/CLAUDE.md#대화), [코드 규칙](/.claude/rules/csharp-style.md)).
 
-> ### 문제를 나누고 정리한 방법
-> - 기능 하나를 구현 → 리뷰 → 판정 → 이슈 → 수정의 다섯 단계로 나눴습니다.
-> - 리뷰의 지적은 CLAUDE의 추측으로 여기고, 지적마다 테스트를 써서 재현되는지 먼저 판정했습니다.
-> - 판정과 상관없이 모든 지적을 이슈로 남기고, 재현된 버그는 수정 브랜치에서 고쳐 PR로 합쳤습니다. 커밋마다 `Fixes #번호`로 이슈를 닫았습니다.
-> - 지금까지 지적 49개를 판정했고, 재현된 23개를 모두 고쳤습니다.
+**AI(Claude Code)**
+- 게임 코드를 작성하고 리뷰했습니다.
+- 제가 요청한 대로 [수치 편집 창](/Project/Assets/Scripts/Editor/DefinitionEditorWindow.cs#L6-L7), [타일 배치 도구](/Project/Assets/Scripts/Editor/LevelTilePainterWindow.cs#L8-L17) 같은 Custom Editor를 만들었습니다.
+- Unity CLI로 컴파일 오류와 테스트 결과를 직접 확인하고([테스트 실행 도구](/Tools/Testing/README.md)), GitHub CLI로 리뷰 지적을 이슈로 등록했습니다([이슈 등록 도구](/Tools/ReviewIssues/README.md)).
+
+</details>
+
+<details>
+<summary><b>AI의 코드 리뷰</b></summary>
+
+- Claude Code의 기본 `/code-review`를 써 보고, 영역을 나눠 에이전트가 읽고 지적마다 실패 시나리오를 적는 구조를 참고했습니다.
+- 리뷰의 지적은 추측이라고 보고, 지적마다 테스트를 써서 재현되는지 판정하는 흐름을 더했습니다.
+- 모든 지적을 판정 라벨과 함께 GitHub 이슈로 남기고, 테스트로 재현된 버그만 열어 둡니다.
+- 이를 위해 [리뷰 워크플로](/Tools/CodeReview/README.md), [이슈 등록 도구](/Tools/ReviewIssues/README.md), 두 도구를 묶는 스킬([`/review-to-issues`](/.claude/skills/review-to-issues/SKILL.md))을 만들었습니다.
+- 버그를 심어 리뷰 도구를 측정해 보니([전체 리뷰 측정](/Docs/ReviewBenchmark/2026-11-15-planted-bugs/README.md)) 재현율은 평균 86.7%였지만, 폴더 전체를 읽는 방식이라 한 번에 에이전트 토큰이 약 100만 들었습니다.
+- 바뀐 코드만 읽는 diff 리뷰 워크플로를 새로 만들어 토큰을 약 8만(12분의 1)으로 줄였고, 심은 버그 6개는 세 번 모두 찾았습니다([diff 리뷰 측정](/Docs/ReviewBenchmark/2026-11-16-critical-hit-diff/README.md)).
+
+</details>
+
+<details>
+<summary><b>문제를 나누고 정리한 방법</b></summary>
+
+- 기능 하나를 구현 → 리뷰 → 판정 → 이슈 → 수정의 다섯 단계로 나눴습니다.
+- 리뷰의 지적은 CLAUDE의 추측으로 여기고, 지적마다 테스트를 써서 재현되는지 먼저 판정했습니다.
+- 판정과 상관없이 모든 지적을 이슈로 남기고, 재현된 버그는 수정 브랜치에서 고쳐 PR로 합쳤습니다. 커밋마다 `Fixes #번호`로 이슈를 닫았습니다.
+- 지금까지 지적 49개를 판정했고, 재현된 23개를 모두 고쳤습니다.
+
+</details>
 
 ### 새로 배워서 적용한 내용
 Roslyn 분석기, Unity Test Framework, Timeline 기반 트레일러 제작을 처음 익혀 프로젝트에 적용했습니다.
