@@ -31,7 +31,7 @@
 
 <img src="Docs/Image/counter_2_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> 기획·설계와 플레이 확인은 제가 맡고 구현과 리뷰는 AI(Claude)에게 맡겼으며, 그 경계를 규칙 문서([CLAUDE.md](/CLAUDE.md#작업-범위))로 정해 AI가 규칙과 어긋나면 [먼저 묻게](/CLAUDE.md#대화) 했습니다.
 
-<img src="Docs/Image/counter_3_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> AI가 쓴 코드는 프로젝트 규칙으로 만든 정적 분석기([Roslyn](/Tools/TopView.Analyzers/README.md)), 코드를 작성한 세션과 다른 새 세션의 AI 리뷰([Claude Code Workflow](/Tools/CodeReview/README.md)), 지적마다 재현 테스트([Unity Test Framework](/Tools/Testing/README.md))를 거쳐 확인하고, 재현된 버그만 이슈([GitHub Issues](/Tools/ReviewIssues/README.md))로 남겼습니다.
+<img src="Docs/Image/counter_3_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> AI가 쓴 코드는 프로젝트 규칙으로 만든 정적 분석기([Roslyn](/Tools/TopView.Analyzers/README.md)), 코드를 작성한 세션과 다른 새 세션의 AI 리뷰([Claude Code Workflow](/Tools/CodeReview/README.md)), 버그 지적의 재현 테스트([Unity Test Framework](/Tools/Testing/README.md))를 거쳐 확인하고, 모든 지적을 판정과 함께 이슈로 기록해 재현된 버그만 열어 두었습니다([GitHub Issues](/Tools/ReviewIssues/README.md)).
 
 ## <a href="#-개발-과정"><img src="Docs/Image/history_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"></a> 개발 과정
 자세한 이야기는 Notion에 있습니다.
@@ -58,7 +58,7 @@
 <summary><b>AI의 코드 리뷰</b></summary>
 
 - Claude Code의 기본 `/code-review`를 써 보고, 영역을 나눠 에이전트가 읽고 지적마다 실패 시나리오를 적는 구조를 참고했습니다.
-- 리뷰의 지적은 추측이라고 보고, 지적마다 테스트를 써서 재현되는지 판정하는 흐름을 더했습니다.
+- 리뷰의 지적은 추측이라고 보고, 버그 지적은 테스트를 써서 재현되는지, 기획 의도일 수 있는 지적은 제가 판단해 판정하는 흐름을 더했습니다.
 - 모든 지적을 판정 라벨과 함께 GitHub 이슈로 남기고, 테스트로 재현된 버그만 열어 둡니다.
 - 이 흐름을 설계하고 구현은 AI에게 맡겨 [리뷰 워크플로](/Tools/CodeReview/README.md), [이슈 등록 도구](/Tools/ReviewIssues/README.md), 두 도구를 묶는 스킬([`/review-to-issues`](/.claude/skills/review-to-issues/SKILL.md))을 만들었습니다.
 - 버그를 심어 리뷰 도구를 측정해 보니([전체 리뷰 측정](/Docs/ReviewBenchmark/2026-11-15-planted-bugs/README.md)) 재현율은 평균 86.7%였지만, 폴더 전체를 읽는 방식이라 한 번에 에이전트 토큰이 약 100만 들었습니다.
@@ -72,9 +72,9 @@
 <summary><b>문제를 나누고 정리한 방법</b></summary>
 
 - 기능 하나를 구현 → 리뷰 → 판정 → 이슈 → 수정의 다섯 단계로 나눴습니다.
-- 리뷰의 지적은 Claude의 추측으로 여기고, 지적마다 테스트를 써서 재현되는지 먼저 판정했습니다.
+- 리뷰의 지적은 Claude의 추측으로 여기고, 버그 지적은 테스트를 써서 재현되는지 먼저 판정했습니다.
 - 판정과 상관없이 모든 지적을 이슈로 남기고, 재현된 버그는 수정 브랜치에서 고쳐 PR로 합쳤습니다. 커밋마다 `Fixes #번호`로 이슈를 닫았습니다.
-- 지금까지 지적 49개를 판정했고, 재현된 23개를 모두 고쳤습니다.
+- 지금까지 지적 49개를 판정했습니다(재현 23, 테스트 없이 고침 12, 기획 의도 8, 확인 안 함 4, 재현 안 됨 2). 재현된 23개는 모두 고쳤습니다.
 
 ![출처, 위치, 판정이 담긴 리뷰 지적 이슈](Docs/Image/Review_Issue_Detail.png)
 
@@ -127,7 +127,7 @@ AI가 쓴 코드는 네 단계를 거칩니다. 앞 단계가 놓친 것을 다�
 |---|---|---|---|
 | 1. 정적 분석기 | 컴파일할 때마다 | 코드 규칙 25개를 Unity Console 경고로 띄웁니다. 규칙의 동작은 예시 문서가 정하고, 그 예시가 곧 분석기의 테스트입니다 | [분석기](/Tools/TopView.Analyzers/README.md), [예시 문서](/Tools/TopView.Analyzers.Tests/Examples/) |
 | 2. 코드 리뷰 | 기능을 마친 뒤 | 코드를 작성한 세션과 다른 새 세션의 에이전트들이 바뀐 코드를 영역별로 읽고, 지적마다 실패 상황을 적습니다 | [리뷰 워크플로](/Tools/CodeReview/README.md), [리뷰 원본](/Docs/Reviews/) |
-| 3. 재현 테스트 | 지적마다 | 리뷰의 지적은 추측으로 보고, 고치기 전 코드에서 실패하는 테스트를 써서 실제 버그인지 판정합니다 | [테스트 실행 도구](/Tools/Testing/README.md), [테스트](/Project/Assets/Scripts/Tests/) |
+| 3. 판정 | 지적마다 | 리뷰의 지적은 추측으로 봅니다. 버그 지적은 고치기 전 코드에서 실패하는 테스트를 써서 실제 버그인지 판정하고, 기획 의도일 수 있는 지적은 제가 판단하며, 규칙·정리 지적은 테스트 없이 기록합니다 | [테스트 실행 도구](/Tools/Testing/README.md), [테스트](/Project/Assets/Scripts/Tests/) |
 | 4. 이슈와 수정 | 판정한 뒤 | 모든 지적을 판정 라벨과 함께 이슈로 남기고, 재현된 버그만 열어 둡니다. 실패하던 테스트가 통과로 바뀌면 고친 것으로 봅니다 | [이슈 등록 도구](/Tools/ReviewIssues/README.md), [리뷰 이슈](https://github.com/To-steak/TopView-Game/issues?q=label%3Areview-finding) |
 
 ![규칙을 어긴 코드에 Unity Console이 띄운 분석기 경고 TV0002](Docs/Image/Analyzer_Warning.png)
