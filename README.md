@@ -39,11 +39,11 @@ TODO: 세 줄 요약 - 무엇을 만들었는지, AI와 어떻게 나눠 일했�
 - 출처: "탁월한 인턴, 성장 가이드" - "바쁘신 분을 위해 먼저, 딱 세 줄로"
 - 출처: 성장 가이드 01 - "무언가를 끝까지 만들어 내고 그 과정을 자기 말로 설명할 수 있는 사람"
 -->
-<img src="Docs/Image/counter_1_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> Unity 6로 탑다운 액션 게임을 기획부터 구현, 트레일러 제작, 배포까지 혼자 완성했습니다.
+<img src="Docs/Image/counter_1_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> Unity 6로 탑다운 액션 게임을 팀원 없이 AI(Claude Code)와 함께 기획부터 구현, 트레일러 제작, 배포까지 완성했습니다.
 
 <img src="Docs/Image/counter_2_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> 기획·설계와 플레이 확인은 제가 맡고 구현과 리뷰는 AI(Claude)에게 맡겼으며, 그 경계를 규칙 문서([CLAUDE.md](/CLAUDE.md#작업-범위))로 정해 AI가 규칙과 어긋나면 [먼저 묻게](/CLAUDE.md#대화) 했습니다.
 
-<img src="Docs/Image/counter_3_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> AI가 쓴 코드는 직접 만든 정적 분석기([Roslyn](/Tools/TopView.Analyzers/README.md)), 코드를 작성한 세션과 다른 새 세션의 AI 리뷰([Claude Code Workflow](/Tools/CodeReview/README.md)), 지적마다 재현 테스트([Unity Test Framework](/Tools/Testing/README.md))를 거쳐 확인하고, 재현된 버그만 이슈([GitHub Issues](/Tools/ReviewIssues/README.md))로 남겼습니다.
+<img src="Docs/Image/counter_3_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> AI가 쓴 코드는 프로젝트 규칙으로 만든 정적 분석기([Roslyn](/Tools/TopView.Analyzers/README.md)), 코드를 작성한 세션과 다른 새 세션의 AI 리뷰([Claude Code Workflow](/Tools/CodeReview/README.md)), 지적마다 재현 테스트([Unity Test Framework](/Tools/Testing/README.md))를 거쳐 확인하고, 재현된 버그만 이슈([GitHub Issues](/Tools/ReviewIssues/README.md))로 남겼습니다.
 
 ## 개발 과정
 <!--
@@ -87,7 +87,7 @@ TODO: 항목마다 한두 줄 요약 + Notion의 해당 사례 링크 + 저장�
 - Claude Code의 기본 `/code-review`를 써 보고, 영역을 나눠 에이전트가 읽고 지적마다 실패 시나리오를 적는 구조를 참고했습니다.
 - 리뷰의 지적은 추측이라고 보고, 지적마다 테스트를 써서 재현되는지 판정하는 흐름을 더했습니다.
 - 모든 지적을 판정 라벨과 함께 GitHub 이슈로 남기고, 테스트로 재현된 버그만 열어 둡니다.
-- 이를 위해 [리뷰 워크플로](/Tools/CodeReview/README.md), [이슈 등록 도구](/Tools/ReviewIssues/README.md), 두 도구를 묶는 스킬([`/review-to-issues`](/.claude/skills/review-to-issues/SKILL.md))을 만들었습니다.
+- 이 흐름을 설계하고 구현은 AI에게 맡겨 [리뷰 워크플로](/Tools/CodeReview/README.md), [이슈 등록 도구](/Tools/ReviewIssues/README.md), 두 도구를 묶는 스킬([`/review-to-issues`](/.claude/skills/review-to-issues/SKILL.md))을 만들었습니다.
 - 버그를 심어 리뷰 도구를 측정해 보니([전체 리뷰 측정](/Docs/ReviewBenchmark/2026-11-15-planted-bugs/README.md)) 재현율은 평균 86.7%였지만, 폴더 전체를 읽는 방식이라 한 번에 에이전트 토큰이 약 100만 들었습니다.
 - 바뀐 코드만 읽는 diff 리뷰 워크플로를 새로 만들어 토큰을 약 8만(12분의 1)으로 줄였고, 심은 버그 6개는 세 번 모두 찾았습니다([diff 리뷰 측정](/Docs/ReviewBenchmark/2026-11-16-critical-hit-diff/README.md)).
 
@@ -103,10 +103,22 @@ TODO: 항목마다 한두 줄 요약 + Notion의 해당 사례 링크 + 저장�
 
 </details>
 
-### 새로 배워서 적용한 내용
-Roslyn 분석기, Unity Test Framework, Timeline 기반 트레일러 제작을 처음 익혀 프로젝트에 적용했습니다.
-### 트레일러 영상 제작 과정
+<details>
+<summary><b>새로 배워서 적용한 내용</b></summary>
+
+- **Roslyn 분석기**: 코드 규칙을 Unity Console의 경고로 띄우려고 처음 도입했습니다. 규칙과 그 동작을 보여 주는 예시 문서는 제가 정하고 분석기 구현은 AI에게 맡겨, 규칙 25개를 만들었습니다. Unity 6000.3의 컴파일러가 Roslyn 4.3이라 그 버전에 맞춰 빌드했습니다([분석기](/Tools/TopView.Analyzers/README.md)).
+- **Unity Test Framework**: 리뷰 지적을 재현하려고 처음 도입했습니다. 열려 있는 에디터를 끊지 않으려고 PlayMode 테스트는 별도 워크 트리에서 배치 모드로 돌리게 했습니다([테스트 실행 도구](/Tools/Testing/README.md)).
+- **Claude Code Workflow**: 기본 `/code-review`의 구조를 참고해 리뷰 흐름과 결과 형식을 정하고, 스크립트 구현은 AI에게 맡겼습니다. 버그를 심어 성능을 측정한 뒤 diff 리뷰로 바꿨습니다([리뷰 워크플로](/Tools/CodeReview/README.md)).
+- **Timeline**: 트레일러 컷을 만들려고 처음 써 봤습니다. (컷 구성과 편집 방식 한 줄)
+
+</details>
+
+<details>
+<summary><b>트레일러 영상 제작 과정</b></summary>
+
 기획, 트레일러 편집, 썸네일, 빌드와 릴리스 배포까지 직접 했습니다.
+
+</details>
 
 ## AI가 일할 수 있는 환경
 <!--
