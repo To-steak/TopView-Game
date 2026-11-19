@@ -1,0 +1,75 @@
+{
+  "summary": "TopView의 두 커밋 사이 diff를 영역별 리뷰 에이전트로 나눠, 바뀐 코드와 그 참조를 따라 읽고 정해진 JSON 형식으로 지적을 모은다",
+  "agentCount": 1,
+  "logs": [],
+  "result": {
+    "date": "2026-11-19",
+    "base": "f1bdec66",
+    "commit": "f1b285d3",
+    "context": "이슈 #49 수정: 최대 탄약 수와 공격 간격의 반올림을 Mathf.RoundToInt(짝수 쪽 반올림)에서 사사오입(RoundHalfUp)으로 바꿨다.",
+    "request": [
+      {
+        "key": "A1",
+        "name": "A1. Utilities (PlayerUpgradeUtility)",
+        "files": [
+          "Project/Assets/Scripts/Utilities/PlayerUpgradeUtility.cs"
+        ],
+        "focus": "RoundHalfUp가 모든 입력에서 사사오입이 맞는지(float 오차, 0 이상이라는 전제가 지켜지는지), 공격 간격의 최소값 처리와 맞물리는지, 같은 파일이나 다른 곳에 아직 Mathf.RoundToInt로 반올림하는 강화 값이 남아 있는지"
+      }
+    ],
+    "areas": [
+      {
+        "area": "A1. Utilities (PlayerUpgradeUtility)",
+        "filesRead": [
+          "Project/Assets/Scripts/Utilities/PlayerUpgradeUtility.cs",
+          "Project/Assets/Scripts/Tests/EditMode/PlayerUpgradeSystemTests.cs",
+          "Project/Assets/Scripts/Systems/Upgrade/PlayerUpgradeSystem.cs"
+        ],
+        "findings": [
+          {
+            "file": "Project/Assets/Scripts/Utilities/PlayerUpgradeUtility.cs",
+            "line": 162,
+            "category": "bug",
+            "severity": "low",
+            "confidence": "medium",
+            "title": "RoundHalfUp가 float 오차로 x.5여야 할 값을 내림해 사사오입이 되지 않는 경우가 있다",
+            "description": "RoundHalfUp(PlayerUpgradeUtility.cs:160-163)는 Mathf.FloorToInt(value + 0.5f)인데, 입력이 Increase/Decrease의 float 곱(baseValue × (1 ± ratio × level))이라 수학적으로 x.5인 값이 float에서 x.4999998처럼 조금 작게 나오면 내림된다. 이슈 #49의 목적(.5는 올림)이 비율이 2진수로 딱 떨어지지 않는 값(0.05, 0.1, 0.15 등)에서는 지켜지지 않는다. 바뀐 줄 103(GetAttackIntervalTicks)과 116(GetMaxAmmo)이 이 함수를 쓴다. 각 연산을 float32로 반올림해 따라 계산하면(base 1~60, ratio 0.01 단위, level 0~5 = Player Definition maxLevel 5) .5여야 하는 102가지 조합이 내림된다. 예: 30 × (1 + 0.05 × 1) = 31.499998 → 31(기대 32), 10 × (1 - 0.15 × 3) = 5.4999995 → 5(기대 6), 30 × (1 - 0.17 × 5) = 4.499999 → 4(기대 5). 지금 Definition 값(Pistol max 8·ratio 0.5, Rifle max 30·ratio 1, interval 15·ratio 0.25)은 2진수로 정확해 해당하지 않으므로 현재 플레이에는 드러나지 않고, 기획자가 0.05 같은 비율을 넣을 때만 나타난다는 전제다. confidence를 medium으로 둔 이유: 중간 연산을 float32로 하는 것(IL2CPP/Mono x64 SSE)을 전제로 시뮬레이션했고, 런타임이 중간값을 더 높은 정밀도로 들고 있으면 결과가 다를 수 있다. 고친다면 작은 엡실론을 더하거나(value + 0.5f + 1e-4f) 비율 계산을 double로 하는 방법이 있다.",
+            "failureScenario": "무기 Definition에서 magazine.max = 30, maxAmmoRatioPerLevel = 0.05로 두고 1레벨로 강화 → Increase가 31.499998f를 돌려줌 → RoundHalfUp = FloorToInt(31.999998f) = 31 → 최대 탄약이 사사오입한 32가 아니라 31로 나오고, 강화 UI(World.UserInterface.cs:315-316)와 탄창 채우기(PlayerUpgradeSystem.cs:124)도 31을 기준으로 한다. 공격 간격도 같아서 intervalTicks 10, attackIntervalRatioPerLevel 0.15, 3레벨이면 6틱이 아니라 5틱이 된다(최소 공격 간격 4보다 크므로 104줄의 하한이 가리지 않는다).",
+            "evidence": "PlayerUpgradeUtility.cs:162 `return Mathf.FloorToInt(value + 0.5f);`; :116 `return RoundHalfUp(Increase(magazine.max, weaponUpgrade.maxAmmoRatioPerLevel, weaponLevel));`; :103 `int intervalTicks = RoundHalfUp(Decrease(...));`; :30 `return baseValue * (1f + ratioPerLevel * level);`; :42 `return baseValue * Mathf.Max(0f, 1f - ratioPerLevel * level);`; Player Definition.asset:54 `maxLevel: 5`, :63 `minAttackIntervalTicks: 4`"
+          }
+        ]
+      }
+    ],
+    "failed": []
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Review"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "diff-review:A1",
+      "phaseIndex": 1,
+      "phaseTitle": "Review",
+      "agentId": "a35d81c6238042704",
+      "model": "claude-opus-5-5",
+      "state": "done",
+      "startedAt": 1795048460819,
+      "queuedAt": 1795048460396,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "promptPreview": "너는 Unity 6 탑뷰 게임(TopView) 코드의 리뷰어다. 저장소 루트는 현재 작업 디렉터리이고, 작업 트리는 커밋 f1b285d3과 같다.\n이번 리뷰는 커밋 f1bdec66에서 f1b285d3까지 바뀐 코드만 본다.\n배경:\n- 게임 로직은 고정 시간 간격 틱으로 돈다. 틱 길이는 Project Settings > Time > Fixed Timestep이다.\n- 엔티티는 공유 저장소 EntityStorage에 있다. 칸 하나 = Entity struct 하나(AoS), 컴포넌트 필드 + mask(ComponentMask) + generation. mask None = 빈 칸. 종류별 마스크 상수는 Entities/EntityArchetype에 있다.\n- System은 처리하는 마스크와 읽고 쓰는 컴포넌…",
+      "promptFramed": true,
+      "lastProgressAt": 1795048525798,
+      "tokens": 78264,
+      "toolCalls": 6,
+      "durationMs": 64975,
+      "resultPreview": "{\"filesRead\":[\"Project/Assets/Scripts/Utilities/PlayerUpgradeUtility.cs\",\"Project/Assets/Scripts/Tests/EditMode/PlayerUpgradeSystemTests.cs\",\"Project/Assets/Scripts/Systems/Upgrade/PlayerUpgradeSystem.cs\"],\"findings\":[{\"file\":\"Project/Assets/Scripts/Utilities/PlayerUpgradeUtility.cs\",\"line\":162,\"category\":\"bug\",\"severity\":\"low\",\"confidence\":\"medium\",\"title\":\"RoundHalfUp가 float 오차로 x.5여야 할 값을 내림해 사…"
+    }
+  ],
+  "totalTokens": 78264,
+  "totalToolCalls": 6
+}
