@@ -64,21 +64,29 @@ TODO: 항목마다 한두 줄 요약 + Notion의 해당 사례 링크 + 저장�
 -->
 자세한 이야기는 Notion에 있습니다.
 
-### AI와 개발자의 역할 분담
-**개발자**
-- 프로젝트 코드 구조 설계
-- 유니티 에디터 작업
-- 플레이 후 기획 수정과 기능 추가
-
-**AI(Claude Code)**
-- 코드 구현
-- 코드 리뷰
-- 규칙과 어긋나는 지시를 받으면 작업 전에 먼저 되묻기
-
-> [!TIP]
-> <img src="Docs/Image/code_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> [코드 규칙](/.claude/rules/csharp-style.md)
+> ### AI와 개발자의 역할 분담
+> **개발자**
+> - 프로젝트 코드 구조 설계
+> - 유니티 에디터 작업
+> - 플레이 후 기획 수정과 기능 추가
 >
-> <img src="Docs/Image/architecture_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle">[아키텍처 규칙](/.claude/rules/architecture.md) 
+> **AI(Claude Code)**
+> - 코드 구현
+> - 코드 리뷰
+> - 규칙과 어긋나는 지시를 받으면 작업 전에 먼저 되묻기
+>
+>> [!TIP]
+>> <img src="Docs/Image/code_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> [코드 규칙](/.claude/rules/csharp-style.md)
+>>
+>> <img src="Docs/Image/architecture_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle">[아키텍처 규칙](/.claude/rules/architecture.md) 
+
+### AI의 코드 리뷰
+
+### 문제를 나누고 정리한 방법
+
+### 새로 배워서 적용한 내용
+
+### 트레일러 영상 제작 과정
 
 ## AI가 일할 수 있는 환경
 <!--
