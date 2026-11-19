@@ -60,6 +60,10 @@
 - 제가 요청한 대로 [수치 편집 창](/Project/Assets/Scripts/Editor/DefinitionEditorWindow.cs#L6-L7), [타일 배치 도구](/Project/Assets/Scripts/Editor/LevelTilePainterWindow.cs#L8-L17) 같은 Custom Editor를 만들었습니다.
 - Unity CLI로 컴파일 오류와 테스트 결과를 직접 확인하고, GitHub CLI로 리뷰 지적을 이슈로 등록했습니다([AI가 일할 수 있는 환경](#-ai가-일할-수-있는-환경)).
 
+**AI가 하지 않는 일**
+- 에디터를 열거나 Play 모드에 들어가지 않습니다([에디터와 파일](/CLAUDE.md#에디터와-파일)).
+- 씬, 프리팹, 에셋, `.meta`는 건드리지 않습니다([작업 범위](/CLAUDE.md#작업-범위)).
+
 <img src="Docs/Image/Definition%20Editor.png" width="49%" alt="수치 편집 창"> <img src="Docs/Image/Level%20Tile%20Painter.png" width="49%" alt="타일 배치 도구">
 
 </details>
@@ -122,8 +126,6 @@ AI가 일을 맡을 때마다 결과를 사람에게 묻지 않고, 스스로 �
 
 
 ![AI가 테스트 실행 도구로 EditMode 테스트를 돌린 결과](Docs/Image/Run_Tests.png)
-
-AI가 하지 않는 일도 함께 정했습니다. 에디터를 열거나 Play 모드에 들어가지 않고, 씬·프리팹·에셋·`.meta`는 건드리지 않습니다([에디터와 파일](/CLAUDE.md#에디터와-파일), [작업 범위](/CLAUDE.md#작업-범위)). 에디터 상태는 사용자의 작업을 끊을 수 있어 사람이 정합니다.
 
 ## <a href="#-검증-체계"><img src="Docs/Image/verified_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"></a> 검증 체계
 1.0.0(11-12)을 낸 뒤 정적 분석기(11-13)와 리뷰·테스트 도구(11-14)를 만들어 출시한 코드를 다시 검증했고, 재현된 버그 23개를 고쳐 1.0.1(11-18)에 담았습니다. 이후 AI가 쓴 코드는 네 단계를 거칩니다. 앞 단계가 놓친 것을 다음 단계가 잡고, 각 단계의 결과는 저장소에 남습니다.
