@@ -264,7 +264,7 @@ TopView-Game/
 **플레이** (Windows, macOS, Linux)
 1. [Release](https://github.com/To-steak/TopView-Game/releases/latest)에서 운영체제에 맞는 파일을 받아 압축을 풉니다.
    - Windows: `TopView_Game-win-intel-64.zip`
-   - macOS(Apple Silicon, Intel): `TopView_Game-mac-applesilicon-intel64bit.zip`
+   - macOS(Apple Silicon, Intel): `TopView_Game-mac-applesilicon-intel64.zip`
    - Linux(x86_64): `TopView_Game-linux-x86_64.zip`
 2. 압축을 푼 폴더의 실행 파일을 엽니다.
 
