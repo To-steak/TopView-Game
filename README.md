@@ -179,39 +179,10 @@ AI가 일을 맡을 때마다 결과를 사람에게 묻지 않고, 스스로 �
 
 **어셈블리 구성**
 
-화살표는 참조 방향입니다. Presentation과 UserInterface는 Systems를 참조하지 못해서, View가 게임 상태를 바꾸는 코드는 컴파일되지 않습니다.
+큰 상자는 어셈블리, 안의 작은 상자는 그 어셈블리에 들어가는 폴더이고, 화살표는 참조 방향입니다. Presentation과 UserInterface는 Systems를 참조하지 못해서, View가 게임 상태를 바꾸는 코드는 컴파일되지 않습니다.
 
-```mermaid
-graph TD
-    subgraph RunLayer["실행: 언제 무엇을 부를지 정함"]
-        Core["Core (App, World)"]
-    end
-    subgraph LogicLayer["로직: 게임 상태를 바꾸는 유일한 곳"]
-        Systems
-    end
-    subgraph ViewLayer["화면: 상태를 읽어 그리기만 함"]
-        Presentation
-        UserInterface
-    end
-    subgraph DataLayer["데이터: 게임에 무엇이 있는지"]
-        Entity["Entity (컴포넌트, 요청, 기록, 명령)"]
-        Definitions
-        Authoring
-        Persistence
-    end
-    Core --> Systems
-    Core --> Presentation
-    Core --> UserInterface
-    Core --> Authoring
-    Core --> Persistence
-    Systems --> Entity
-    Presentation --> Entity
-    UserInterface --> Entity
-    Authoring --> Definitions
-    Authoring --> Entity
-    Definitions --> Entity
-    Persistence --> Entity
-```
+![게임 어셈블리의 참조 방향과 각 어셈블리에 들어가는 폴더](Docs/Image/Assemblies.svg)
+<!-- TODO: 논문처럼 그림 아래에 그림 설명(캡션)을 단다 -->
 
 <details>
 <summary><b>어셈블리별 설명</b></summary>
