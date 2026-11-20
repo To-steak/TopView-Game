@@ -261,8 +261,11 @@ TopView-Game/
 - [`Docs/ReviewBenchmark/`](/Docs/ReviewBenchmark/): 버그를 심어 리뷰 도구를 측정한 기록
 
 ## <a href="#-실행-방법"><img src="Docs/Image/sports_esports_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"></a> 실행 방법
-**플레이** (Windows 전용)
-1. [Release](https://github.com/To-steak/TopView-Game/releases/latest)에서 `TopView_Game.zip`을 받아 압축을 풉니다.
+**플레이** (Windows, macOS, Linux)
+1. [Release](https://github.com/To-steak/TopView-Game/releases/latest)에서 운영체제에 맞는 파일을 받아 압축을 풉니다.
+   - Windows: `TopView_Game-win-intel-64.zip`
+   - macOS(Apple Silicon, Intel): `TopView_Game-mac-applesilicon-intel64bit.zip`
+   - Linux(x86_64): `TopView_Game-linux-x86_64.zip`
 2. 압축을 푼 폴더의 실행 파일을 엽니다.
 
 **조작**
