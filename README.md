@@ -187,18 +187,27 @@ AI가 일을 맡을 때마다 결과를 사람에게 묻지 않고, 스스로 �
 <details>
 <summary><b>어셈블리별 설명</b></summary>
 
+폴더는 타입 종류별로 나누되, 같은 어셈블리에 들어갈 폴더는 asmref로 묶었습니다.
+
 **실행**: 언제 무엇을 부를지 정합니다
 - `Core`: App(씬 전환, 설정, 배경음악 같은 앱 수명의 일)과 World(한 판의 데이터와 틱·호출 순서)
 
 **로직**: 게임 상태를 바꾸는 유일한 곳입니다
-- `Systems`: System과 값 계산 도구(Utility)
+- `Systems`
+  - `Systems/`: 게임 상태를 바꾸는 System
+  - `Utilities/` (asmref): 값 계산 도구
 
 **화면**: 상태를 읽어 그리기만 합니다
 - `Presentation`: 게임 세계의 연출(ViewSystem, View, 오브젝트 풀)
 - `UserInterface`: MVP 구조의 화면 UI(View, Presenter)
 
 **데이터**: 게임에 무엇이 있는지 담습니다
-- `Entity`: 엔티티, 컴포넌트, 요청, 기록, 명령. 다른 프로젝트 어셈블리를 참조하지 않습니다
+- `Entity`: 다른 프로젝트 어셈블리를 참조하지 않습니다
+  - `Entities/`: 게임 속 대상과 저장 칸
+  - `Components/` (asmref): 모든 데이터의 묶음
+  - `Requests/` (asmref): 틱 안에서 System에 일을 맡기는 요청
+  - `Records/` (asmref): 그 틱에 일어난 일을 View에 전하는 기록
+  - `Commands/` (asmref): 입력을 로직에 전하는 명령
 - `Definitions`: 에디터에서 조정하는 수치(ScriptableObject)
 - `Authoring`: 씬에 놓인 엔티티의 종류와 위치
 - `Persistence`: 설정과 기록 저장
