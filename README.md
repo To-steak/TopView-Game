@@ -268,6 +268,8 @@ TopView-Game/
    - Linux(x86_64): `TopView_Game-linux-x86_64.zip`
 2. 압축을 푼 폴더의 실행 파일을 엽니다.
 
+macOS와 Linux 빌드는 Unity로 만들기만 했고, 실행은 Windows에서만 확인했습니다.
+
 **조작**
 
 | 키 | 동작 |
