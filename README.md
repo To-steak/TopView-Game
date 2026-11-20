@@ -187,7 +187,7 @@ AI가 일을 맡을 때마다 결과를 사람에게 묻지 않고, 스스로 �
 
 **어셈블리 구성**
 
-큰 상자는 어셈블리, 안의 작은 상자는 그 어셈블리에 들어가는 폴더이고, 화살표는 참조 방향입니다. Presentation과 UserInterface는 Systems를 참조하지 못해서, View가 게임 상태를 바꾸는 코드는 컴파일되지 않습니다.
+큰 상자는 어셈블리, 안의 작은 상자는 그 어셈블리에 들어가는 폴더이고, 화살표는 참조 방향입니다. Presentation과 UserInterface는 Systems를 참조하지 못해서, View 코드는 System을 부를 수 없습니다. View가 게임 상태를 읽기만 하고 바꾸지 않는 것은 규칙([아키텍처 규칙](/.claude/rules/architecture.md))으로 지킵니다.
 
 ![게임 어셈블리의 참조 방향과 각 어셈블리에 들어가는 폴더](Docs/Image/Assemblies.svg)
 
