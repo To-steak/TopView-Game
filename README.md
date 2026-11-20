@@ -55,6 +55,12 @@
 - 직접 플레이해 보고 수치 편집 창으로 게임 내 수치를 조정해 밸런스를 잡았습니다.
 - AI의 작업 범위와 규칙을 문서로 정해, 규칙과 어긋나는 지시는 AI가 먼저 되묻게 했습니다([작업 범위](/CLAUDE.md#작업-범위), [되묻기 규칙](/CLAUDE.md#대화), [코드 규칙](/.claude/rules/csharp-style.md)).
 
+<img src="Docs/Image/Definition%20Editor.png" width="49%" alt="수치 편집 창"> <img src="Docs/Image/Level%20Tile%20Painter.png" width="49%" alt="타일 배치 도구">
+
+> 왼쪽은 수치 편집 창으로, Definition 에셋을 Settings·Weapons·Player·Enemy·Loot 탭에 모아 고른 에셋의 수치를 바로 고칩니다. 
+>
+> 오른쪽은 타일 배치 도구로, 타일·소품·방·채우기·산 모드와 브러시 크기, 층을 골라 씬에 타일을 칠합니다.
+
 **AI(Claude Code)**
 - 게임 코드를 작성하고 리뷰했습니다.
 - 제가 요청한 대로 [수치 편집 창](/Project/Assets/Scripts/Editor/DefinitionEditorWindow.cs#L6-L7), [타일 배치 도구](/Project/Assets/Scripts/Editor/LevelTilePainterWindow.cs#L8-L17) 같은 Custom Editor를 만들었습니다.
@@ -63,9 +69,6 @@
 **AI가 하지 않는 일**
 - 에디터를 열거나 Play 모드에 들어가지 않습니다([에디터와 파일](/CLAUDE.md#에디터와-파일)).
 - 씬, 프리팹, 에셋, `.meta`는 건드리지 않습니다([작업 범위](/CLAUDE.md#작업-범위)).
-
-<img src="Docs/Image/Definition%20Editor.png" width="49%" alt="수치 편집 창"> <img src="Docs/Image/Level%20Tile%20Painter.png" width="49%" alt="타일 배치 도구">
-<!-- TODO: 논문처럼 그림 아래에 그림 설명(캡션)을 단다 -->
 
 </details>
 
@@ -85,7 +88,8 @@
 - 지금까지 폴더 단위 리뷰 3회와 diff 리뷰 1회에서 나온 지적 49개를 판정했습니다(재현 23, 테스트 없이 고침 12, 의도된 사항 8, 확인 안 함 4, 재현 안 됨 2). 재현된 23개는 모두 수정 브랜치에서 고쳐 PR로 합쳤습니다.
 
 ![출처, 위치, 판정이 담긴 리뷰 지적 이슈](Docs/Image/Review_Issue_Detail.png)
-<!-- TODO: 논문처럼 그림 아래에 그림 설명(캡션)을 단다 -->
+
+> 리뷰 지적 하나를 등록한 이슈(#48). 출처(리뷰 원본의 지적 번호), 위치, 분류, 심각도, 판정, 문제와 재현 상황이 정해진 칸에 들어갑니다.
 
 </details>
 
@@ -99,7 +103,8 @@
 - 바뀐 코드만 읽는 diff 리뷰 워크플로를 새로 만들었습니다. 버그 6개를 심은 가짜 기능으로 세 번 돌려 보니 매번 6개를 모두 찾았고, 토큰은 8만 남짓 들었습니다([diff 리뷰 측정](/Docs/ReviewBenchmark/2026-11-16-critical-hit-diff/README.md)). 원인이 바뀌지 않은 파일에 있어 참조를 따라가야 보이는 버그는 아직 측정하지 않았습니다.
 
 ![판정 라벨과 함께 등록된 리뷰 지적 이슈 목록](Docs/Image/Review_Issues.png)
-<!-- TODO: 논문처럼 그림 아래에 그림 설명(캡션)을 단다 -->
+
+> 판정 라벨(reproduced, not-reproduced, intended, not-checked)과 함께 등록된 리뷰 지적 이슈 49개.
 
 </details>
 
@@ -111,7 +116,8 @@
 - 3일에 걸쳐 트레일러를 완성해 YouTube에 올렸습니다([트레일러](https://youtu.be/7fyoxN1xmZw)).
 
 ![Timeline으로 컷을 재생하는 화면](Docs/Image/Trailer_Timeline.gif)
-<!-- TODO: 논문처럼 그림 아래에 그림 설명(캡션)을 단다 -->
+
+> Unity Timeline으로 트레일러의 한 컷을 재생하는 화면.
 
 </details>
 
@@ -130,7 +136,8 @@ AI가 일을 맡을 때마다 결과를 사람에게 묻지 않고, 스스로 �
 
 
 ![AI가 테스트 실행 도구로 EditMode 테스트를 돌린 결과](Docs/Image/Run_Tests.png)
-<!-- TODO: 논문처럼 그림 아래에 그림 설명(캡션)을 단다 -->
+
+> Claude Code가 테스트 실행 도구(`run_tests.sh editmode`)로 열려 있는 에디터에서 EditMode 테스트를 돌린 결과. 결과는 `editmode.json`으로도 남습니다.
 
 ## <a href="#-검증-체계"><img src="Docs/Image/verified_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"></a> 검증 체계
 [1.0.0](https://github.com/To-steak/TopView-Game/releases/tag/v1.0.0)(11-12)을 낸 뒤 [정적 분석기](https://github.com/To-steak/TopView-Game/commit/04bae22a)(11-13)와 [리뷰](https://github.com/To-steak/TopView-Game/commit/f1fd8a4b)·[테스트 도구](https://github.com/To-steak/TopView-Game/commit/66d8aa71)(11-14)를 만들어 출시한 코드를 다시 검증했고, 재현된 버그 23개를 고쳐 [1.0.1](https://github.com/To-steak/TopView-Game/releases/tag/v1.0.1)(11-18)에 담았습니다. 
@@ -150,7 +157,8 @@ AI가 일을 맡을 때마다 결과를 사람에게 묻지 않고, 스스로 �
    - 모든 지적을 판정 라벨과 함께 이슈로 남기고, 재현된 버그만 열어 둡니다. 실패하던 테스트가 통과로 바뀌면 고친 것으로 봅니다([이슈 등록 도구](/Tools/ReviewIssues/README.md), [리뷰 이슈](https://github.com/To-steak/TopView-Game/issues?q=label%3Areview-finding)).
 
 ![규칙을 어긴 코드에 Unity Console이 띄운 분석기 경고 TV0002](Docs/Image/Analyzer_Warning.png)
-<!-- TODO: 논문처럼 그림 아래에 그림 설명(캡션)을 단다 -->
+
+> `var`를 쓴 코드에 정적 분석기가 띄운 경고 TV0002. 규칙을 어긴 파일과 줄 위치가 Unity Console에 나옵니다.
 
 **판정 규칙**
 - 재현된 버그의 테스트는 고칠 때까지 실패한 채 저장소에 남깁니다. 지우거나 건너뛰게 하지 않아서, 열린 이슈 수만큼 실패하는 테스트가 있는 것이 정상입니다.
@@ -182,7 +190,8 @@ AI가 일을 맡을 때마다 결과를 사람에게 묻지 않고, 스스로 �
 큰 상자는 어셈블리, 안의 작은 상자는 그 어셈블리에 들어가는 폴더이고, 화살표는 참조 방향입니다. Presentation과 UserInterface는 Systems를 참조하지 못해서, View가 게임 상태를 바꾸는 코드는 컴파일되지 않습니다.
 
 ![게임 어셈블리의 참조 방향과 각 어셈블리에 들어가는 폴더](Docs/Image/Assemblies.svg)
-<!-- TODO: 논문처럼 그림 아래에 그림 설명(캡션)을 단다 -->
+
+> 게임 어셈블리의 참조 방향. 점선 상자는 asmref로 그 어셈블리에 들어가는 폴더입니다.
 
 <details>
 <summary><b>어셈블리별 설명</b></summary>
@@ -274,7 +283,8 @@ TopView-Game/
 | Esc | 일시정지 |
 
 ![이동, 점프, 카메라 회전, 달리기를 하는 플레이 장면](Docs/Image/Gameplay.gif)
-<!-- TODO: 논문처럼 그림 아래에 그림 설명(캡션)을 단다 -->
+
+> 이동, 달리기, 점프, 카메라 회전을 하는 플레이 장면.
 
 **프로젝트 열기**
 - Unity 6000.3.27f2 (URP)에서 `Project/` 폴더를 엽니다.
