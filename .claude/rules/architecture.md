@@ -382,7 +382,7 @@ System의 동작을 Unity Test Framework의 EditMode 테스트로 확인한다.
 World의 호출 순서와 씬(지형, NavMesh)에 달린 동작, 표시(ViewSystem, UI)의 동작을 PlayMode 테스트로 확인한다.
 
 - **Logic은 System 하나로 드러나지 않는 버그만 PlayMode로 쓴다.** 실제 `World` 씬을 불러와 판이 준비되면 `Time.timeScale`을 0으로 두어 App의 자동 틱을 멈추고, 테스트가 `World.Tick`을 직접 부른다. 테스트 클래스는 확인하는 대상에 `Tests`를 붙인다(`WorldTickTests`).
-  - 이유: 틱을 테스트가 부르면 몇 번째 틱에 무엇이 일어나는지 정확히 셀 수 있다. 한 틱 차이로 생기는 버그는 사람이 에디터에서 재현할 수 없다.
+  - 이유: 틱을 테스트가 부르면 몇 번째 틱에 무엇이 일어나는지 정확히 셀 수 있다. 한 틱 차이로 생기는 버그는 사람이 에디터에서 재현하기 어렵다.
 - **테스트가 놓는 엔티티의 값은 테스트가 직접 넣는다.** 씬의 배치나 Definition 수치에 기대지 않는다. 씬에서 쓰는 것은 지형, NavMesh처럼 테스트가 만들 수 없는 것뿐이다.
   - 이유: 씬을 고칠 때마다 테스트가 깨지면 테스트를 믿을 수 없다.
 - **표시(ViewSystem, UI View, Presenter)의 버그는 World 씬 없이 그 대상 하나를 단위로 쓴다.** 테스트가 필요한 참조만 붙인 View 오브젝트를 직접 만들고 `Present`나 표시 메서드를 불러 결과(글자, 켜짐, 여백 등)를 확인한다. 인스펙터에서 받는 private 직렬화 필드는 리플렉션으로 채운다. 테스트 클래스는 대상 이름에 `Tests`를 붙인다(`PlayerHealthViewTests`). 트윈과 파티클처럼 프레임이 흘러야 하는 동작이 있어 PlayMode로 쓴다.
