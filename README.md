@@ -278,7 +278,7 @@ TopView-Game/
 
 **프로젝트 열기**
 - Unity 6000.3.27f2 (URP)에서 `Project/` 폴더를 엽니다.
-- 에셋 스토어 에셋(`Project/Assets/Local Assets/`)과 스카이박스 패키지는 재배포할 수 없어 저장소에 넣지 않았습니다. 저장소만 받아서는 모델, 사운드, 폰트가 빠진 채로 열립니다. 플레이는 Release의 빌드로 해 주세요.
+- 에셋 스토어 에셋(`Project/Assets/Local Assets/`)과 [스카이박스 패키지](#-license)는 재배포할 수 없어 저장소에 넣지 않았습니다. 저장소만 받아서는 모델, 사운드, 폰트가 빠진 채로 열립니다. 플레이는 Release의 빌드로 해 주세요.
 
 ## <a href="#-license"><img src="Docs/Image/license_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"></a> License
 프로젝트에 사용한 외부 에셋과 라이선스입니다. 저장소에 넣지 않은 에셋의 라이선스 파일은 [`Docs/License/`](/Docs/License/)에 복사해 두었습니다.
@@ -299,5 +299,5 @@ TopView-Game/
 - [Shooting Sound](https://assetstore.unity.com/packages/audio/sound-fx/shooting-sound-177096) - [B.G.M](https://assetstore.unity.com/publishers/9381) ([라이선스](/Docs/License/ShootingSound/ReadMe.txt))
 
 **그 밖의 에셋 (저장소에 포함하지 않음)**
-- DNFBitBit 폰트 - NEOPLE Inc., SIL Open Font License 1.1 ([라이선스](/Docs/License/DNFBitBit/OFL.txt))
+- [DNFBitBit 폰트](https://df.nexon.com/data/font/dnfbitbit) - NEOPLE Inc., SIL Open Font License 1.1 ([라이선스](/Docs/License/DNFBitBit/OFL.txt))
 - 효과음 - [효과음 라보(効果音ラボ)](https://soundeffect-lab.info/), 사이트 이용 약관을 따릅니다
