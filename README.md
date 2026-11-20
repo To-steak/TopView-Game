@@ -137,12 +137,21 @@ AI가 일을 맡을 때마다 결과를 사람에게 묻지 않고, 스스로 �
 
 이후 AI가 쓴 코드는 네 단계를 거칩니다. 앞 단계가 놓친 것을 다음 단계가 잡고, 각 단계의 결과는 저장소에 남습니다.
 
-| 단계 | 언제 | 무엇을 확인하나 | 근거 |
-|---|---|---|---|
-| 1. 정적 분석기 | 컴파일할 때마다 | 코드 규칙 25개를 Unity Console 경고로 띄웁니다. 규칙의 동작은 예시 문서가 정하고, 그 예시가 곧 분석기의 테스트입니다 | [분석기](/Tools/TopView.Analyzers/README.md), [예시 문서](/Tools/TopView.Analyzers.Tests/Examples/) |
-| 2. 코드 리뷰 | 기능을 마친 뒤 | 코드를 작성한 세션과 다른 새 세션의 에이전트들이 바뀐 코드를 영역별로 읽고, 지적마다 실패 상황을 적습니다 | [리뷰 워크플로](/Tools/CodeReview/README.md), [리뷰 원본](/Docs/Reviews/) |
-| 3. 판정 | 지적마다 | 리뷰의 지적은 추측으로 봅니다. 버그 지적은 고치기 전 코드에서 실패하는 테스트를 써서 실제 버그인지 판정하고, 의도한 동작을 버그로 본 지적은 제가 판단해 '의도된 사항'으로 닫으며, 규칙·정리·불일치 지적은 테스트 없이 기록합니다 | [테스트 실행 도구](/Tools/Testing/README.md), [테스트](/Project/Assets/Scripts/Tests/) |
-| 4. 이슈와 수정 | 판정한 뒤 | 모든 지적을 판정 라벨과 함께 이슈로 남기고, 재현된 버그만 열어 둡니다. 실패하던 테스트가 통과로 바뀌면 고친 것으로 봅니다 | [이슈 등록 도구](/Tools/ReviewIssues/README.md), [리뷰 이슈](https://github.com/To-steak/TopView-Game/issues?q=label%3Areview-finding) |
+1. **정적 분석기** — 컴파일할 때마다
+   - 코드 규칙 25개를 Unity Console 경고로 띄웁니다. 규칙의 동작은 예시 문서가 정하고, 그 예시가 곧 분석기의 테스트입니다.
+   - 근거: [분석기](/Tools/TopView.Analyzers/README.md), [예시 문서](/Tools/TopView.Analyzers.Tests/Examples/)
+2. **코드 리뷰** — 기능을 마친 뒤
+   - 코드를 작성한 세션과 다른 새 세션의 에이전트들이 바뀐 코드를 영역별로 읽고, 지적마다 실패 상황을 적습니다.
+   - 근거: [리뷰 워크플로](/Tools/CodeReview/README.md), [리뷰 원본](/Docs/Reviews/)
+3. **판정** — 지적마다
+   - 리뷰의 지적은 추측으로 봅니다.
+   - 버그 지적은 고치기 전 코드에서 실패하는 테스트를 써서 실제 버그인지 판정합니다.
+   - 의도한 동작을 버그로 본 지적은 제가 판단해 '의도된 사항'으로 닫습니다.
+   - 규칙·정리·불일치 지적은 테스트 없이 기록합니다.
+   - 근거: [테스트 실행 도구](/Tools/Testing/README.md), [테스트](/Project/Assets/Scripts/Tests/)
+4. **이슈와 수정** — 판정한 뒤
+   - 모든 지적을 판정 라벨과 함께 이슈로 남기고, 재현된 버그만 열어 둡니다. 실패하던 테스트가 통과로 바뀌면 고친 것으로 봅니다.
+   - 근거: [이슈 등록 도구](/Tools/ReviewIssues/README.md), [리뷰 이슈](https://github.com/To-steak/TopView-Game/issues?q=label%3Areview-finding)
 
 ![규칙을 어긴 코드에 Unity Console이 띄운 분석기 경고 TV0002](Docs/Image/Analyzer_Warning.png)
 <!-- TODO: 논문처럼 그림 아래에 그림 설명(캡션)을 단다 -->
