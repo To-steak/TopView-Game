@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 15003, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: Windows
+  m_Name: Windows-Low
   m_EditorClassIdentifier: UnityEditor.dll::UnityEditor.Build.Profile.BuildProfile
   m_AssetVersion: 1
   m_BuildTarget: 19
   m_Subtarget: 2
   m_PlatformId: 4e3c793746204150860bf175a9a41a05
   m_PlatformBuildProfile:
-    rid: 7292244148747239426
+    rid: 7292244154659373056
   m_OverrideGlobalSceneList: 0
   m_Scenes: []
   m_HasScriptingDefines: 0
@@ -27,7 +27,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 7292244148747239426
+    - rid: 7292244154659373056
       type: {class: WindowsPlatformSettings, ns: UnityEditor.WindowsStandalone, asm: UnityEditor.WindowsStandalone.Extensions}
       data:
         m_Development: 0
@@ -50,3 +50,18 @@ MonoBehaviour:
         m_CopyPDBFiles: 0
         m_WindowsDevicePortalAddress: 
         m_WindowsDevicePortalUsername: 
+--- !u!114 &5307557505506636907
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 15010, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: Quality Settings
+  m_EditorClassIdentifier: UnityEditor.dll::UnityEditor.Build.Profile.BuildProfileQualitySettings
+  m_DefaultQualityLevel: World - Low
+  m_QualityLevels:
+  - World - Low

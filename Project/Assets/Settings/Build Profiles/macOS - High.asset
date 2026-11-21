@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 15003, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: macOS
+  m_Name: macOS - High
   m_EditorClassIdentifier: UnityEditor.dll::UnityEditor.Build.Profile.BuildProfile
   m_AssetVersion: 1
   m_BuildTarget: 2
@@ -1027,3 +1027,18 @@ MonoBehaviour:
         m_MacOSXcodeBuildConfig: 1
         m_Architecture: 2
         m_CreateXcodeProject: 0
+--- !u!114 &7344846268000365101
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 15010, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: Quality Settings
+  m_EditorClassIdentifier: UnityEditor.dll::UnityEditor.Build.Profile.BuildProfileQualitySettings
+  m_DefaultQualityLevel: World - High
+  m_QualityLevels:
+  - World - High
