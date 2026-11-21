@@ -16,53 +16,6 @@ MonoBehaviour:
   weapon:
     damage: 85
     aimHeight: 0
-    kind: 0
-    ammo:
-      max: 0
-      startingCurrent: 0
-      startingReserve: 0
-    durationTicks: 40
-    attackIntervalTicks: 40
-    melee:
-      startTicks: 18
-      endTicks: 24
-      shape:
-        radius: 2
-        offset: 1
-    straight:
-      projectile:
-        flight:
-          speed: 0
-          lifetimeTicks: 0
-        hit:
-          radius: 0
-          collisionLayer:
-            serializedVersion: 2
-            m_Bits: 0
-        explosion:
-          radius: 0
-      shots: []
-    arc:
-      projectile:
-        flight:
-          flightTicks: 0
-          arcHeight: 0
-        hit:
-          radius: 0
-          collisionLayer:
-            serializedVersion: 2
-            m_Bits: 0
-        explosion:
-          radius: 0
-      shots: []
-    throwing:
-      chargePerTick: 0
-      maxThrowDistance: 0
-    upgrade:
-      maxAmmoRatioPerLevel: 0
-      attackIntervalRatioPerLevel: 0
-      explosionRadiusIncreasePerLevel: 0
-      meleeRangeRatioPerLevel: 0.25
   upgrade:
     maxAmmoRatioPerLevel: 0
     attackIntervalRatioPerLevel: 0
