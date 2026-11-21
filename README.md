@@ -262,13 +262,15 @@ TopView-Game/
 
 ## <a href="#-실행-방법"><img src="Docs/Image/sports_esports_24dp_C0C0C0_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"></a> 실행 방법
 **플레이** (Windows, macOS, Linux)
-1. [Release](https://github.com/To-steak/TopView-Game/releases/latest)에서 운영체제에 맞는 파일을 받아 압축을 풉니다.
-   - Windows: `TopView_Game-win-intel-64.zip`
-   - macOS(Apple Silicon, Intel): `TopView_Game-mac-applesilicon-intel64.zip`
-   - Linux(x86_64): `TopView_Game-linux-x86_64.zip`
-2. 압축을 푼 폴더의 실행 파일을 엽니다.
+1. [Release](https://github.com/To-steak/TopView-Game/releases/latest)에서 운영체제와 사양에 맞는 파일을 받아 압축을 풉니다. 고사양은 `high`, 저사양은 `Low` 파일입니다.
 
-macOS와 Linux 빌드는 Unity로 만들기만 했고, 실행은 Windows에서만 확인했습니다.
+   | 운영체제 | 고사양 (high) | 저사양 (Low) |
+   |---|---|---|
+   | Windows | `TopView_Game_high-win-intel64.zip` | `TopView_Game_Low-win-intel-64.zip` |
+   | macOS(Apple Silicon, Intel) | `TopView_Game_high-mac-applesilicon-intel64.zip` | `TopView_Game_Low-mac-applesilicon-intel64bit.zip` |
+   | Linux(x86_64) | `TopView_Game_high-linux-x86_64.zip` | `TopView_Game_Low-linux-x86_64.zip` |
+
+2. 압축을 푼 폴더의 실행 파일을 엽니다.
 
 **조작**
 
