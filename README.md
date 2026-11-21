@@ -3,7 +3,7 @@
 
 > [!IMPORTANT]
 > 적을 물리치고 강화를 하며 최종적으로 보스를 쓰러뜨리는 탑다운 액션 게임을 기획하고 Claude Code와 함께 작업하였습니다.
-> 2026년 8월에 올려 두고 멈췄던 프로젝트를, 10월 30일부터 Claude Code와 데이터 지향 구조로 다시 짜서 11월 12일 1.0.0을 출시했습니다.
+> 2026년 8월에 올려 두고 멈췄던 프로젝트를, 10월 30일부터 Claude Code와 ECS 방식으로 다시 짜서 11월 12일 1.0.0을 출시했습니다.
 
 <img src="Docs/Image/smart_display_24dp_FF6666_FILL0_wght400_GRAD0_opsz24.svg" align="absmiddle"> [TopView Game 트레일러 영상 보러가기 - YouTube](https://youtu.be/7fyoxN1xmZw)
 
